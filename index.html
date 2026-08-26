@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PhotoWalk</title>
+<meta name="description" content="Plan photo walks, learn composition, and organize your reference library.">
+<meta name="theme-color" content="#14110f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./icons/icon.svg">
+<link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+<div class="app-shell">
+
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        <circle cx="12" cy="13" r="3.4" stroke="currentColor" stroke-width="1.6"/>
+      </svg>
+      <span>PhotoWalk</span>
+    </div>
+    <div class="topbar-actions">
+      <span class="streak-badge" title="Current streak">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 2c1 3-2 4-2 7a4 4 0 0 0 8 0c0-1-.4-2-1-3 1.5 1 2.5 3 2.5 5a6.5 6.5 0 0 1-13 0C6.5 7 9 4 12 2z" fill="currentColor"/>
+        </svg>
+        <span id="streakBadgeText">0</span>
+      </span>
+      <button type="button" id="installBtn" class="btn btn-ghost hidden">Install</button>
+    </div>
+  </header>
+
+  <main class="views">
+
+    <section id="view-home" class="view" data-view="home">
+      <div id="activeWalkBanner" class="banner hidden">
+        <span id="activeWalkText"></span>
+        <button type="button" id="resumeWalkBtn" class="btn btn-accent btn-sm">Resume</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-value" id="statWalks">0</span>
+          <span class="stat-label">Walks completed</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="statPhotosAnalyzed">0</span>
+          <span class="stat-label">Photos analyzed</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="statRefs">0</span>
+          <span class="stat-label">References saved</span>
+        </div>
+      </div>
+
+      <h2 class="section-title">Shooting activity</h2>
+      <div class="heatmap-card">
+        <div class="heatmap-scroll" id="heatmapScroll">
+          <div class="heatmap-inner">
+            <div class="heatmap-months" id="heatmapMonths"></div>
+            <div class="heatmap-grid" id="heatmapGrid"></div>
+          </div>
+        </div>
+        <div class="heatmap-footer">
+          <span id="heatmapSummary" class="muted"></span>
+          <span class="heatmap-legend">
+            Less
+            <span class="heatmap-day" data-level="0"></span>
+            <span class="heatmap-day" data-level="1"></span>
+            <span class="heatmap-day" data-level="2"></span>
+            <span class="heatmap-day" data-level="3"></span>
+            <span class="heatmap-day" data-level="4"></span>
+            More
+          </span>
+        </div>
+      </div>
+
+      <h2 class="section-title">Start a walk</h2>
+      <div class="quick-actions">
+        <button type="button" id="quickCasualBtn" class="quick-card">
+          <strong>Casual</strong>
+          <span>Get one broad theme and go shoot.</span>
+        </button>
+        <button type="button" id="quickGuidedBtn" class="quick-card quick-card-accent">
+          <strong>Guided</strong>
+          <span>Theme, mini-challenges, timer &amp; nudges.</span>
+        </button>
+      </div>
+
+      <h2 class="section-title">About this demo</h2>
+      <p class="muted card-text">
+        PhotoWalk turns aimless wandering into a structured practice habit: a theme generator with
+        composition explainers, a manual analysis suite for studying any photo, a closed sharing space
+        for walk partners, and a self-organizing reference album.
+      </p>
+    </section>
+
+    <section id="view-walks" class="view hidden" data-view="walks">
+      <h2 class="section-title">PhotoWalk Guide</h2>
+
+      <div class="segmented" role="tablist">
+        <button type="button" id="modeCasualBtn" class="segment active">Casual</button>
+        <button type="button" id="modeGuidedBtn" class="segment">Guided</button>
+      </div>
+      <p id="modeHint" class="hint hidden">Finish your current walk to switch modes.</p>
+
+      <div id="durationRow" class="field-row hidden">
+        <label for="durationSelect">Walk length</label>
+        <select id="durationSelect"></select>
+      </div>
+
+      <button type="button" id="getThemeBtn" class="btn btn-primary btn-block">Get a Theme</button>
+
+      <div id="themeCard" class="theme-card hidden">
+        <h3 id="themeTitle"></h3>
+        <p id="themeBrief" class="muted"></p>
+        <button type="button" id="viewConceptsBtn" class="btn btn-ghost btn-sm">View Concept Examples</button>
+
+        <div id="challengesSection" class="hidden">
+          <h4 class="subsection-title">Mini-challenges</h4>
+          <ul id="challengesList" class="challenges-list"></ul>
+        </div>
+
+        <div id="timerSection" class="timer-block hidden">
+          <div id="timerDisplay" class="timer-display">00:00</div>
+          <div class="timer-track"><div id="timerBar" class="timer-fill"></div></div>
+        </div>
+
+        <button type="button" id="notifBtn" class="btn btn-ghost btn-sm">Enable Notifications</button>
+
+        <div class="theme-actions">
+          <button type="button" id="startWalkBtn" class="btn btn-accent btn-block hidden">Start Walk</button>
+          <button type="button" id="finishWalkBtn" class="btn btn-primary btn-block hidden">Finish Walk</button>
+          <button type="button" id="markCompleteBtn" class="btn btn-accent btn-block hidden">Mark Walk Complete</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-analyze" class="view hidden" data-view="analyze">
+      <h2 class="section-title">Manual Photo Analysis</h2>
+
+      <input type="file" id="photoInput" accept="image/*" class="visually-hidden">
+
+      <div id="analyzeEmpty" class="empty-state">
+        <p>Load a photo to overlay composition guides, a light histogram, and a color palette.</p>
+        <button type="button" id="choosePhotoBtn" class="btn btn-primary">Choose Photo</button>
+      </div>
+
+      <div id="analyzeWorkspace" class="hidden">
+        <div class="canvas-stack" id="canvasStack">
+          <canvas id="imageCanvas"></canvas>
+          <canvas id="overlayCanvas"></canvas>
+        </div>
+
+        <div class="overlay-controls">
+          <button type="button" id="ovNoneBtn" class="chip-btn">None</button>
+          <button type="button" id="ovThirdsBtn" class="chip-btn active">Rule of Thirds</button>
+          <button type="button" id="ovGoldenBtn" class="chip-btn">Golden Ratio</button>
+          <button type="button" id="resetGridBtn" class="chip-btn chip-btn-ghost">Reset Grid</button>
+        </div>
+        <p class="hint">Drag on the photo to nudge the guide lines onto your subject.</p>
+
+        <h4 class="subsection-title">Light Histogram</h4>
+        <canvas id="histogramCanvas" class="histogram-canvas" width="300" height="100"></canvas>
+
+        <h4 class="subsection-title">Color Palette</h4>
+        <div id="paletteRow" class="palette-row"></div>
+
+        <h4 class="subsection-title">Metadata (EXIF)</h4>
+        <div id="exifBlock" class="exif-block"></div>
+
+        <h4 class="subsection-title">Save to Reference Album</h4>
+        <input type="text" id="tagsInput" class="text-input" placeholder="Tags, comma separated (e.g. bridge, sunset)">
+        <div class="theme-actions">
+          <button type="button" id="saveToAlbumBtn" class="btn btn-accent btn-block">Save to Album</button>
+          <button type="button" id="chooseAnotherBtn" class="btn btn-ghost btn-block">Choose Another Photo</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-album" class="view hidden" data-view="album">
+      <h2 class="section-title">Smart Reference Album</h2>
+
+      <div class="filter-row">
+        <select id="filterBrightness">
+          <option value="all">Any brightness</option>
+          <option value="Bright">Bright</option>
+          <option value="Balanced">Balanced</option>
+          <option value="Dark">Dark</option>
+        </select>
+        <select id="filterAspect">
+          <option value="all">Any shape</option>
+          <option value="Landscape">Landscape</option>
+          <option value="Portrait">Portrait</option>
+          <option value="Square">Square</option>
+        </select>
+        <select id="filterColor">
+          <option value="all">Any color</option>
+          <option value="Red">Red</option>
+          <option value="Orange">Orange</option>
+          <option value="Yellow">Yellow</option>
+          <option value="Green">Green</option>
+          <option value="Teal">Teal</option>
+          <option value="Blue">Blue</option>
+          <option value="Purple">Purple</option>
+          <option value="Pink">Pink</option>
+          <option value="Neutral">Neutral</option>
+          <option value="Black">Black</option>
+          <option value="White">White</option>
+        </select>
+      </div>
+      <input type="text" id="albumSearch" class="text-input" placeholder="Search tags or camera model">
+
+      <p id="albumEmpty" class="empty-state-sm">No references yet — save one from the Analyze tab.</p>
+      <div id="albumGrid" class="album-grid"></div>
+    </section>
+
+    <section id="view-share" class="view hidden" data-view="share">
+      <h2 class="section-title">Post-Walk Sharing</h2>
+      <p class="muted card-text">
+        Demo mode: rooms sync across tabs open on this browser, simulating a closed sharing space for
+        your walk partners without a backend.
+      </p>
+
+      <div id="shareJoinSection">
+        <div class="theme-card">
+          <h4 class="subsection-title">Create a Room</h4>
+          <input type="text" id="roomThemeInput" class="text-input" placeholder="Theme (optional)">
+          <button type="button" id="createRoomBtn" class="btn btn-accent btn-block">Create Room</button>
+        </div>
+        <div class="theme-card">
+          <h4 class="subsection-title">Join a Room</h4>
+          <input type="text" id="joinCodeInput" class="text-input" placeholder="Room code">
+          <button type="button" id="joinRoomBtn" class="btn btn-primary btn-block">Join Room</button>
+          <p id="shareError" class="error-text"></p>
+        </div>
+      </div>
+
+      <div id="shareRoomSection" class="hidden">
+        <div class="room-header">
+          <div>
+            <div class="room-code" id="roomCodeDisplay"></div>
+            <div id="roomThemeDisplay" class="muted"></div>
+          </div>
+          <div class="room-header-actions">
+            <button type="button" id="copyInviteBtn" class="btn btn-ghost btn-sm">Copy Invite</button>
+            <button type="button" id="leaveRoomBtn" class="btn btn-ghost btn-sm">Leave</button>
+          </div>
+        </div>
+
+        <div class="theme-card">
+          <h4 class="subsection-title">Share a Shot</h4>
+          <input type="text" id="uploaderNameInput" class="text-input" placeholder="Your name">
+          <input type="file" id="roomPhotoInput" accept="image/*" class="text-input">
+          <input type="text" id="roomNoteInput" class="text-input" placeholder="Note (optional)">
+          <button type="button" id="uploadToRoomBtn" class="btn btn-accent btn-block">Upload</button>
+        </div>
+
+        <p id="roomPhotosEmpty" class="empty-state-sm">No shots shared yet.</p>
+        <div id="roomPhotosGrid" class="album-grid"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="bottom-nav">
+    <button type="button" class="nav-btn active" data-view="home">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <span>Home</span>
+    </button>
+    <button type="button" class="nav-btn" data-view="walks">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M13 4a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM7 21l2.5-6L7 12l2-5 4 2 3 5-3 1 1 6M5 21l3-8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Walks</span>
+    </button>
+    <button type="button" class="nav-btn" data-view="analyze">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="14" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M3 15l5-5 3 3 4-5 6 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Analyze</span>
+    </button>
+    <button type="button" class="nav-btn" data-view="album">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="3" width="8" height="8" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="13" width="8" height="8" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="13" width="8" height="8" rx="1.2" stroke="currentColor" stroke-width="1.6"/></svg>
+      <span>Album</span>
+    </button>
+    <button type="button" class="nav-btn" data-view="share">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="6" cy="12" r="2.4" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="6" r="2.4" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="18" r="2.4" stroke="currentColor" stroke-width="1.6"/><path d="M8.2 10.8L15.8 7M8.2 13.2l7.6 3.8" stroke="currentColor" stroke-width="1.6"/></svg>
+      <span>Share</span>
+    </button>
+  </nav>
+
+  <div id="modalRoot" class="modal-root hidden"></div>
+  <div id="toastRoot" class="toast-root"></div>
+</div>
+
+<script type="module" src="./js/app.js"></script>
+</body>
+</html>
