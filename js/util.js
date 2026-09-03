@@ -9,6 +9,15 @@ export function uid() {
   return 'id-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
+/**
+ * Asks app.js to switch views. A window event (matching the existing
+ * `photowalk:stats-changed` bus) rather than an export, because app.js sits at
+ * the top of the import graph and importing it back would create a cycle.
+ */
+export function navigateTo(view) {
+  window.dispatchEvent(new CustomEvent('photowalk:navigate', { detail: { view } }));
+}
+
 export function roomCode() {
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = '';
@@ -30,6 +39,18 @@ export function formatTime(isoOrMs) {
   return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
 }
 
+/** Hours are the app's unit of progress, so they read the same everywhere: 2h, 2.5h, 45m. */
+export function formatHours(hours) {
+  const h = Math.max(0, hours || 0);
+  if (h > 0 && h < 1) {
+    // Guard the boundary: 0.999h rounds to 60 minutes, which should read "1h".
+    const mins = Math.round(h * 60);
+    if (mins < 60) return Math.max(1, mins) + 'm';
+  }
+  const rounded = Math.round(h * 10) / 10;
+  return (Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1)) + 'h';
+}
+
 /** Local (not UTC) YYYY-MM-DD key, so a day boundary matches the user's own clock. */
 export function localDateKey(d = new Date()) {
   const y = d.getFullYear();
@@ -44,6 +65,27 @@ export function readFileAsDataUrl(file) {
     reader.onload = () => resolve(reader.result);
     reader.onerror = () => reject(reader.error);
     reader.readAsDataURL(file);
+  });
+}
+
+/** Decodes a base64 data URL into a Blob, for moving legacy photos into IndexedDB. */
+export function dataUrlToBlob(dataUrl) {
+  const [header, body] = String(dataUrl).split(',');
+  if (!body || !header.includes(';base64')) throw new Error('Not a base64 data URL');
+  const mime = (header.match(/:(.*?);/) || [, 'image/jpeg'])[1];
+  const binary = atob(body);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new Blob([bytes], { type: mime });
+}
+
+export function canvasToBlob(canvas, type = 'image/jpeg', quality = 0.85) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error('Could not encode canvas'))),
+      type,
+      quality
+    );
   });
 }
 
@@ -94,6 +136,27 @@ const HUE_NAMES = [
   [15, 'Red'], [45, 'Orange'], [70, 'Yellow'], [170, 'Green'],
   [200, 'Teal'], [255, 'Blue'], [290, 'Purple'], [330, 'Pink'], [360, 'Red']
 ];
+
+/** Buckets a focal length into the categories the album filters by. */
+export function focalBucket(mm) {
+  if (!mm || !Number.isFinite(mm)) return null;
+  if (mm < 35) return 'Wide';
+  if (mm <= 70) return 'Normal';
+  return 'Tele';
+}
+
+/** Buckets an f-number by how much of the frame stays sharp. */
+export function apertureBucket(fNumber) {
+  if (!fNumber || !Number.isFinite(fNumber)) return null;
+  if (fNumber <= 2.8) return 'Fast';
+  if (fNumber <= 8) return 'Mid';
+  return 'Deep';
+}
+
+export function formatCoords(lat, lon) {
+  const fmt = (v, pos, neg) => `${Math.abs(v).toFixed(5)}° ${v >= 0 ? pos : neg}`;
+  return `${fmt(lat, 'N', 'S')}, ${fmt(lon, 'E', 'W')}`;
+}
 
 export function nearestColorName(r, g, b) {
   const { h, s, l } = rgbToHsl(r, g, b);

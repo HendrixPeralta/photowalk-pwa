@@ -3,6 +3,8 @@
 // demo illustrates each concept with original vector diagrams instead of
 // sourced photography — no copyright risk, and it renders fully offline.
 
+import { escapeHtml } from './util.js';
+
 export const CONCEPTS = {
   'thirds': {
     title: 'Rule of Thirds',
@@ -109,7 +111,66 @@ export const CONCEPTS = {
         <circle cx="30" cy="110" r="12"/><circle cx="175" cy="105" r="16"/>
       </g>
       <circle cx="100" cy="70" r="24" class="accent-fill"/></svg>`
+  },
+  'motion-blur': {
+    title: 'Motion & Blur',
+    tip: 'Let moving subjects streak while something still stays sharp — or pan with the motion.',
+    svg: `<svg viewBox="0 0 200 140"><defs><filter id="mblur" x="-40%" width="180%"><feGaussianBlur stdDeviation="6 0.3"/></filter></defs>
+      <rect width="200" height="140" class="bg"/>
+      <g filter="url(#mblur)" class="muted">
+        <rect x="25" y="50" width="65" height="34" rx="10"/>
+      </g>
+      <circle cx="150" cy="67" r="17" class="accent-fill"/></svg>`
+  },
+  'low-angle': {
+    title: 'Change Your Angle',
+    tip: 'Shoot from your knees or point straight up — unfamiliar angles make familiar places new.',
+    svg: `<svg viewBox="0 0 200 140"><rect width="200" height="140" class="bg"/>
+      <path d="M0,140 L78,22 L90,22 L44,140 Z" class="layer layer-2"/>
+      <path d="M200,140 L122,22 L110,22 L156,140 Z" class="layer layer-2"/>
+      <circle cx="100" cy="36" r="10" class="accent-fill"/></svg>`
+  },
+  'scale-contrast': {
+    title: 'Sense of Scale',
+    tip: 'A tiny figure beside something huge tells the viewer exactly how big the scene is.',
+    svg: `<svg viewBox="0 0 200 140"><rect width="200" height="140" class="bg"/>
+      <path d="M35,140 L35,25 L115,25 L115,140 Z" class="muted"/>
+      <line x1="0" y1="128" x2="200" y2="128" class="grid"/>
+      <circle cx="155" cy="121" r="6" class="accent-fill"/></svg>`
+  },
+  'night-glow': {
+    title: 'Night Glow',
+    tip: 'After dark, point lights become the subject — brace your phone and expose for the glow.',
+    svg: `<svg viewBox="0 0 200 140"><defs><filter id="nglow"><feGaussianBlur stdDeviation="2.5"/></filter></defs>
+      <rect width="200" height="140" class="bg-dark"/>
+      <g filter="url(#nglow)">
+        <circle cx="48" cy="42" r="8" class="sun"/>
+        <circle cx="118" cy="88" r="6" class="sun"/>
+        <circle cx="170" cy="30" r="5" class="sun"/>
+      </g>
+      <circle cx="90" cy="52" r="11" class="accent-fill"/></svg>`
   }
+};
+
+// Search terms for the optional public-domain photo strip (see openverse.js).
+// Kept beside the concepts so a new concept and its examples stay in one place.
+export const CONCEPT_QUERIES = {
+  'thirds': 'rule of thirds composition photograph',
+  'golden': 'golden ratio composition photograph',
+  'leading-lines': 'leading lines road perspective photograph',
+  'reflection': 'reflection still water symmetry photograph',
+  'framing': 'natural framing archway doorway photograph',
+  'silhouette': 'silhouette sunset backlit photograph',
+  'texture-pattern': 'repeating pattern texture wall photograph',
+  'negative-space': 'negative space minimal sky photograph',
+  'warm-light': 'golden hour warm sunlight long shadows photograph',
+  'layers-depth': 'foreground background depth layers landscape photograph',
+  'color-pop': 'single bright color against muted scene photograph',
+  'shallow-dof': 'shallow depth of field bokeh photograph',
+  'motion-blur': 'motion blur panning moving subject photograph',
+  'low-angle': 'looking up buildings low angle perspective photograph',
+  'scale-contrast': 'tiny person vast landscape sense of scale photograph',
+  'night-glow': 'night city lights bokeh long exposure photograph'
 };
 
 export const THEMES = [
@@ -222,10 +283,231 @@ export const THEMES = [
       'Use a plain sky, wall, or floor as the space',
       'Leave more empty room than feels comfortable'
     ]
+  },
+  {
+    id: 'motion-rhythm',
+    title: 'Motion & Rhythm',
+    brief: 'Bikes, buses, birds — let the city move through your frame.',
+    concepts: ['motion-blur', 'leading-lines'],
+    challenges: [
+      'Capture something moving while the background stays sharp',
+      'Pan with a moving subject so the background streaks instead',
+      'Freeze a moment mid-motion: a step, a jump, a splash'
+    ]
+  },
+  {
+    id: 'look-up',
+    title: 'Look Up',
+    brief: 'Everything above eye level — rooftops, wires, canopies, sky.',
+    concepts: ['low-angle', 'negative-space'],
+    challenges: [
+      'Point the camera straight up and shoot what converges',
+      'Frame a rooftop, wire, or branch against plain sky',
+      'Shoot a tall subject from its base to exaggerate its height'
+    ]
+  },
+  {
+    id: 'ground-level',
+    title: 'Ground Level',
+    brief: 'Drop the camera to your ankles and shoot the world from below.',
+    concepts: ['low-angle', 'leading-lines'],
+    challenges: [
+      'Shoot with the camera resting on the ground',
+      'Use the pavement itself as a giant foreground',
+      'Catch feet, wheels, or paws passing at their own eye level'
+    ]
+  },
+  {
+    id: 'sense-of-scale',
+    title: 'Sense of Scale',
+    brief: 'Pair something tiny with something huge and let the contrast speak.',
+    concepts: ['scale-contrast', 'negative-space'],
+    challenges: [
+      'Photograph a person dwarfed by a building or landscape',
+      'Include something familiar to make a big scene measurable',
+      'Reverse it: shoot something tiny so it looks monumental'
+    ]
+  },
+  {
+    id: 'night-lights',
+    title: 'Night Lights',
+    brief: 'After dark the light sources become the subjects.',
+    concepts: ['night-glow', 'color-pop'],
+    challenges: [
+      'Shoot a lit window, sign, or streetlamp against the dark',
+      'Brace your phone on something solid and hold still',
+      'Find two different colors of light in one frame'
+    ]
+  },
+  {
+    id: 'weather-mood',
+    title: 'Weather & Mood',
+    brief: 'Rain, fog, wind, and heavy clouds do the atmosphere for you.',
+    concepts: ['negative-space', 'layers-depth'],
+    challenges: [
+      'Make the weather itself visible in the frame',
+      'Shoot how the light changes under clouds or through fog',
+      'Find someone or something reacting to the weather'
+    ]
+  },
+  {
+    id: 'signs-letters',
+    title: 'Signs & Letters',
+    brief: 'Hunt typography — hand-painted, neon, worn, or accidental.',
+    concepts: ['color-pop', 'texture-pattern'],
+    challenges: [
+      'Photograph a sign so old it has become texture',
+      'Isolate a single letter or number as the subject',
+      'Find words that mean something new out of context'
+    ]
+  },
+  {
+    id: 'nature-in-city',
+    title: 'Nature in the City',
+    brief: 'Find the green pushing back — weeds, roots, moss, and birds.',
+    concepts: ['framing', 'shallow-dof'],
+    challenges: [
+      'Photograph a plant growing where it should not',
+      'Frame something man-made through leaves or branches',
+      'Get close to one small living detail and blur the city behind it'
+    ]
+  },
+  {
+    id: 'curves-spirals',
+    title: 'Curves & Spirals',
+    brief: 'Skip the straight lines — hunt arcs, bends, and coils instead.',
+    concepts: ['golden', 'leading-lines'],
+    challenges: [
+      'Find a staircase, ramp, or road that curves through the frame',
+      'Let one arc carry the eye from a corner to your subject',
+      'Shoot a spiral — a shell, a hose, a stairwell from above or below'
+    ]
+  },
+  {
+    id: 'symmetry-hunt',
+    title: 'Symmetry Hunt',
+    brief: 'Find scenes that mirror themselves — then decide whether to break them.',
+    concepts: ['reflection', 'framing'],
+    challenges: [
+      'Center a perfectly symmetrical scene, dead-on',
+      'Use a reflection to complete the symmetry',
+      'Break it: add one off-center element to a symmetrical frame'
+    ]
+  },
+  {
+    id: 'minimal-geometry',
+    title: 'Minimal Geometry',
+    brief: 'Reduce the world to shapes: blocks of color, edges, and empty space.',
+    concepts: ['negative-space', 'thirds'],
+    challenges: [
+      'Shoot a frame with three or fewer shapes in it',
+      'Line up an edge in the scene with a rule-of-thirds line',
+      'Make a photo that reads as abstract until you look twice'
+    ]
+  },
+  {
+    id: 'wear-and-decay',
+    title: 'Wear & Decay',
+    brief: 'Rust, cracks, and fading paint — photograph what time is doing.',
+    concepts: ['texture-pattern', 'layers-depth'],
+    challenges: [
+      'Find something old beside something new in one frame',
+      'Get close enough that rust or peeling paint becomes a landscape',
+      'Shoot a repair — tape, patch, or weld — as the subject'
+    ]
+  },
+  {
+    id: 'transit-waiting',
+    title: 'Transit & Waiting',
+    brief: 'Stations, stops, and platforms — the in-between places people pass through.',
+    concepts: ['leading-lines', 'motion-blur'],
+    challenges: [
+      'Use tracks, platform edges, or queue lines to lead the eye',
+      'Contrast someone waiting still with something rushing past',
+      'Shoot the moment of arrival or departure, not the ride'
+    ]
+  },
+  {
+    id: 'hands-at-work',
+    title: 'Hands at Work',
+    brief: 'Vendors, makers, gardeners — tell a story through hands, not faces.',
+    concepts: ['shallow-dof', 'motion-blur'],
+    challenges: [
+      'Photograph hands mid-task, respectfully, in public',
+      'Isolate the hands with a blurred background',
+      'Include the tool or material, and let it explain the job'
+    ]
   }
 ];
 
-export function randomTheme(excludeId) {
-  const pool = excludeId ? THEMES.filter((t) => t.id !== excludeId) : THEMES;
-  return pool[Math.floor(Math.random() * pool.length)];
+/** One concept card, shared by the walk explainer modal and the Analyze tab. */
+export function renderConceptCard(key) {
+  const c = CONCEPTS[key];
+  if (!c) return '';
+  return `<div class="concept-card">
+    <div class="concept-art">${c.svg}</div>
+    <h4>${escapeHtml(c.title)}</h4>
+    <p>${escapeHtml(c.tip)}</p>
+    <div class="concept-photos" data-concept="${escapeHtml(key)}"></div>
+  </div>`;
+}
+
+// Themes that live or die on low, warm sun: worth steering toward in the late
+// afternoon, and frustrating to hand someone after dark.
+const LOW_SUN_THEMES = ['golden-hour', 'shadows-silhouettes'];
+
+// Themes that only work after dark — pointless to suggest in daylight.
+const NIGHT_THEMES = ['night-lights'];
+
+function timeOfDayBucket(now) {
+  const h = now.getHours();
+  if (h >= 16 && h < 20) return 'golden';
+  if (h >= 20 || h < 6) return 'dark';
+  return 'day';
+}
+
+/**
+ * Picks the next theme with a reason the user can see: the clock narrows the
+ * pool to what the current light supports, then the least-practiced theme in
+ * that pool wins, so the generator spreads practice instead of repeating.
+ *
+ * @param {string|null} excludeId theme to avoid (usually the one on screen)
+ * @param {Record<string, number>} counts walks completed per theme id
+ * @returns {{theme: object, reason: string}}
+ */
+export function suggestTheme(excludeId, counts = {}, now = new Date()) {
+  const bucket = timeOfDayBucket(now);
+  let pool = THEMES.filter((t) => t.id !== excludeId);
+  if (bucket !== 'dark') {
+    const daylight = pool.filter((t) => !NIGHT_THEMES.includes(t.id));
+    if (daylight.length) pool = daylight;
+  }
+
+  let candidates = pool;
+  let reason = '';
+
+  if (bucket === 'golden') {
+    const lit = pool.filter((t) => LOW_SUN_THEMES.includes(t.id));
+    if (lit.length) {
+      candidates = lit;
+      reason = 'The sun is getting low — this is the window for it.';
+    }
+  } else if (bucket === 'dark') {
+    const afterDark = pool.filter((t) => !LOW_SUN_THEMES.includes(t.id));
+    if (afterDark.length) candidates = afterDark;
+  }
+
+  const fewest = Math.min(...candidates.map((t) => counts[t.id] || 0));
+  const leastPracticed = candidates.filter((t) => (counts[t.id] || 0) === fewest);
+  const theme = leastPracticed[Math.floor(Math.random() * leastPracticed.length)];
+
+  if (!reason && NIGHT_THEMES.includes(theme.id)) {
+    reason = "It's dark out — the right window for this one.";
+  }
+  if (!reason) {
+    reason = fewest === 0
+      ? "You haven't walked this theme yet."
+      : 'One of your least-practiced themes.';
+  }
+  return { theme, reason };
 }

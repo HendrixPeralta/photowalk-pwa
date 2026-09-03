@@ -33,33 +33,59 @@
         <span id="streakBadgeText">0</span>
       </span>
       <button type="button" id="installBtn" class="btn btn-ghost hidden">Install</button>
+      <button type="button" id="profileBtn" class="icon-btn" aria-label="Profile">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M5 20c1.2-3.4 3.8-5 7-5s5.8 1.6 7 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
     </div>
   </header>
 
   <main class="views">
 
     <section id="view-home" class="view" data-view="home">
-      <div id="activeWalkBanner" class="banner hidden">
-        <span id="activeWalkText"></span>
-        <button type="button" id="resumeWalkBtn" class="btn btn-accent btn-sm">Resume</button>
-      </div>
+      <h2 class="section-title">Start a walk</h2>
 
-      <div class="stats-grid">
-        <div class="stat-card">
-          <span class="stat-value" id="statWalks">0</span>
-          <span class="stat-label">Walks completed</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value" id="statPhotosAnalyzed">0</span>
-          <span class="stat-label">Photos analyzed</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value" id="statRefs">0</span>
-          <span class="stat-label">References saved</span>
+      <div id="quickStart">
+        <div class="quick-actions">
+          <button type="button" id="quickCasualBtn" class="quick-card">
+            <strong>Casual</strong>
+            <span>A theme and its challenges. No timer — finish when you&rsquo;re done.</span>
+          </button>
+          <button type="button" id="quickGuidedBtn" class="quick-card quick-card-accent">
+            <strong>Guided</strong>
+            <span>The same, plus a countdown and mid-walk nudges.</span>
+          </button>
         </div>
       </div>
 
-      <h2 class="section-title">Shooting activity</h2>
+      <div id="homeWalkPanel" class="theme-card walk-panel hidden">
+        <div class="walk-panel-head">
+          <div class="walk-panel-titles">
+            <strong id="homeWalkTheme"></strong>
+            <span id="homeWalkMode" class="muted"></span>
+          </div>
+          <div class="walk-panel-clock">
+            <span id="homeWalkTimer" class="walk-panel-timer">00:00</span>
+            <span id="homeWalkTimerLabel" class="muted"></span>
+          </div>
+        </div>
+        <div id="homeWalkTrack" class="timer-track hidden"><div id="homeWalkBar" class="timer-fill"></div></div>
+        <div class="theme-actions">
+          <button type="button" id="homeStopWalkBtn" class="btn btn-primary btn-block">Stop Walk</button>
+          <button type="button" id="homeWalkBriefBtn" class="btn btn-ghost btn-block">Theme &amp; challenges</button>
+        </div>
+      </div>
+
+      <div class="section-title-row">
+        <h2 class="section-title">Shooting activity</h2>
+        <span id="weeklyGoalText" class="goal-text"></span>
+        <label class="goal-edit">
+          <span class="visually-hidden">Weekly hour goal</span>
+          <select id="weeklyGoalSelect"></select>
+        </label>
+      </div>
       <div class="heatmap-card">
         <div class="heatmap-scroll" id="heatmapScroll">
           <div class="heatmap-inner">
@@ -79,18 +105,15 @@
             More
           </span>
         </div>
+
+        <div class="weekly-goal">
+          <div class="timer-track"><div id="weeklyGoalBar" class="timer-fill goal-fill"></div></div>
+        </div>
       </div>
 
-      <h2 class="section-title">Start a walk</h2>
-      <div class="quick-actions">
-        <button type="button" id="quickCasualBtn" class="quick-card">
-          <strong>Casual</strong>
-          <span>Get one broad theme and go shoot.</span>
-        </button>
-        <button type="button" id="quickGuidedBtn" class="quick-card quick-card-accent">
-          <strong>Guided</strong>
-          <span>Theme, mini-challenges, timer &amp; nudges.</span>
-        </button>
+      <h2 class="section-title">Reward progress</h2>
+      <div class="theme-card reward-progress-card">
+        <div id="rewardBar" class="reward-bar"></div>
       </div>
 
       <h2 class="section-title">About this demo</h2>
@@ -104,22 +127,37 @@
     <section id="view-walks" class="view hidden" data-view="walks">
       <h2 class="section-title">PhotoWalk Guide</h2>
 
-      <div class="segmented" role="tablist">
-        <button type="button" id="modeCasualBtn" class="segment active">Casual</button>
-        <button type="button" id="modeGuidedBtn" class="segment">Guided</button>
+      <div class="stats-grid">
+        <div class="stat-card stat-card-hero">
+          <span class="stat-value" id="statHours">0h</span>
+          <span class="stat-label">Hours shot</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="statWalks">0</span>
+          <span class="stat-label">Walks completed</span>
+        </div>
       </div>
-      <p id="modeHint" class="hint hidden">Finish your current walk to switch modes.</p>
 
-      <div id="durationRow" class="field-row hidden">
-        <label for="durationSelect">Walk length</label>
-        <select id="durationSelect"></select>
+      <div class="theme-card walk-setup">
+        <h4 class="subsection-title">Walk style</h4>
+        <div class="segmented" role="tablist">
+          <button type="button" id="modeCasualBtn" class="segment active">Casual</button>
+          <button type="button" id="modeGuidedBtn" class="segment">Guided</button>
+        </div>
+        <p id="modeHint" class="hint hidden">Finish your current walk to switch modes.</p>
+
+        <div id="durationRow" class="field-row hidden">
+          <label for="durationSelect">Walk length</label>
+          <select id="durationSelect"></select>
+        </div>
+
+        <button type="button" id="getThemeBtn" class="btn btn-accent btn-block">Get a Theme</button>
       </div>
-
-      <button type="button" id="getThemeBtn" class="btn btn-primary btn-block">Get a Theme</button>
 
       <div id="themeCard" class="theme-card hidden">
         <h3 id="themeTitle"></h3>
         <p id="themeBrief" class="muted"></p>
+        <p id="themeReason" class="theme-reason hidden"></p>
         <button type="button" id="viewConceptsBtn" class="btn btn-ghost btn-sm">View Concept Examples</button>
 
         <div id="challengesSection" class="hidden">
@@ -137,40 +175,132 @@
         <div class="theme-actions">
           <button type="button" id="startWalkBtn" class="btn btn-accent btn-block hidden">Start Walk</button>
           <button type="button" id="finishWalkBtn" class="btn btn-primary btn-block hidden">Finish Walk</button>
-          <button type="button" id="markCompleteBtn" class="btn btn-accent btn-block hidden">Mark Walk Complete</button>
         </div>
       </div>
+
+      <details id="rewardsDetails" class="theme-card collapse-card rewards-card">
+        <summary class="collapse-summary">
+          <span class="collapse-title">Hour rewards</span>
+          <span id="rewardsSummaryCount" class="muted collapse-meta"></span>
+          <svg class="collapse-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </summary>
+        <div class="collapse-body">
+          <p class="muted card-text">Pick a treat and price it in shooting hours — every hour on the heatmap counts toward it.</p>
+          <div class="reward-form">
+            <input type="text" id="rewardTitleInput" class="text-input" placeholder="Reward (e.g. new camera strap)" maxlength="60">
+            <input type="number" id="rewardHoursInput" class="text-input reward-hours-input" placeholder="Hours" min="0.5" step="0.5" inputmode="decimal">
+            <button type="button" id="addRewardBtn" class="btn btn-primary">Set Reward</button>
+          </div>
+          <p id="rewardsEmpty" class="empty-state-sm">No rewards yet — try “New 35mm lens” for 20 hours.</p>
+          <ul id="rewardsList" class="rewards-list"></ul>
+        </div>
+      </details>
     </section>
 
     <section id="view-analyze" class="view hidden" data-view="analyze">
       <h2 class="section-title">Manual Photo Analysis</h2>
 
+      <div id="analyzePinnedTip" class="banner analyze-tip hidden"></div>
+
       <input type="file" id="photoInput" accept="image/*" class="visually-hidden">
 
       <div id="analyzeEmpty" class="empty-state">
-        <p>Load a photo to overlay composition guides, a light histogram, and a color palette.</p>
+        <p>Load a photo to overlay composition guides, a light histogram, a color palette, and video-style scopes.</p>
         <button type="button" id="choosePhotoBtn" class="btn btn-primary">Choose Photo</button>
       </div>
 
       <div id="analyzeWorkspace" class="hidden">
-        <div class="canvas-stack" id="canvasStack">
-          <canvas id="imageCanvas"></canvas>
-          <canvas id="overlayCanvas"></canvas>
+        <div id="compareStrip" class="compare-strip">
+          <div class="compare-pane">
+            <p class="compare-label">Yours</p>
+            <div class="canvas-stack" id="canvasStack">
+              <div class="canvas-inner" id="canvasInner">
+                <canvas id="imageCanvas"></canvas>
+                <canvas id="overlayCanvas"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="compare-pane hidden" id="refPane">
+            <p class="compare-label">Reference</p>
+            <div class="canvas-stack" id="refCanvasStack">
+              <canvas id="refImageCanvas"></canvas>
+              <canvas id="refOverlayCanvas"></canvas>
+            </div>
+          </div>
         </div>
 
         <div class="overlay-controls">
-          <button type="button" id="ovNoneBtn" class="chip-btn">None</button>
-          <button type="button" id="ovThirdsBtn" class="chip-btn active">Rule of Thirds</button>
-          <button type="button" id="ovGoldenBtn" class="chip-btn">Golden Ratio</button>
-          <button type="button" id="resetGridBtn" class="chip-btn chip-btn-ghost">Reset Grid</button>
+          <label class="visually-hidden" for="overlaySelect">Composition guide</label>
+          <select id="overlaySelect" class="chip-select">
+            <option value="none">No Guide</option>
+            <option value="thirds" selected>Rule of Thirds</option>
+            <option value="golden">Golden Ratio</option>
+            <option value="golden-triangles">Golden Triangles</option>
+            <option value="spiral-section">Spiral Section</option>
+            <option value="golden-spiral">Golden Spiral</option>
+          </select>
+          <button type="button" id="flipGuideBtn" class="chip-btn hidden">Flip</button>
+          <button type="button" id="rotateGuideBtn" class="chip-btn hidden">Rotate</button>
+          <button type="button" id="resetGridBtn" class="chip-btn chip-btn-ghost">Reset</button>
         </div>
-        <p class="hint">Drag on the photo to nudge the guide lines onto your subject.</p>
+        <div class="overlay-controls overlay-controls-secondary">
+          <button type="button" id="compareBtn" class="chip-btn">Compare&hellip;</button>
+          <button type="button" id="exitCompareBtn" class="chip-btn hidden">Exit Compare</button>
+          <button type="button" id="fitViewBtn" class="chip-btn chip-btn-ghost">Fit</button>
+        </div>
+        <div id="overlayTipBox" class="overlay-tip hidden"></div>
+        <p class="hint">Drag a guide line to move just that line. Scroll or pinch to zoom, drag to pan, double-tap for 2&times;.</p>
 
         <h4 class="subsection-title">Light Histogram</h4>
-        <canvas id="histogramCanvas" class="histogram-canvas" width="300" height="100"></canvas>
+        <div id="histGrid" class="hist-grid">
+          <div>
+            <p class="compare-label">Yours</p>
+            <canvas id="histogramCanvas" class="histogram-canvas"></canvas>
+            <p id="histogramCaption" class="hint"></p>
+          </div>
+          <div id="refHistBlock" class="hidden">
+            <p class="compare-label">Reference</p>
+            <canvas id="refHistogramCanvas" class="histogram-canvas"></canvas>
+            <p id="refHistogramCaption" class="hint"></p>
+          </div>
+        </div>
+
+        <h4 class="subsection-title">Scopes</h4>
+        <div class="overlay-controls" id="scopeTabs">
+          <button type="button" class="chip-btn active" data-scope="waveform">Waveform</button>
+          <button type="button" class="chip-btn" data-scope="parade">Parade</button>
+          <button type="button" class="chip-btn" data-scope="vectorscope">Vector</button>
+          <button type="button" class="chip-btn" data-scope="cie">CIE</button>
+          <button type="button" class="chip-btn" data-scope="all">All 4</button>
+        </div>
+        <div id="scopeGrid" class="scope-grid">
+          <figure class="scope-cell" data-scope="waveform">
+            <figcaption class="scope-name">Waveform <span>luma against position across the frame</span></figcaption>
+            <canvas id="waveformCanvas" class="scope-canvas"></canvas>
+            <p id="waveformCaption" class="hint scope-caption"></p>
+          </figure>
+          <figure class="scope-cell" data-scope="parade">
+            <figcaption class="scope-name">RGB Parade <span>the waveform split into red, green and blue</span></figcaption>
+            <canvas id="paradeCanvas" class="scope-canvas"></canvas>
+            <p id="paradeCaption" class="hint scope-caption"></p>
+          </figure>
+          <figure class="scope-cell" data-scope="vectorscope">
+            <figcaption class="scope-name">Vectorscope <span>hue as angle, saturation as distance</span></figcaption>
+            <canvas id="vectorscopeCanvas" class="scope-canvas"></canvas>
+            <p id="vectorscopeCaption" class="hint scope-caption"></p>
+          </figure>
+          <figure class="scope-cell" data-scope="cie">
+            <figcaption class="scope-name">CIE Chromaticity <span>which colors the frame occupies</span></figcaption>
+            <canvas id="cieCanvas" class="scope-canvas"></canvas>
+            <p id="cieCaption" class="hint scope-caption"></p>
+          </figure>
+        </div>
 
         <h4 class="subsection-title">Color Palette</h4>
         <div id="paletteRow" class="palette-row"></div>
+        <p id="paletteCaption" class="hint"></p>
 
         <h4 class="subsection-title">Metadata (EXIF)</h4>
         <div id="exifBlock" class="exif-block"></div>
@@ -215,7 +345,26 @@
           <option value="White">White</option>
         </select>
       </div>
-      <input type="text" id="albumSearch" class="text-input" placeholder="Search tags or camera model">
+      <div class="filter-row">
+        <select id="filterFocal">
+          <option value="all">Any focal length</option>
+          <option value="Wide">Wide (under 35mm)</option>
+          <option value="Normal">Normal (35–70mm)</option>
+          <option value="Tele">Tele (over 70mm)</option>
+        </select>
+        <select id="filterAperture">
+          <option value="all">Any aperture</option>
+          <option value="Fast">Fast (f/2.8 and wider)</option>
+          <option value="Mid">Mid (f/2.8–f/8)</option>
+          <option value="Deep">Deep (f/8 and narrower)</option>
+        </select>
+        <select id="filterLocation">
+          <option value="all">Any location</option>
+          <option value="yes">Has location</option>
+          <option value="no">No location</option>
+        </select>
+      </div>
+      <input type="text" id="albumSearch" class="text-input" placeholder="Search tags, camera, or settings">
 
       <p id="albumEmpty" class="empty-state-sm">No references yet — save one from the Analyze tab.</p>
       <div id="albumGrid" class="album-grid"></div>
@@ -227,6 +376,8 @@
         Demo mode: rooms sync across tabs open on this browser, simulating a closed sharing space for
         your walk partners without a backend.
       </p>
+
+      <p id="sharedFilesNotice" class="banner shared-notice hidden"></p>
 
       <div id="shareJoinSection">
         <div class="theme-card">
@@ -254,16 +405,51 @@
           </div>
         </div>
 
+        <div class="theme-card invite-card">
+          <h4 class="subsection-title">Invite your walk partners</h4>
+          <div id="roomQr" class="room-qr"></div>
+          <p class="muted invite-hint">Scan this, or send the link:</p>
+          <p id="roomInviteLink" class="invite-link"></p>
+        </div>
+
         <div class="theme-card">
-          <h4 class="subsection-title">Share a Shot</h4>
+          <h4 class="subsection-title">Share your shots</h4>
           <input type="text" id="uploaderNameInput" class="text-input" placeholder="Your name">
-          <input type="file" id="roomPhotoInput" accept="image/*" class="text-input">
+          <input type="file" id="roomPhotoInput" accept="image/*" multiple class="text-input">
           <input type="text" id="roomNoteInput" class="text-input" placeholder="Note (optional)">
           <button type="button" id="uploadToRoomBtn" class="btn btn-accent btn-block">Upload</button>
         </div>
 
         <p id="roomPhotosEmpty" class="empty-state-sm">No shots shared yet.</p>
         <div id="roomPhotosGrid" class="album-grid"></div>
+      </div>
+    </section>
+
+    <section id="view-settings" class="view hidden" data-view="settings">
+      <h2 class="section-title">Settings</h2>
+
+      <div class="field-row">
+        <label for="quickDurationSelect">Guided walk length</label>
+        <select id="quickDurationSelect"></select>
+      </div>
+
+      <div class="theme-card collapse-card reminder-card">
+        <label class="collapse-summary reminder-header">
+          <span class="collapse-title">Walk reminders</span>
+          <span class="slide-switch">
+            <input type="checkbox" id="reminderToggle" aria-label="Walk reminders">
+            <span class="slide-switch-track" aria-hidden="true"></span>
+          </span>
+        </label>
+
+        <div id="reminderBody" class="collapse-body hidden">
+          <div class="field-row">
+            <label for="reminderTime">Time</label>
+            <input type="time" id="reminderTime" class="text-input time-input" value="18:00">
+          </div>
+          <div id="reminderDays" class="day-chips"></div>
+          <p id="reminderStatus" class="hint"></p>
+        </div>
       </div>
     </section>
 
@@ -291,6 +477,69 @@
       <span>Share</span>
     </button>
   </nav>
+
+  <div id="drawerRoot" class="drawer-root hidden">
+    <div class="drawer-backdrop" data-close-drawer></div>
+    <div class="drawer-frame">
+      <aside class="drawer" role="dialog" aria-label="Menu">
+        <button type="button" class="drawer-close" data-close-drawer aria-label="Close">&times;</button>
+
+        <div class="drawer-brand">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+            <circle cx="12" cy="13" r="3.4" stroke="currentColor" stroke-width="1.6"/>
+          </svg>
+          <span>PhotoWalk</span>
+        </div>
+
+        <nav class="drawer-nav">
+          <button type="button" class="drawer-item" data-nav="home">
+            <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+            <span>Home</span>
+          </button>
+          <button type="button" class="drawer-item" data-nav="walks">
+            <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M13 4a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM7 21l2.5-6L7 12l2-5 4 2 3 5-3 1 1 6M5 21l3-8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span>Walks</span>
+          </button>
+          <button type="button" class="drawer-item" data-nav="analyze">
+            <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="14" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M3 15l5-5 3 3 4-5 6 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span>Analyze</span>
+          </button>
+          <button type="button" class="drawer-item" data-nav="album">
+            <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="3" width="8" height="8" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="13" width="8" height="8" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="13" width="8" height="8" rx="1.2" stroke="currentColor" stroke-width="1.6"/></svg></span>
+            <span>Album</span>
+          </button>
+          <button type="button" class="drawer-item" data-nav="share">
+            <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="6" cy="12" r="2.4" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="6" r="2.4" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="18" r="2.4" stroke="currentColor" stroke-width="1.6"/><path d="M8.2 10.8L15.8 7M8.2 13.2l7.6 3.8" stroke="currentColor" stroke-width="1.6"/></svg></span>
+            <span>Share</span>
+          </button>
+        </nav>
+
+        <div class="drawer-group">
+          <button type="button" class="drawer-item" data-nav="settings">
+            <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.8l1.2 2.6 2.8-.6 1 2.7 2.7 1-.6 2.8 2.1 1.7-2.1 1.7.6 2.8-2.7 1-1 2.7-2.8-.6L12 21.2l-1.2-2.6-2.8.6-1-2.7-2.7-1 .6-2.8L2.8 12l2.1-1.7-.6-2.8 2.7-1 1-2.7 2.8.6z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span>
+            <span>Settings</span>
+          </button>
+        </div>
+
+        <button type="button" id="drawerUserBtn" class="drawer-user">
+          <span class="profile-avatar" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/>
+              <path d="M5 20c1.2-3.4 3.8-5 7-5s5.8 1.6 7 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="drawer-user-names">
+            <strong>Guest</strong>
+            <span class="muted">Not signed in</span>
+          </span>
+          <svg class="drawer-user-dots" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/>
+          </svg>
+        </button>
+      </aside>
+    </div>
+  </div>
 
   <div id="modalRoot" class="modal-root hidden"></div>
   <div id="toastRoot" class="toast-root"></div>

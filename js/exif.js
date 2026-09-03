@@ -7,11 +7,35 @@
 const TAG_MAKE = 0x010F;
 const TAG_MODEL = 0x0110;
 const TAG_EXIF_IFD = 0x8769;
+const TAG_GPS_IFD = 0x8825;
 const TAG_FNUMBER = 0x829D;
 const TAG_EXPOSURE_TIME = 0x829A;
 const TAG_ISO = 0x8827;
 const TAG_FOCAL_LENGTH = 0x920A;
 const TAG_DATE_TAKEN = 0x9003;
+
+const GPS_LAT_REF = 0x0001;
+const GPS_LAT = 0x0002;
+const GPS_LON_REF = 0x0003;
+const GPS_LON = 0x0004;
+
+const HEIF_BRANDS = ['heic', 'heix', 'hevc', 'hevx', 'heim', 'heis', 'hevm', 'hevs', 'mif1', 'msf1'];
+
+/**
+ * True for HEIC/HEIF files. Every browser except Safari refuses to decode them,
+ * so the UI can say why instead of showing a generic failure.
+ */
+export async function isHeif(file) {
+  try {
+    const head = await file.slice(0, 12).arrayBuffer();
+    const view = new DataView(head);
+    if (view.byteLength < 12) return false;
+    const read4 = (o) => String.fromCharCode(view.getUint8(o), view.getUint8(o + 1), view.getUint8(o + 2), view.getUint8(o + 3));
+    return read4(4) === 'ftyp' && HEIF_BRANDS.includes(read4(8));
+  } catch (err) {
+    return false;
+  }
+}
 
 export async function readExif(file) {
   try {
@@ -83,6 +107,16 @@ function parseTiff(view, tiffStart) {
     return tags;
   }
 
+  /** Degrees/minutes/seconds triplet -> signed decimal degrees. */
+  function readCoordinate(entry, refEntry, negativeRef) {
+    if (!entry || entry.count < 3) return null;
+    const base = tiffStart + entry.valueOffset;
+    const value = readRational(base) + readRational(base + 8) / 60 + readRational(base + 16) / 3600;
+    if (!Number.isFinite(value)) return null;
+    const ref = refEntry ? readString(refEntry).toUpperCase() : '';
+    return ref.startsWith(negativeRef) ? -value : value;
+  }
+
   const firstIFDOffset = get32(tiffStart + 4);
   const ifd0 = parseIFD(tiffStart + firstIFDOffset);
   const result = {};
@@ -94,7 +128,10 @@ function parseTiff(view, tiffStart) {
     const exifIFD = parseIFD(tiffStart + ifd0[TAG_EXIF_IFD].valueOffset);
     if (exifIFD[TAG_FNUMBER]) {
       const f = readRational(tiffStart + exifIFD[TAG_FNUMBER].valueOffset);
-      if (f) result.aperture = 'f/' + (Math.round(f * 10) / 10);
+      if (f) {
+        result.fNumber = f;
+        result.aperture = 'f/' + (Math.round(f * 10) / 10);
+      }
     }
     if (exifIFD[TAG_EXPOSURE_TIME]) {
       const t = readRational(tiffStart + exifIFD[TAG_EXPOSURE_TIME].valueOffset);
@@ -106,9 +143,23 @@ function parseTiff(view, tiffStart) {
     }
     if (exifIFD[TAG_FOCAL_LENGTH]) {
       const fl = readRational(tiffStart + exifIFD[TAG_FOCAL_LENGTH].valueOffset);
-      if (fl) result.focalLength = Math.round(fl) + 'mm';
+      if (fl) {
+        result.focalMm = fl;
+        result.focalLength = Math.round(fl) + 'mm';
+      }
     }
     if (exifIFD[TAG_DATE_TAKEN]) result.dateTaken = readString(exifIFD[TAG_DATE_TAKEN]);
+  }
+
+  if (ifd0[TAG_GPS_IFD]) {
+    const gpsIFD = parseIFD(tiffStart + ifd0[TAG_GPS_IFD].valueOffset);
+    const lat = readCoordinate(gpsIFD[GPS_LAT], gpsIFD[GPS_LAT_REF], 'S');
+    const lon = readCoordinate(gpsIFD[GPS_LON], gpsIFD[GPS_LON_REF], 'W');
+    // An all-zero GPS block means "tag present, never populated" — not Null Island.
+    if (lat !== null && lon !== null && (lat !== 0 || lon !== 0)) {
+      result.lat = lat;
+      result.lon = lon;
+    }
   }
 
   return Object.keys(result).length ? result : null;

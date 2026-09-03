@@ -1,8 +1,9 @@
-import { state } from './store.js';
-import { localDateKey } from './util.js';
+import { state, save, hoursThisWeek } from './store.js';
+import { localDateKey, formatHours, clamp } from './util.js';
 
 const WEEKS = 52;
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const GOAL_OPTIONS = [1, 2, 3, 5, 7, 10];
 
 let els = {};
 
@@ -11,8 +12,35 @@ export function initHeatmap() {
     scroll: document.getElementById('heatmapScroll'),
     months: document.getElementById('heatmapMonths'),
     grid: document.getElementById('heatmapGrid'),
-    summary: document.getElementById('heatmapSummary')
+    summary: document.getElementById('heatmapSummary'),
+    goalText: document.getElementById('weeklyGoalText'),
+    goalBar: document.getElementById('weeklyGoalBar'),
+    goalSelect: document.getElementById('weeklyGoalSelect')
   };
+
+  els.goalSelect.innerHTML = GOAL_OPTIONS
+    .map((h) => `<option value="${h}">${h}h / week</option>`).join('');
+  els.goalSelect.addEventListener('change', () => {
+    state.profile.weeklyGoalHours = Number(els.goalSelect.value);
+    save();
+    renderWeeklyGoal();
+  });
+}
+
+/**
+ * A weekly hour target sits alongside the day-streak on purpose: it survives a
+ * missed day, which is the failure mode that makes people quit a streak app.
+ */
+function renderWeeklyGoal() {
+  const goal = state.profile.weeklyGoalHours || 3;
+  const done = hoursThisWeek();
+  const pct = clamp((done / goal) * 100, 0, 100);
+
+  els.goalSelect.value = String(goal);
+  els.goalBar.style.width = pct + '%';
+  els.goalText.textContent = done >= goal
+    ? `Weekly goal met — ${formatHours(done)} this week`
+    : `${formatHours(done)} of ${formatHours(goal)} this week`;
 }
 
 function levelFor(hours) {
@@ -68,13 +96,14 @@ export function renderHeatmap() {
         const key = localDateKey(day);
         const hours = state.activityLog[key] || 0;
         if (hours > 0) { totalHours += hours; activeDays += 1; }
-        const label = `${day.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}: ${hours > 0 ? hours.toFixed(1) + 'h shooting' : 'no walk logged'}`;
+        const label = `${day.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}: ${hours > 0 ? formatHours(hours) + ' shooting' : 'no walk logged'}`;
         return `<span class="heatmap-day" data-level="${levelFor(hours)}" title="${label}"></span>`;
       }).join('')}
     </div>
   `).join('');
 
-  els.summary.textContent = `${activeDays} day${activeDays === 1 ? '' : 's'} out in the last year · ${totalHours.toFixed(1)}h shooting`;
+  els.summary.textContent = `${activeDays} day${activeDays === 1 ? '' : 's'} out in the last year · ${formatHours(totalHours)} shooting`;
 
+  renderWeeklyGoal();
   requestAnimationFrame(() => { els.scroll.scrollLeft = els.scroll.scrollWidth; });
 }
