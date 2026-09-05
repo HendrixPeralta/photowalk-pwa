@@ -466,10 +466,16 @@ function timeOfDayBucket(now) {
   return 'day';
 }
 
+// Golden hour nudges toward low-sun themes by knocking this many walks off
+// their practice count, rather than locking the pool to only them — a theme
+// you've truly never walked can still win, so New Theme keeps some variety.
+const GOLDEN_HOUR_DISCOUNT = 2;
+
 /**
- * Picks the next theme with a reason the user can see: the clock narrows the
- * pool to what the current light supports, then the least-practiced theme in
- * that pool wins, so the generator spreads practice instead of repeating.
+ * Picks the next theme with a reason the user can see: dark hours drop themes
+ * that need light entirely, golden hour biases toward low-sun themes without
+ * excluding the rest, and the least-practiced theme in what remains wins, so
+ * the generator spreads practice instead of repeating.
  *
  * @param {string|null} excludeId theme to avoid (usually the one on screen)
  * @param {Record<string, number>} counts walks completed per theme id
@@ -484,28 +490,29 @@ export function suggestTheme(excludeId, counts = {}, now = new Date()) {
   }
 
   let candidates = pool;
-  let reason = '';
-
-  if (bucket === 'golden') {
-    const lit = pool.filter((t) => LOW_SUN_THEMES.includes(t.id));
-    if (lit.length) {
-      candidates = lit;
-      reason = 'The sun is getting low — this is the window for it.';
-    }
-  } else if (bucket === 'dark') {
+  if (bucket === 'dark') {
     const afterDark = pool.filter((t) => !LOW_SUN_THEMES.includes(t.id));
     if (afterDark.length) candidates = afterDark;
   }
 
-  const fewest = Math.min(...candidates.map((t) => counts[t.id] || 0));
-  const leastPracticed = candidates.filter((t) => (counts[t.id] || 0) === fewest);
+  const effectiveCount = (t) => {
+    const base = counts[t.id] || 0;
+    return bucket === 'golden' && LOW_SUN_THEMES.includes(t.id)
+      ? Math.max(0, base - GOLDEN_HOUR_DISCOUNT)
+      : base;
+  };
+
+  const fewest = Math.min(...candidates.map(effectiveCount));
+  const leastPracticed = candidates.filter((t) => effectiveCount(t) === fewest);
   const theme = leastPracticed[Math.floor(Math.random() * leastPracticed.length)];
 
-  if (!reason && NIGHT_THEMES.includes(theme.id)) {
+  let reason;
+  if (bucket === 'golden' && LOW_SUN_THEMES.includes(theme.id)) {
+    reason = 'The sun is getting low — this is the window for it.';
+  } else if (NIGHT_THEMES.includes(theme.id)) {
     reason = "It's dark out — the right window for this one.";
-  }
-  if (!reason) {
-    reason = fewest === 0
+  } else {
+    reason = (counts[theme.id] || 0) === 0
       ? "You haven't walked this theme yet."
       : 'One of your least-practiced themes.';
   }
