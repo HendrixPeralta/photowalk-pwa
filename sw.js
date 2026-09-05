@@ -1,4 +1,4 @@
-const CACHE_NAME = 'photowalk-v16';
+const CACHE_NAME = 'photowalk-v17';
 const RUNTIME_CACHE = 'photowalk-runtime-v1';
 const CURRENT_CACHES = [CACHE_NAME, RUNTIME_CACHE];
 

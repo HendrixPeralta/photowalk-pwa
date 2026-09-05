@@ -190,6 +190,8 @@ button, input, select {
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-block { width: 100%; }
 .btn-sm { padding: 7px 12px; font-size: 0.82rem; }
+.theme-btn-row { display: flex; gap: 10px; }
+.theme-btn-row > .btn { flex: 1; }
 
 .btn-primary { background: var(--surface-3); color: var(--text); border-color: var(--border); }
 .btn-accent { background: var(--accent); color: var(--accent-contrast); }
