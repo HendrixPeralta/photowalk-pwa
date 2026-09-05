@@ -83,7 +83,9 @@ async function openDetail(id) {
   const url = await imageUrl(item.imageId);
   const rows = exifRows(item.exif);
 
-  const walkTheme = item.themeId ? THEMES.find((t) => t.id === item.themeId) : null;
+  const walkTheme = item.themeId
+    ? THEMES.find((t) => t.id === item.themeId) || state.customThemes.find((t) => t.id === item.themeId)
+    : null;
   const chips = [item.aspectLabel, item.brightnessLabel, item.colorName, item.focalLabel, item.apertureLabel]
     .filter(Boolean)
     .map((label) => `<span class="chip">${escapeHtml(label)}</span>`)

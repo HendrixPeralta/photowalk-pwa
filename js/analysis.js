@@ -787,7 +787,9 @@ export function exifRows(exif) {
 function renderPinnedTip() {
   const lastWalk = state.lastWalk;
   const fresh = lastWalk && !lastWalk.tipDismissed && Date.now() - lastWalk.endedAt < 24 * 3600000;
-  const theme = fresh ? THEMES.find((t) => t.id === lastWalk.themeId) : null;
+  const theme = fresh
+    ? THEMES.find((t) => t.id === lastWalk.themeId) || state.customThemes.find((t) => t.id === lastWalk.themeId)
+    : null;
   els.pinnedTip.classList.toggle('hidden', !theme);
   if (!theme) return;
 

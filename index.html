@@ -146,6 +146,7 @@
         </div>
 
         <button type="button" id="getThemeBtn" class="btn btn-accent btn-block">Get a Theme</button>
+        <button type="button" id="customThemeBtn" class="btn btn-ghost btn-block">Custom Theme</button>
       </div>
 
       <div id="themeCard" class="theme-card hidden">
@@ -171,6 +172,21 @@
           <button type="button" id="finishWalkBtn" class="btn btn-primary btn-block hidden">Finish Walk</button>
         </div>
       </div>
+
+      <details id="savedThemesDetails" class="theme-card collapse-card">
+        <summary class="collapse-summary">
+          <span class="collapse-title">My Themes</span>
+          <span id="savedThemesCount" class="muted collapse-meta"></span>
+          <svg class="collapse-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </summary>
+        <div class="collapse-body">
+          <p class="muted card-text">Themes you built yourself from Custom Theme, saved for reuse.</p>
+          <p id="savedThemesEmpty" class="empty-state-sm">No custom themes yet — try Custom Theme above.</p>
+          <ul id="savedThemesList" class="rewards-list"></ul>
+        </div>
+      </details>
 
       <details id="rewardsDetails" class="theme-card collapse-card rewards-card">
         <summary class="collapse-summary">

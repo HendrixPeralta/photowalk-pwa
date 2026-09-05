@@ -31,6 +31,8 @@ function defaultState() {
     walkHistory: [],
     activityLog: {}, // { 'YYYY-MM-DD': hoursSpentShooting }
     rewards: [], // { id, title, targetHours, baselineHours, createdAt, claimedAt, notified }
+    customThemes: [], // { id, title, brief, concepts: [], challenges: [string] } — user-built themes
+
     reminder: { enabled: false, time: '18:00', days: [1, 3, 5] } // days: 0=Sun
   };
 }

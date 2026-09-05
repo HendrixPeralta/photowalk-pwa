@@ -440,6 +440,18 @@ export const THEMES = [
   }
 ];
 
+/** Every built-in mini-challenge, deduped, for the custom theme builder's picklist. */
+export function allChallenges() {
+  const seen = new Set();
+  const list = [];
+  for (const t of THEMES) {
+    for (const c of t.challenges) {
+      if (!seen.has(c)) { seen.add(c); list.push(c); }
+    }
+  }
+  return list;
+}
+
 /** One concept card, shared by the walk explainer modal and the Analyze tab. */
 export function renderConceptCard(key) {
   const c = CONCEPTS[key];

@@ -1,5 +1,5 @@
 import { state, save, addActivityHours, recordWalk, themeWalkCounts } from './store.js';
-import { CONCEPTS, CONCEPT_QUERIES, THEMES, suggestTheme, renderConceptCard } from './concepts.js';
+import { CONCEPTS, CONCEPT_QUERIES, THEMES, suggestTheme, renderConceptCard, allChallenges } from './concepts.js';
 import { fetchConceptPhotos, safeImageUrl } from './openverse.js';
 import { openModal, closeModal } from './modal.js';
 import { showToast } from './toast.js';
@@ -39,6 +39,10 @@ export function initWalks() {
     durationSelect: document.getElementById('durationSelect'),
     quickDurationSelect: document.getElementById('quickDurationSelect'),
     getThemeBtn: document.getElementById('getThemeBtn'),
+    customThemeBtn: document.getElementById('customThemeBtn'),
+    savedThemesList: document.getElementById('savedThemesList'),
+    savedThemesEmpty: document.getElementById('savedThemesEmpty'),
+    savedThemesCount: document.getElementById('savedThemesCount'),
     themeCard: document.getElementById('themeCard'),
     themeTitle: document.getElementById('themeTitle'),
     themeBrief: document.getElementById('themeBrief'),
@@ -76,6 +80,14 @@ export function initWalks() {
   els.modeCasual.addEventListener('click', () => setMode('casual'));
   els.modeGuided.addEventListener('click', () => setMode('guided'));
   els.getThemeBtn.addEventListener('click', pickTheme);
+  els.customThemeBtn.addEventListener('click', openCustomThemeModal);
+  els.savedThemesList.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    const { action, id } = btn.dataset;
+    if (action === 'use') useSavedTheme(id);
+    if (action === 'remove') removeSavedTheme(id);
+  });
   els.viewConceptsBtn.addEventListener('click', () => theme && openConceptModal(theme));
   els.startWalkBtn.addEventListener('click', () => startWalk());
   els.finishWalkBtn.addEventListener('click', () => finishWalk(false));
@@ -106,6 +118,7 @@ export function initWalks() {
 
   setMode('casual');
   restoreActiveWalk();
+  renderSavedThemes();
 }
 
 /** The guided length is a preference: quick-start has no room to ask for it. */
@@ -145,8 +158,14 @@ function applyMode(next) {
 function pickTheme() {
   if (state.activeWalk) return;
   const picked = suggestTheme(theme && theme.id, themeWalkCounts());
-  theme = picked.theme;
-  themeReason = picked.reason;
+  useTheme(picked.theme, picked.reason);
+}
+
+/** Puts any theme (random pick, custom build, or a saved one) on screen and ready to start. */
+function useTheme(t, reason = '') {
+  if (state.activeWalk) return;
+  theme = t;
+  themeReason = reason;
   els.getThemeBtn.textContent = 'New Theme';
   // Hand the accent over to Start Walk: rerolling is the fallback now, not the
   // main action, and two accent buttons on screen read as two primary choices.
@@ -163,6 +182,7 @@ function renderThemeCard() {
   els.themeBrief.textContent = theme.brief;
   els.themeReason.textContent = themeReason;
   els.themeReason.classList.toggle('hidden', !themeReason);
+  els.viewConceptsBtn.classList.toggle('hidden', !theme.concepts.length);
   els.challengesList.innerHTML = challengeListHtml(theme);
   syncChallengeChecks();
 }
@@ -191,6 +211,122 @@ function toggleChallenge(idx, checked) {
   save();
 }
 
+/* ---------- Custom themes ---------- */
+
+/**
+ * Lets a user assemble their own theme from the existing mini-challenge pool
+ * (plus any of their own wording) instead of only ever getting a random pick.
+ * Saved themes persist in state.customThemes and show up under "My Themes".
+ */
+function openCustomThemeModal() {
+  if (state.activeWalk) { showToast('Finish your current walk before building a new theme.'); return; }
+
+  const pickHtml = allChallenges().map((c) => `
+    <li>
+      <label class="challenge-item">
+        <input type="checkbox" class="custom-challenge-check" value="${escapeHtml(c)}">
+        <span>${escapeHtml(c)}</span>
+      </label>
+    </li>`).join('');
+
+  openModal(`
+    <h3>Build a Custom Theme</h3>
+    <input type="text" id="customThemeTitle" class="text-input" placeholder="Title (e.g. Rainy Day Reflections)" maxlength="60">
+    <input type="text" id="customThemeBrief" class="text-input" placeholder="Brief: what are you hunting for? (optional)" maxlength="140">
+    <h4 class="subsection-title">Pick from existing challenges</h4>
+    <ul class="challenges-list">${pickHtml}</ul>
+    <h4 class="subsection-title">Add your own</h4>
+    <div class="reward-form">
+      <input type="text" id="customChallengeInput" class="text-input" placeholder="Write a mini-challenge">
+      <button type="button" id="addCustomChallengeBtn" class="btn btn-ghost">Add</button>
+    </div>
+    <ul id="customChallengeExtras" class="challenges-list"></ul>
+    <div class="theme-actions">
+      <button type="button" id="saveCustomThemeBtn" class="btn btn-accent btn-block">Save Theme</button>
+    </div>
+  `);
+
+  const extras = [];
+  const extrasList = document.getElementById('customChallengeExtras');
+  const renderExtras = () => {
+    extrasList.innerHTML = extras.map((c, i) => `
+      <li class="reward-row">
+        <span class="reward-title">${escapeHtml(c)}</span>
+        <button type="button" class="btn btn-ghost btn-sm" data-extra-idx="${i}">Remove</button>
+      </li>`).join('');
+  };
+
+  document.getElementById('addCustomChallengeBtn').addEventListener('click', () => {
+    const input = document.getElementById('customChallengeInput');
+    const val = input.value.trim();
+    if (!val) return;
+    extras.push(val);
+    input.value = '';
+    renderExtras();
+  });
+
+  extrasList.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-extra-idx]');
+    if (!btn) return;
+    extras.splice(Number(btn.dataset.extraIdx), 1);
+    renderExtras();
+  });
+
+  document.getElementById('saveCustomThemeBtn').addEventListener('click', () => {
+    const title = document.getElementById('customThemeTitle').value.trim();
+    const brief = document.getElementById('customThemeBrief').value.trim();
+    const checked = Array.from(document.querySelectorAll('.custom-challenge-check:checked')).map((el) => el.value);
+    const challenges = [...checked, ...extras];
+
+    if (!title) { showToast('Give your theme a title.'); return; }
+    if (!challenges.length) { showToast('Pick or add at least one challenge.'); return; }
+
+    const custom = {
+      id: uid(),
+      title,
+      brief: brief || 'A theme you built yourself.',
+      concepts: [],
+      challenges
+    };
+    state.customThemes.push(custom);
+    save();
+    renderSavedThemes();
+    closeModal();
+    useTheme(custom, 'Your own custom theme.');
+    showToast('Custom theme saved.');
+  });
+}
+
+function renderSavedThemes() {
+  if (!els.savedThemesList) return;
+  const list = state.customThemes;
+  els.savedThemesEmpty.classList.toggle('hidden', list.length > 0);
+  els.savedThemesList.innerHTML = list.map((t) => `
+    <li class="reward-item">
+      <div class="reward-row">
+        <span class="reward-title">${escapeHtml(t.title)}</span>
+        <span class="reward-actions">
+          <button type="button" class="btn btn-ghost btn-sm" data-action="use" data-id="${t.id}">Use</button>
+          <button type="button" class="btn btn-ghost btn-sm" data-action="remove" data-id="${t.id}">Remove</button>
+        </span>
+      </div>
+    </li>`).join('');
+  els.savedThemesCount.textContent = list.length ? `${list.length} saved` : 'None yet';
+}
+
+function useSavedTheme(id) {
+  if (state.activeWalk) { showToast('Finish your current walk before switching themes.'); return; }
+  const t = state.customThemes.find((x) => x.id === id);
+  if (!t) return;
+  useTheme(t, 'Your own custom theme.');
+}
+
+function removeSavedTheme(id) {
+  state.customThemes = state.customThemes.filter((t) => t.id !== id);
+  save();
+  renderSavedThemes();
+}
+
 /**
  * The walk brief: what you are shooting and what to try. Pops up on start so a
  * one-tap walk still tells you your theme, and stays reachable from the Home
@@ -206,6 +342,9 @@ function openWalkBrief() {
     ? `<h4 class="subsection-title">Mini-challenges</h4>
        <ul class="challenges-list">${challengeListHtml(theme)}</ul>`
     : '';
+  const conceptsBtn = theme.concepts.length
+    ? `<button type="button" id="briefConceptsBtn" class="btn btn-ghost btn-block">View concept examples</button>`
+    : '';
 
   openModal(`
     <h3>${escapeHtml(theme.title)}</h3>
@@ -215,7 +354,7 @@ function openWalkBrief() {
     ${challenges}
     <div class="theme-actions">
       <button type="button" id="briefGoBtn" class="btn btn-accent btn-block">Start shooting</button>
-      <button type="button" id="briefConceptsBtn" class="btn btn-ghost btn-block">View concept examples</button>
+      ${conceptsBtn}
       <button type="button" id="briefStopBtn" class="btn btn-ghost btn-block">Stop walk</button>
     </div>
   `);
@@ -226,7 +365,8 @@ function openWalkBrief() {
     if (state.activeWalk && !state.activeWalk.startedAt) beginShooting();
     closeModal();
   });
-  document.getElementById('briefConceptsBtn').addEventListener('click', () => openConceptModal(theme));
+  const briefConceptsBtn = document.getElementById('briefConceptsBtn');
+  if (briefConceptsBtn) briefConceptsBtn.addEventListener('click', () => openConceptModal(theme));
   document.getElementById('briefStopBtn').addEventListener('click', () => {
     closeModal();
     finishWalk(false);
@@ -437,7 +577,7 @@ function beginShooting() {
 function restoreActiveWalk() {
   const w = state.activeWalk;
   if (!w) return;
-  const t = THEMES.find((x) => x.id === w.themeId);
+  const t = THEMES.find((x) => x.id === w.themeId) || state.customThemes.find((x) => x.id === w.themeId);
   if (!t) { state.activeWalk = null; save(); return; }
 
   theme = t;
