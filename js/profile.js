@@ -1,9 +1,8 @@
 import { navigateTo } from './util.js';
 import { showToast } from './toast.js';
 
-// The side menu mirrors the bottom nav and fronts the screens that have no tab
-// of their own (Settings). The user card at the foot is where Google sign-in
-// will land.
+// The side menu fronts the screens that have no tab of their own (Settings).
+// The user card at the foot is where Google sign-in will land.
 
 let root = null;
 
