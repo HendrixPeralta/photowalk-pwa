@@ -222,7 +222,10 @@ function openWalkBrief() {
 
   syncChallengeChecks();
 
-  document.getElementById('briefGoBtn').addEventListener('click', closeModal);
+  document.getElementById('briefGoBtn').addEventListener('click', () => {
+    if (state.activeWalk && !state.activeWalk.startedAt) beginShooting();
+    closeModal();
+  });
   document.getElementById('briefConceptsBtn').addEventListener('click', () => openConceptModal(theme));
   document.getElementById('briefStopBtn').addEventListener('click', () => {
     closeModal();
@@ -398,24 +401,37 @@ function fireDueNudges() {
 function startWalk({ brief = false } = {}) {
   if (!theme || state.activeWalk) return;
   const guided = mode === 'guided';
-  const startedAt = Date.now();
-  const durationMin = guided ? guidedDurationMin() : null;
 
   state.activeWalk = {
     mode,
     themeId: theme.id,
-    startedAt,
-    durationMin,
+    startedAt: brief ? null : Date.now(),
+    durationMin: guided ? guidedDurationMin() : null,
     challengesChecked: new Array(theme.challenges.length).fill(false),
-    nudges: guided ? nudgePlan(startedAt, durationMin) : []
+    nudges: []
   };
   save();
 
   applyActiveWalkUi();
-  if (guided) scheduleTriggeredNudges();
-  runTimer();
   if (brief) openWalkBrief();
+  else beginShooting();
   window.dispatchEvent(new CustomEvent('photowalk:stats-changed'));
+}
+
+/**
+ * Starts the clock. Called right away for a manual Start Walk, or deferred
+ * until "Start shooting" is tapped so a quick-start walk doesn't burn shooting
+ * time while its brief is still up.
+ */
+function beginShooting() {
+  const w = state.activeWalk;
+  w.startedAt = Date.now();
+  if (w.mode === 'guided') {
+    w.nudges = nudgePlan(w.startedAt, w.durationMin);
+    scheduleTriggeredNudges();
+  }
+  save();
+  runTimer();
 }
 
 function restoreActiveWalk() {
@@ -431,7 +447,8 @@ function restoreActiveWalk() {
   els.quickDurationSelect.disabled = true;
   renderThemeCard();
   applyActiveWalkUi();
-  runTimer();
+  if (w.startedAt) runTimer();
+  else openWalkBrief();
 }
 
 function applyActiveWalkUi() {
@@ -482,6 +499,7 @@ function clockText(ms) {
 function tick() {
   const w = state.activeWalk;
   if (!w) { clearInterval(timerHandle); timerHandle = null; return; }
+  if (!w.startedAt) return; // still on the brief, clock hasn't started
 
   const elapsed = Date.now() - w.startedAt;
 
@@ -533,6 +551,17 @@ function computeElapsedHours(walk) {
 function finishWalk(auto) {
   const w = state.activeWalk;
   if (!w) return;
+
+  if (!w.startedAt) {
+    // Stopped from the brief before shooting started — nothing was logged.
+    state.activeWalk = null;
+    save();
+    theme = null;
+    themeReason = '';
+    resetThemeUi();
+    applyMode(mode);
+    return;
+  }
 
   const measured = computeElapsedHours(w);
   if (w.mode === 'casual' && measured > CASUAL_CONFIRM_HOURS) {
