@@ -155,31 +155,6 @@
     <!-- ==================== WALKS ==================== -->
     <section id="view-walks" class="view" data-view="walks">
 
-      <!-- Solar meter. Everything here is computed locally from the device
-           clock and (if granted) a coarse GPS fix — no weather service. -->
-      <div class="solar-card">
-        <div class="solar-head">
-          <span class="solar-head-left">
-            <span id="solarDot" class="solar-dot"></span>
-            <span class="label-caps">Optical Ambient Meter</span>
-          </span>
-          <span id="solarReadout" class="data-sm" style="color:var(--text-dim)">&mdash;</span>
-        </div>
-        <div class="solar-body">
-          <div>
-            <h2 id="solarGreeting" class="solar-greeting">Good day.</h2>
-            <p class="solar-line">
-              <svg viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px;vertical-align:-2px;color:var(--accent)"><use href="#i-twilight"/></svg>
-              <span id="solarLine">Checking the light&hellip;</span>
-            </p>
-          </div>
-          <div class="solar-clock">
-            <span id="solarClock" class="data-lg">&ndash;&ndash;:&ndash;&ndash;</span>
-            <span id="solarClockLabel" class="label-caps">Solar peak</span>
-          </div>
-        </div>
-      </div>
-
       <!-- Discipline cadence: the last seven days as film canisters. -->
       <div class="cadence-card">
         <div class="cadence-head">
@@ -187,6 +162,13 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-film"/></svg>
             <span class="label-caps">Discipline Cadence</span>
           </span>
+          <!-- Golden-hour timing, computed locally from the device clock and a
+               cached coarse fix. With no fix it is the tap target that asks
+               for one. -->
+          <button type="button" id="goldenBadge" class="cadence-golden">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-twilight"/></svg>
+            <span id="goldenText">Checking the light&hellip;</span>
+          </button>
         </div>
         <div id="filmStrip" class="film-strip"></div>
         <!-- Hidden for now (not deleted): un-hide by removing the `hidden` class.
@@ -920,6 +902,20 @@
           <div id="reminderDays" class="day-chips"></div>
           <p id="reminderStatus" class="hint"></p>
         </div>
+      </div>
+
+      <div class="theme-card">
+        <span class="label-caps" style="color:var(--accent-strong)">Demo data</span>
+        <h3 class="subsection-title" style="margin-top:6px">Practice history</h3>
+        <p id="demoDataStatus" class="muted card-text"></p>
+        <div class="theme-btn-row">
+          <button type="button" id="fillThreeMonthsBtn" class="btn btn-accent btn-sm">Fill 3 months</button>
+          <button type="button" id="fillYearBtn" class="btn btn-ghost btn-sm">Fill a year</button>
+          <button type="button" id="restoreProfileBtn" class="btn btn-ghost btn-sm">Restore mine</button>
+        </div>
+        <p class="hint">Fills the cadence strip, the heatmap, the streak and the reward ladder with one
+          consistent history. Whatever the profile held before is parked, so Restore always has something
+          to give back.</p>
       </div>
     </section>
 

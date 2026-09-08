@@ -465,7 +465,23 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
   background: var(--surface-1);
   border: 2px solid var(--accent);
 }
-.reward-bar-mark-done { background: var(--accent); }
+
+/* The head of the fill: where the hours have got to. Its transition matches
+   .reward-bar-fill's exactly so the circle and the bar move as one piece. */
+.reward-bar-handle {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 15px;
+  height: 15px;
+  margin-left: -7.5px;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface-1);
+  box-shadow: 0 0 0 1px var(--accent);
+  transition: left 0.4s ease;
+}
 
 .reward-bar-legend {
   list-style: none;
@@ -1430,25 +1446,7 @@ input[type="file"].text-input { padding: 8px; }
    Precision Darkroom — new instrument components
    ========================================================================== */
 
-/* --- Solar meter: golden-hour countdown and solar noon ------------------- */
-.solar-card {
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 12px;
-  margin-bottom: 12px;
-}
-
-.solar-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-
-.solar-head-left { display: flex; align-items: center; gap: 6px; }
-
+/* --- Status dot: shared by the cadence, HUD and mission readouts --------- */
 .solar-dot {
   width: 8px; height: 8px;
   border-radius: 50%;
@@ -1459,35 +1457,6 @@ input[type="file"].text-input { padding: 8px; }
 .solar-dot[data-state="night"] { background: var(--cyan); }
 @keyframes solar-ping { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 @media (prefers-reduced-motion: reduce) { .solar-dot { animation: none; } }
-
-.solar-head .label-caps { color: var(--accent-strong); }
-
-.solar-body {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.solar-greeting {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 24px;
-}
-
-.solar-line {
-  margin: 3px 0 0;
-  font-size: 12px;
-  line-height: 16px;
-  color: var(--text-dim);
-}
-.solar-line strong { color: var(--accent-strong); font-family: var(--font-data); font-weight: 500; }
-
-.solar-clock { text-align: right; flex-shrink: 0; }
-.solar-clock .data-lg { display: block; color: var(--accent-strong); font-weight: 700; }
-.solar-clock .label-caps { display: block; color: var(--text-dim); }
 
 /* --- Discipline cadence: seven-day film canister strip ------------------- */
 .cadence-card {
@@ -1507,6 +1476,28 @@ input[type="file"].text-input { padding: 8px; }
 }
 .cadence-head svg { width: 16px; height: 16px; color: var(--accent); }
 .cadence-head-left { display: flex; align-items: center; gap: 6px; }
+
+.cadence-golden {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border: 0;
+  background: var(--surface-4);
+  border-radius: var(--radius-sm);
+  color: var(--accent-strong);
+  font-family: var(--font-data);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+  cursor: default;
+}
+.cadence-golden svg { width: 12px; height: 12px; color: inherit; }
+/* No fix yet: dimmed, and the only state that is actually tappable. */
+.cadence-golden[data-state="nofix"] { color: var(--text-dim); cursor: pointer; }
+/* Inside the window — the one reading worth glancing up for. */
+.cadence-golden[data-state="now"] { background: var(--accent-deep); color: var(--accent-strong); }
 
 .film-strip {
   display: flex;

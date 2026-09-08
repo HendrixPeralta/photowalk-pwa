@@ -2,7 +2,8 @@
  * Field HUD — the screen you actually look at while you're out walking.
  *
  * Everything on it is measured, not simulated. Elapsed and target come from the
- * walk timer, the directive is the theme and its mini-challenges, frames are
+ * walk timer, the directive is the theme (plus its mini-challenges on a Guided
+ * Sprint — a casual walk gets the theme alone), frames are
  * the ones you logged yourself (with whatever EXIF the file carried), and the
  * track is a real GPS polyline you opt into with a tap.
  *
@@ -134,8 +135,11 @@ function tickHud() {
   const total = (w.challengesChecked || []).length;
   els.frames.textContent = String(frames.length);
 
-  const pct = total ? Math.round((done / total) * 100) : 0;
-  els.progress.textContent = `Progress: ${pct}%`;
+  // A casual walk carries no checklist, so there is no percentage to report —
+  // captures are the only progress it has.
+  els.progress.textContent = total ? `Progress: ${Math.round((done / total) * 100)}%` : '';
+  els.progress.classList.toggle('hidden', !total);
+  els.pips.classList.toggle('hidden', !total);
   els.pips.innerHTML = Array.from({ length: total }, (_, i) =>
     `<span class="mission-pip${i < done ? ' done' : ''}"></span>`).join('');
   els.synced.textContent = `${frames.length} capture${frames.length === 1 ? '' : 's'}`;
@@ -148,7 +152,8 @@ function tickHud() {
 
 function renderChallenges(theme) {
   const w = state.activeWalk;
-  if (!theme || !theme.challenges.length) { els.challenges.innerHTML = ''; return; }
+  // Mini-challenges are a Guided Sprint feature; casual mode is the theme alone.
+  if (!theme || w.mode !== 'guided' || !theme.challenges.length) { els.challenges.innerHTML = ''; return; }
   // Same markup and class as the Walks tab, so walks.js's delegated change
   // handler keeps both copies of the checklist in step.
   els.challenges.innerHTML = theme.challenges.map((c, i) => `

@@ -216,20 +216,32 @@ function dismissTheme() {
   resetThemeUi();
 }
 
+/**
+ * Mini-challenges belong to the Guided Sprint. Casual mode is the theme on its
+ * own — nothing to tick off, stop whenever you're done. Read the mode off the
+ * running walk when there is one, so a restored walk can't disagree with the
+ * mode it was started in.
+ */
+function challengesFor(t = theme) {
+  const walkMode = state.activeWalk ? state.activeWalk.mode : mode;
+  return t && walkMode === 'guided' ? t.challenges : [];
+}
+
 function renderThemeCard() {
+  const challenges = challengesFor();
   els.themeCard.classList.remove('hidden');
-  els.challengesSection.classList.toggle('hidden', !theme.challenges.length);
+  els.challengesSection.classList.toggle('hidden', !challenges.length);
   els.themeTitle.textContent = theme.title;
   els.themeBrief.textContent = theme.brief;
   els.themeReason.textContent = themeReason;
   els.themeReason.classList.toggle('hidden', !themeReason);
   els.viewConceptsBtn.classList.toggle('hidden', !theme.concepts.length);
-  els.challengesList.innerHTML = challengeListHtml(theme);
+  els.challengesList.innerHTML = challengeListHtml(challenges);
   syncChallengeChecks();
 }
 
-function challengeListHtml(t) {
-  return t.challenges.map((c, i) => `
+function challengeListHtml(list) {
+  return list.map((c, i) => `
     <li>
       <label class="challenge-item">
         <input type="checkbox" data-idx="${i}" class="challenge-check">
@@ -291,6 +303,7 @@ function openThemeEditorModal(existingTheme = null) {
     <input type="text" id="customThemeTitle" class="text-input" placeholder="Title (e.g. Rainy Day Reflections)" maxlength="60" value="${existingTheme ? escapeHtml(existingTheme.title) : ''}">
     <input type="text" id="customThemeBrief" class="text-input" placeholder="Brief: what are you hunting for? (optional)" maxlength="140" value="${existingTheme ? escapeHtml(existingTheme.brief) : ''}">
     <h4 class="subsection-title">Pick from existing challenges</h4>
+    <p class="muted card-text">Optional — challenges only show up on a Guided Sprint. A casual walk runs on the theme alone.</p>
     <ul class="challenges-list">${pickHtml}</ul>
     <h4 class="subsection-title">Add your own</h4>
     <div class="reward-form">
@@ -337,7 +350,6 @@ function openThemeEditorModal(existingTheme = null) {
     const challenges = [...checked, ...extras];
 
     if (!title) { showToast('Give your theme a title.'); return; }
-    if (!challenges.length) { showToast('Pick or add at least one challenge.'); return; }
 
     let saved;
     if (editingCustomId) {
@@ -414,9 +426,10 @@ function openWalkBrief() {
     ? `Guided walk &middot; ${w.durationMin} min on the clock`
     : 'Casual walk &middot; no timer, stop it whenever you are done';
 
-  const challenges = theme.challenges.length
+  const briefChallenges = challengesFor();
+  const challenges = briefChallenges.length
     ? `<h4 class="subsection-title">Mini-challenges</h4>
-       <ul class="challenges-list">${challengeListHtml(theme)}</ul>`
+       <ul class="challenges-list">${challengeListHtml(briefChallenges)}</ul>`
     : '';
   const conceptsBtn = theme.concepts.length
     ? `<button type="button" id="briefConceptsBtn" class="btn btn-ghost btn-block">View concept examples</button>`
@@ -623,7 +636,7 @@ function startWalk({ brief = false } = {}) {
     themeId: theme.id,
     startedAt: brief ? null : Date.now(),
     durationMin: guided ? guidedDurationMin() : null,
-    challengesChecked: new Array(theme.challenges.length).fill(false),
+    challengesChecked: new Array(challengesFor().length).fill(false),
     nudges: [],
     pausedAt: null,
     frames: []  // logged in the Field HUD
@@ -804,6 +817,7 @@ export function renderHomeWalkState() {
   els.homeMode.textContent = guided ? `Guided \u00b7 ${w.durationMin} min` : 'Casual';
   els.homeTimerLabel.textContent = guided ? 'left' : 'elapsed';
   els.homeTrack.classList.toggle('hidden', !guided);
+  els.homeBriefBtn.textContent = guided ? 'Theme & challenges' : 'View theme';
   els.homeBriefBtn.classList.toggle('hidden', !theme);
   tick();
 }
