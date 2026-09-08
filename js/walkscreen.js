@@ -1,32 +1,27 @@
 /**
- * The instrument panel at the top of the Walks screen: the solar meter, the
- * seven-day film-canister strip, and the two cadence tiles.
+ * The instrument panel at the top of the Walks screen: the seven-day
+ * film-canister strip, its golden-hour badge, and the two cadence tiles.
  *
  * Everything here is derived from data PhotoWalk already has — the activity
  * log, the frame log, and (only if the user has granted it) a cached GPS fix.
- * Nothing is fetched, and nothing is invented: with no location the solar card
- * says so and offers a tap to fix it, rather than showing a plausible-looking
+ * Nothing is fetched, and nothing is invented: with no location the badge says
+ * so and offers a tap to fix it, rather than showing a plausible-looking
  * sunset for a city the user isn't in.
  */
 
 import { state, save, hoursInPeriod } from './store.js';
 import { localDateKey } from './util.js';
 import { cachedFix, fixIsFresh, requestFix, geolocationSupported, formatLat } from './geo.js';
-import { lightWindow, compassPoint } from './sun.js';
+import { lightWindow, solarTimes } from './sun.js';
 import { showToast } from './toast.js';
 
 let els = {};
-let solarHandle = null;
+let goldenHandle = null;
 
 export function initWalkScreen() {
   els = {
-    dot: document.getElementById('solarDot'),
-    readout: document.getElementById('solarReadout'),
-    greeting: document.getElementById('solarGreeting'),
-    line: document.getElementById('solarLine'),
-    clock: document.getElementById('solarClock'),
-    clockLabel: document.getElementById('solarClockLabel'),
-    chain: document.getElementById('cadenceChain'),
+    golden: document.getElementById('goldenBadge'),
+    goldenText: document.getElementById('goldenText'),
     strip: document.getElementById('filmStrip'),
     walks: document.getElementById('cadenceWalks'),
     walksBar: document.getElementById('cadenceWalksBar'),
@@ -38,93 +33,89 @@ export function initWalkScreen() {
     guidedBadge: document.getElementById('guidedPacingBadge')
   };
 
-  // The whole solar card is the affordance for granting location — the line
-  // inside it says as much when there is no fix.
-  els.line.parentElement.addEventListener('click', async () => {
+  // The badge is the affordance for granting location — it says as much when
+  // there is no fix.
+  els.golden.addEventListener('click', async () => {
     if (fixIsFresh()) return;
     if (!geolocationSupported()) { showToast('This browser has no location support.'); return; }
-    els.line.textContent = 'Getting a fix…';
+    els.goldenText.textContent = 'Getting a fix…';
     try {
       await requestFix();
-      renderSolar();
+      renderGolden();
       renderLaunchMeta();
     } catch (err) {
-      els.line.textContent = err.message;
+      els.goldenText.textContent = err.message;
+      showToast(err.message);
     }
   });
 
   // A new fix changes both the sun readout and the launch button's coordinates.
-  window.addEventListener('photowalk:fix-changed', () => { renderSolar(); renderLaunchMeta(); });
+  window.addEventListener('photowalk:fix-changed', () => { renderGolden(); renderLaunchMeta(); });
 
   // The countdown only needs minute resolution.
-  clearInterval(solarHandle);
-  solarHandle = setInterval(renderSolar, 30000);
+  clearInterval(goldenHandle);
+  goldenHandle = setInterval(renderGolden, 30000);
 }
 
 export function renderWalkScreen() {
-  renderSolar();
+  renderGolden();
   renderFilmStrip();
   renderCadence();
   renderLaunchMeta();
 }
 
-/* ---------- Solar meter ---------- */
-
-function greetingFor(hour) {
-  if (hour < 5) return 'Still dark out';
-  if (hour < 12) return 'Good morning';
-  if (hour < 18) return 'Good afternoon';
-  return 'Good evening';
-}
+/* ---------- Golden-hour badge ---------- */
 
 function hhmm(date) {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 }
 
-function renderSolar() {
-  if (!els.greeting) return;
-  const now = new Date();
-  const name = (state.profile.displayName || '').trim();
-  els.greeting.textContent = `${greetingFor(now.getHours())}${name ? ', ' + name : ''}.`;
+/**
+ * One short line of golden-hour timing: minutes left if we are inside the
+ * window, otherwise the clock time the next one opens. After sunset that means
+ * reaching into tomorrow morning rather than pointing at a window that closed.
+ */
+function goldenReading(now, fix) {
+  const light = lightWindow(now, fix.lat, fix.lon);
+  const t = light.times;
+
+  if (light.phase === 'golden') {
+    return { text: `${light.minutesTo}m of golden left`, state: 'now', title: light.label };
+  }
+  if (light.phase === 'blue' && t.sunrise) {
+    return { text: `Golden ${hhmm(t.sunrise)}`, state: 'next', title: 'Morning golden hour starts at sunrise' };
+  }
+  if (light.phase === 'day') {
+    const target = t.goldenEveningStart || t.sunset;
+    if (target) return { text: `Golden ${hhmm(target)}`, state: 'next', title: light.label };
+  }
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const next = solarTimes(tomorrow, fix.lat, fix.lon);
+  if (next.sunrise) {
+    return { text: `Golden ${hhmm(next.sunrise)}`, state: 'next', title: 'Tomorrow morning golden hour' };
+  }
+  return { text: light.label, state: 'next', title: light.label };
+}
+
+function renderGolden() {
+  if (!els.goldenText) return;
 
   const fix = cachedFix();
   if (!fixIsFresh(fix)) {
-    els.dot.dataset.state = 'night';
-    els.readout.textContent = 'NO FIX';
-    els.line.textContent = geolocationSupported()
+    const supported = geolocationSupported();
+    els.goldenText.textContent = supported ? 'Add location' : 'No location support';
+    els.golden.dataset.state = 'nofix';
+    els.golden.title = supported
       ? 'Tap to add your location for golden-hour timings.'
       : 'Golden-hour timings need location support.';
-    els.clock.textContent = hhmm(now);
-    els.clockLabel.textContent = 'Local time';
     return;
   }
 
-  const light = lightWindow(now, fix.lat, fix.lon);
-  els.dot.dataset.state = light.phase === 'night' ? 'night' : 'sun';
-  els.readout.textContent =
-    `ALT ${light.altitude.toFixed(1)}° · ${Math.round(light.azimuth)}° ${compassPoint(light.azimuth)}`;
-
-  if (light.minutesTo === null) {
-    els.line.textContent = light.label;
-  } else if (light.phase === 'golden') {
-    els.line.innerHTML = `${light.label} &mdash; <strong>${light.minutesTo}m left</strong>`;
-  } else {
-    els.line.innerHTML = `${light.label} <strong>(${formatCountdown(light.minutesTo)})</strong>`;
-  }
-
-  // Solar noon is the honest "peak" reading; after it has passed, sunset is
-  // the number a photographer is actually watching.
-  const past = light.times.solarNoon.getTime() < now.getTime();
-  const target = past && light.times.sunset ? light.times.sunset : light.times.solarNoon;
-  els.clock.textContent = hhmm(target);
-  els.clockLabel.textContent = past && light.times.sunset ? 'Sunset' : 'Solar peak';
-}
-
-function formatCountdown(minutes) {
-  if (minutes < 60) return `${minutes}m remaining`;
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  return m ? `${h}h ${m}m remaining` : `${h}h remaining`;
+  const reading = goldenReading(new Date(), fix);
+  els.goldenText.textContent = reading.text;
+  els.golden.dataset.state = reading.state;
+  els.golden.title = reading.title;
 }
 
 /* ---------- Seven-day film strip ---------- */
@@ -177,9 +168,6 @@ function renderFilmStrip() {
 function renderCadence() {
   if (!els.walks) return;
 
-  const streak = liveStreak();
-  els.chain.textContent = `${streak}-Day Chain`;
-
   const goal = Number(state.profile.goals.week) || 3;
   const done = hoursInPeriod('week');
   els.walks.textContent = `${done.toFixed(1)} of ${goal}`;
@@ -196,16 +184,6 @@ function renderCadence() {
     const delta = Math.round(((thisWeek - lastWeek) / lastWeek) * 100);
     els.framesNote.textContent = `${delta >= 0 ? '+' : ''}${delta}% vs last week`;
   }
-}
-
-/** currentStreak() without the import cycle — same rule, read live. */
-function liveStreak() {
-  const { streak, lastWalkDate } = state.profile;
-  if (!streak || !lastWalkDate) return 0;
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const alive = lastWalkDate === new Date().toDateString() || lastWalkDate === yesterday.toDateString();
-  return alive ? streak : 0;
 }
 
 /* ---------- Launch button chrome ---------- */
