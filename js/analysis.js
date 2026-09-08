@@ -10,6 +10,12 @@ import {
 } from './interpret.js';
 import { computeScopes, drawWaveform, drawParade, drawVectorscope, drawChromaticity } from './scopes.js';
 import {
+  initDeconstruct, renderTonalKey, renderGamut, renderTakeaway,
+  setFrameLabel, clearDeconstruct, tonalKey, gamutClusters
+} from './deconstruct.js';
+import { exportBreakdownSheet } from './sheet.js';
+import { logFrame } from './walkscreen.js';
+import {
   escapeHtml, uid, clamp, loadImage, readFileAsDataUrl, rgbToHex, nearestColorName,
   drawToCanvas, canvasToBlob, focalBucket, apertureBucket, formatCoords
 } from './util.js';
@@ -112,8 +118,13 @@ export function initAnalysis() {
     exifBlock: document.getElementById('exifBlock'),
     tagsInput: document.getElementById('tagsInput'),
     saveBtn: document.getElementById('saveToAlbumBtn'),
-    anotherBtn: document.getElementById('chooseAnotherBtn')
+    anotherBtn: document.getElementById('chooseAnotherBtn'),
+    shareToDebriefBtn: document.getElementById('shareToDebriefBtn'),
+    exportBreakdownBtn: document.getElementById('exportBreakdownBtn')
   };
+
+  initDeconstruct();
+  clearDeconstruct();
 
   imageCtx = els.imageCanvas.getContext('2d', { willReadFrequently: true });
   overlayCtx = els.overlayCanvas.getContext('2d');
@@ -182,6 +193,11 @@ export function initAnalysis() {
   });
 
   els.saveBtn.addEventListener('click', saveToAlbum);
+  els.exportBreakdownBtn.addEventListener('click', exportBreakdown);
+  els.shareToDebriefBtn.addEventListener('click', () => {
+    navigateTo('share');
+    showToast('Upload this shot to the room to put it in the debrief.');
+  });
   els.anotherBtn.addEventListener('click', resetWorkspace);
 
   setScopeView(scopeView); // hides the cells the default tab does not show
@@ -297,6 +313,14 @@ export async function analyzeImage(img, { exif = null, countStat = false, albumI
   drawScopes();
   renderPalette(currentPalette);
   renderExif(exif);
+
+  // The written readouts: tonal key, colour gamut and the takeaway, all
+  // derived from the numbers just computed above.
+  const summary = histogramSummary(currentHist.bins);
+  renderTonalKey(currentHist.bins, summary);
+  renderGamut(currentPalette);
+  renderTakeaway(currentPalette, summary, exif);
+  setFrameLabel(state.profile.photosAnalyzed + (countStat ? 1 : 0));
 
   els.tagsInput.value = restore && restore.tags ? restore.tags.join(', ') : '';
   updateSaveButtonLabel();
@@ -766,17 +790,26 @@ function renderExif(exif) {
     : '<p class="muted">An EXIF block was found, but it did not contain the fields PhotoWalk reads.</p>';
 }
 
-/** Shared by the analysis pane and the album detail sheet. */
-export function exifRows(exif) {
+/** The readable EXIF fields as plain [label, value] pairs. */
+export function exifPairs(exif) {
   if (!exif) return [];
-  const rows = [
+  const pairs = [
     ['Camera', [exif.make, exif.model].filter(Boolean).join(' ')],
     ['Aperture', exif.aperture],
     ['Shutter', exif.shutter],
     ['ISO', exif.iso],
     ['Focal length', exif.focalLength],
     ['Date taken', exif.dateTaken]
-  ].filter(([, v]) => v)
+  ].filter(([, v]) => v);
+  if (exif.lat != null && exif.lon != null) pairs.push(['Location', formatCoords(exif.lat, exif.lon)]);
+  return pairs;
+}
+
+/** Shared by the analysis pane and the album detail sheet. */
+export function exifRows(exif) {
+  if (!exif) return [];
+  const rows = exifPairs(exif)
+    .filter(([k]) => k !== 'Location')
     .map(([k, v]) => `<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v)}</dd>`);
 
   if (exif.lat != null && exif.lon != null) {
@@ -910,7 +943,9 @@ function exitCompare() {
 /* ---------- Save / reset ---------- */
 
 function updateSaveButtonLabel() {
-  els.saveBtn.textContent = albumItemId ? 'Update Reference' : 'Save to Album';
+  const slot = els.saveBtn.querySelector('[data-label]');
+  const label = albumItemId ? 'Update Reference' : 'Save to Smart Reference Library';
+  if (slot) slot.textContent = label; else els.saveBtn.textContent = label;
 }
 
 function overlaySnapshot() {
@@ -974,6 +1009,7 @@ async function saveToAlbum() {
       savedAt: Date.now()
     });
     save();
+    logFrame();
     window.dispatchEvent(new CustomEvent('photowalk:stats-changed'));
     els.tagsInput.value = '';
     showToast('Saved to your Reference Album.');
@@ -1003,4 +1039,32 @@ function resetWorkspace() {
   els.input.value = '';
   els.workspace.classList.add('hidden');
   els.empty.classList.remove('hidden');
+  clearDeconstruct();
+}
+
+/**
+ * Renders the on-screen analysis to a downloadable study sheet. Everything on
+ * it is already visible here — the sheet just makes it portable.
+ */
+async function exportBreakdown() {
+  if (!currentHist || !currentImage) { showToast('Load a photo first.'); return; }
+  const summary = histogramSummary(currentHist.bins);
+  const rel = currentPalette.length ? paletteRelationship(currentPalette) : null;
+
+  els.exportBreakdownBtn.disabled = true;
+  try {
+    await exportBreakdownSheet({
+      imageCanvas: els.imageCanvas,
+      overlayCanvas: els.overlayCanvas,
+      histogramCanvas: els.histogramCanvas,
+      clusters: gamutClusters(currentPalette),
+      harmony: rel ? rel.label : '',
+      tonalTitle: `Tonal key: ${tonalKey(summary).title}`,
+      tonalText: summary.caption,
+      takeaway: document.getElementById('takeawayText').textContent,
+      exifRows: exifPairs(currentExif)
+    });
+  } finally {
+    els.exportBreakdownBtn.disabled = false;
+  }
 }

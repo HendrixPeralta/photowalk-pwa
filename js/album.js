@@ -63,7 +63,7 @@ export function renderAlbum() {
   els.empty.classList.toggle('hidden', items.length > 0);
   els.empty.textContent = state.album.length
     ? 'No references match these filters.'
-    : 'No references yet — save one from the Analyze tab.';
+    : 'No references yet — save one from the Analysis tab.';
 
   els.grid.innerHTML = items.map((item) => `
     <button type="button" class="album-thumb" data-id="${item.id}" data-image="${escapeHtml(item.imageId || '')}">

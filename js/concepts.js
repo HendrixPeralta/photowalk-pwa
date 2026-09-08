@@ -452,7 +452,7 @@ export function allChallenges() {
   return list;
 }
 
-/** One concept card, shared by the walk explainer modal and the Analyze tab. */
+/** One concept card, shared by the walk explainer modal and the Analysis tab. */
 export function renderConceptCard(key) {
   const c = CONCEPTS[key];
   if (!c) return '';

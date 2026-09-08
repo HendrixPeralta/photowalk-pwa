@@ -3,7 +3,12 @@ import { takeSharedFiles } from './db.js';
 import { formatHours } from './util.js';
 import { initModal } from './modal.js';
 import { initToast, showToast } from './toast.js';
-import { initWalks, quickStartWalk, renderHomeWalkState } from './walks.js';
+import {
+  initWalks, renderHomeWalkState, pauseWalk, resumeWalk, activeTheme, finishActiveWalk
+} from './walks.js';
+import { initWalkScreen, renderWalkScreen } from './walkscreen.js';
+import { initHud, renderHud, pauseHudRendering } from './hud.js';
+import { initDebrief } from './debrief.js';
 import { initAnalysis } from './analysis.js';
 import { initAlbum, renderAlbum } from './album.js';
 import { initShare, renderShare, joinRoom, attachSharedFiles } from './share.js';
@@ -13,29 +18,43 @@ import { initReminders, syncReminderSchedule, maybeNudgeOnOpen } from './reminde
 import { initProfile } from './profile.js';
 import { backfillMilestones } from './milestones.js';
 
+// The header shows which instrument you are looking at, under the wordmark.
+const SCREEN_TITLES = {
+  walks: 'Walks',
+  hud: 'Field HUD',
+  analyze: 'Analysis',
+  album: 'Album',
+  share: 'Partners',
+  settings: 'Settings'
+};
+
 function showView(name) {
   document.querySelectorAll('.view').forEach((v) => v.classList.toggle('hidden', v.dataset.view !== name));
   document.querySelectorAll('.nav-btn').forEach((b) => b.classList.toggle('active', b.dataset.view === name));
-  if (name === 'home') renderHome();
-  if (name === 'walks') renderStatTiles();
+  document.getElementById('screenTitle').textContent = SCREEN_TITLES[name] || 'PhotoWalk';
+
+  // The HUD runs a one-second clock; don't leave it ticking behind other tabs.
+  if (name !== 'hud') pauseHudRendering();
+
+  if (name === 'walks') renderWalks();
+  if (name === 'hud') renderHud();
   if (name === 'album') renderAlbum();
   if (name === 'share') renderShare();
+
+  document.querySelector('.views').scrollTo({ top: 0 });
 }
 
-// The stat tiles live on the Walks screen.
-function renderStatTiles() {
-  document.getElementById('statHours').textContent = formatHours(totalActivityHours());
-  document.getElementById('statWalks').textContent = String(state.profile.walksCompleted);
-}
-
-function renderHome() {
+function renderWalks() {
   // currentStreak(), not profile.streak: the stored number is only rewritten
   // when a walk finishes, so it keeps reading high after the streak has lapsed.
   document.getElementById('streakBadgeText').textContent = String(currentStreak());
+  document.getElementById('statHours').textContent = formatHours(totalActivityHours());
+  document.getElementById('statWalks').textContent = String(state.profile.walksCompleted);
 
-  // Start cards or the running walk (clock + Stop), never both.
+  // The launcher or the running walk (clock + HUD + Stop), never both.
   renderHomeWalkState();
 
+  renderWalkScreen();
   renderHeatmap();
   renderRewards();
 }
@@ -44,8 +63,6 @@ function initNav() {
   document.querySelectorAll('.nav-btn').forEach((btn) => {
     btn.addEventListener('click', () => showView(btn.dataset.view));
   });
-  document.getElementById('quickCasualBtn').addEventListener('click', () => quickStartWalk('casual'));
-  document.getElementById('quickGuidedBtn').addEventListener('click', () => quickStartWalk('guided'));
 }
 
 /**
@@ -147,7 +164,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Before any view renders, so the seeded stats are what Home paints.
   await maybeSeedDemoData();
 
+  // Before initWalks: the launch button's mode and GPS chrome is rendered from
+  // inside applyMode(), which runs during initWalks().
+  initWalkScreen();
   initWalks();
+  initHud({
+    pause: pauseWalk,
+    resume: resumeWalk,
+    finish: finishActiveWalk,
+    themeOf: activeTheme
+  });
+  initDebrief();
   initAnalysis();
   initAlbum();
   initShare();
@@ -160,13 +187,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   initServiceWorker();
 
   window.addEventListener('photowalk:stats-changed', () => {
-    renderHome();
-    renderStatTiles();
+    renderWalks();
     renderAlbum();
   });
   window.addEventListener('photowalk:navigate', (e) => showView(e.detail.view));
 
-  showView('home');
+  showView('walks');
   handleLaunchIntent();
 
   // The scheduling window only reaches two weeks out, so top it up every launch.

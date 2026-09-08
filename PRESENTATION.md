@@ -30,7 +30,7 @@ PhotoWalk is an app that attacks both. Let me show you.
 
 ## 1:15 — Part 1: See what you're looking at (105 sec)
 
-*Switch to the Analyze screen. Load a photo the audience can react to.*
+*Switch to the Analysis screen. Load a photo the audience can react to.*
 
 Here's a photo. It looks good. Why?
 
@@ -58,7 +58,7 @@ And you can put your shot next to a photo you admire, side by side, same tools o
 
 ## 3:00 — Part 2: Make practice visible (95 sec)
 
-*Switch to Home.*
+*Switch to the Walks screen.*
 
 Okay, second problem. Knowing things doesn't make you good. Reps do.
 
@@ -97,7 +97,7 @@ Thank you.
 ## Delivery notes
 
 - **The hands-up opener is the whole hook.** Don't rush it — the second question is what lands.
-- **Have one photo pre-loaded** in Analyze. Fumbling with a file picker on stage kills 20 seconds.
+- **Have one photo pre-loaded** in Analysis. Fumbling with a file picker on stage kills 20 seconds.
 - Pick a demo photo with **obvious blue shadows or clipped highlights** so the plain-language caption says something dramatic.
 - If you're running long, cut compare mode (0:15) and the walk-themes aside (0:20).
 - If asked "why no AI?": *because an AI score tells you what it thinks, not how to see. The goal is your eye, not the app's.*

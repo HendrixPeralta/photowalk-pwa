@@ -5,61 +5,212 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>PhotoWalk</title>
 <meta name="description" content="Plan photo walks, learn composition, and organize your reference library.">
-<meta name="theme-color" content="#14110f">
+<meta name="theme-color" content="#111318">
+<meta name="color-scheme" content="dark">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="./icons/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
 <link rel="stylesheet" href="./css/styles.css">
 </head>
 <body>
+
+<!-- Icon sprite: Material-Symbols equivalents drawn as inline SVG so the app
+     keeps its whole look offline, without pulling an icon webfont. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <g id="i-camera" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/>
+      <circle cx="12" cy="13" r="3.4"/>
+    </g>
+    <g id="i-explore" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>
+    </g>
+    <g id="i-grid" fill="none" stroke="currentColor" stroke-width="1.6">
+      <rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/>
+      <rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/>
+    </g>
+    <g id="i-library" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <rect x="3" y="6" width="15" height="13" rx="1.5"/><path d="M21 8v9a2 2 0 0 1-2 2"/>
+      <path d="M3 16l4-4 3 3 3.5-4.5L18 16"/>
+    </g>
+    <g id="i-timer" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <circle cx="12" cy="13" r="7.5"/><path d="M12 9.5V13l2.5 2M9.5 2.5h5"/>
+    </g>
+    <g id="i-hourglass" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <path d="M7 3h10v3.5L12 12l5 5.5V21H7v-3.5L12 12 7 6.5z"/>
+    </g>
+    <g id="i-target" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/>
+      <circle cx="12" cy="12" r="2.6"/>
+    </g>
+    <g id="i-footprint" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <path d="M7 4c1.7 0 2.6 1.6 2.6 3.6S8.8 12 7 12s-2.6-1.6-2.6-4.4S5.3 4 7 4zM7 14.5h2.4v2.8A2.2 2.2 0 0 1 7.2 19.5 2.2 2.2 0 0 1 5 17.3v-2.8z"/>
+      <path d="M17 8c1.4 0 2.2 1.3 2.2 3s-.7 3.6-2.2 3.6-2.2-1.3-2.2-3.6S15.6 8 17 8z"/>
+    </g>
+    <g id="i-bolt" fill="currentColor"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></g>
+    <g id="i-flame" fill="currentColor">
+      <path d="M12 2c1 3-2 4-2 7a4 4 0 0 0 8 0c0-1-.4-2-1-3 1.5 1 2.5 3 2.5 5a6.5 6.5 0 0 1-13 0C6.5 7 9 4 12 2z"/>
+    </g>
+    <g id="i-film" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M8 4v16M16 4v16"/>
+      <path d="M4 9h4M4 15h4M16 9h4M16 15h4"/>
+    </g>
+    <g id="i-sun" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"/>
+    </g>
+    <g id="i-twilight" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M3 18h18M6.5 18a5.5 5.5 0 0 1 11 0"/><path d="M12 4v2.5M4.9 7.4l1.7 1.7M19.1 7.4l-1.7 1.7"/>
+    </g>
+    <g id="i-lens" fill="none" stroke="currentColor" stroke-width="1.6">
+      <circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/>
+    </g>
+    <g id="i-shutter" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="8.5"/><path d="M12 3.5L16.2 11M20.2 15.2H11.6M8.2 20.4l4.2-7.5M3.8 15.2L8 7.8M3.8 8.8h8.6M15.8 3.6l-4.2 7.4"/>
+    </g>
+    <g id="i-bulb" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <path d="M9 17h6M10 20h4"/><path d="M12 3a6 6 0 0 1 3.5 10.9V17h-7v-3.1A6 6 0 0 1 12 3z"/>
+    </g>
+    <g id="i-contrast" fill="none" stroke="currentColor" stroke-width="1.6">
+      <circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17a8.5 8.5 0 0 0 0-17z" fill="currentColor"/>
+    </g>
+    <g id="i-palette" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <path d="M12 3.5a8.5 8.5 0 0 0 0 17c1.4 0 2-1 2-1.8 0-1.6-1.5-1.7-1.5-3 0-.9.7-1.7 1.8-1.7h1.6a4.6 4.6 0 0 0 4.6-4.6c0-3.3-3.8-5.9-8.5-5.9z"/>
+      <circle cx="8" cy="10" r="1"/><circle cx="11" cy="7" r="1"/><circle cx="15.5" cy="8" r="1"/>
+    </g>
+    <g id="i-compare" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7 7H3l3-3M3 7l3 3M17 17h4l-3-3M21 17l-3 3"/><path d="M7 7h6a4 4 0 0 1 4 4v6"/>
+    </g>
+    <g id="i-tune" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>
+    </g>
+    <g id="i-chat" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <path d="M4 5h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H9l-5 4V6a1 1 0 0 1 1-1z"/>
+    </g>
+    <g id="i-send" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <path d="M4 12l16-8-6 16-2.5-6.5z"/>
+    </g>
+    <g id="i-pin" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <path d="M12 21s6.5-6 6.5-11a6.5 6.5 0 0 0-13 0C5.5 15 12 21 12 21z"/><circle cx="12" cy="10" r="2.4"/>
+    </g>
+    <g id="i-navigate" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <path d="M3.5 11.5l17-7-7 17-2.5-7.5z"/>
+    </g>
+    <g id="i-pause" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <path d="M9 5v14M15 5v14"/>
+    </g>
+    <g id="i-flag" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <path d="M6 21V4h12l-2.5 4L18 12H6"/>
+    </g>
+    <g id="i-download" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3v11M8 10.5l4 4 4-4M4 19h16"/>
+    </g>
+    <g id="i-bookmark" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <path d="M6 3h12v18l-6-4.5L6 21z"/>
+    </g>
+    <g id="i-repeat" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 9V7a2 2 0 0 1 2-2h11l-2.5-2.5M20 15v2a2 2 0 0 1-2 2H7l2.5 2.5"/>
+    </g>
+    <g id="i-settings" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M12 2.8l1.2 2.6 2.8-.6 1 2.7 2.7 1-.6 2.8 2.1 1.7-2.1 1.7.6 2.8-2.7 1-1 2.7-2.8-.6L12 21.2l-1.2-2.6-2.8.6-1-2.7-2.7-1 .6-2.8L2.8 12l2.1-1.7-.6-2.8 2.7-1 1-2.7 2.8.6z"/>
+    </g>
+    <g id="i-user" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <circle cx="12" cy="8" r="3.4"/><path d="M5 20c1.2-3.4 3.8-5 7-5s5.8 1.6 7 5"/>
+    </g>
+    <g id="i-mic" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <rect x="9.5" y="3" width="5" height="10" rx="2.5"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/>
+    </g>
+  </defs>
+</svg>
+
 <div class="app-shell">
 
   <header class="topbar">
     <div class="brand">
-      <svg class="brand-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
-        <circle cx="12" cy="13" r="3.4" stroke="currentColor" stroke-width="1.6"/>
-      </svg>
-      <span>PhotoWalk</span>
+      <span class="brand-mark">
+        <svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-shutter"/></svg>
+      </span>
+      <span class="brand-titles">
+        <span class="label-caps">PhotoWalk</span>
+        <h1 id="screenTitle">Walks</h1>
+      </span>
     </div>
     <div class="topbar-actions">
       <span class="streak-badge" title="Current streak">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M12 2c1 3-2 4-2 7a4 4 0 0 0 8 0c0-1-.4-2-1-3 1.5 1 2.5 3 2.5 5a6.5 6.5 0 0 1-13 0C6.5 7 9 4 12 2z" fill="currentColor"/>
-        </svg>
-        <span id="streakBadgeText">0</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true" style="width:13px;height:13px"><use href="#i-flame"/></svg>
+        <span><span id="streakBadgeText">0</span>d streak</span>
       </span>
-      <button type="button" id="installBtn" class="btn btn-ghost hidden">Install</button>
+      <button type="button" id="installBtn" class="btn btn-ghost btn-sm hidden">Install</button>
       <button type="button" id="profileBtn" class="icon-btn" aria-label="Profile">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/>
-          <path d="M5 20c1.2-3.4 3.8-5 7-5s5.8 1.6 7 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-        </svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-user"/></svg>
       </button>
     </div>
   </header>
 
   <main class="views">
 
-    <section id="view-home" class="view" data-view="home">
-      <h2 class="section-title">Start a walk</h2>
+    <!-- ==================== WALKS ==================== -->
+    <section id="view-walks" class="view" data-view="walks">
 
-      <div id="quickStart">
-        <div class="quick-actions">
-          <button type="button" id="quickCasualBtn" class="quick-card">
-            <strong>Casual</strong>
-            <span>A theme and its challenges. No timer — finish when you&rsquo;re done.</span>
-          </button>
-          <button type="button" id="quickGuidedBtn" class="quick-card quick-card-accent">
-            <strong>Guided</strong>
-            <span>The same, plus a countdown and mid-walk nudges.</span>
-          </button>
+      <!-- Solar meter. Everything here is computed locally from the device
+           clock and (if granted) a coarse GPS fix — no weather service. -->
+      <div class="solar-card">
+        <div class="solar-head">
+          <span class="solar-head-left">
+            <span id="solarDot" class="solar-dot"></span>
+            <span class="label-caps">Optical Ambient Meter</span>
+          </span>
+          <span id="solarReadout" class="data-sm" style="color:var(--text-dim)">&mdash;</span>
+        </div>
+        <div class="solar-body">
+          <div>
+            <h2 id="solarGreeting" class="solar-greeting">Good day.</h2>
+            <p class="solar-line">
+              <svg viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px;vertical-align:-2px;color:var(--accent)"><use href="#i-twilight"/></svg>
+              <span id="solarLine">Checking the light&hellip;</span>
+            </p>
+          </div>
+          <div class="solar-clock">
+            <span id="solarClock" class="data-lg">&ndash;&ndash;:&ndash;&ndash;</span>
+            <span id="solarClockLabel" class="label-caps">Solar peak</span>
+          </div>
         </div>
       </div>
 
+      <!-- Discipline cadence: the last seven days as film canisters. -->
+      <div class="cadence-card">
+        <div class="cadence-head">
+          <span class="cadence-head-left">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-film"/></svg>
+            <span class="label-caps">Discipline Cadence</span>
+          </span>
+          <span class="cadence-chain">
+            <svg viewBox="0 0 24 24" aria-hidden="true" style="width:12px;height:12px"><use href="#i-bolt"/></svg>
+            <span id="cadenceChain">0-Day Chain</span>
+          </span>
+        </div>
+        <div id="filmStrip" class="film-strip"></div>
+        <div class="micro-stats">
+          <div class="micro-stat">
+            <span class="label-caps">Weekly Cadence</span>
+            <span class="micro-stat-value"><strong id="cadenceWalks">0 of 3</strong><span>hours</span></span>
+            <div class="timer-track"><div id="cadenceWalksBar" class="timer-fill"></div></div>
+          </div>
+          <div class="micro-stat micro-stat-accent">
+            <span class="label-caps">Frames Exposed</span>
+            <span class="micro-stat-value"><strong id="cadenceFrames">0</strong><span>frames</span></span>
+            <span id="cadenceFramesNote" class="micro-stat-note">&nbsp;</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Running-walk status. Replaces the launcher while a walk is live. -->
       <div id="homeWalkPanel" class="theme-card walk-panel hidden">
         <div class="walk-panel-head">
           <div class="walk-panel-titles">
@@ -73,8 +224,96 @@
         </div>
         <div id="homeWalkTrack" class="timer-track hidden"><div id="homeWalkBar" class="timer-fill"></div></div>
         <div class="theme-actions">
-          <button type="button" id="homeStopWalkBtn" class="btn btn-primary btn-block">Stop Walk</button>
+          <button type="button" id="homeWalkHudBtn" class="btn btn-accent btn-block">Open Field HUD</button>
           <button type="button" id="homeWalkBriefBtn" class="btn btn-ghost btn-block">Theme &amp; challenges</button>
+          <button type="button" id="homeStopWalkBtn" class="btn btn-ghost btn-block">Stop Walk</button>
+        </div>
+      </div>
+
+      <div id="quickStart">
+        <div class="log-head">
+          <span class="label-caps">Field Objective Setting</span>
+          <span class="log-last">Tap to switch</span>
+        </div>
+
+        <div class="mode-cards">
+          <button type="button" id="modeCasualBtn" class="mode-card active">
+            <span class="mode-card-head">
+              <span class="mode-card-title">
+                <span class="mode-card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-lens"/></svg></span>
+                <strong>Casual Walk Mode</strong>
+              </span>
+              <span class="mode-card-badge">No timer</span>
+            </span>
+            <span class="mode-card-desc">Broad, relaxed inspiration. A theme and its challenges, finished whenever you&rsquo;re done.</span>
+          </button>
+          <button type="button" id="modeGuidedBtn" class="mode-card">
+            <span class="mode-card-head">
+              <span class="mode-card-title">
+                <span class="mode-card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-timer"/></svg></span>
+                <strong>Guided Sprint Mode</strong>
+              </span>
+              <span class="mode-card-badge" id="guidedPacingBadge">30m Pacing</span>
+            </span>
+            <span class="mode-card-desc">The same theme and challenges, plus a countdown and mid-walk nudges.</span>
+          </button>
+        </div>
+
+        <p id="modeHint" class="hint hidden">Finish your current walk to switch modes.</p>
+
+        <div id="durationRow" class="field-row hidden">
+          <label for="durationSelect">Walk length</label>
+          <select id="durationSelect"></select>
+        </div>
+
+        <div class="theme-btn-row" style="margin-top:10px">
+          <button type="button" id="getThemeBtn" class="btn btn-accent">Get a Theme</button>
+          <button type="button" id="customThemeBtn" class="btn btn-ghost">Custom Theme</button>
+        </div>
+
+        <div id="themeCard" class="theme-card hidden" style="margin-top:12px">
+          <button type="button" id="dismissThemeBtn" class="card-close" aria-label="Dismiss theme">&times;</button>
+          <span class="label-caps" style="color:var(--accent-strong)">Current Visual Focus</span>
+          <h3 id="themeTitle"></h3>
+          <p id="themeBrief" class="muted card-text"></p>
+          <p id="themeReason" class="theme-reason hidden"></p>
+          <div class="theme-btn-row">
+            <!-- Concept examples are parked, not deleted: drop `hidden` to bring the browser back. -->
+            <button type="button" id="viewConceptsBtn" class="btn btn-ghost btn-sm hidden">View Concept Examples</button>
+            <button type="button" id="editThemeBtn" class="btn btn-ghost btn-sm">Edit Theme</button>
+          </div>
+
+          <div id="challengesSection" class="hidden">
+            <h4 class="subsection-title">Mini-challenges</h4>
+            <ul id="challengesList" class="challenges-list"></ul>
+          </div>
+
+          <div id="timerSection" class="timer-block hidden">
+            <div id="timerDisplay" class="timer-display">00:00</div>
+            <div class="timer-track"><div id="timerBar" class="timer-fill"></div></div>
+          </div>
+
+          <button type="button" id="notifBtn" class="btn btn-ghost btn-sm" style="margin-top:10px">Enable Notifications</button>
+        </div>
+
+        <div style="margin-top:12px">
+          <button type="button" id="startWalkBtn" class="launch-btn">
+            <span class="launch-btn-left">
+              <span class="launch-btn-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-shutter"/></svg></span>
+              <span class="launch-btn-labels">
+                <span class="label-caps">Engage Exposure</span>
+                <strong data-label>Start Photowalk</strong>
+              </span>
+            </span>
+            <span class="launch-btn-right">
+              <span id="launchFix" class="launch-fix hidden">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-target"/></svg>
+                <span id="launchFixText"></span>
+              </span>
+              <span id="launchModeLabel" class="label-caps">Casual Mode</span>
+            </span>
+          </button>
+          <button type="button" id="finishWalkBtn" class="btn btn-primary btn-block hidden" style="margin-top:8px"><span data-label>Stop Walk</span></button>
         </div>
       </div>
 
@@ -118,10 +357,57 @@
         </div>
       </div>
 
+      <h2 class="section-title">Lifetime</h2>
+      <div class="stats-grid">
+        <div class="stat-card stat-card-hero">
+          <span class="stat-value" id="statHours">0h</span>
+          <span class="stat-label">Hours shot</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="statWalks">0</span>
+          <span class="stat-label">Walks completed</span>
+        </div>
+      </div>
+
       <h2 class="section-title">Reward progress</h2>
       <div class="theme-card reward-progress-card">
         <div id="rewardBar" class="reward-bar"></div>
       </div>
+
+      <details id="savedThemesDetails" class="theme-card collapse-card">
+        <summary class="collapse-summary">
+          <span class="collapse-title">My Themes</span>
+          <span id="savedThemesCount" class="muted collapse-meta"></span>
+          <svg class="collapse-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </summary>
+        <div class="collapse-body">
+          <p class="muted card-text">Themes you built yourself from Custom Theme, saved for reuse.</p>
+          <p id="savedThemesEmpty" class="empty-state-sm">No custom themes yet &mdash; try Custom Theme above.</p>
+          <ul id="savedThemesList" class="rewards-list"></ul>
+        </div>
+      </details>
+
+      <details id="rewardsDetails" class="theme-card collapse-card rewards-card">
+        <summary class="collapse-summary">
+          <span class="collapse-title">Hour rewards</span>
+          <span id="rewardsSummaryCount" class="muted collapse-meta"></span>
+          <svg class="collapse-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </summary>
+        <div class="collapse-body">
+          <p class="muted card-text">Pick a treat and price it in shooting hours &mdash; every hour on the heatmap counts toward it.</p>
+          <div class="reward-form">
+            <input type="text" id="rewardTitleInput" class="text-input" placeholder="Reward (e.g. new camera strap)" maxlength="60">
+            <input type="number" id="rewardHoursInput" class="text-input reward-hours-input" placeholder="Hours" min="0.5" step="0.5" inputmode="decimal">
+            <button type="button" id="addRewardBtn" class="btn btn-primary">Set Reward</button>
+          </div>
+          <p id="rewardsEmpty" class="empty-state-sm">No rewards yet &mdash; try &ldquo;New 35mm lens&rdquo; for 20 hours.</p>
+          <ul id="rewardsList" class="rewards-list"></ul>
+        </div>
+      </details>
 
       <!-- Hidden for now (not deleted): un-hide by removing the `hidden` class. -->
       <details id="themeGoalsDetails" class="theme-card collapse-card hidden">
@@ -148,116 +434,144 @@
           <ul id="themeGoalsList" class="rewards-list"></ul>
         </div>
       </details>
-
     </section>
 
-    <section id="view-walks" class="view hidden" data-view="walks">
-      <h2 class="section-title">PhotoWalk Guide</h2>
+    <!-- ==================== FIELD HUD ==================== -->
+    <section id="view-hud" class="view hidden" data-view="hud">
 
-      <div class="stats-grid">
-        <div class="stat-card stat-card-hero">
-          <span class="stat-value" id="statHours">0h</span>
-          <span class="stat-label">Hours shot</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value" id="statWalks">0</span>
-          <span class="stat-label">Walks completed</span>
-        </div>
+      <div id="hudIdle" class="hud-idle">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-shutter"/></svg>
+        <p>No walk in progress. The field HUD wakes up when you start one &mdash; elapsed time, the mission directive, your logged frames and the track you covered.</p>
+        <button type="button" id="hudGoToWalksBtn" class="btn btn-accent">Set up a walk</button>
       </div>
 
-      <div class="theme-card walk-setup">
-        <h4 class="subsection-title">Walk style</h4>
-        <div class="segmented" role="tablist">
-          <button type="button" id="modeCasualBtn" class="segment active">Casual</button>
-          <button type="button" id="modeGuidedBtn" class="segment">Guided</button>
-        </div>
-        <p id="modeHint" class="hint hidden">Finish your current walk to switch modes.</p>
-
-        <div id="durationRow" class="field-row hidden">
-          <label for="durationSelect">Walk length</label>
-          <select id="durationSelect"></select>
-        </div>
-
-        <div class="theme-btn-row">
-          <button type="button" id="getThemeBtn" class="btn btn-accent">Get a Theme</button>
-          <button type="button" id="customThemeBtn" class="btn btn-ghost">Custom Theme</button>
-        </div>
-      </div>
-
-      <div id="themeCard" class="theme-card hidden">
-        <button type="button" id="dismissThemeBtn" class="card-close" aria-label="Dismiss theme">&times;</button>
-        <h3 id="themeTitle"></h3>
-        <p id="themeBrief" class="muted"></p>
-        <p id="themeReason" class="theme-reason hidden"></p>
-        <div class="theme-btn-row">
-          <button type="button" id="viewConceptsBtn" class="btn btn-ghost btn-sm">View Concept Examples</button>
-          <button type="button" id="editThemeBtn" class="btn btn-ghost btn-sm">Edit Theme</button>
-        </div>
-
-        <div id="challengesSection" class="hidden">
-          <h4 class="subsection-title">Mini-challenges</h4>
-          <ul id="challengesList" class="challenges-list"></ul>
-        </div>
-
-        <div id="timerSection" class="timer-block hidden">
-          <div id="timerDisplay" class="timer-display">00:00</div>
-          <div class="timer-track"><div id="timerBar" class="timer-fill"></div></div>
-        </div>
-
-        <button type="button" id="notifBtn" class="btn btn-ghost btn-sm">Enable Notifications</button>
-
-        <div class="theme-actions">
-          <button type="button" id="startWalkBtn" class="btn btn-accent btn-block hidden">Start Walk</button>
-          <button type="button" id="finishWalkBtn" class="btn btn-primary btn-block hidden">Finish Walk</button>
-        </div>
-      </div>
-
-      <details id="savedThemesDetails" class="theme-card collapse-card">
-        <summary class="collapse-summary">
-          <span class="collapse-title">My Themes</span>
-          <span id="savedThemesCount" class="muted collapse-meta"></span>
-          <svg class="collapse-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </summary>
-        <div class="collapse-body">
-          <p class="muted card-text">Themes you built yourself from Custom Theme, saved for reuse.</p>
-          <p id="savedThemesEmpty" class="empty-state-sm">No custom themes yet — try Custom Theme above.</p>
-          <ul id="savedThemesList" class="rewards-list"></ul>
-        </div>
-      </details>
-
-      <details id="rewardsDetails" class="theme-card collapse-card rewards-card">
-        <summary class="collapse-summary">
-          <span class="collapse-title">Hour rewards</span>
-          <span id="rewardsSummaryCount" class="muted collapse-meta"></span>
-          <svg class="collapse-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </summary>
-        <div class="collapse-body">
-          <p class="muted card-text">Pick a treat and price it in shooting hours — every hour on the heatmap counts toward it.</p>
-          <div class="reward-form">
-            <input type="text" id="rewardTitleInput" class="text-input" placeholder="Reward (e.g. new camera strap)" maxlength="60">
-            <input type="number" id="rewardHoursInput" class="text-input reward-hours-input" placeholder="Hours" min="0.5" step="0.5" inputmode="decimal">
-            <button type="button" id="addRewardBtn" class="btn btn-primary">Set Reward</button>
+      <div id="hudActive" class="hidden">
+        <div class="telemetry-grid">
+          <div class="telemetry-cell">
+            <span class="telemetry-cell-head">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-timer"/></svg>
+              <span class="label-caps">Elapsed</span>
+            </span>
+            <span class="telemetry-value" id="hudElapsed">00:00</span>
           </div>
-          <p id="rewardsEmpty" class="empty-state-sm">No rewards yet — try “New 35mm lens” for 20 hours.</p>
-          <ul id="rewardsList" class="rewards-list"></ul>
+          <div class="telemetry-cell telemetry-cell-cyan">
+            <span class="telemetry-cell-head">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-hourglass"/></svg>
+              <span class="label-caps">Target</span>
+            </span>
+            <span class="telemetry-value" id="hudTarget">&mdash;</span>
+          </div>
+          <div class="telemetry-cell telemetry-cell-plain">
+            <span class="telemetry-cell-head">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-target"/></svg>
+              <span class="label-caps">Frames</span>
+            </span>
+            <span class="telemetry-value" id="hudFrames">0</span>
+          </div>
+          <div class="telemetry-cell telemetry-cell-plain">
+            <span class="telemetry-cell-head">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-footprint"/></svg>
+              <span class="label-caps">Track</span>
+            </span>
+            <span class="telemetry-value" id="hudTrack">&mdash;<small>km</small></span>
+          </div>
         </div>
-      </details>
+
+        <div class="mission-card">
+          <div class="mission-head">
+            <span class="mission-head-left">
+              <span id="hudMissionDot" class="solar-dot"></span>
+              <span class="label-caps" id="hudMissionNo">Mission &middot; Directive</span>
+            </span>
+            <span class="mission-badge" id="hudMissionMode">Casual</span>
+          </div>
+          <h2 class="mission-title" id="hudMissionTitle"></h2>
+          <div class="mission-hint">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bulb"/></svg>
+            <p id="hudMissionHint"></p>
+          </div>
+          <div class="mission-progress">
+            <span class="mission-pips" id="hudMissionPips"></span>
+            <span class="mission-progress-text" id="hudMissionProgress">Progress: 0%</span>
+            <span class="mission-synced" id="hudMissionSynced">0 captures</span>
+          </div>
+          <ul id="hudChallengesList" class="challenges-list" style="margin-top:12px"></ul>
+          <div class="capture-strip" id="hudCaptureStrip"></div>
+        </div>
+
+        <div class="log-head">
+          <span class="label-caps">Quick Capture Log</span>
+          <span class="log-last" id="hudLogLast">No frames yet</span>
+        </div>
+        <button type="button" id="hudLogFrameBtn" class="btn btn-accent log-btn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-camera"/></svg>
+          <span id="hudLogFrameLabel">Log Frame #1</span>
+          <span class="log-btn-tag">+EXIF</span>
+        </button>
+        <input type="file" id="hudFrameInput" accept="image/*" class="visually-hidden">
+        <div class="hud-secondary-row">
+          <button type="button" id="hudNoteBtn" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mic"/></svg>
+            Field Note
+          </button>
+          <button type="button" id="hudPinBtn" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pin"/></svg>
+            Pin Location
+          </button>
+        </div>
+
+        <div class="map-card">
+          <div class="map-head">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-explore"/></svg>
+            <span class="label-caps">Waypoint Route</span>
+            <span class="map-place" id="hudMapPlace">Tracking off</span>
+          </div>
+          <div class="map-frame">
+            <canvas id="hudMapCanvas"></canvas>
+            <span class="map-badge map-badge-sun">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sun"/></svg>
+              <span id="hudSunBadge">&mdash;</span>
+            </span>
+            <span class="map-badge map-badge-dist">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-navigate"/></svg>
+              <span id="hudDistBadge">0 m tracked</span>
+            </span>
+            <span class="map-badge map-badge-shadow" id="hudShadowBadge">Shadow index &mdash;</span>
+          </div>
+          <button type="button" id="hudTrackToggleBtn" class="btn btn-ghost btn-block btn-sm" style="margin-top:8px">Start GPS tracking</button>
+        </div>
+
+        <div class="hud-footer-row">
+          <button type="button" id="hudPauseBtn" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pause"/></svg>
+            <span data-label>Pause Walk</span>
+          </button>
+          <button type="button" id="hudCompleteBtn" class="btn btn-accent">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-flag"/></svg>
+            Complete
+          </button>
+        </div>
+      </div>
     </section>
 
+    <!-- ==================== ANALYSIS ==================== -->
     <section id="view-analyze" class="view hidden" data-view="analyze">
-      <h2 class="section-title">Manual Photo Analysis</h2>
+
+      <div class="debrief-head">
+        <span class="debrief-head-left">
+          <span class="solar-dot"></span>
+          <span class="label-caps" id="analyzeFrameLabel">Deconstruct_Mode</span>
+        </span>
+        <span class="debrief-privacy" id="analyzeFrameNo">NO FRAME</span>
+      </div>
 
       <div id="analyzePinnedTip" class="banner analyze-tip hidden"></div>
 
       <input type="file" id="photoInput" accept="image/*" class="visually-hidden">
 
       <div id="analyzeEmpty" class="empty-state">
-        <p>Load a photo to overlay composition guides, a color palette, a light histogram, and video-style scopes.</p>
-        <button type="button" id="choosePhotoBtn" class="btn btn-primary">Choose Photo</button>
+        <p>Load a photo to overlay composition guides, a colour gamut readout, a luminance spectrum, and video-style scopes.</p>
+        <button type="button" id="choosePhotoBtn" class="btn btn-accent">Choose Photo</button>
       </div>
 
       <div id="analyzeWorkspace" class="hidden">
@@ -300,11 +614,7 @@
         <div id="overlayTipBox" class="overlay-tip hidden"></div>
         <p class="hint">Drag a guide line to move just that line. Scroll or pinch to zoom, drag to pan, double-tap for 2&times;.</p>
 
-        <h4 class="subsection-title">Color Palette</h4>
-        <div id="paletteRow" class="palette-row"></div>
-        <p id="paletteCaption" class="hint"></p>
-
-        <h4 class="subsection-title">Light Histogram</h4>
+        <h4 class="subsection-title">Luminance Spectrum</h4>
         <div id="histGrid" class="hist-grid">
           <div>
             <p class="compare-label">Yours</p>
@@ -317,6 +627,34 @@
             <p id="refHistogramCaption" class="hint"></p>
           </div>
         </div>
+
+        <!-- Rule-based tonal verdict, computed from the histogram in interpret.js. -->
+        <div id="tonalKeyNote" class="diag-note hidden">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-contrast"/></svg>
+          <div class="diag-note-body">
+            <div class="diag-note-head">
+              <strong id="tonalKeyTitle"></strong>
+              <span class="diag-note-tag" id="tonalKeyTag"></span>
+            </div>
+            <p id="tonalKeyText"></p>
+          </div>
+        </div>
+
+        <div class="gamut-head">
+          <h4 class="subsection-title">Colour Gamut Extraction</h4>
+          <span class="gamut-count" id="gamutCount">0 clusters</span>
+        </div>
+        <div class="harmony-row" id="harmonyRow" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-compare"/></svg>
+          <div>
+            <span class="label-caps">Harmonic Relationship</span>
+            <strong id="harmonyName"></strong>
+          </div>
+        </div>
+        <div class="gamut-bar" id="gamutBar"></div>
+        <div class="gamut-specs" id="gamutSpecs"></div>
+        <div id="paletteRow" class="palette-row hidden"></div>
+        <p id="paletteCaption" class="hint"></p>
 
         <details id="scopesDetails" class="theme-card collapse-card scopes-details">
           <summary class="collapse-summary">
@@ -351,7 +689,7 @@
                 <p id="vectorscopeCaption" class="hint scope-caption"></p>
               </figure>
               <figure class="scope-cell" data-scope="cie">
-                <figcaption class="scope-name">CIE Chromaticity <span>which colors the frame occupies</span></figcaption>
+                <figcaption class="scope-name">CIE Chromaticity <span>which colours the frame occupies</span></figcaption>
                 <canvas id="cieCanvas" class="scope-canvas"></canvas>
                 <p id="cieCaption" class="hint scope-caption"></p>
               </figure>
@@ -359,18 +697,40 @@
           </div>
         </details>
 
-        <h4 class="subsection-title">Metadata (EXIF)</h4>
+        <h4 class="subsection-title">Optical Payload &amp; EXIF</h4>
         <div id="exifBlock" class="exif-block"></div>
+
+        <div id="takeawayNote" class="diag-note hidden">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bulb"/></svg>
+          <div class="diag-note-body">
+            <div class="diag-note-head"><strong>Analysis takeaway</strong></div>
+            <p id="takeawayText"></p>
+          </div>
+        </div>
 
         <h4 class="subsection-title">Save to Reference Album</h4>
         <input type="text" id="tagsInput" class="text-input" placeholder="Tags, comma separated (e.g. bridge, sunset)">
-        <div class="theme-actions">
-          <button type="button" id="saveToAlbumBtn" class="btn btn-accent btn-block">Save to Album</button>
+        <div class="action-stack">
+          <button type="button" id="saveToAlbumBtn" class="btn btn-accent btn-block">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bookmark"/></svg>
+            <span data-label>Save to Smart Reference Library</span>
+          </button>
+          <div class="theme-btn-row">
+            <button type="button" id="shareToDebriefBtn" class="btn btn-primary">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chat"/></svg>
+              To Debrief
+            </button>
+            <button type="button" id="exportBreakdownBtn" class="btn btn-primary">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"/></svg>
+              Export Sheet
+            </button>
+          </div>
           <button type="button" id="chooseAnotherBtn" class="btn btn-ghost btn-block">Choose Another Photo</button>
         </div>
       </div>
     </section>
 
+    <!-- ==================== ALBUM ==================== -->
     <section id="view-album" class="view hidden" data-view="album">
       <h2 class="section-title">Smart Reference Album</h2>
 
@@ -406,13 +766,13 @@
         <select id="filterFocal">
           <option value="all">Any focal length</option>
           <option value="Wide">Wide (under 35mm)</option>
-          <option value="Normal">Normal (35–70mm)</option>
+          <option value="Normal">Normal (35&ndash;70mm)</option>
           <option value="Tele">Tele (over 70mm)</option>
         </select>
         <select id="filterAperture">
           <option value="all">Any aperture</option>
           <option value="Fast">Fast (f/2.8 and wider)</option>
-          <option value="Mid">Mid (f/2.8–f/8)</option>
+          <option value="Mid">Mid (f/2.8&ndash;f/8)</option>
           <option value="Deep">Deep (f/8 and narrower)</option>
         </select>
         <select id="filterLocation">
@@ -423,27 +783,35 @@
       </div>
       <input type="text" id="albumSearch" class="text-input" placeholder="Search tags, camera, or settings">
 
-      <p id="albumEmpty" class="empty-state-sm">No references yet — save one from the Analyze tab.</p>
+      <p id="albumEmpty" class="empty-state-sm">No references yet &mdash; save one from the Analysis tab.</p>
       <div id="albumGrid" class="album-grid"></div>
     </section>
 
+    <!-- ==================== PARTNERS ==================== -->
     <section id="view-share" class="view hidden" data-view="share">
-      <h2 class="section-title">Post-Walk Sharing</h2>
-      <p class="muted card-text">
-        Demo mode: rooms sync across tabs open on this browser, simulating a closed sharing space for
-        your walk partners without a backend.
-      </p>
 
       <p id="sharedFilesNotice" class="banner shared-notice hidden"></p>
 
       <div id="shareJoinSection">
+        <div class="debrief-head">
+          <span class="debrief-head-left">
+            <span class="solar-dot"></span>
+            <span class="label-caps">Debrief Vault</span>
+          </span>
+          <span class="debrief-privacy">PRIVATE SESSION</span>
+        </div>
+        <p class="muted card-text">
+          Demo mode: rooms sync across tabs open on this browser, simulating a closed debrief space for
+          your walk partners without a backend.
+        </p>
+
         <div class="theme-card">
-          <h4 class="subsection-title">Create a Room</h4>
+          <h4 class="subsection-title" style="margin-top:0">Create a Room</h4>
           <input type="text" id="roomThemeInput" class="text-input" placeholder="Theme (optional)">
           <button type="button" id="createRoomBtn" class="btn btn-accent btn-block">Create Room</button>
         </div>
         <div class="theme-card">
-          <h4 class="subsection-title">Join a Room</h4>
+          <h4 class="subsection-title" style="margin-top:0">Join a Room</h4>
           <input type="text" id="joinCodeInput" class="text-input" placeholder="Room code">
           <button type="button" id="joinRoomBtn" class="btn btn-primary btn-block">Join Room</button>
           <p id="shareError" class="error-text"></p>
@@ -451,26 +819,86 @@
       </div>
 
       <div id="shareRoomSection" class="hidden">
-        <div class="room-header">
+        <div class="debrief-head">
+          <span class="debrief-head-left">
+            <span class="solar-dot"></span>
+            <span class="label-caps" id="debriefArchive">Debrief Vault &middot; Archive</span>
+          </span>
+          <span class="debrief-privacy">PRIVATE SESSION</span>
+        </div>
+        <h2 class="debrief-title" id="roomCodeDisplay"></h2>
+        <p class="debrief-sub" id="roomThemeDisplay"></p>
+
+        <div class="debrief-meta">
           <div>
-            <div class="room-code" id="roomCodeDisplay"></div>
-            <div id="roomThemeDisplay" class="muted"></div>
+            <span class="label-caps">Duration</span>
+            <strong id="debriefDuration">&mdash;</strong>
           </div>
-          <div class="room-header-actions">
-            <button type="button" id="copyInviteBtn" class="btn btn-ghost btn-sm">Copy Invite</button>
-            <button type="button" id="leaveRoomBtn" class="btn btn-ghost btn-sm">Leave</button>
+          <div class="debrief-meta-accent">
+            <span class="label-caps">Exposures</span>
+            <strong id="debriefExposures">0</strong>
+          </div>
+          <div class="debrief-meta-cyan">
+            <span class="label-caps">Partners</span>
+            <strong id="debriefPartners">&mdash;</strong>
           </div>
         </div>
 
-        <div class="theme-card invite-card">
-          <h4 class="subsection-title">Invite your walk partners</h4>
-          <div id="roomQr" class="room-qr"></div>
-          <p class="muted invite-hint">Scan this, or send the link:</p>
-          <p id="roomInviteLink" class="invite-link"></p>
+        <div class="theme-card" id="debriefPromptCard" hidden>
+          <span class="label-caps">Challenge Prompt</span>
+          <h3 id="debriefPromptTitle"></h3>
+          <p class="muted card-text" id="debriefPromptText"></p>
         </div>
 
+        <h2 class="section-title">Side-by-side study</h2>
+        <div class="split-toolbar">
+          <button type="button" class="chip-btn active" id="splitModeDual">Dual Split</button>
+          <button type="button" class="chip-btn" id="splitModeWipe">Rangefinder Wipe</button>
+          <span class="split-synced">Synced EXIF</span>
+        </div>
+        <div id="splitEmpty" class="empty-state-sm">Share at least two shots to line them up side by side.</div>
+        <div id="splitDual" class="split-grid hidden"></div>
+        <div id="splitWipeBlock" class="hidden">
+          <div class="wipe-frame" id="wipeFrame">
+            <img id="wipeBottomImg" alt="">
+            <img id="wipeTopImg" class="wipe-top" alt="">
+            <div class="wipe-handle" id="wipeHandle"></div>
+          </div>
+          <div class="wipe-caption">
+            <span id="wipeLeftLabel"></span>
+            <span>Drag to calibrate split prism</span>
+            <span id="wipeRightLabel"></span>
+          </div>
+        </div>
+
+        <div class="critique-head">
+          <span class="critique-head-left">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chat"/></svg>
+            <strong>Technical Critique</strong>
+          </span>
+          <span class="critique-motto">Zero vanity metrics</span>
+        </div>
+        <div class="critique-tags" id="critiqueTags"></div>
+        <div class="critique-list" id="critiqueList"></div>
+        <p id="critiqueEmpty" class="empty-state-sm">No notes yet &mdash; open with what you were metering for.</p>
+        <div class="critique-form">
+          <input type="text" id="critiqueInput" class="text-input" placeholder="Add technical observation or focal inquiry…" maxlength="400">
+          <button type="button" id="critiqueSendBtn" class="btn btn-accent" aria-label="Post note">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-send"/></svg>
+          </button>
+        </div>
+
+        <div class="momentum-card">
+          <span class="momentum-flame"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-flame"/></svg></span>
+          <span class="momentum-body">
+            <span class="label-caps">Habit Momentum</span>
+            <strong id="momentumText">0-Day Cadence Streak</strong>
+          </span>
+          <span class="momentum-badge" id="momentumBadge">+0<br>DEBRIEF</span>
+        </div>
+
+        <h2 class="section-title">Share your shots</h2>
         <div class="theme-card">
-          <h4 class="subsection-title">Share your shots</h4>
           <input type="text" id="uploaderNameInput" class="text-input" placeholder="Your name">
           <input type="file" id="roomPhotoInput" accept="image/*" multiple class="text-input">
           <input type="text" id="roomNoteInput" class="text-input" placeholder="Note (optional)">
@@ -479,9 +907,32 @@
 
         <p id="roomPhotosEmpty" class="empty-state-sm">No shots shared yet.</p>
         <div id="roomPhotosGrid" class="album-grid"></div>
+
+        <div class="theme-card invite-card" style="margin-top:12px">
+          <h4 class="subsection-title" style="margin-top:0">Invite your walk partners</h4>
+          <div id="roomQr" class="room-qr"></div>
+          <p class="muted invite-hint">Scan this, or send the link:</p>
+          <p id="roomInviteLink" class="invite-link"></p>
+        </div>
+
+        <div class="action-stack">
+          <button type="button" id="exportStudySheetBtn" class="btn btn-accent btn-block">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"/></svg>
+            Export Side-by-Side Study Sheet
+          </button>
+          <button type="button" id="scheduleNextWalkBtn" class="btn btn-primary btn-block">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-repeat"/></svg>
+            Schedule Next Walk
+          </button>
+          <div class="theme-btn-row">
+            <button type="button" id="copyInviteBtn" class="btn btn-ghost btn-sm">Copy Invite</button>
+            <button type="button" id="leaveRoomBtn" class="btn btn-ghost btn-sm">Leave Room</button>
+          </div>
+        </div>
       </div>
     </section>
 
+    <!-- ==================== SETTINGS ==================== -->
     <section id="view-settings" class="view hidden" data-view="settings">
       <h2 class="section-title">Settings</h2>
 
@@ -513,25 +964,26 @@
   </main>
 
   <nav class="bottom-nav">
-    <button type="button" class="nav-btn active" data-view="home">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-      <span>Home</span>
-    </button>
-    <button type="button" class="nav-btn" data-view="walks">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M13 4a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM7 21l2.5-6L7 12l2-5 4 2 3 5-3 1 1 6M5 21l3-8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <button type="button" class="nav-btn active" data-view="walks">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-explore"/></svg>
       <span>Walks</span>
     </button>
+    <button type="button" class="nav-btn" data-view="hud">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-camera"/></svg>
+      <span id="hudLiveDot" class="nav-live hidden"></span>
+      <span>Field HUD</span>
+    </button>
     <button type="button" class="nav-btn" data-view="analyze">
-      <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="14" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M3 15l5-5 3 3 4-5 6 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span>Analyze</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-grid"/></svg>
+      <span>Analysis</span>
     </button>
     <button type="button" class="nav-btn" data-view="album">
-      <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="3" width="8" height="8" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="13" width="8" height="8" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="13" width="8" height="8" rx="1.2" stroke="currentColor" stroke-width="1.6"/></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-library"/></svg>
       <span>Album</span>
     </button>
     <button type="button" class="nav-btn" data-view="share">
-      <svg viewBox="0 0 24 24" fill="none"><circle cx="6" cy="12" r="2.4" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="6" r="2.4" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="18" r="2.4" stroke="currentColor" stroke-width="1.6"/><path d="M8.2 10.8L15.8 7M8.2 13.2l7.6 3.8" stroke="currentColor" stroke-width="1.6"/></svg>
-      <span>Share</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chat"/></svg>
+      <span>Partners</span>
     </button>
   </nav>
 
@@ -542,26 +994,20 @@
         <button type="button" class="drawer-close" data-close-drawer aria-label="Close">&times;</button>
 
         <div class="drawer-brand">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
-            <circle cx="12" cy="13" r="3.4" stroke="currentColor" stroke-width="1.6"/>
-          </svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-shutter"/></svg>
           <span>PhotoWalk</span>
         </div>
 
         <div class="drawer-group">
           <button type="button" class="drawer-item" data-nav="settings">
-            <span class="drawer-item-icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.8l1.2 2.6 2.8-.6 1 2.7 2.7 1-.6 2.8 2.1 1.7-2.1 1.7.6 2.8-2.7 1-1 2.7-2.8-.6L12 21.2l-1.2-2.6-2.8.6-1-2.7-2.7-1 .6-2.8L2.8 12l2.1-1.7-.6-2.8 2.7-1 1-2.7 2.8.6z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span>
+            <span class="drawer-item-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-settings"/></svg></span>
             <span>Settings</span>
           </button>
         </div>
 
         <button type="button" id="drawerUserBtn" class="drawer-user">
           <span class="profile-avatar" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/>
-              <path d="M5 20c1.2-3.4 3.8-5 7-5s5.8 1.6 7 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-            </svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-user"/></svg>
           </span>
           <span class="drawer-user-names">
             <strong>Guest</strong>

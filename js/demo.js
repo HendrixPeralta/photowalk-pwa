@@ -261,6 +261,20 @@ function buildThemeGoals(history) {
 }
 
 /**
+ * Frames exposed per shooting day, derived from the hours actually logged so
+ * the film strip and the heatmap can never disagree. Roughly 18 frames an hour
+ * with some scatter: a working rate for someone shooting deliberately.
+ */
+function buildFrameLog(log, rand) {
+  const frames = {};
+  for (const [key, hours] of Object.entries(log)) {
+    if (!hours) continue;
+    frames[key] = Math.max(1, Math.round(hours * (14 + rand() * 10)));
+  }
+  return frames;
+}
+
+/**
  * Fills the profile with a year of plausible practice. Overwrites the activity
  * log, walk history, rewards and theme goals — photos, rooms and custom themes
  * are left alone.
@@ -277,6 +291,7 @@ export function seedDemoData(options = {}) {
 
   const history = buildWalkHistory(log, rand, cfg);
   state.activityLog = log;
+  state.frameLog = buildFrameLog(log, rand);
   state.walkHistory = history.slice(0, 200);
 
   const total = totalActivityHours();
@@ -338,6 +353,7 @@ function stripDemoParam() {
 
 function wipeStats() {
   state.activityLog = {};
+  state.frameLog = {};
   state.walkHistory = [];
   state.rewards = [];
   state.lastWalk = null;
@@ -389,7 +405,9 @@ export function ensureDemoData(options = {}) {
   const upToDate = state.demoMode
     && state.demoMode.seed === seed
     && state.walkHistory.length > 0
-    && (state.activityLog[localDateKey()] || 0) > 0;
+    && (state.activityLog[localDateKey()] || 0) > 0
+    // A fixture seeded before the frame log existed has to be topped up too.
+    && Object.keys(state.frameLog || {}).length > 0;
   if (upToDate) return null;
   return seedDemoData({ ...options, seed });
 }
