@@ -34,6 +34,13 @@
   --font-body: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-data: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
+  /* The heatmap's column pitch. The month labels and the day squares are two
+     separate flex rows that have to stay in register across 53 columns, so
+     both read their width and gap from here — a 1px difference compounds into
+     a visible slide between the labels and the grid they label. */
+  --heat-cell: 11px;
+  --heat-gap: 3px;
+
   --heat-0: #1a1b21;
   --heat-1: #4a3410;
   --heat-2: #8a5c0d;
@@ -328,25 +335,24 @@ button, input, select {
 
 .heatmap-months {
   display: flex;
-  gap: 3px;
+  gap: var(--heat-gap);
   padding-left: 1px;
 }
-/* One label per week column, so it must track .heatmap-day's width exactly —
-   any difference compounds across 53 columns and slides the months out of
-   register with the grid they label. */
+/* One label per week column: same width and gap as the grid below, via
+   --heat-cell / --heat-gap. Never hard-code these two apart. */
 .heatmap-month {
-  width: 11px;
-  flex: 0 0 11px;
+  width: var(--heat-cell);
+  flex: 0 0 var(--heat-cell);
   font-size: 0.62rem;
   color: var(--text-dim);
   white-space: nowrap;
 }
 
-.heatmap-grid { display: flex; gap: 3px; }
-.heatmap-week { display: flex; flex-direction: column; gap: 3px; }
+.heatmap-grid { display: flex; gap: var(--heat-gap); }
+.heatmap-week { display: flex; flex-direction: column; gap: var(--heat-gap); }
 
 .heatmap-day {
-  width: 10px; height: 10px;
+  width: var(--heat-cell); height: var(--heat-cell);
   border-radius: var(--radius-sm);
   background: var(--heat-0);
   flex-shrink: 0;
