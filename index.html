@@ -123,9 +123,6 @@
     <g id="i-user" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
       <circle cx="12" cy="8" r="3.4"/><path d="M5 20c1.2-3.4 3.8-5 7-5s5.8 1.6 7 5"/>
     </g>
-    <g id="i-mic" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
-      <rect x="9.5" y="3" width="5" height="10" rx="2.5"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/>
-    </g>
   </defs>
 </svg>
 
@@ -514,16 +511,10 @@
           <span class="log-btn-tag">+EXIF</span>
         </button>
         <input type="file" id="hudFrameInput" accept="image/*" class="visually-hidden">
-        <div class="hud-secondary-row">
-          <button type="button" id="hudNoteBtn" class="btn btn-primary">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mic"/></svg>
-            Field Note
-          </button>
-          <button type="button" id="hudPinBtn" class="btn btn-primary">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pin"/></svg>
-            Pin Location
-          </button>
-        </div>
+        <button type="button" id="hudPinBtn" class="btn btn-primary btn-block" style="margin-top:8px">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pin"/></svg>
+          Pin Location
+        </button>
 
         <div class="map-card">
           <div class="map-head">

@@ -51,7 +51,6 @@ export function initHud(api = {}) {
     logBtn: document.getElementById('hudLogFrameBtn'),
     logLabel: document.getElementById('hudLogFrameLabel'),
     frameInput: document.getElementById('hudFrameInput'),
-    noteBtn: document.getElementById('hudNoteBtn'),
     pinBtn: document.getElementById('hudPinBtn'),
     mapPlace: document.getElementById('hudMapPlace'),
     mapCanvas: document.getElementById('hudMapCanvas'),
@@ -67,7 +66,6 @@ export function initHud(api = {}) {
   els.goToWalks.addEventListener('click', () => navigateTo('walks'));
   els.logBtn.addEventListener('click', () => els.frameInput.click());
   els.frameInput.addEventListener('change', onFramePicked);
-  els.noteBtn.addEventListener('click', openFieldNote);
   els.pinBtn.addEventListener('click', pinLocation);
   els.trackToggle.addEventListener('click', toggleTracking);
   els.pauseBtn.addEventListener('click', togglePause);
@@ -305,31 +303,7 @@ function openFrameSheet(frameId) {
   });
 }
 
-/* ---------- Field notes and pins ---------- */
-
-function openFieldNote() {
-  const w = state.activeWalk;
-  if (!w) return;
-  openModal(`
-    <h3>Field note</h3>
-    <p class="muted">Anything you want to remember when you review the walk — what you were metering
-      for, a street to come back to, a light that only works at this hour.</p>
-    <textarea id="fieldNoteInput" class="text-input" rows="4" maxlength="500"
-      placeholder="Metered for the rim light, ignored the pavement…"></textarea>
-    <div class="theme-actions">
-      <button type="button" id="fieldNoteSaveBtn" class="btn btn-accent btn-block">Save note</button>
-    </div>
-  `);
-  document.getElementById('fieldNoteSaveBtn').addEventListener('click', () => {
-    const text = document.getElementById('fieldNoteInput').value.trim();
-    if (!text) { closeModal(); return; }
-    w.notes = w.notes || [];
-    w.notes.push({ id: uid(), at: Date.now(), text });
-    save();
-    closeModal();
-    showToast('Note saved to this walk.');
-  });
-}
+/* ---------- Pinned waypoints ---------- */
 
 async function pinLocation() {
   const w = state.activeWalk;

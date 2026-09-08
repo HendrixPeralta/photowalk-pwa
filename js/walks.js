@@ -630,8 +630,7 @@ function startWalk({ brief = false } = {}) {
     pausedAt: null,
     frames: [],  // logged in the Field HUD
     track: [],   // GPS polyline, only if the user turns tracking on
-    pins: [],
-    notes: []
+    pins: []
   };
   save();
 

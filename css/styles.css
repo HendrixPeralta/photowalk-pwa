@@ -1994,13 +1994,6 @@ input[type="file"].text-input { padding: 8px; }
   font-size: 11px;
 }
 
-.hud-secondary-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 8px;
-}
-
 /* --- Field HUD: waypoint / track map ------------------------------------- */
 .map-card {
   background: var(--surface-1);
