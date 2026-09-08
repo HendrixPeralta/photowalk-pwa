@@ -359,7 +359,9 @@ button, input, select {
 
 .heatmap-footer {
   display: flex;
-  align-items: center;
+  /* The summary can run to two lines on a narrow screen; keep the legend
+     pinned to the first one rather than letting it drift down beside line two. */
+  align-items: flex-start;
   justify-content: space-between;
   gap: 10px;
   margin-top: 10px;
@@ -1583,6 +1585,20 @@ input[type="file"].text-input { padding: 8px; }
 .film-cell.film-cell-today .film-cell-day { color: var(--accent); }
 .film-cell.film-cell-today .film-cell-can { background: var(--accent); color: var(--accent-contrast); }
 .film-cell.film-cell-today .film-cell-val { color: var(--text); font-weight: 600; }
+
+/* --- The year, nested under the week ------------------------------------- */
+/* Separated from the micro stats by a hairline rather than its own card, so
+   the cadence panel reads as one instrument with three scales on it. */
+.cadence-year {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+/* The micro stats normally provide the gap under the film strip. */
+.micro-stats.hidden + .cadence-year { margin-top: 14px; }
+.cadence-year > .label-caps { display: block; color: var(--text-dim); margin-bottom: 8px; }
+.cadence-year .heatmap-footer { margin-top: 10px; }
+.cadence-year .weekly-goal { margin-top: 12px; }
 
 /* --- Micro stat pair ----------------------------------------------------- */
 .micro-stats {

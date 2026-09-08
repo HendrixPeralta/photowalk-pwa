@@ -196,7 +196,10 @@
           </span>
         </div>
         <div id="filmStrip" class="film-strip"></div>
-        <div class="micro-stats">
+        <!-- Hidden for now (not deleted): un-hide by removing the `hidden` class.
+             walkscreen.js keeps filling these in, so they are live the moment
+             they come back. -->
+        <div class="micro-stats hidden">
           <div class="micro-stat">
             <span class="label-caps">Weekly Cadence</span>
             <span class="micro-stat-value"><strong id="cadenceWalks">0 of 3</strong><span>hours</span></span>
@@ -206,6 +209,48 @@
             <span class="label-caps">Frames Exposed</span>
             <span class="micro-stat-value"><strong id="cadenceFrames">0</strong><span>frames</span></span>
             <span id="cadenceFramesNote" class="micro-stat-note">&nbsp;</span>
+          </div>
+        </div>
+
+        <!-- The full year, folded into the same card: the film strip is this
+             week, the heatmap is the run it belongs to. -->
+        <div class="cadence-year">
+          <span class="label-caps">Shooting activity &middot; last 365 days</span>
+          <div class="heatmap-scroll" id="heatmapScroll">
+            <div class="heatmap-inner">
+              <div class="heatmap-months" id="heatmapMonths"></div>
+              <div class="heatmap-grid" id="heatmapGrid"></div>
+            </div>
+          </div>
+          <div class="heatmap-footer">
+            <span id="heatmapSummary" class="muted"></span>
+            <span class="heatmap-legend">
+              Less
+              <span class="heatmap-day" data-level="0"></span>
+              <span class="heatmap-day" data-level="1"></span>
+              <span class="heatmap-day" data-level="2"></span>
+              <span class="heatmap-day" data-level="3"></span>
+              <span class="heatmap-day" data-level="4"></span>
+              More
+            </span>
+          </div>
+
+          <!-- Hidden for now (not deleted): un-hide by removing the `hidden` class. -->
+          <div class="weekly-goal hidden">
+            <div class="goal-head">
+              <div class="segmented" id="goalPeriodRow" role="tablist">
+                <button type="button" class="segment" data-period="week">Week</button>
+                <button type="button" class="segment" data-period="month">Month</button>
+                <button type="button" class="segment" data-period="year">Year</button>
+              </div>
+              <label class="goal-edit">
+                <span class="visually-hidden">Goal hours</span>
+                <input type="number" id="goalHoursInput" class="goal-hours-input" min="0.5" step="0.5" inputmode="decimal">
+              </label>
+            </div>
+            <div id="goalPresets" class="goal-presets"></div>
+            <span id="weeklyGoalText" class="goal-text"></span>
+            <div class="timer-track"><div id="weeklyGoalBar" class="timer-fill goal-fill"></div></div>
           </div>
         </div>
       </div>
@@ -314,46 +359,6 @@
             </span>
           </button>
           <button type="button" id="finishWalkBtn" class="btn btn-primary btn-block hidden" style="margin-top:8px"><span data-label>Stop Walk</span></button>
-        </div>
-      </div>
-
-      <h2 class="section-title">Shooting activity</h2>
-      <div class="heatmap-card">
-        <div class="heatmap-scroll" id="heatmapScroll">
-          <div class="heatmap-inner">
-            <div class="heatmap-months" id="heatmapMonths"></div>
-            <div class="heatmap-grid" id="heatmapGrid"></div>
-          </div>
-        </div>
-        <div class="heatmap-footer">
-          <span id="heatmapSummary" class="muted"></span>
-          <span class="heatmap-legend">
-            Less
-            <span class="heatmap-day" data-level="0"></span>
-            <span class="heatmap-day" data-level="1"></span>
-            <span class="heatmap-day" data-level="2"></span>
-            <span class="heatmap-day" data-level="3"></span>
-            <span class="heatmap-day" data-level="4"></span>
-            More
-          </span>
-        </div>
-
-        <!-- Hidden for now (not deleted): un-hide by removing the `hidden` class. -->
-        <div class="weekly-goal hidden">
-          <div class="goal-head">
-            <div class="segmented" id="goalPeriodRow" role="tablist">
-              <button type="button" class="segment" data-period="week">Week</button>
-              <button type="button" class="segment" data-period="month">Month</button>
-              <button type="button" class="segment" data-period="year">Year</button>
-            </div>
-            <label class="goal-edit">
-              <span class="visually-hidden">Goal hours</span>
-              <input type="number" id="goalHoursInput" class="goal-hours-input" min="0.5" step="0.5" inputmode="decimal">
-            </label>
-          </div>
-          <div id="goalPresets" class="goal-presets"></div>
-          <span id="weeklyGoalText" class="goal-text"></span>
-          <div class="timer-track"><div id="weeklyGoalBar" class="timer-fill goal-fill"></div></div>
         </div>
       </div>
 
