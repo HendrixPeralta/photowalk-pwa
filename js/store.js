@@ -26,18 +26,25 @@ function defaultState() {
     rooms: {},
     currentRoom: null,
     activeWalk: null,
-    // The most recent finished walk, kept so the Analyze tab can pin its theme
+    // The most recent finished walk, kept so the Analysis tab can pin its theme
     // tips for a day: { themeId, mode, durationMin, endedAt, challengesDone, tipDismissed }
     lastWalk: null,
     // Newest first, capped at WALK_HISTORY_LIMIT:
     // { id, themeId, mode, hours, challengesDone, challengeCount, endedAt }
     walkHistory: [],
     activityLog: {}, // { 'YYYY-MM-DD': hoursSpentShooting }
+    // { 'YYYY-MM-DD': framesExposed } — frames logged in the Field HUD, which
+    // is what the film strip and the "frames exposed" tile count.
+    frameLog: {},
     rewards: [], // { id, title, targetHours, baselineHours, createdAt, claimedAt, notified }
     customThemes: [], // { id, title, brief, concepts: [], challenges: [string] } — user-built themes
     // Set only by the screenshot fixture in demo.js: { seed, seededAt }. Its
     // presence is what keeps demo mode on across refreshes.
     demoMode: null,
+    // Set once by backstory.js when a new profile is given its three months of
+    // starting history: { seed, days, seededAt }. Its presence is what stops a
+    // second backstory ever being written over real practice.
+    seededHistory: null,
 
     reminder: { enabled: false, time: '18:00', days: [1, 3, 5] } // days: 0=Sun
   };

@@ -165,9 +165,21 @@ export function rewardTimeline() {
   const start = last ? targetTotalHours(last)
     : upcoming.length ? Math.min(...upcoming.map((r) => r.baselineHours))
     : 0;
-  const end = upcoming.length ? targetTotalHours(upcoming[upcoming.length - 1]) : now;
-  const span = Math.max(end - start, MIN_AXIS_SPAN_HOURS);
-  const pctOf = (hours) => clamp(((hours - start) / span) * 100, 0, 100);
+
+  // The axis is piecewise, not linear in hours: every leg between two stops
+  // gets an equal slice of the bar. A far-off reward (say 200h) would otherwise
+  // squash the walk toward the next one (10h) into a sliver of fill.
+  const nodes = [start, ...upcoming.map(targetTotalHours)];
+  const legPct = 100 / Math.max(nodes.length - 1, 1);
+  const pctOf = (hours) => {
+    for (let i = 1; i < nodes.length; i++) {
+      if (hours > nodes[i]) continue;
+      const leg = Math.max(nodes[i] - nodes[i - 1], MIN_AXIS_SPAN_HOURS);
+      const within = (hours - nodes[i - 1]) / leg;
+      return clamp((i - 1 + within) * legPct, 0, 100);
+    }
+    return nodes.length > 1 ? 100 : 0;
+  };
 
   const stops = [];
   if (last) {
@@ -207,9 +219,15 @@ function renderRewardBar() {
   }
 
   const next = stops.find((s) => s.kind === 'next');
-  const marksHtml = stops.map((s) => `
-    <span class="reward-bar-mark ${s.kind === 'earned' ? 'reward-bar-mark-done' : ''}"
-          style="left:${s.pct}%" title="${escapeHtml(s.title)}"></span>`).join('');
+
+  // Only the far end of the axis is marked. The reward behind us is the origin,
+  // and a dot pinned to the left edge reads as a stray blob rather than an
+  // achievement; the rewards in between are named in the legend below. That
+  // leaves one circle that moves: the handle riding the end of the fill.
+  const endStop = stops.filter((s) => s.kind === 'next').pop();
+  const marksHtml = endStop
+    ? `<span class="reward-bar-mark" style="left:${endStop.pct}%" title="${escapeHtml(endStop.title)}"></span>`
+    : '';
 
   const legendHtml = stops.map((s) => `
     <li class="reward-leg ${s.kind === 'earned' ? 'reward-leg-done' : ''}">
@@ -217,6 +235,17 @@ function renderRewardBar() {
       <span class="reward-leg-title">${escapeHtml(s.title)}</span>
       <span class="reward-leg-note">${escapeHtml(s.note)}</span>
     </li>`).join('');
+
+  // Any progress at all should read as a visible nub rather than a hairline the
+  // track's rounded cap swallows — and that 2% floor is also what keeps the
+  // handle clear of the left end of the track.
+  const fillPct = upcoming ? (nowPct > 0 ? Math.max(nowPct, 2) : 0) : 100;
+  // The handle sits at exactly the fill's width, so the two always end at the
+  // same point and animate as one. With nothing banked there is no head to the
+  // fill, so there is no handle either.
+  const handleHtml = fillPct > 0
+    ? `<span class="reward-bar-handle" style="left:${fillPct}%" title="${formatHours(now)} shot"></span>`
+    : '';
 
   els.bar.innerHTML = `
     <div class="reward-bar-head">
@@ -226,8 +255,9 @@ function renderRewardBar() {
         : 'Every reward earned — set another one'}</span>
     </div>
     <div class="reward-bar-track">
-      <div class="reward-bar-fill" style="width:${upcoming ? nowPct : 100}%"></div>
+      <div class="reward-bar-fill" style="width:${fillPct}%"></div>
       ${marksHtml}
+      ${handleHtml}
     </div>
     <ul class="reward-bar-legend">${legendHtml}</ul>
     <button type="button" class="btn btn-ghost btn-sm" data-action="manage">Manage rewards</button>`;

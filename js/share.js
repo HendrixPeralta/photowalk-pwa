@@ -4,6 +4,8 @@ import { qrSvg } from './qr.js';
 import { openModal, closeModal } from './modal.js';
 import { showToast } from './toast.js';
 import { analyzeStoredImage } from './analysis.js';
+import { readExif } from './exif.js';
+import { renderDebrief } from './debrief.js';
 import { escapeHtml, uid, roomCode, formatTime, loadImage, readFileAsDataUrl, drawToCanvas, canvasToBlob, navigateTo } from './util.js';
 
 const ROOM_MAX_DIM = 900;
@@ -97,6 +99,8 @@ export function renderShare() {
   els.photosGrid.querySelectorAll('.room-thumb').forEach((btn) => {
     btn.addEventListener('click', () => openPhotoDetail(room.code, btn.dataset.id));
   });
+
+  renderDebrief();
 }
 
 function renderSharedNotice() {
@@ -212,6 +216,9 @@ async function uploadPhotos() {
         note,
         ts: Date.now(),
         comments: [],
+        // Read before the resize, which strips it: the debrief's side-by-side
+        // view is only worth anything with both exposures attached.
+        exif: await readExif(file),
         // Stamped so partners can see which walk theme a shot was made under.
         themeId: state.activeWalk ? state.activeWalk.themeId : null
       });

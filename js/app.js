@@ -3,7 +3,12 @@ import { takeSharedFiles } from './db.js';
 import { formatHours } from './util.js';
 import { initModal } from './modal.js';
 import { initToast, showToast } from './toast.js';
-import { initWalks, quickStartWalk, renderHomeWalkState } from './walks.js';
+import {
+  initWalks, renderHomeWalkState, pauseWalk, resumeWalk, activeTheme, finishActiveWalk
+} from './walks.js';
+import { initWalkScreen, renderWalkScreen } from './walkscreen.js';
+import { initHud, renderHud, pauseHudRendering } from './hud.js';
+import { initDebrief } from './debrief.js';
 import { initAnalysis } from './analysis.js';
 import { initAlbum, renderAlbum } from './album.js';
 import { initShare, renderShare, joinRoom, attachSharedFiles } from './share.js';
@@ -11,31 +16,46 @@ import { initHeatmap, renderHeatmap } from './heatmap.js';
 import { initRewards, renderRewards } from './rewards.js';
 import { initReminders, syncReminderSchedule, maybeNudgeOnOpen } from './reminders.js';
 import { initProfile } from './profile.js';
+import { initDemoPanel } from './demopanel.js';
 import { backfillMilestones } from './milestones.js';
+
+// The header shows which instrument you are looking at, under the wordmark.
+const SCREEN_TITLES = {
+  walks: 'Walks',
+  hud: 'Field HUD',
+  analyze: 'Analysis',
+  album: 'Album',
+  share: 'Partners',
+  settings: 'Settings'
+};
 
 function showView(name) {
   document.querySelectorAll('.view').forEach((v) => v.classList.toggle('hidden', v.dataset.view !== name));
   document.querySelectorAll('.nav-btn').forEach((b) => b.classList.toggle('active', b.dataset.view === name));
-  if (name === 'home') renderHome();
-  if (name === 'walks') renderStatTiles();
+  document.getElementById('screenTitle').textContent = SCREEN_TITLES[name] || 'PhotoWalk';
+
+  // The HUD runs a one-second clock; don't leave it ticking behind other tabs.
+  if (name !== 'hud') pauseHudRendering();
+
+  if (name === 'walks') renderWalks();
+  if (name === 'hud') renderHud();
   if (name === 'album') renderAlbum();
   if (name === 'share') renderShare();
+
+  document.querySelector('.views').scrollTo({ top: 0 });
 }
 
-// The stat tiles live on the Walks screen.
-function renderStatTiles() {
-  document.getElementById('statHours').textContent = formatHours(totalActivityHours());
-  document.getElementById('statWalks').textContent = String(state.profile.walksCompleted);
-}
-
-function renderHome() {
+function renderWalks() {
   // currentStreak(), not profile.streak: the stored number is only rewritten
   // when a walk finishes, so it keeps reading high after the streak has lapsed.
   document.getElementById('streakBadgeText').textContent = String(currentStreak());
+  document.getElementById('statHours').textContent = formatHours(totalActivityHours());
+  document.getElementById('statWalks').textContent = String(state.profile.walksCompleted);
 
-  // Start cards or the running walk (clock + Stop), never both.
+  // The launcher or the running walk (clock + HUD + Stop), never both.
   renderHomeWalkState();
 
+  renderWalkScreen();
   renderHeatmap();
   renderRewards();
 }
@@ -44,8 +64,6 @@ function initNav() {
   document.querySelectorAll('.nav-btn').forEach((btn) => {
     btn.addEventListener('click', () => showView(btn.dataset.view));
   });
-  document.getElementById('quickCasualBtn').addEventListener('click', () => quickStartWalk('casual'));
-  document.getElementById('quickGuidedBtn').addEventListener('click', () => quickStartWalk('guided'));
 }
 
 /**
@@ -106,7 +124,8 @@ function initInstallPrompt() {
 /**
  * Screenshot fixture: `?demo` seeds a year of believable practice, `?demo=clear`
  * hands the real profile back, and any other value is used as the generator
- * seed for a different-looking year.
+ * seed for a different-looking year. Distinct from the three months of starting
+ * history below: the fixture is temporary and reversible, that is permanent.
  *
  * Demo mode is sticky — the flag rides along in saved state, so the module also
  * loads on a plain refresh and tops the data up if it has gone missing or no
@@ -114,14 +133,42 @@ function initInstallPrompt() {
  */
 async function maybeSeedDemoData() {
   const value = new URLSearchParams(window.location.search).get('demo');
-  if (value === null && !state.demoMode) return;
+  if (value === null && !state.demoMode) return false;
   try {
     const demo = await import('./demo.js');
     demo.installDemoHooks();
-    if (value === 'clear') { demo.clearDemoData(); return; }
+    // Leaving demo mode is a wipe or a restore, and either way the starting
+    // history must keep its hands off it — hence the "handled" answer.
+    if (value === 'clear') { demo.clearDemoData(); return true; }
     demo.ensureDemoData(Number(value) > 1 ? { seed: Number(value) } : {});
   } catch (err) {
     console.warn('PhotoWalk: could not load demo data.', err);
+  }
+  return true;
+}
+
+/**
+ * A profile with nothing in it makes every screen on the app look broken: an
+ * empty heatmap, a dead streak, reward bars with nowhere to point. So a new
+ * profile is given three months of practice to stand on, once, and from then on
+ * it is ordinary history that real walks add to.
+ *
+ * `?history=seed` rewrites it (handy after clearing storage) and `?history=undo`
+ * hands back the profile as it was before the seed landed. Both still work
+ * while demo mode is on; the automatic seed does not, because the fixture owns
+ * the stats then.
+ */
+async function maybeSeedStartingHistory({ skipAuto = false } = {}) {
+  const value = new URLSearchParams(window.location.search).get('history');
+  if (skipAuto && value === null) return;
+  try {
+    const backstory = await import('./backstory.js');
+    backstory.installHistoryHooks();
+    if (value === 'undo') { backstory.undoStarterHistory(); return; }
+    if (value === 'seed') { backstory.seedStarterHistory(); return; }
+    backstory.maybeSeedStarterHistory();
+  } catch (err) {
+    console.warn('PhotoWalk: could not seed the starting history.', err);
   }
 }
 
@@ -145,9 +192,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   backfillMilestones();
 
   // Before any view renders, so the seeded stats are what Home paints.
-  await maybeSeedDemoData();
+  const demoHandledStats = await maybeSeedDemoData();
+  await maybeSeedStartingHistory({ skipAuto: demoHandledStats });
 
+  // Before initWalks: the launch button's mode and GPS chrome is rendered from
+  // inside applyMode(), which runs during initWalks().
+  initWalkScreen();
   initWalks();
+  initHud({
+    pause: pauseWalk,
+    resume: resumeWalk,
+    finish: finishActiveWalk,
+    themeOf: activeTheme
+  });
+  initDebrief();
   initAnalysis();
   initAlbum();
   initShare();
@@ -155,18 +213,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   initRewards();
   initReminders();
   initProfile();
+  initDemoPanel();
   initNav();
   initInstallPrompt();
   initServiceWorker();
 
   window.addEventListener('photowalk:stats-changed', () => {
-    renderHome();
-    renderStatTiles();
+    renderWalks();
     renderAlbum();
   });
   window.addEventListener('photowalk:navigate', (e) => showView(e.detail.view));
 
-  showView('home');
+  showView('walks');
   handleLaunchIntent();
 
   // The scheduling window only reaches two weeks out, so top it up every launch.

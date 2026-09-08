@@ -30,7 +30,7 @@ PhotoWalk is an app that attacks both. Let me show you.
 
 ## 1:15 — Part 1: See what you're looking at (105 sec)
 
-*Switch to the Analyze screen. Load a photo the audience can react to.*
+*Switch to the Analysis screen. Load a photo the audience can react to.*
 
 Here's a photo. It looks good. Why?
 
@@ -58,7 +58,7 @@ And you can put your shot next to a photo you admire, side by side, same tools o
 
 ## 3:00 — Part 2: Make practice visible (95 sec)
 
-*Switch to Home.*
+*Switch to the Walks screen.*
 
 Okay, second problem. Knowing things doesn't make you good. Reps do.
 
@@ -97,7 +97,34 @@ Thank you.
 ## Delivery notes
 
 - **The hands-up opener is the whole hook.** Don't rush it — the second question is what lands.
-- **Have one photo pre-loaded** in Analyze. Fumbling with a file picker on stage kills 20 seconds.
+- **Have one photo pre-loaded** in Analysis. Fumbling with a file picker on stage kills 20 seconds.
 - Pick a demo photo with **obvious blue shadows or clipped highlights** so the plain-language caption says something dramatic.
 - If you're running long, cut compare mode (0:15) and the walk-themes aside (0:20).
 - If asked "why no AI?": *because an AI score tells you what it thinks, not how to see. The goal is your eye, not the app's.*
+
+---
+
+## Demo data
+
+A fresh profile is not empty: on first open it is given **three months of
+practice** — an activity log, the walks behind it, the frames, four rewards at
+different stages and a theme goal — all generated from one log, so the heatmap,
+the streak badge, the goal bars and the reward timeline agree with each other.
+It is written **once** and then left alone: real walks pile on top of it, and it
+is never regenerated. `js/backstory.js` owns it.
+
+**Settings → Demo data** is the one-tap version, and the card always states what
+is currently loaded:
+
+- **Fill 3 months** — the three-month history, written for keeps
+- **Fill a year** — the full-year fixture (see below)
+- **Restore mine** — hand back the profile as it was before either landed
+
+The same three by URL, for a phone that is easier to type into than to tap:
+`?history=seed`, `?history=undo`, `?demo=1`, `?demo=clear`. In the console,
+`photowalkHistory.status()` reports what the profile claims.
+
+For a screenshot that needs a **full year** of history instead, `?demo=1` parks
+the real profile and seeds twelve months from the same generator; `?demo=clear`
+gives it back. Demo mode re-seeds itself so its streak always ends today, which
+is why it is the one to use on stage if the laptop has been sitting for a week.

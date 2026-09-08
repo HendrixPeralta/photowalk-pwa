@@ -1,5 +1,5 @@
-const CACHE_NAME = 'photowalk-v23';
-const RUNTIME_CACHE = 'photowalk-runtime-v1';
+const CACHE_NAME = 'photowalk-v26';
+const RUNTIME_CACHE = 'photowalk-runtime-v2';
 const CURRENT_CACHES = [CACHE_NAME, RUNTIME_CACHE];
 
 const PRECACHE_URLS = [
@@ -13,6 +13,9 @@ const PRECACHE_URLS = [
   './js/exif.js',
   './js/qr.js',
   './js/concepts.js',
+  './js/sun.js',
+  './js/geo.js',
+  './js/sheet.js',
   './js/openverse.js',
   './js/modal.js',
   './js/toast.js',
@@ -24,9 +27,15 @@ const PRECACHE_URLS = [
   './js/milestones.js',
   './js/profile.js',
   './js/walks.js',
+  './js/walkscreen.js',
+  './js/hud.js',
+  './js/deconstruct.js',
+  './js/debrief.js',
   './js/analysis.js',
   './js/album.js',
   './js/share.js',
+  './js/backstory.js',
+  './js/demopanel.js',
   './js/demo.js',
   './js/app.js',
   './icons/icon.svg',
@@ -36,6 +45,15 @@ const PRECACHE_URLS = [
 // Public-domain concept examples are fetched from here and cached so the
 // explainer keeps working after the first view, offline included.
 const PHOTO_API_HOST = 'api.openverse.org';
+
+// Third-party assets that are worth keeping once they've been fetched: the
+// interface fonts (so the Precision Darkroom typography survives going offline)
+// and the map tiles for routes already walked.
+const RUNTIME_HOSTS = [
+  'fonts.googleapis.com',
+  'fonts.gstatic.com',
+  'tile.openstreetmap.org'
+];
 
 /* ---------- IndexedDB (mirrors js/db.js — keep the names in sync) ---------- */
 
@@ -118,7 +136,7 @@ self.addEventListener('fetch', (event) => {
 
   if (event.request.method !== 'GET') return;
 
-  if (url.hostname === PHOTO_API_HOST) {
+  if (url.hostname === PHOTO_API_HOST || RUNTIME_HOSTS.includes(url.hostname)) {
     event.respondWith(cacheFirstRuntime(event.request));
     return;
   }

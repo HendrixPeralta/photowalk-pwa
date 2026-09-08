@@ -4,6 +4,7 @@ import { fetchConceptPhotos, safeImageUrl } from './openverse.js';
 import { openModal, closeModal } from './modal.js';
 import { showToast } from './toast.js';
 import { escapeHtml, navigateTo, formatHours, uid } from './util.js';
+import { renderLaunchMeta } from './walkscreen.js';
 import { activeRewardProgress, claimRewardUnlocks } from './rewards.js';
 import { claimNewMilestones } from './milestones.js';
 
@@ -94,7 +95,7 @@ export function initWalks() {
   els.viewConceptsBtn.addEventListener('click', () => theme && openConceptModal(theme));
   els.editThemeBtn.addEventListener('click', () => theme && openThemeEditorModal(theme));
   els.dismissThemeBtn.addEventListener('click', dismissTheme);
-  els.startWalkBtn.addEventListener('click', () => startWalk());
+  els.startWalkBtn.addEventListener('click', launchWalk);
   els.finishWalkBtn.addEventListener('click', () => finishWalk(false));
   els.homeStopBtn.addEventListener('click', () => finishWalk(false));
   els.homeBriefBtn.addEventListener('click', () => theme && openWalkBrief());
@@ -150,13 +151,35 @@ function setMode(next) {
   applyMode(next);
 }
 
+/**
+ * The hero Start Photowalk button. With a theme already on screen this is the
+ * old Start Walk; without one it picks a theme and opens the brief, which is
+ * what the two Home quick-start cards used to do.
+ */
+export function launchWalk() {
+  if (state.activeWalk) return;
+  if (theme) startWalk();
+  else quickStartWalk(mode);
+}
+
+/**
+ * Button labels live in a [data-label] span now, because the launcher and the
+ * HUD buttons wrap their text in markup that textContent would wipe out.
+ */
+function setBtnLabel(btn, text) {
+  const slot = btn.querySelector('[data-label]');
+  if (slot) slot.textContent = text;
+  else btn.textContent = text;
+}
+
 function applyMode(next) {
   mode = next;
   els.modeCasual.classList.toggle('active', mode === 'casual');
   els.modeGuided.classList.toggle('active', mode === 'guided');
   els.durationRow.classList.toggle('hidden', mode !== 'guided');
-  els.startWalkBtn.textContent = 'Start Walk';
-  els.finishWalkBtn.textContent = 'Stop Walk';
+  setBtnLabel(els.startWalkBtn, theme ? 'Start Walk' : 'Start Photowalk');
+  setBtnLabel(els.finishWalkBtn, 'Stop Walk');
+  renderLaunchMeta(mode);
   if (theme) renderThemeCard();
 }
 
@@ -175,6 +198,7 @@ function useTheme(t, reason = '') {
   // Hand the accent over to Start Walk: rerolling is the fallback now, not the
   // main action, and two accent buttons on screen read as two primary choices.
   els.getThemeBtn.classList.replace('btn-accent', 'btn-primary');
+  setBtnLabel(els.startWalkBtn, 'Start Walk');
   renderThemeCard();
   els.startWalkBtn.classList.remove('hidden');
   els.finishWalkBtn.classList.add('hidden');
@@ -192,20 +216,32 @@ function dismissTheme() {
   resetThemeUi();
 }
 
+/**
+ * Mini-challenges belong to the Guided Sprint. Casual mode is the theme on its
+ * own — nothing to tick off, stop whenever you're done. Read the mode off the
+ * running walk when there is one, so a restored walk can't disagree with the
+ * mode it was started in.
+ */
+function challengesFor(t = theme) {
+  const walkMode = state.activeWalk ? state.activeWalk.mode : mode;
+  return t && walkMode === 'guided' ? t.challenges : [];
+}
+
 function renderThemeCard() {
+  const challenges = challengesFor();
   els.themeCard.classList.remove('hidden');
-  els.challengesSection.classList.toggle('hidden', !theme.challenges.length);
+  els.challengesSection.classList.toggle('hidden', !challenges.length);
   els.themeTitle.textContent = theme.title;
   els.themeBrief.textContent = theme.brief;
   els.themeReason.textContent = themeReason;
   els.themeReason.classList.toggle('hidden', !themeReason);
   els.viewConceptsBtn.classList.toggle('hidden', !theme.concepts.length);
-  els.challengesList.innerHTML = challengeListHtml(theme);
+  els.challengesList.innerHTML = challengeListHtml(challenges);
   syncChallengeChecks();
 }
 
-function challengeListHtml(t) {
-  return t.challenges.map((c, i) => `
+function challengeListHtml(list) {
+  return list.map((c, i) => `
     <li>
       <label class="challenge-item">
         <input type="checkbox" data-idx="${i}" class="challenge-check">
@@ -267,6 +303,7 @@ function openThemeEditorModal(existingTheme = null) {
     <input type="text" id="customThemeTitle" class="text-input" placeholder="Title (e.g. Rainy Day Reflections)" maxlength="60" value="${existingTheme ? escapeHtml(existingTheme.title) : ''}">
     <input type="text" id="customThemeBrief" class="text-input" placeholder="Brief: what are you hunting for? (optional)" maxlength="140" value="${existingTheme ? escapeHtml(existingTheme.brief) : ''}">
     <h4 class="subsection-title">Pick from existing challenges</h4>
+    <p class="muted card-text">Optional — challenges only show up on a Guided Sprint. A casual walk runs on the theme alone.</p>
     <ul class="challenges-list">${pickHtml}</ul>
     <h4 class="subsection-title">Add your own</h4>
     <div class="reward-form">
@@ -313,7 +350,6 @@ function openThemeEditorModal(existingTheme = null) {
     const challenges = [...checked, ...extras];
 
     if (!title) { showToast('Give your theme a title.'); return; }
-    if (!challenges.length) { showToast('Pick or add at least one challenge.'); return; }
 
     let saved;
     if (editingCustomId) {
@@ -390,9 +426,10 @@ function openWalkBrief() {
     ? `Guided walk &middot; ${w.durationMin} min on the clock`
     : 'Casual walk &middot; no timer, stop it whenever you are done';
 
-  const challenges = theme.challenges.length
+  const briefChallenges = challengesFor();
+  const challenges = briefChallenges.length
     ? `<h4 class="subsection-title">Mini-challenges</h4>
-       <ul class="challenges-list">${challengeListHtml(theme)}</ul>`
+       <ul class="challenges-list">${challengeListHtml(briefChallenges)}</ul>`
     : '';
   const conceptsBtn = theme.concepts.length
     ? `<button type="button" id="briefConceptsBtn" class="btn btn-ghost btn-block">View concept examples</button>`
@@ -599,14 +636,17 @@ function startWalk({ brief = false } = {}) {
     themeId: theme.id,
     startedAt: brief ? null : Date.now(),
     durationMin: guided ? guidedDurationMin() : null,
-    challengesChecked: new Array(theme.challenges.length).fill(false),
-    nudges: []
+    challengesChecked: new Array(challengesFor().length).fill(false),
+    nudges: [],
+    pausedAt: null,
+    frames: []  // logged in the Field HUD
   };
   save();
 
   applyActiveWalkUi();
   if (brief) openWalkBrief();
   else beginShooting();
+  window.dispatchEvent(new CustomEvent('photowalk:walk-changed'));
   window.dispatchEvent(new CustomEvent('photowalk:stats-changed'));
 }
 
@@ -639,8 +679,8 @@ function restoreActiveWalk() {
   els.quickDurationSelect.disabled = true;
   renderThemeCard();
   applyActiveWalkUi();
-  if (w.startedAt) runTimer();
-  else openWalkBrief();
+  if (w.startedAt && !w.pausedAt) runTimer();
+  else if (!w.startedAt) openWalkBrief();
 }
 
 function applyActiveWalkUi() {
@@ -664,10 +704,14 @@ function resetThemeUi() {
   els.dismissThemeBtn.disabled = false;
   els.getThemeBtn.textContent = 'Get a Theme';
   els.getThemeBtn.classList.replace('btn-primary', 'btn-accent');
+  setBtnLabel(els.startWalkBtn, 'Start Photowalk');
   els.durationSelect.disabled = false;
   els.quickDurationSelect.disabled = false;
   syncDurationSelects();
-  els.startWalkBtn.classList.add('hidden');
+  // The launcher stays put. It needed a theme back when it only started a
+  // themed walk; it quick-starts one now, so hiding it on the way back to idle
+  // left the screen with no way to start a walk until the next reload.
+  els.startWalkBtn.classList.remove('hidden');
   els.finishWalkBtn.classList.add('hidden');
   els.timerSection.classList.add('hidden');
   els.themeCard.classList.add('hidden');
@@ -696,6 +740,7 @@ function tick() {
   const w = state.activeWalk;
   if (!w) { clearInterval(timerHandle); timerHandle = null; return; }
   if (!w.startedAt) return; // still on the brief, clock hasn't started
+  if (w.pausedAt) return;   // frozen until the HUD resumes it
 
   const elapsed = Date.now() - w.startedAt;
 
@@ -719,6 +764,48 @@ function tick() {
 }
 
 /**
+ * Freezes the walk clock. Rather than track a separate "paused for" total,
+ * resume slides startedAt (and every scheduled nudge) forward by the length of
+ * the pause, so elapsed time, the countdown, the nudge plan and the hours
+ * banked at the end all stay consistent with one number.
+ */
+export function pauseWalk() {
+  const w = state.activeWalk;
+  if (!w || !w.startedAt || w.pausedAt) return;
+  w.pausedAt = Date.now();
+  clearInterval(timerHandle);
+  timerHandle = null;
+  cancelScheduledNudges();
+  save();
+  showToast('Walk paused — the clock is stopped.');
+  window.dispatchEvent(new CustomEvent('photowalk:walk-changed'));
+}
+
+export function resumeWalk() {
+  const w = state.activeWalk;
+  if (!w || !w.pausedAt) return;
+  const delta = Date.now() - w.pausedAt;
+  w.startedAt += delta;
+  (w.nudges || []).forEach((n) => { n.at += delta; });
+  w.pausedAt = null;
+  save();
+  if (w.mode === 'guided') scheduleTriggeredNudges();
+  runTimer();
+  showToast('Back on the clock.');
+  window.dispatchEvent(new CustomEvent('photowalk:walk-changed'));
+}
+
+/** The theme the active walk is running, for the Field HUD's directive card. */
+export function activeTheme() {
+  return theme;
+}
+
+/** Lets the Field HUD's Complete button end the walk through the normal path. */
+export function finishActiveWalk() {
+  finishWalk(false);
+}
+
+/**
  * Home shows either the two start cards or the running walk — never both, so
  * there is always exactly one place to start and one place to stop.
  */
@@ -733,6 +820,7 @@ export function renderHomeWalkState() {
   els.homeMode.textContent = guided ? `Guided \u00b7 ${w.durationMin} min` : 'Casual';
   els.homeTimerLabel.textContent = guided ? 'left' : 'elapsed';
   els.homeTrack.classList.toggle('hidden', !guided);
+  els.homeBriefBtn.textContent = guided ? 'Theme & challenges' : 'View theme';
   els.homeBriefBtn.classList.toggle('hidden', !theme);
   tick();
 }
@@ -741,7 +829,10 @@ function computeElapsedHours(walk) {
   const capMs = walk.mode === 'guided'
     ? walk.durationMin * 60000
     : CASUAL_MAX_HOURS * 3600000;
-  return Math.max(0, Math.min(Date.now() - walk.startedAt, capMs)) / 3600000;
+  // Finishing from a paused HUD must bank the time up to the pause, not the
+  // wall-clock time since, or a walk left paused overnight logs the night.
+  const until = walk.pausedAt || Date.now();
+  return Math.max(0, Math.min(until - walk.startedAt, capMs)) / 3600000;
 }
 
 function finishWalk(auto) {
@@ -821,7 +912,7 @@ function completeWalk(w, hours, auto) {
     tipDismissed: false
   };
 
-  // lastWalk drives the Analyze tab's pinned tips; walkHistory is the long
+  // lastWalk drives the Analysis tab's pinned tips; walkHistory is the long
   // record that theme suggestions and milestones read from.
   state.lastWalk = record;
   recordWalk(record);
@@ -840,6 +931,7 @@ function completeWalk(w, hours, auto) {
   const milestones = claimNewMilestones(record);
 
   openWalkSummary(finishedTheme, record, hours, auto, unlockedRewards, milestones);
+  window.dispatchEvent(new CustomEvent('photowalk:walk-changed'));
   window.dispatchEvent(new CustomEvent('photowalk:stats-changed'));
 }
 
