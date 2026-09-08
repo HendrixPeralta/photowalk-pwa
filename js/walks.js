@@ -69,8 +69,7 @@ export function initWalks() {
     homeTrack: document.getElementById('homeWalkTrack'),
     homeBar: document.getElementById('homeWalkBar'),
     homeStopBtn: document.getElementById('homeStopWalkBtn'),
-    homeBriefBtn: document.getElementById('homeWalkBriefBtn'),
-    homeHudBtn: document.getElementById('homeWalkHudBtn')
+    homeBriefBtn: document.getElementById('homeWalkBriefBtn')
   };
 
   const durationOptions = DURATIONS.map((d) => `<option value="${d.value}">${d.label}</option>`).join('');
@@ -100,7 +99,6 @@ export function initWalks() {
   els.finishWalkBtn.addEventListener('click', () => finishWalk(false));
   els.homeStopBtn.addEventListener('click', () => finishWalk(false));
   els.homeBriefBtn.addEventListener('click', () => theme && openWalkBrief());
-  els.homeHudBtn.addEventListener('click', () => navigateTo('hud'));
 
   // Delegated so the checkboxes work the same whether they are on the Walks tab
   // or in the walk pop-up, which is rendered on demand.
