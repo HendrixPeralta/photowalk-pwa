@@ -219,9 +219,15 @@ function renderRewardBar() {
   }
 
   const next = stops.find((s) => s.kind === 'next');
-  const marksHtml = stops.map((s) => `
-    <span class="reward-bar-mark ${s.kind === 'earned' ? 'reward-bar-mark-done' : ''}"
-          style="left:${s.pct}%" title="${escapeHtml(s.title)}"></span>`).join('');
+
+  // Only the far end of the axis is marked. The reward behind us is the origin,
+  // and a dot pinned to the left edge reads as a stray blob rather than an
+  // achievement; the rewards in between are named in the legend below. That
+  // leaves one circle that moves: the handle riding the end of the fill.
+  const endStop = stops.filter((s) => s.kind === 'next').pop();
+  const marksHtml = endStop
+    ? `<span class="reward-bar-mark" style="left:${endStop.pct}%" title="${escapeHtml(endStop.title)}"></span>`
+    : '';
 
   const legendHtml = stops.map((s) => `
     <li class="reward-leg ${s.kind === 'earned' ? 'reward-leg-done' : ''}">
@@ -231,8 +237,15 @@ function renderRewardBar() {
     </li>`).join('');
 
   // Any progress at all should read as a visible nub rather than a hairline the
-  // track's rounded cap swallows.
+  // track's rounded cap swallows — and that 2% floor is also what keeps the
+  // handle clear of the left end of the track.
   const fillPct = upcoming ? (nowPct > 0 ? Math.max(nowPct, 2) : 0) : 100;
+  // The handle sits at exactly the fill's width, so the two always end at the
+  // same point and animate as one. With nothing banked there is no head to the
+  // fill, so there is no handle either.
+  const handleHtml = fillPct > 0
+    ? `<span class="reward-bar-handle" style="left:${fillPct}%" title="${formatHours(now)} shot"></span>`
+    : '';
 
   els.bar.innerHTML = `
     <div class="reward-bar-head">
@@ -244,6 +257,7 @@ function renderRewardBar() {
     <div class="reward-bar-track">
       <div class="reward-bar-fill" style="width:${fillPct}%"></div>
       ${marksHtml}
+      ${handleHtml}
     </div>
     <ul class="reward-bar-legend">${legendHtml}</ul>
     <button type="button" class="btn btn-ghost btn-sm" data-action="manage">Manage rewards</button>`;
