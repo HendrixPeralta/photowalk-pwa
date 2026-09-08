@@ -187,10 +187,6 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-film"/></svg>
             <span class="label-caps">Discipline Cadence</span>
           </span>
-          <span class="cadence-chain">
-            <svg viewBox="0 0 24 24" aria-hidden="true" style="width:12px;height:12px"><use href="#i-bolt"/></svg>
-            <span id="cadenceChain">0-Day Chain</span>
-          </span>
         </div>
         <div id="filmStrip" class="film-strip"></div>
         <!-- Hidden for now (not deleted): un-hide by removing the `hidden` class.
@@ -286,7 +282,7 @@
               </span>
               <span class="mode-card-badge">No timer</span>
             </span>
-            <span class="mode-card-desc">Broad, relaxed inspiration. A theme and its challenges, finished whenever you&rsquo;re done.</span>
+            <span class="mode-card-desc">Broad, relaxed inspiration. Just a theme to shoot, finished whenever you&rsquo;re done.</span>
           </button>
           <button type="button" id="modeGuidedBtn" class="mode-card">
             <span class="mode-card-head">
@@ -296,7 +292,7 @@
               </span>
               <span class="mode-card-badge" id="guidedPacingBadge">30m Pacing</span>
             </span>
-            <span class="mode-card-desc">The same theme and challenges, plus a countdown and mid-walk nudges.</span>
+            <span class="mode-card-desc">The same themes, plus mini-challenges, a countdown and mid-walk nudges.</span>
           </button>
         </div>
 
@@ -606,8 +602,23 @@
           <button type="button" id="resetGridBtn" class="chip-btn chip-btn-push">Reset</button>
           <button type="button" id="fitViewBtn" class="chip-btn">Fit</button>
         </div>
-        <div id="overlayTipBox" class="overlay-tip hidden"></div>
         <p class="hint">Drag a guide line to move just that line. Scroll or pinch to zoom, drag to pan, double-tap for 2&times;.</p>
+
+        <div class="gamut-head">
+          <h4 class="subsection-title">Colour Gamut Extraction</h4>
+          <span class="gamut-count" id="gamutCount">0 clusters</span>
+        </div>
+        <div class="harmony-row" id="harmonyRow" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-compare"/></svg>
+          <div>
+            <span class="label-caps">Harmonic Relationship</span>
+            <strong id="harmonyName"></strong>
+          </div>
+        </div>
+        <div class="gamut-bar" id="gamutBar"></div>
+        <div class="gamut-specs" id="gamutSpecs"></div>
+        <div id="paletteRow" class="palette-row hidden"></div>
+        <p id="paletteCaption" class="hint"></p>
 
         <h4 class="subsection-title">Luminance Spectrum</h4>
         <div id="histGrid" class="hist-grid">
@@ -634,22 +645,6 @@
             <p id="tonalKeyText"></p>
           </div>
         </div>
-
-        <div class="gamut-head">
-          <h4 class="subsection-title">Colour Gamut Extraction</h4>
-          <span class="gamut-count" id="gamutCount">0 clusters</span>
-        </div>
-        <div class="harmony-row" id="harmonyRow" hidden>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-compare"/></svg>
-          <div>
-            <span class="label-caps">Harmonic Relationship</span>
-            <strong id="harmonyName"></strong>
-          </div>
-        </div>
-        <div class="gamut-bar" id="gamutBar"></div>
-        <div class="gamut-specs" id="gamutSpecs"></div>
-        <div id="paletteRow" class="palette-row hidden"></div>
-        <p id="paletteCaption" class="hint"></p>
 
         <details id="scopesDetails" class="theme-card collapse-card scopes-details">
           <summary class="collapse-summary">

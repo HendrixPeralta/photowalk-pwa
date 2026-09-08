@@ -3,7 +3,7 @@ import { readExif, isHeif } from './exif.js';
 import { putImage, imageUrl, hydrateImages } from './db.js';
 import { showToast } from './toast.js';
 import { openModal, closeModal } from './modal.js';
-import { CONCEPTS, THEMES, renderConceptCard } from './concepts.js';
+import { CONCEPTS, THEMES } from './concepts.js';
 import {
   histogramSummary, paletteRelationship, waveformSummary, paradeSummary,
   vectorscopeSummary, chromaticitySummary, SHADOW_END, HIGHLIGHT_START
@@ -98,7 +98,6 @@ export function initAnalysis() {
     exitCompareBtn: document.getElementById('exitCompareBtn'),
     fitViewBtn: document.getElementById('fitViewBtn'),
     resetGrid: document.getElementById('resetGridBtn'),
-    overlayTipBox: document.getElementById('overlayTipBox'),
     histogramCanvas: document.getElementById('histogramCanvas'),
     histogramCaption: document.getElementById('histogramCaption'),
     refHistBlock: document.getElementById('refHistBlock'),
@@ -214,21 +213,7 @@ function setOverlay(type) {
   els.overlaySelect.value = type;
   els.flipGuideBtn.classList.toggle('hidden', !FLIPPABLE_OVERLAYS.includes(type));
   els.rotateGuideBtn.classList.toggle('hidden', !ROTATABLE_OVERLAYS.includes(type));
-  renderOverlayTip();
   drawOverlay();
-}
-
-/** The concept card text for the active guide — the "why" next to the "what". */
-function renderOverlayTip() {
-  const concept = CONCEPTS[overlayType];
-  els.overlayTipBox.classList.toggle('hidden', !concept);
-  if (!concept) return;
-  els.overlayTipBox.innerHTML = `
-    <p><strong>${escapeHtml(concept.title)}</strong>${escapeHtml(concept.tip)}</p>
-    <button type="button" id="overlayTipMoreBtn" class="btn btn-ghost btn-sm">See diagram</button>`;
-  document.getElementById('overlayTipMoreBtn').addEventListener('click', () => {
-    openModal(`<div class="concept-grid">${renderConceptCard(overlayType)}</div>`);
-  });
 }
 
 async function handleFile(file) {

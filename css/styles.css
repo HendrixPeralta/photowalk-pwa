@@ -1403,21 +1403,7 @@ input[type="file"].text-input { padding: 8px; }
 .analyze-tip .pinned-tip-line { margin: 0 0 6px; font-size: 0.82rem; color: var(--text-dim); }
 .analyze-tip .btn { align-self: flex-end; }
 
-.overlay-tip {
-  background: var(--surface-1);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 10px 12px;
-  margin-top: 10px;
-  font-size: 0.82rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-.overlay-tip p { margin: 0; }
-.overlay-tip strong { display: block; margin-bottom: 2px; }
-.overlay-tip .btn { flex-shrink: 0; }
+
 
 .compare-strip { display: grid; gap: 10px; }
 .compare-label {
@@ -1521,20 +1507,6 @@ input[type="file"].text-input { padding: 8px; }
 }
 .cadence-head svg { width: 16px; height: 16px; color: var(--accent); }
 .cadence-head-left { display: flex; align-items: center; gap: 6px; }
-
-.cadence-chain {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
-  background: var(--surface-4);
-  border-radius: var(--radius-sm);
-  color: var(--accent-strong);
-  font-family: var(--font-data);
-  font-size: 11px;
-  font-weight: 500;
-  white-space: nowrap;
-}
 
 .film-strip {
   display: flex;
