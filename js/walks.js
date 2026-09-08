@@ -708,7 +708,10 @@ function resetThemeUi() {
   els.durationSelect.disabled = false;
   els.quickDurationSelect.disabled = false;
   syncDurationSelects();
-  els.startWalkBtn.classList.add('hidden');
+  // The launcher stays put. It needed a theme back when it only started a
+  // themed walk; it quick-starts one now, so hiding it on the way back to idle
+  // left the screen with no way to start a walk until the next reload.
+  els.startWalkBtn.classList.remove('hidden');
   els.finishWalkBtn.classList.add('hidden');
   els.timerSection.classList.add('hidden');
   els.themeCard.classList.add('hidden');
