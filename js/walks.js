@@ -48,6 +48,8 @@ export function initWalks() {
     themeBrief: document.getElementById('themeBrief'),
     themeReason: document.getElementById('themeReason'),
     viewConceptsBtn: document.getElementById('viewConceptsBtn'),
+    editThemeBtn: document.getElementById('editThemeBtn'),
+    dismissThemeBtn: document.getElementById('dismissThemeBtn'),
     challengesSection: document.getElementById('challengesSection'),
     challengesList: document.getElementById('challengesList'),
     notifBtn: document.getElementById('notifBtn'),
@@ -80,15 +82,18 @@ export function initWalks() {
   els.modeCasual.addEventListener('click', () => setMode('casual'));
   els.modeGuided.addEventListener('click', () => setMode('guided'));
   els.getThemeBtn.addEventListener('click', pickTheme);
-  els.customThemeBtn.addEventListener('click', openCustomThemeModal);
+  els.customThemeBtn.addEventListener('click', () => openThemeEditorModal());
   els.savedThemesList.addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-action]');
     if (!btn) return;
     const { action, id } = btn.dataset;
     if (action === 'use') useSavedTheme(id);
+    if (action === 'edit') editSavedTheme(id);
     if (action === 'remove') removeSavedTheme(id);
   });
   els.viewConceptsBtn.addEventListener('click', () => theme && openConceptModal(theme));
+  els.editThemeBtn.addEventListener('click', () => theme && openThemeEditorModal(theme));
+  els.dismissThemeBtn.addEventListener('click', dismissTheme);
   els.startWalkBtn.addEventListener('click', () => startWalk());
   els.finishWalkBtn.addEventListener('click', () => finishWalk(false));
   els.homeStopBtn.addEventListener('click', () => finishWalk(false));
@@ -175,6 +180,18 @@ function useTheme(t, reason = '') {
   els.finishWalkBtn.classList.add('hidden');
 }
 
+/**
+ * Puts the suggested theme away without starting a walk. Reuses the same
+ * teardown as finishing one, so there is exactly one definition of "no theme
+ * on screen" — the only extra work is dropping the theme this module is holding.
+ */
+function dismissTheme() {
+  if (state.activeWalk) return; // stop the walk first; the card is live then
+  theme = null;
+  themeReason = '';
+  resetThemeUi();
+}
+
 function renderThemeCard() {
   els.themeCard.classList.remove('hidden');
   els.challengesSection.classList.toggle('hidden', !theme.challenges.length);
@@ -217,22 +234,38 @@ function toggleChallenge(idx, checked) {
  * Lets a user assemble their own theme from the existing mini-challenge pool
  * (plus any of their own wording) instead of only ever getting a random pick.
  * Saved themes persist in state.customThemes and show up under "My Themes".
+ *
+ * Also doubles as the editor for an existing theme: pass the theme in and its
+ * title/brief/challenges prefill the form. Editing an already-custom theme
+ * updates it in place; editing a built-in theme always saves the result as a
+ * new custom theme instead, since the built-in list is shared and can't be
+ * rewritten per user.
  */
-function openCustomThemeModal() {
-  if (state.activeWalk) { showToast('Finish your current walk before building a new theme.'); return; }
+function openThemeEditorModal(existingTheme = null) {
+  if (state.activeWalk) { showToast('Finish your current walk before editing a theme.'); return; }
 
-  const pickHtml = allChallenges().map((c) => `
+  const editingCustomId = existingTheme && state.customThemes.some((t) => t.id === existingTheme.id)
+    ? existingTheme.id
+    : null;
+  const isBuiltIn = Boolean(existingTheme) && !editingCustomId;
+  const poolChallenges = allChallenges();
+  const initialChallenges = existingTheme ? existingTheme.challenges : [];
+  const initialChecked = new Set(initialChallenges.filter((c) => poolChallenges.includes(c)));
+  const initialExtras = initialChallenges.filter((c) => !poolChallenges.includes(c));
+
+  const pickHtml = poolChallenges.map((c) => `
     <li>
       <label class="challenge-item">
-        <input type="checkbox" class="custom-challenge-check" value="${escapeHtml(c)}">
+        <input type="checkbox" class="custom-challenge-check" value="${escapeHtml(c)}" ${initialChecked.has(c) ? 'checked' : ''}>
         <span>${escapeHtml(c)}</span>
       </label>
     </li>`).join('');
 
   openModal(`
-    <h3>Build a Custom Theme</h3>
-    <input type="text" id="customThemeTitle" class="text-input" placeholder="Title (e.g. Rainy Day Reflections)" maxlength="60">
-    <input type="text" id="customThemeBrief" class="text-input" placeholder="Brief: what are you hunting for? (optional)" maxlength="140">
+    <h3>${existingTheme ? 'Edit Theme' : 'Build a Custom Theme'}</h3>
+    ${isBuiltIn ? '<p class="muted">This saves as a new custom theme — the original stays as it was.</p>' : ''}
+    <input type="text" id="customThemeTitle" class="text-input" placeholder="Title (e.g. Rainy Day Reflections)" maxlength="60" value="${existingTheme ? escapeHtml(existingTheme.title) : ''}">
+    <input type="text" id="customThemeBrief" class="text-input" placeholder="Brief: what are you hunting for? (optional)" maxlength="140" value="${existingTheme ? escapeHtml(existingTheme.brief) : ''}">
     <h4 class="subsection-title">Pick from existing challenges</h4>
     <ul class="challenges-list">${pickHtml}</ul>
     <h4 class="subsection-title">Add your own</h4>
@@ -242,11 +275,11 @@ function openCustomThemeModal() {
     </div>
     <ul id="customChallengeExtras" class="challenges-list"></ul>
     <div class="theme-actions">
-      <button type="button" id="saveCustomThemeBtn" class="btn btn-accent btn-block">Save Theme</button>
+      <button type="button" id="saveCustomThemeBtn" class="btn btn-accent btn-block">${existingTheme ? 'Save Changes' : 'Save Theme'}</button>
     </div>
   `);
 
-  const extras = [];
+  const extras = initialExtras.slice();
   const extrasList = document.getElementById('customChallengeExtras');
   const renderExtras = () => {
     extrasList.innerHTML = extras.map((c, i) => `
@@ -255,6 +288,7 @@ function openCustomThemeModal() {
         <button type="button" class="btn btn-ghost btn-sm" data-extra-idx="${i}">Remove</button>
       </li>`).join('');
   };
+  renderExtras();
 
   document.getElementById('addCustomChallengeBtn').addEventListener('click', () => {
     const input = document.getElementById('customChallengeInput');
@@ -281,19 +315,30 @@ function openCustomThemeModal() {
     if (!title) { showToast('Give your theme a title.'); return; }
     if (!challenges.length) { showToast('Pick or add at least one challenge.'); return; }
 
-    const custom = {
-      id: uid(),
-      title,
-      brief: brief || 'A theme you built yourself.',
-      concepts: [],
-      challenges
-    };
-    state.customThemes.push(custom);
+    let saved;
+    if (editingCustomId) {
+      saved = state.customThemes.find((t) => t.id === editingCustomId);
+      saved.title = title;
+      saved.brief = brief || 'A theme you built yourself.';
+      saved.challenges = challenges;
+    } else {
+      saved = {
+        id: uid(),
+        title,
+        brief: brief || 'A theme you built yourself.',
+        // A built-in theme's concepts carry over so its edited copy keeps
+        // "View Concept Examples" instead of losing it just because it's custom now.
+        concepts: existingTheme ? existingTheme.concepts.slice() : [],
+        challenges
+      };
+      state.customThemes.push(saved);
+    }
+
     save();
     renderSavedThemes();
     closeModal();
-    useTheme(custom, 'Your own custom theme.');
-    showToast('Custom theme saved.');
+    useTheme(saved, 'Your own custom theme.');
+    showToast(editingCustomId ? 'Theme updated.' : 'Custom theme saved.');
   });
 }
 
@@ -307,11 +352,18 @@ function renderSavedThemes() {
         <span class="reward-title">${escapeHtml(t.title)}</span>
         <span class="reward-actions">
           <button type="button" class="btn btn-ghost btn-sm" data-action="use" data-id="${t.id}">Use</button>
+          <button type="button" class="btn btn-ghost btn-sm" data-action="edit" data-id="${t.id}">Edit</button>
           <button type="button" class="btn btn-ghost btn-sm" data-action="remove" data-id="${t.id}">Remove</button>
         </span>
       </div>
     </li>`).join('');
   els.savedThemesCount.textContent = list.length ? `${list.length} saved` : 'None yet';
+}
+
+function editSavedTheme(id) {
+  const t = state.customThemes.find((x) => x.id === id);
+  if (!t) return;
+  openThemeEditorModal(t);
 }
 
 function useSavedTheme(id) {
@@ -593,6 +645,8 @@ function restoreActiveWalk() {
 
 function applyActiveWalkUi() {
   els.getThemeBtn.disabled = true;
+  els.editThemeBtn.disabled = true;
+  els.dismissThemeBtn.disabled = true;
   els.durationSelect.disabled = true;
   els.quickDurationSelect.disabled = true;
   els.startWalkBtn.classList.add('hidden');
@@ -606,6 +660,8 @@ function applyActiveWalkUi() {
 
 function resetThemeUi() {
   els.getThemeBtn.disabled = false;
+  els.editThemeBtn.disabled = false;
+  els.dismissThemeBtn.disabled = false;
   els.getThemeBtn.textContent = 'Get a Theme';
   els.getThemeBtn.classList.replace('btn-primary', 'btn-accent');
   els.durationSelect.disabled = false;

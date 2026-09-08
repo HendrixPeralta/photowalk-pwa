@@ -78,14 +78,7 @@
         </div>
       </div>
 
-      <div class="section-title-row">
-        <h2 class="section-title">Shooting activity</h2>
-        <span id="weeklyGoalText" class="goal-text"></span>
-        <label class="goal-edit">
-          <span class="visually-hidden">Weekly hour goal</span>
-          <select id="weeklyGoalSelect"></select>
-        </label>
-      </div>
+      <h2 class="section-title">Shooting activity</h2>
       <div class="heatmap-card">
         <div class="heatmap-scroll" id="heatmapScroll">
           <div class="heatmap-inner">
@@ -106,7 +99,21 @@
           </span>
         </div>
 
-        <div class="weekly-goal">
+        <!-- Hidden for now (not deleted): un-hide by removing the `hidden` class. -->
+        <div class="weekly-goal hidden">
+          <div class="goal-head">
+            <div class="segmented" id="goalPeriodRow" role="tablist">
+              <button type="button" class="segment" data-period="week">Week</button>
+              <button type="button" class="segment" data-period="month">Month</button>
+              <button type="button" class="segment" data-period="year">Year</button>
+            </div>
+            <label class="goal-edit">
+              <span class="visually-hidden">Goal hours</span>
+              <input type="number" id="goalHoursInput" class="goal-hours-input" min="0.5" step="0.5" inputmode="decimal">
+            </label>
+          </div>
+          <div id="goalPresets" class="goal-presets"></div>
+          <span id="weeklyGoalText" class="goal-text"></span>
           <div class="timer-track"><div id="weeklyGoalBar" class="timer-fill goal-fill"></div></div>
         </div>
       </div>
@@ -115,6 +122,32 @@
       <div class="theme-card reward-progress-card">
         <div id="rewardBar" class="reward-bar"></div>
       </div>
+
+      <!-- Hidden for now (not deleted): un-hide by removing the `hidden` class. -->
+      <details id="themeGoalsDetails" class="theme-card collapse-card hidden">
+        <summary class="collapse-summary">
+          <span class="collapse-title">Theme goals</span>
+          <span id="themeGoalsSummaryCount" class="muted collapse-meta"></span>
+          <svg class="collapse-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </summary>
+        <div class="collapse-body">
+          <p class="muted card-text">Set an hour target for one specific theme, on top of your overall goal above.</p>
+          <div class="reward-form">
+            <select id="themeGoalThemeSelect"></select>
+            <input type="number" id="themeGoalHoursInput" class="text-input reward-hours-input" placeholder="Hours" min="0.5" step="0.5" inputmode="decimal">
+            <select id="themeGoalPeriodSelect" class="goal-period-select">
+              <option value="week">per week</option>
+              <option value="month">per month</option>
+              <option value="year">per year</option>
+            </select>
+            <button type="button" id="addThemeGoalBtn" class="btn btn-primary">Set Goal</button>
+          </div>
+          <p id="themeGoalsEmpty" class="empty-state-sm">No theme goals yet.</p>
+          <ul id="themeGoalsList" class="rewards-list"></ul>
+        </div>
+      </details>
 
     </section>
 
@@ -152,10 +185,14 @@
       </div>
 
       <div id="themeCard" class="theme-card hidden">
+        <button type="button" id="dismissThemeBtn" class="card-close" aria-label="Dismiss theme">&times;</button>
         <h3 id="themeTitle"></h3>
         <p id="themeBrief" class="muted"></p>
         <p id="themeReason" class="theme-reason hidden"></p>
-        <button type="button" id="viewConceptsBtn" class="btn btn-ghost btn-sm">View Concept Examples</button>
+        <div class="theme-btn-row">
+          <button type="button" id="viewConceptsBtn" class="btn btn-ghost btn-sm">View Concept Examples</button>
+          <button type="button" id="editThemeBtn" class="btn btn-ghost btn-sm">Edit Theme</button>
+        </div>
 
         <div id="challengesSection" class="hidden">
           <h4 class="subsection-title">Mini-challenges</h4>
@@ -219,7 +256,7 @@
       <input type="file" id="photoInput" accept="image/*" class="visually-hidden">
 
       <div id="analyzeEmpty" class="empty-state">
-        <p>Load a photo to overlay composition guides, a light histogram, a color palette, and video-style scopes.</p>
+        <p>Load a photo to overlay composition guides, a color palette, a light histogram, and video-style scopes.</p>
         <button type="button" id="choosePhotoBtn" class="btn btn-primary">Choose Photo</button>
       </div>
 
@@ -243,7 +280,7 @@
           </div>
         </div>
 
-        <div class="overlay-controls">
+        <div class="overlay-controls guide-controls">
           <label class="visually-hidden" for="overlaySelect">Composition guide</label>
           <select id="overlaySelect" class="chip-select">
             <option value="none">No Guide</option>
@@ -255,15 +292,17 @@
           </select>
           <button type="button" id="flipGuideBtn" class="chip-btn hidden">Flip</button>
           <button type="button" id="rotateGuideBtn" class="chip-btn hidden">Rotate</button>
-          <button type="button" id="resetGridBtn" class="chip-btn chip-btn-ghost">Reset</button>
-        </div>
-        <div class="overlay-controls overlay-controls-secondary">
           <button type="button" id="compareBtn" class="chip-btn">Compare&hellip;</button>
           <button type="button" id="exitCompareBtn" class="chip-btn hidden">Exit Compare</button>
-          <button type="button" id="fitViewBtn" class="chip-btn chip-btn-ghost">Fit</button>
+          <button type="button" id="resetGridBtn" class="chip-btn chip-btn-push">Reset</button>
+          <button type="button" id="fitViewBtn" class="chip-btn">Fit</button>
         </div>
         <div id="overlayTipBox" class="overlay-tip hidden"></div>
         <p class="hint">Drag a guide line to move just that line. Scroll or pinch to zoom, drag to pan, double-tap for 2&times;.</p>
+
+        <h4 class="subsection-title">Color Palette</h4>
+        <div id="paletteRow" class="palette-row"></div>
+        <p id="paletteCaption" class="hint"></p>
 
         <h4 class="subsection-title">Light Histogram</h4>
         <div id="histGrid" class="hist-grid">
@@ -279,40 +318,46 @@
           </div>
         </div>
 
-        <h4 class="subsection-title">Scopes</h4>
-        <div class="overlay-controls" id="scopeTabs">
-          <button type="button" class="chip-btn active" data-scope="waveform">Waveform</button>
-          <button type="button" class="chip-btn" data-scope="parade">Parade</button>
-          <button type="button" class="chip-btn" data-scope="vectorscope">Vector</button>
-          <button type="button" class="chip-btn" data-scope="cie">CIE</button>
-          <button type="button" class="chip-btn" data-scope="all">All 4</button>
-        </div>
-        <div id="scopeGrid" class="scope-grid">
-          <figure class="scope-cell" data-scope="waveform">
-            <figcaption class="scope-name">Waveform <span>luma against position across the frame</span></figcaption>
-            <canvas id="waveformCanvas" class="scope-canvas"></canvas>
-            <p id="waveformCaption" class="hint scope-caption"></p>
-          </figure>
-          <figure class="scope-cell" data-scope="parade">
-            <figcaption class="scope-name">RGB Parade <span>the waveform split into red, green and blue</span></figcaption>
-            <canvas id="paradeCanvas" class="scope-canvas"></canvas>
-            <p id="paradeCaption" class="hint scope-caption"></p>
-          </figure>
-          <figure class="scope-cell" data-scope="vectorscope">
-            <figcaption class="scope-name">Vectorscope <span>hue as angle, saturation as distance</span></figcaption>
-            <canvas id="vectorscopeCanvas" class="scope-canvas"></canvas>
-            <p id="vectorscopeCaption" class="hint scope-caption"></p>
-          </figure>
-          <figure class="scope-cell" data-scope="cie">
-            <figcaption class="scope-name">CIE Chromaticity <span>which colors the frame occupies</span></figcaption>
-            <canvas id="cieCanvas" class="scope-canvas"></canvas>
-            <p id="cieCaption" class="hint scope-caption"></p>
-          </figure>
-        </div>
-
-        <h4 class="subsection-title">Color Palette</h4>
-        <div id="paletteRow" class="palette-row"></div>
-        <p id="paletteCaption" class="hint"></p>
+        <details id="scopesDetails" class="theme-card collapse-card scopes-details">
+          <summary class="collapse-summary">
+            <span class="collapse-title">Advanced: Scopes</span>
+            <span class="muted collapse-meta">Waveform, parade, vector, CIE</span>
+            <svg class="collapse-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </summary>
+          <div class="collapse-body">
+            <div class="overlay-controls" id="scopeTabs">
+              <button type="button" class="chip-btn active" data-scope="waveform">Waveform</button>
+              <button type="button" class="chip-btn" data-scope="parade">Parade</button>
+              <button type="button" class="chip-btn" data-scope="vectorscope">Vector</button>
+              <button type="button" class="chip-btn" data-scope="cie">CIE</button>
+              <button type="button" class="chip-btn" data-scope="all">All 4</button>
+            </div>
+            <div id="scopeGrid" class="scope-grid">
+              <figure class="scope-cell" data-scope="waveform">
+                <figcaption class="scope-name">Waveform <span>luma against position across the frame</span></figcaption>
+                <canvas id="waveformCanvas" class="scope-canvas"></canvas>
+                <p id="waveformCaption" class="hint scope-caption"></p>
+              </figure>
+              <figure class="scope-cell" data-scope="parade">
+                <figcaption class="scope-name">RGB Parade <span>the waveform split into red, green and blue</span></figcaption>
+                <canvas id="paradeCanvas" class="scope-canvas"></canvas>
+                <p id="paradeCaption" class="hint scope-caption"></p>
+              </figure>
+              <figure class="scope-cell" data-scope="vectorscope">
+                <figcaption class="scope-name">Vectorscope <span>hue as angle, saturation as distance</span></figcaption>
+                <canvas id="vectorscopeCanvas" class="scope-canvas"></canvas>
+                <p id="vectorscopeCaption" class="hint scope-caption"></p>
+              </figure>
+              <figure class="scope-cell" data-scope="cie">
+                <figcaption class="scope-name">CIE Chromaticity <span>which colors the frame occupies</span></figcaption>
+                <canvas id="cieCanvas" class="scope-canvas"></canvas>
+                <p id="cieCaption" class="hint scope-caption"></p>
+              </figure>
+            </div>
+          </div>
+        </details>
 
         <h4 class="subsection-title">Metadata (EXIF)</h4>
         <div id="exifBlock" class="exif-block"></div>

@@ -98,6 +98,7 @@ export function initAnalysis() {
     refHistBlock: document.getElementById('refHistBlock'),
     refHistogramCanvas: document.getElementById('refHistogramCanvas'),
     refHistogramCaption: document.getElementById('refHistogramCaption'),
+    scopesDetails: document.getElementById('scopesDetails'),
     scopeTabs: document.getElementById('scopeTabs'),
     scopeGrid: document.getElementById('scopeGrid'),
     scopeCells: SCOPES.map((scope) => ({
@@ -161,6 +162,12 @@ export function initAnalysis() {
   els.scopeTabs.addEventListener('click', (e) => {
     const btn = e.target.closest('.chip-btn');
     if (btn) setScopeView(btn.dataset.scope);
+  });
+
+  // Scope canvases measure zero wide while the Advanced panel is folded away,
+  // so they are only drawn once opening it has given them a real box.
+  els.scopesDetails.addEventListener('toggle', () => {
+    if (els.scopesDetails.open) drawScopes();
   });
 
   // Scopes size themselves off their CSS box, so a rotation or a window
@@ -681,7 +688,7 @@ function setScopeView(view) {
 }
 
 function drawScopes() {
-  if (!currentScopes) return;
+  if (!currentScopes || !els.scopesDetails.open) return;
   for (const entry of els.scopeCells) {
     if (entry.cell.classList.contains('hidden')) continue;
     entry.draw(entry.canvas, currentScopes);

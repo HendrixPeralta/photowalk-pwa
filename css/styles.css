@@ -152,15 +152,6 @@ button, input, select {
 }
 .section-title:first-child { margin-top: 4px; }
 
-.section-title-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 20px 0 10px;
-}
-.section-title-row .section-title { margin: 0; margin-right: auto; }
-.section-title-row .goal-text { font-size: 0.8rem; }
-
 .subsection-title {
   font-size: 0.85rem;
   text-transform: uppercase;
@@ -296,15 +287,21 @@ button, input, select {
   padding-top: 10px;
   border-top: 1px solid var(--border);
 }
-.goal-text { font-weight: 600; }
-.goal-edit select {
+.goal-text { font-weight: 600; display: block; margin-top: 8px; }
+.goal-head { display: flex; align-items: center; gap: 10px; }
+.goal-head .segmented { flex: 1; margin-bottom: 0; }
+.goal-hours-input {
+  width: 64px;
+  flex-shrink: 0;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 4px 6px;
-  font-size: 0.75rem;
-  color: var(--text-dim);
+  padding: 8px 6px;
+  font-size: 0.85rem;
+  text-align: center;
+  color: var(--text);
 }
+.goal-presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .goal-fill { transition: width 0.4s ease; }
 .weekly-goal .timer-track { margin-top: 8px; }
 
@@ -454,6 +451,16 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
 .reward-form .text-input { margin: 0; flex: 1 1 100%; }
 .reward-form .reward-hours-input { flex: 0 0 90px; }
 .reward-form .btn { flex: 1 1 auto; }
+.reward-form select {
+  flex: 1 1 100%;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 0.88rem;
+  color: var(--text);
+}
+.reward-form select.goal-period-select { flex: 0 0 110px; }
 
 /* Walk reminders */
 .reminder-header { justify-content: space-between; }
@@ -662,6 +669,24 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
 .theme-card h3 { margin: 0 0 4px; font-size: 1.1rem; }
 .theme-card > .btn { margin-top: 10px; }
 
+/* Dismiss affordance for the suggested-theme card. Anchored to the card rather
+   than sitting in the button row: rerolling and editing are theme choices, but
+   putting the card away is not, so it reads as chrome the way a modal's X does. */
+#themeCard { position: relative; }
+#themeCard > h3 { padding-right: 28px; }
+.card-close {
+  position: absolute;
+  top: 6px; right: 10px;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 1.6rem;
+  line-height: 1;
+  padding: 0 4px;
+  cursor: pointer;
+}
+.card-close:disabled { opacity: 0.35; cursor: default; }
+
 /* Walk setup: mode, length, and the theme button are one decision, so they read
    as a single panel instead of three controls floating under the stat tiles.
    Flex gap keeps the spacing even as the hint and length rows toggle on and off. */
@@ -714,7 +739,33 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
 }
 
 .overlay-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-.overlay-controls-secondary { margin-top: 8px; }
+
+/* The guide row sits on one line under the frame. The chips hold their size and
+   the guide select absorbs the squeeze, ellipsising rather than dropping Fit
+   onto a second row when Flip or Rotate joins for the angled guides. The row
+   peaks at five controls (Flip and Rotate never show together), which fits even
+   on a narrow phone; the scroll is only a safety valve against a wide font. */
+.guide-controls {
+  flex-wrap: nowrap;
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* Scrolling one axis clips the other, so buy back room for focus rings. */
+  padding: 2px 0;
+  margin-top: 10px;
+}
+.guide-controls::-webkit-scrollbar { display: none; }
+.guide-controls .chip-btn { flex: 0 0 auto; }
+.guide-controls .chip-select {
+  flex: 0 1 auto;
+  min-width: 4.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 400px) {
+  .guide-controls { gap: 6px; }
+  .guide-controls .chip-btn, .guide-controls .chip-select { padding: 7px 10px; }
+}
 .chip-btn {
   background: var(--surface-1);
   border: 1px solid var(--border);
@@ -726,7 +777,8 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
   cursor: pointer;
 }
 .chip-btn.active { background: var(--accent); color: var(--accent-contrast); border-color: var(--accent); }
-.chip-btn-ghost { margin-left: auto; }
+/* Starts the right-hand utility group: everything after it hugs the edge. */
+.chip-btn-push { margin-left: auto; }
 .chip-select {
   background: var(--accent);
   border: 1px solid var(--accent);
@@ -746,6 +798,11 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
   border-radius: var(--radius-sm);
   display: block;
 }
+
+/* Scopes live behind an Advanced fold: most reads only need the palette and the
+   histogram, so the four traces stay one tap away instead of in the way. */
+.scopes-details { margin-top: 18px; }
+.scopes-details .collapse-body > .overlay-controls:first-child { margin-top: 0; }
 
 /* Scopes. Deliberately dark in both themes: a waveform trace is a thin bright
    line, and it disappears on a light background. */

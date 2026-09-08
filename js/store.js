@@ -3,6 +3,7 @@ import { putImage, requestPersistence, storageEstimate } from './db.js';
 import { showToast } from './toast.js';
 
 const KEY = 'photowalk:state:v2';
+export const STATE_KEY = KEY; // the demo fixture stashes and restores the raw blob
 const LEGACY_KEY = 'photowalk:state:v1';
 export const SYNC_CHANNEL = 'photowalk-sync';
 
@@ -14,7 +15,9 @@ function defaultState() {
       lastWalkDate: null,
       walksCompleted: 0,
       photosAnalyzed: 0,
-      weeklyGoalHours: 3,
+      goals: { week: 3, month: 12, year: 100 }, // hour target per period, all shown at once
+      goalPeriod: 'week', // which one the editable Home goal bar is currently showing
+      themeGoals: [], // { id, themeId, hours, period } — an hour target for one specific theme
       guidedDurationMin: 30,
       milestonesSeen: [],
       displayName: ''
@@ -32,15 +35,23 @@ function defaultState() {
     activityLog: {}, // { 'YYYY-MM-DD': hoursSpentShooting }
     rewards: [], // { id, title, targetHours, baselineHours, createdAt, claimedAt, notified }
     customThemes: [], // { id, title, brief, concepts: [], challenges: [string] } — user-built themes
+    // Set only by the screenshot fixture in demo.js: { seed, seededAt }. Its
+    // presence is what keeps demo mode on across refreshes.
+    demoMode: null,
 
     reminder: { enabled: false, time: '18:00', days: [1, 3, 5] } // days: 0=Sun
   };
 }
 
 function hydrate(parsed) {
-  return Object.assign(defaultState(), parsed, {
-    profile: Object.assign(defaultState().profile, parsed.profile || {})
-  });
+  const profile = Object.assign(defaultState().profile, parsed.profile || {});
+  // v2 stored one weekly number; carry it over as the "week" goal the first time
+  // this state is loaded post-upgrade, rather than silently resetting it to 3.
+  if (typeof profile.weeklyGoalHours === 'number' && !(parsed.profile && parsed.profile.goals)) {
+    profile.goals.week = profile.weeklyGoalHours;
+  }
+  delete profile.weeklyGoalHours;
+  return Object.assign(defaultState(), parsed, { profile });
 }
 
 /**
@@ -147,15 +158,33 @@ export function totalActivityHours() {
   return Object.values(state.activityLog).reduce((sum, h) => sum + (h || 0), 0);
 }
 
-/** Hours logged since the most recent Sunday, matching the heatmap's week start. */
-export function hoursThisWeek() {
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-  start.setDate(start.getDate() - start.getDay());
+/** Midnight at the start of the given period's current instance: this week/month/year. */
+function periodStart(period, now = new Date()) {
+  const d = new Date(now);
+  d.setHours(0, 0, 0, 0);
+  if (period === 'month') { d.setDate(1); return d; }
+  if (period === 'year') { d.setMonth(0, 1); return d; }
+  d.setDate(d.getDate() - d.getDay()); // week: rewind to the preceding Sunday
+  return d;
+}
 
+/** Hours logged since the start of the current week/month/year, matching the heatmap's week start. */
+export function hoursInPeriod(period, now = new Date()) {
+  const start = periodStart(period, now);
   let total = 0;
-  for (const d = new Date(start); d <= new Date(); d.setDate(d.getDate() + 1)) {
+  for (const d = new Date(start); d <= now; d.setDate(d.getDate() + 1)) {
     total += state.activityLog[localDateKey(d)] || 0;
+  }
+  return total;
+}
+
+/** Hours logged toward one specific theme within the given period, read from walk history. */
+export function hoursForThemeInPeriod(themeId, period, now = new Date()) {
+  const start = periodStart(period, now).getTime();
+  const end = now.getTime();
+  let total = 0;
+  for (const w of state.walkHistory) {
+    if (w.themeId === themeId && w.endedAt >= start && w.endedAt <= end) total += w.hours || 0;
   }
   return total;
 }

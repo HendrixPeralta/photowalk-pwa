@@ -103,6 +103,28 @@ function initInstallPrompt() {
   });
 }
 
+/**
+ * Screenshot fixture: `?demo` seeds a year of believable practice, `?demo=clear`
+ * hands the real profile back, and any other value is used as the generator
+ * seed for a different-looking year.
+ *
+ * Demo mode is sticky — the flag rides along in saved state, so the module also
+ * loads on a plain refresh and tops the data up if it has gone missing or no
+ * longer reaches today. Without the flag and without the param, nothing loads.
+ */
+async function maybeSeedDemoData() {
+  const value = new URLSearchParams(window.location.search).get('demo');
+  if (value === null && !state.demoMode) return;
+  try {
+    const demo = await import('./demo.js');
+    demo.installDemoHooks();
+    if (value === 'clear') { demo.clearDemoData(); return; }
+    demo.ensureDemoData(Number(value) > 1 ? { seed: Number(value) } : {});
+  } catch (err) {
+    console.warn('PhotoWalk: could not load demo data.', err);
+  }
+}
+
 function initServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.register('./sw.js').catch((err) => {
@@ -121,6 +143,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Anyone with stats from before milestones existed shouldn't be buried in
   // retroactive badges on their next walk.
   backfillMilestones();
+
+  // Before any view renders, so the seeded stats are what Home paints.
+  await maybeSeedDemoData();
 
   initWalks();
   initAnalysis();
