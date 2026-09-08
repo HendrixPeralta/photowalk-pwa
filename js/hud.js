@@ -17,10 +17,8 @@ import { readExif } from './exif.js';
 import { showToast } from './toast.js';
 import { openModal, closeModal } from './modal.js';
 import { escapeHtml, uid, navigateTo, drawToCanvas, canvasToBlob, localDateKey } from './util.js';
-import { watchPosition, stopWatching, isWatching, distanceMeters, cachedFix, fixIsFresh } from './geo.js';
-import { sunPosition, shadowIndex, compassPoint } from './sun.js';
+import { cachedFix, fixIsFresh, requestFix } from './geo.js';
 import { logFrame } from './walkscreen.js';
-import { drawTrack } from './trackmap.js';
 
 let els = {};
 let tickHandle = null;
@@ -37,7 +35,6 @@ export function initHud(api = {}) {
     elapsed: document.getElementById('hudElapsed'),
     target: document.getElementById('hudTarget'),
     frames: document.getElementById('hudFrames'),
-    track: document.getElementById('hudTrack'),
     missionNo: document.getElementById('hudMissionNo'),
     missionMode: document.getElementById('hudMissionMode'),
     missionTitle: document.getElementById('hudMissionTitle'),
@@ -52,12 +49,6 @@ export function initHud(api = {}) {
     logLabel: document.getElementById('hudLogFrameLabel'),
     frameInput: document.getElementById('hudFrameInput'),
     pinBtn: document.getElementById('hudPinBtn'),
-    mapPlace: document.getElementById('hudMapPlace'),
-    mapCanvas: document.getElementById('hudMapCanvas'),
-    sunBadge: document.getElementById('hudSunBadge'),
-    distBadge: document.getElementById('hudDistBadge'),
-    shadowBadge: document.getElementById('hudShadowBadge'),
-    trackToggle: document.getElementById('hudTrackToggleBtn'),
     pauseBtn: document.getElementById('hudPauseBtn'),
     completeBtn: document.getElementById('hudCompleteBtn'),
     liveDot: document.getElementById('hudLiveDot')
@@ -66,8 +57,7 @@ export function initHud(api = {}) {
   els.goToWalks.addEventListener('click', () => navigateTo('walks'));
   els.logBtn.addEventListener('click', () => els.frameInput.click());
   els.frameInput.addEventListener('change', onFramePicked);
-  els.pinBtn.addEventListener('click', pinLocation);
-  els.trackToggle.addEventListener('click', toggleTracking);
+  els.pinBtn.addEventListener('click', openInMaps);
   els.pauseBtn.addEventListener('click', togglePause);
   els.completeBtn.addEventListener('click', () => hooks.finish && hooks.finish());
   els.strip.addEventListener('click', (e) => {
@@ -100,7 +90,6 @@ export function renderHud() {
 
   renderChallenges(theme);
   renderCaptureStrip();
-  renderMap();
   els.pauseBtn.querySelector('[data-label]').textContent = w.pausedAt ? 'Resume Walk' : 'Pause Walk';
 
   tickHud();
@@ -144,11 +133,6 @@ function tickHud() {
   const done = (w.challengesChecked || []).filter(Boolean).length;
   const total = (w.challengesChecked || []).length;
   els.frames.textContent = String(frames.length);
-
-  const metres = trackDistance(w);
-  els.track.innerHTML = metres >= 1000
-    ? `${(metres / 1000).toFixed(1)}<small>km</small>`
-    : `${Math.round(metres)}<small>m</small>`;
 
   const pct = total ? Math.round((done / total) * 100) : 0;
   els.progress.textContent = `Progress: ${pct}%`;
@@ -303,97 +287,39 @@ function openFrameSheet(frameId) {
   });
 }
 
-/* ---------- Pinned waypoints ---------- */
+/* ---------- Hand-off to the maps app ---------- */
 
-async function pinLocation() {
-  const w = state.activeWalk;
-  if (!w) return;
-  const fix = cachedFix();
+/**
+ * Where you are, in whatever maps app the device actually has.
+ *
+ * PhotoWalk deliberately doesn't draw its own map any more: a native maps app
+ * already knows the streets, works offline better than we can, and is one tap
+ * from directions. `geo:` is the Android intent, `maps:` the iOS one, and
+ * OpenStreetMap is the honest fallback everywhere else (same host the EXIF
+ * location link already uses).
+ */
+function mapsUrl(lat, lon) {
+  const ua = navigator.userAgent;
+  const coords = `${lat},${lon}`;
+  if (/iPhone|iPad|iPod/.test(ua)) return `maps://?ll=${coords}&q=${encodeURIComponent('You are here')}`;
+  if (/Android/.test(ua)) return `geo:${coords}?q=${coords}`;
+  return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=17/${lat}/${lon}`;
+}
+
+async function openInMaps() {
+  // The tap is the user gesture the permission prompt needs, so it is fine to
+  // ask here even though the app never asks on load.
+  let fix = cachedFix();
   if (!fixIsFresh(fix)) {
-    showToast('Start GPS tracking first so there is a position to pin.');
-    return;
-  }
-  w.pins = w.pins || [];
-  w.pins.push({ id: uid(), at: Date.now(), lat: fix.lat, lon: fix.lon });
-  save();
-  renderMap();
-  showToast(`Pinned ${w.pins.length} waypoint${w.pins.length === 1 ? '' : 's'} on this walk.`);
-}
-
-/* ---------- Tracking and the map ---------- */
-
-function trackDistance(w) {
-  const pts = (w && w.track) || [];
-  let total = 0;
-  for (let i = 1; i < pts.length; i++) total += distanceMeters(pts[i - 1], pts[i]);
-  return total;
-}
-
-function toggleTracking() {
-  const w = state.activeWalk;
-  if (!w) return;
-
-  if (isWatching()) {
-    stopWatching();
-    els.trackToggle.textContent = 'Start GPS tracking';
-    els.mapPlace.textContent = 'Tracking paused';
-    return;
-  }
-
-  els.trackToggle.textContent = 'Requesting position…';
-  // watchPosition retries on its own and the first few callbacks often fail
-  // while the receiver settles; only say so once, and never once it's working.
-  let warned = false;
-  watchPosition(
-    (fix) => {
-      warned = true;
-      w.track = w.track || [];
-      const last = w.track[w.track.length - 1];
-      // Drop jitter: consumer GPS wanders several metres while standing still.
-      if (!last || distanceMeters(last, fix) > 8) {
-        w.track.push({ lat: fix.lat, lon: fix.lon, at: fix.at });
-        save();
-      }
-      els.trackToggle.textContent = 'Stop GPS tracking';
-      els.mapPlace.textContent = `±${Math.round(fix.accuracy)} m`;
-      renderMap();
-      tickHud();
-    },
-    (err) => {
-      if (warned) return;
-      warned = true;
-      els.trackToggle.textContent = 'Start GPS tracking';
-      els.mapPlace.textContent = 'Tracking off';
+    showToast('Getting a location fix…');
+    try {
+      fix = await requestFix({ highAccuracy: true });
+    } catch (err) {
       showToast(err.message);
+      return;
     }
-  );
-}
-
-function renderMap() {
-  const w = state.activeWalk;
-  if (!w || !els.mapCanvas) return;
-  const track = w.track || [];
-  const pins = w.pins || [];
-  drawTrack(els.mapCanvas, track, pins);
-
-  const metres = trackDistance(w);
-  els.distBadge.textContent = metres >= 1000
-    ? `${(metres / 1000).toFixed(2)} km tracked`
-    : `${Math.round(metres)} m tracked`;
-
-  const fix = track[track.length - 1] || (fixIsFresh() ? cachedFix() : null);
-  if (!fix) {
-    els.sunBadge.textContent = 'no fix';
-    els.shadowBadge.textContent = 'Shadow index —';
-    return;
   }
-  const pos = sunPosition(new Date(), fix.lat, fix.lon);
-  els.sunBadge.textContent =
-    `${Math.round(pos.azimuth)}° ${compassPoint(pos.azimuth)} · ${Math.round(pos.altitude)}° EL`;
-  const idx = shadowIndex(pos.altitude);
-  els.shadowBadge.textContent = idx === null
-    ? 'No cast shadow'
-    : `Shadow index ${idx.toFixed(1)}`;
+  window.open(mapsUrl(fix.lat, fix.lon), '_blank', 'noopener');
 }
 
 /* ---------- Pause ---------- */

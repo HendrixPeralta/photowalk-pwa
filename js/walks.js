@@ -626,9 +626,7 @@ function startWalk({ brief = false } = {}) {
     challengesChecked: new Array(theme.challenges.length).fill(false),
     nudges: [],
     pausedAt: null,
-    frames: [],  // logged in the Field HUD
-    track: [],   // GPS polyline, only if the user turns tracking on
-    pins: []
+    frames: []  // logged in the Field HUD
   };
   save();
 

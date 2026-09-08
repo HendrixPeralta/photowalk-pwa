@@ -15,7 +15,6 @@ const PRECACHE_URLS = [
   './js/concepts.js',
   './js/sun.js',
   './js/geo.js',
-  './js/trackmap.js',
   './js/sheet.js',
   './js/openverse.js',
   './js/modal.js',

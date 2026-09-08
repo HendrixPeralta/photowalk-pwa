@@ -1789,6 +1789,8 @@ input[type="file"].text-input { padding: 8px; }
   gap: 6px;
   margin-bottom: 8px;
 }
+/* Three tiles breathe where four had to be crammed. */
+.telemetry-grid-3 { grid-template-columns: repeat(3, 1fr); }
 
 .telemetry-cell {
   background: var(--surface-1);
@@ -1971,59 +1973,6 @@ input[type="file"].text-input { padding: 8px; }
   font-family: var(--font-data);
   font-size: 11px;
 }
-
-/* --- Field HUD: waypoint / track map ------------------------------------- */
-.map-card {
-  background: var(--surface-1);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 12px;
-  margin-top: 12px;
-}
-.map-head {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 8px;
-}
-.map-head svg { width: 16px; height: 16px; color: var(--cyan); flex-shrink: 0; }
-.map-head .label-caps { color: var(--text-warm); }
-.map-place {
-  margin-left: auto;
-  font-family: var(--font-data);
-  font-size: 11px;
-  color: var(--text-dim);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.map-frame {
-  position: relative;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: var(--surface-0);
-}
-.map-frame canvas { display: block; width: 100%; height: 180px; }
-
-.map-badge {
-  position: absolute;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 7px;
-  background: rgba(12, 14, 19, 0.85);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-data);
-  font-size: 10px;
-  white-space: nowrap;
-}
-.map-badge svg { width: 12px; height: 12px; }
-.map-badge-sun { top: 8px; right: 8px; color: var(--accent-strong); }
-.map-badge-dist { bottom: 8px; left: 8px; color: var(--text); }
-.map-badge-shadow { bottom: 8px; right: 8px; color: var(--cyan); border-color: var(--cyan-deep); }
 
 .hud-footer-row {
   display: grid;

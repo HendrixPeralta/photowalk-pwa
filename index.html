@@ -443,7 +443,7 @@
       </div>
 
       <div id="hudActive" class="hidden">
-        <div class="telemetry-grid">
+        <div class="telemetry-grid telemetry-grid-3">
           <div class="telemetry-cell">
             <span class="telemetry-cell-head">
               <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-timer"/></svg>
@@ -464,13 +464,6 @@
               <span class="label-caps">Frames</span>
             </span>
             <span class="telemetry-value" id="hudFrames">0</span>
-          </div>
-          <div class="telemetry-cell telemetry-cell-plain">
-            <span class="telemetry-cell-head">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-footprint"/></svg>
-              <span class="label-caps">Track</span>
-            </span>
-            <span class="telemetry-value" id="hudTrack">&mdash;<small>km</small></span>
           </div>
         </div>
 
@@ -508,29 +501,8 @@
         <input type="file" id="hudFrameInput" accept="image/*" class="visually-hidden">
         <button type="button" id="hudPinBtn" class="btn btn-primary btn-block" style="margin-top:8px">
           <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pin"/></svg>
-          Pin Location
+          Open in Maps
         </button>
-
-        <div class="map-card">
-          <div class="map-head">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-explore"/></svg>
-            <span class="label-caps">Waypoint Route</span>
-            <span class="map-place" id="hudMapPlace">Tracking off</span>
-          </div>
-          <div class="map-frame">
-            <canvas id="hudMapCanvas"></canvas>
-            <span class="map-badge map-badge-sun">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sun"/></svg>
-              <span id="hudSunBadge">&mdash;</span>
-            </span>
-            <span class="map-badge map-badge-dist">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-navigate"/></svg>
-              <span id="hudDistBadge">0 m tracked</span>
-            </span>
-            <span class="map-badge map-badge-shadow" id="hudShadowBadge">Shadow index &mdash;</span>
-          </div>
-          <button type="button" id="hudTrackToggleBtn" class="btn btn-ghost btn-block btn-sm" style="margin-top:8px">Start GPS tracking</button>
-        </div>
 
         <div class="hud-footer-row">
           <button type="button" id="hudPauseBtn" class="btn btn-primary">
