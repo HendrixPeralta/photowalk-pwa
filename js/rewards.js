@@ -165,9 +165,21 @@ export function rewardTimeline() {
   const start = last ? targetTotalHours(last)
     : upcoming.length ? Math.min(...upcoming.map((r) => r.baselineHours))
     : 0;
-  const end = upcoming.length ? targetTotalHours(upcoming[upcoming.length - 1]) : now;
-  const span = Math.max(end - start, MIN_AXIS_SPAN_HOURS);
-  const pctOf = (hours) => clamp(((hours - start) / span) * 100, 0, 100);
+
+  // The axis is piecewise, not linear in hours: every leg between two stops
+  // gets an equal slice of the bar. A far-off reward (say 200h) would otherwise
+  // squash the walk toward the next one (10h) into a sliver of fill.
+  const nodes = [start, ...upcoming.map(targetTotalHours)];
+  const legPct = 100 / Math.max(nodes.length - 1, 1);
+  const pctOf = (hours) => {
+    for (let i = 1; i < nodes.length; i++) {
+      if (hours > nodes[i]) continue;
+      const leg = Math.max(nodes[i] - nodes[i - 1], MIN_AXIS_SPAN_HOURS);
+      const within = (hours - nodes[i - 1]) / leg;
+      return clamp((i - 1 + within) * legPct, 0, 100);
+    }
+    return nodes.length > 1 ? 100 : 0;
+  };
 
   const stops = [];
   if (last) {
@@ -218,6 +230,10 @@ function renderRewardBar() {
       <span class="reward-leg-note">${escapeHtml(s.note)}</span>
     </li>`).join('');
 
+  // Any progress at all should read as a visible nub rather than a hairline the
+  // track's rounded cap swallows.
+  const fillPct = upcoming ? (nowPct > 0 ? Math.max(nowPct, 2) : 0) : 100;
+
   els.bar.innerHTML = `
     <div class="reward-bar-head">
       <span class="reward-bar-now">${formatHours(now)} shot</span>
@@ -226,7 +242,7 @@ function renderRewardBar() {
         : 'Every reward earned — set another one'}</span>
     </div>
     <div class="reward-bar-track">
-      <div class="reward-bar-fill" style="width:${upcoming ? nowPct : 100}%"></div>
+      <div class="reward-bar-fill" style="width:${fillPct}%"></div>
       ${marksHtml}
     </div>
     <ul class="reward-bar-legend">${legendHtml}</ul>
