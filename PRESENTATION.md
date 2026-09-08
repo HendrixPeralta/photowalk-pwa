@@ -101,3 +101,30 @@ Thank you.
 - Pick a demo photo with **obvious blue shadows or clipped highlights** so the plain-language caption says something dramatic.
 - If you're running long, cut compare mode (0:15) and the walk-themes aside (0:20).
 - If asked "why no AI?": *because an AI score tells you what it thinks, not how to see. The goal is your eye, not the app's.*
+
+---
+
+## Demo data
+
+A fresh profile is not empty: on first open it is given **three months of
+practice** — an activity log, the walks behind it, the frames, four rewards at
+different stages and a theme goal — all generated from one log, so the heatmap,
+the streak badge, the goal bars and the reward timeline agree with each other.
+It is written **once** and then left alone: real walks pile on top of it, and it
+is never regenerated. `js/backstory.js` owns it.
+
+**Settings → Demo data** is the one-tap version, and the card always states what
+is currently loaded:
+
+- **Fill 3 months** — the three-month history, written for keeps
+- **Fill a year** — the full-year fixture (see below)
+- **Restore mine** — hand back the profile as it was before either landed
+
+The same three by URL, for a phone that is easier to type into than to tap:
+`?history=seed`, `?history=undo`, `?demo=1`, `?demo=clear`. In the console,
+`photowalkHistory.status()` reports what the profile claims.
+
+For a screenshot that needs a **full year** of history instead, `?demo=1` parks
+the real profile and seeds twelve months from the same generator; `?demo=clear`
+gives it back. Demo mode re-seeds itself so its streak always ends today, which
+is why it is the one to use on stage if the laptop has been sitting for a week.

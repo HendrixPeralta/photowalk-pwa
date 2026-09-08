@@ -41,6 +41,10 @@ function defaultState() {
     // Set only by the screenshot fixture in demo.js: { seed, seededAt }. Its
     // presence is what keeps demo mode on across refreshes.
     demoMode: null,
+    // Set once by backstory.js when a new profile is given its three months of
+    // starting history: { seed, days, seededAt }. Its presence is what stops a
+    // second backstory ever being written over real practice.
+    seededHistory: null,
 
     reminder: { enabled: false, time: '18:00', days: [1, 3, 5] } // days: 0=Sun
   };
