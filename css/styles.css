@@ -974,6 +974,7 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
   margin: 8px 0 6px;
   flex-wrap: wrap;
 }
+.curve-modes { margin: 0 0 8px; }
 .curve-hint { margin: 0; font-size: 0.72rem; }
 .btn-sm { padding: 6px 11px; font-size: 0.8rem; }
 .btn-sm:disabled { opacity: 0.45; pointer-events: none; }

@@ -651,11 +651,15 @@
                 <p id="cieCaption" class="hint scope-caption"></p>
               </figure>
               <figure class="scope-cell" data-scope="tonecurve">
-                <figcaption class="scope-name">Tone Curve <span>drag to reshape tones and watch the cost</span></figcaption>
+                <figcaption class="scope-name">Tone Curve <span>how this frame's tones are actually spread</span></figcaption>
+                <div class="overlay-controls curve-modes" id="curveModes">
+                  <button type="button" class="chip-btn active" data-curve-mode="measured">Measured</button>
+                  <button type="button" class="chip-btn" data-curve-mode="adjust">Adjust</button>
+                </div>
                 <canvas id="tonecurveCanvas" class="scope-canvas curve-canvas"></canvas>
                 <div class="curve-actions">
-                  <button type="button" id="curveResetBtn" class="btn btn-ghost btn-sm">Reset curve</button>
-                  <span class="hint curve-hint">Tap to add a point · double-tap one to remove it</span>
+                  <button type="button" id="curveResetBtn" class="btn btn-ghost btn-sm hidden">Reset curve</button>
+                  <span class="hint curve-hint" id="curveHint"></span>
                 </div>
                 <p id="tonecurveCaption" class="hint scope-caption"></p>
               </figure>

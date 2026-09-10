@@ -11,7 +11,8 @@ import {
 import { computeScopes, drawWaveform, drawParade, drawVectorscope, drawChromaticity } from './scopes.js';
 import {
   initToneCurve, drawToneCurve, toneCurveSummary, resetToneCurve,
-  setToneCurveHistogram, clearToneCurve, toneCurveTableValues, isToneCurveIdentity
+  setToneCurveHistogram, clearToneCurve, toneCurveTableValues, isToneCurveIdentity,
+  setToneCurveMode, getToneCurveMode
 } from './tonecurve.js';
 import {
   initDeconstruct, renderTonalKey, renderGamut, renderTakeaway,
@@ -120,6 +121,8 @@ export function initAnalysis() {
       caption: document.getElementById(`${scope.key}Caption`)
     })),
     curveResetBtn: document.getElementById('curveResetBtn'),
+    curveModes: document.getElementById('curveModes'),
+    curveHint: document.getElementById('curveHint'),
     paletteRow: document.getElementById('paletteRow'),
     paletteCaption: document.getElementById('paletteCaption'),
     exifBlock: document.getElementById('exifBlock'),
@@ -184,6 +187,11 @@ export function initAnalysis() {
 
   initToneCurve(document.getElementById('tonecurveCanvas'), refreshToneCurve);
   els.curveResetBtn.addEventListener('click', resetToneCurve);
+  els.curveModes.addEventListener('click', (e) => {
+    const btn = e.target.closest('.chip-btn');
+    if (btn) setToneCurveMode(btn.dataset.curveMode);
+  });
+  refreshToneCurve(); // sync the mode chips and hint before any frame is loaded
 
   // Scope canvases measure zero wide while the Advanced panel is folded away,
   // so they are only drawn once opening it has given them a real box.
@@ -287,7 +295,7 @@ export async function analyzeImage(img, { exif = null, countStat = false, albumI
   // linear and inherits the new histogram as its backdrop.
   clearToneCurve();
   setToneCurveHistogram(currentHist.bins);
-  applyToneCurveToPreview();
+  refreshToneCurve();
 
   // Reveal before drawing: the histogram and guide-line widths measure the
   // on-screen layout, which is zero while the workspace is display:none.
@@ -731,6 +739,15 @@ function drawScopes() {
 function refreshToneCurve() {
   const entry = els.scopeCells.find((s) => s.key === 'tonecurve');
   if (!entry) return;
+
+  const adjusting = getToneCurveMode() === 'adjust';
+  els.curveModes.querySelectorAll('.chip-btn').forEach((btn) => {
+    btn.classList.toggle('active', (btn.dataset.curveMode === 'adjust') === adjusting);
+  });
+  els.curveResetBtn.classList.toggle('hidden', !adjusting);
+  els.curveHint.textContent = adjusting
+    ? 'Tap to add a point · double-tap one to remove it'
+    : 'Measured from the frame — switch to Adjust to try a change.';
 
   if (!entry.cell.classList.contains('hidden') && els.scopesDetails.open) {
     drawToneCurve(entry.canvas);
