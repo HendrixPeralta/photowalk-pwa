@@ -17,6 +17,7 @@ import { initRewards, renderRewards } from './rewards.js';
 import { initReminders, syncReminderSchedule, maybeNudgeOnOpen } from './reminders.js';
 import { initProfile } from './profile.js';
 import { initDemoPanel } from './demopanel.js';
+import { initReview } from './review.js';
 import { backfillMilestones } from './milestones.js';
 
 // The header shows which instrument you are looking at, under the wordmark.
@@ -214,6 +215,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initReminders();
   initProfile();
   initDemoPanel();
+  initReview();
   initNav();
   initInstallPrompt();
   initServiceWorker();

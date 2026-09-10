@@ -939,6 +939,32 @@
           consistent history. Whatever the profile held before is parked, so Restore always has something
           to give back.</p>
       </div>
+
+      <div class="theme-card review-card">
+        <span class="label-caps" style="color:var(--accent-strong)">Feedback</span>
+        <h3 class="subsection-title" style="margin-top:6px">Leave a review</h3>
+        <p class="muted card-text">Tried PhotoWalk in the demo? Tell us what landed and what got in your way.</p>
+
+        <div id="reviewStars" class="review-stars" role="radiogroup" aria-label="Rating out of five"></div>
+
+        <label class="sr-only" for="reviewText">Your review</label>
+        <textarea id="reviewText" class="text-input review-text" rows="4" maxlength="2000"
+          placeholder="What worked? What got in your way?"></textarea>
+
+        <label class="sr-only" for="reviewName">Your name, optional</label>
+        <input type="text" id="reviewName" class="text-input" maxlength="80" placeholder="Name (optional)">
+
+        <!-- Honeypot: a real person never fills in a field they cannot see. -->
+        <input type="text" id="reviewWebsite" class="review-hp" tabindex="-1" autocomplete="off"
+          aria-hidden="true">
+
+        <div class="theme-btn-row">
+          <button type="button" id="reviewSendBtn" class="btn btn-accent btn-sm">Send review</button>
+        </div>
+        <p id="reviewStatus" class="hint"></p>
+        <p class="hint">Reviews are held on this device and sent when you're online. Only the rating and
+          the words you type are sent — never your photos or your practice history.</p>
+      </div>
     </section>
 
   </main>

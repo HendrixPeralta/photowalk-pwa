@@ -2409,3 +2409,67 @@ input[type="file"].text-input { padding: 8px; }
 }
 
 .action-stack { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+
+/* Demo feedback ---------------------------------------------------------- */
+
+/* Labels the screen reader needs and the layout doesn't. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.review-stars {
+  display: flex;
+  gap: 6px;
+  margin: 12px 0;
+}
+
+.review-star {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-dim);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+.review-star.on {
+  color: var(--accent-strong);
+  background: var(--surface-3);
+  border-color: var(--accent-deep);
+}
+.review-star:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.review-card .text-input { margin-bottom: 8px; }
+
+.review-text {
+  font: inherit;
+  resize: vertical;
+  min-height: 84px;
+}
+
+/* Off-screen rather than display:none — a bot that skips hidden fields should
+   still find this one. */
+.review-hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
