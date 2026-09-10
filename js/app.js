@@ -9,7 +9,7 @@ import {
 import { initWalkScreen, renderWalkScreen } from './walkscreen.js';
 import { initHud, renderHud, pauseHudRendering } from './hud.js';
 import { initDebrief } from './debrief.js';
-import { initAnalysis } from './analysis.js';
+import { initAnalysis, loadDefaultPhoto } from './analysis.js';
 import { initAlbum, renderAlbum } from './album.js';
 import { initShare, renderShare, joinRoom, attachSharedFiles } from './share.js';
 import { initHeatmap, renderHeatmap } from './heatmap.js';
@@ -42,6 +42,9 @@ function showView(name) {
   if (name === 'hud') renderHud();
   if (name === 'album') renderAlbum();
   if (name === 'share') renderShare();
+  // Deliberately on first view rather than at boot: the default frame costs a
+  // fetch and four scope passes, and most sessions never open this tab.
+  if (name === 'analyze') loadDefaultPhoto();
 
   document.querySelector('.views').scrollTo({ top: 0 });
 }
@@ -173,6 +176,27 @@ async function maybeSeedStartingHistory({ skipAuto = false } = {}) {
   }
 }
 
+/**
+ * The bundled starter reference library. Lands once per profile, so that the
+ * Album tab and its six filters have something to work on before the user has
+ * saved anything of their own.
+ *
+ * `?photos=seed` writes it again (handy after clearing storage) and
+ * `?photos=clear` takes it back out, pixels included.
+ */
+async function maybeSeedStarterAlbum() {
+  const value = new URLSearchParams(window.location.search).get('photos');
+  try {
+    const seeder = await import('./seedphotos.js');
+    seeder.installPhotoHooks();
+    if (value === 'clear') { await seeder.clearBundledPhotos(); return; }
+    if (value === 'seed') { await seeder.seedBundledPhotos(); return; }
+    await seeder.maybeSeedBundledPhotos();
+  } catch (err) {
+    console.warn('PhotoWalk: could not seed the starter album.', err);
+  }
+}
+
 function initServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.register('./sw.js').catch((err) => {
@@ -228,6 +252,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   showView('walks');
   handleLaunchIntent();
+
+  // Not awaited: nine fetches and nine decodes have no business holding up the
+  // first paint, and the album re-renders itself off stats-changed when they land.
+  maybeSeedStarterAlbum();
 
   // The scheduling window only reaches two weeks out, so top it up every launch.
   syncReminderSchedule();

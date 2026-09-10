@@ -15,7 +15,7 @@ import {
   setToneCurveMode, getToneCurveMode
 } from './tonecurve.js';
 import {
-  initDeconstruct, renderTonalKey, renderGamut, renderTakeaway,
+  initDeconstruct, renderTonalKey, renderGamut, takeawayText,
   setFrameLabel, clearDeconstruct, tonalKey, gamutClusters
 } from './deconstruct.js';
 import { exportBreakdownSheet } from './sheet.js';
@@ -125,7 +125,9 @@ export function initAnalysis() {
     curveHint: document.getElementById('curveHint'),
     paletteRow: document.getElementById('paletteRow'),
     paletteCaption: document.getElementById('paletteCaption'),
-    exifBlock: document.getElementById('exifBlock'),
+    shotStrip: document.getElementById('shotStrip'),
+    shotExposure: document.getElementById('shotExposure'),
+    shotGear: document.getElementById('shotGear'),
     tagsInput: document.getElementById('tagsInput'),
     saveBtn: document.getElementById('saveToAlbumBtn'),
     anotherBtn: document.getElementById('chooseAnotherBtn'),
@@ -246,19 +248,18 @@ async function handleFile(file) {
     showToast(await isHeif(file)
       ? "This browser can't open HEIC photos — export the shot as JPEG and try again."
       : 'That file could not be opened as an image.');
-    els.exifBlock.innerHTML = '';
+    els.shotStrip.classList.add('hidden');
     els.input.value = '';
     return;
   }
 
   await analyzeImage(img, { countStat: true });
 
-  els.exifBlock.innerHTML = '<p class="muted">Reading metadata...</p>';
   const exif = await exifPromise;
   // Guard against a second photo loading while EXIF parsing was in flight.
   if (currentImage === img) {
     currentExif = exif;
-    renderExif(exif);
+    renderShotStrip(exif);
   }
 }
 
@@ -322,14 +323,13 @@ export async function analyzeImage(img, { exif = null, countStat = false, albumI
   drawHistogramView();
   drawScopes();
   renderPalette(currentPalette);
-  renderExif(exif);
+  renderShotStrip(exif);
 
-  // The written readouts: tonal key, colour gamut and the takeaway, all
-  // derived from the numbers just computed above.
+  // The written readouts: tonal key and colour gamut, both derived from the
+  // numbers just computed above.
   const summary = histogramSummary(currentHist.bins);
   renderTonalKey(currentHist.bins, summary);
   renderGamut(currentPalette);
-  renderTakeaway(currentPalette, summary, exif);
   setFrameLabel(state.profile.photosAnalyzed + (countStat ? 1 : 0));
 
   els.tagsInput.value = restore && restore.tags ? restore.tags.join(', ') : '';
@@ -339,6 +339,40 @@ export async function analyzeImage(img, { exif = null, countStat = false, albumI
     state.profile.photosAnalyzed += 1;
     save();
     window.dispatchEvent(new CustomEvent('photowalk:stats-changed'));
+  }
+}
+
+/* ---------- Default frame ---------- */
+
+// Opening Analysis on an empty state gives a first-time user nothing to read
+// the histogram, the scopes or the tone curve against — every instrument on
+// the tab is blank until they go and find a photo. This frame ships with the
+// app so the whole panel is live on the first visit.
+const DEFAULT_PHOTO_URL = './photos/story-6762.jpg';
+let defaultPhotoTried = false;
+
+/**
+ * Loads the bundled default frame — once per session, and only while the
+ * workspace is genuinely empty. So it never lands on top of a photo the user
+ * chose, and "Choose Another" stays a way out rather than a loop back to here.
+ */
+export async function loadDefaultPhoto() {
+  if (defaultPhotoTried || currentImage) return false;
+  defaultPhotoTried = true;
+  try {
+    // Pixels come through an <img> (the browser decodes it off-thread); the
+    // blob is only fetched for its EXIF. Both are served by the same SW cache.
+    const [img, exif] = await Promise.all([
+      loadImage(DEFAULT_PHOTO_URL),
+      fetch(DEFAULT_PHOTO_URL).then((res) => (res.ok ? res.blob().then(readExif) : null))
+    ]);
+    if (currentImage) return false; // the user picked their own while this was in flight
+    // countStat stays off: a frame the app opened is not a frame they analyzed.
+    await analyzeImage(img, { exif, countStat: false });
+    return true;
+  } catch (err) {
+    console.warn('PhotoWalk: could not load the default analysis frame.', err);
+    return false;
   }
 }
 
@@ -832,15 +866,24 @@ function renderPalette(palette) {
 
 /* ---------- EXIF ---------- */
 
-function renderExif(exif) {
-  if (!exif) {
-    els.exifBlock.innerHTML = '<p class="muted">No EXIF metadata found in this file. Screenshots, downloads, and messaging-app copies usually strip this data — a known limitation for reference libraries.</p>';
-    return;
-  }
-  const rows = exifRows(exif);
-  els.exifBlock.innerHTML = rows.length
-    ? `<dl class="exif-list">${rows.join('')}</dl>`
-    : '<p class="muted">An EXIF block was found, but it did not contain the fields PhotoWalk reads.</p>';
+/**
+ * The settings, read off the frame itself. Values only and no labels: f/2.5
+ * and 1/3200s announce what they are, and a photographer reads the exposure
+ * triangle as one line rather than as three rows of a table.
+ */
+function renderShotStrip(exif) {
+  const pick = (key) => (exif ? exif[key] : null);
+  const exposure = [pick('aperture'), pick('shutter'), pick('iso')].filter(Boolean);
+  const gear = [pick('focalLength'), [exif?.make, exif?.model].filter(Boolean).join(' ')].filter(Boolean);
+
+  els.shotExposure.innerHTML = exposure
+    .map((v) => `<span>${escapeHtml(v)}</span>`).join('<i class="shot-sep" aria-hidden="true"></i>');
+  els.shotGear.innerHTML = gear
+    .map((v) => `<span>${escapeHtml(v)}</span>`).join('<i class="shot-sep" aria-hidden="true"></i>');
+
+  els.shotExposure.classList.toggle('hidden', !exposure.length);
+  els.shotGear.classList.toggle('hidden', !gear.length);
+  els.shotStrip.classList.toggle('hidden', !exposure.length && !gear.length);
 }
 
 /** The readable EXIF fields as plain [label, value] pairs. */
@@ -858,11 +901,15 @@ export function exifPairs(exif) {
   return pairs;
 }
 
-/** Shared by the analysis pane and the album detail sheet. */
-export function exifRows(exif) {
+/**
+ * Shared by the analysis pane and the album detail sheet. `skip` omits labels
+ * already shown elsewhere — the analysis pane puts these under the frame, but
+ * the album sheet has no preview strip and still wants the full table.
+ */
+export function exifRows(exif, { skip = [] } = {}) {
   if (!exif) return [];
   const rows = exifPairs(exif)
-    .filter(([k]) => k !== 'Location')
+    .filter(([k]) => k !== 'Location' && !skip.includes(k))
     .map(([k, v]) => `<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v)}</dd>`);
 
   if (exif.lat != null && exif.lon != null) {
@@ -1010,6 +1057,48 @@ function overlaySnapshot() {
   };
 }
 
+/**
+ * Measures a decoded image the way the workspace does, for callers that need
+ * album metadata without loading the photo into the UI — the bundled starter
+ * references in seedphotos.js. Returns { avgLum, palette }.
+ */
+export function measureForAlbum(img) {
+  const sample = drawToCanvas(img, MAX_DIM);
+  const data = sample.getContext('2d').getImageData(0, 0, sample.width, sample.height);
+  return { avgLum: computeHistogram(data).avgLum, palette: computePalette(data) };
+}
+
+/**
+ * The album item shape, in one place. Every dropdown in the Album tab filters
+ * on one of these derived labels, so a seeded reference has to be built from
+ * the same thresholds a saved one is or the two sort differently.
+ */
+export function albumRecord({
+  imageId, width, height, avgLum, palette = [],
+  exif = null, tags = [], overlay = null, themeId = null, savedAt = Date.now()
+}) {
+  const aspect = width / height;
+  const top = palette[0];
+  return {
+    id: uid(),
+    imageId,
+    width,
+    height,
+    aspectLabel: aspect > 1.15 ? 'Landscape' : aspect < 0.87 ? 'Portrait' : 'Square',
+    brightnessLabel: avgLum > 170 ? 'Bright' : avgLum < 85 ? 'Dark' : 'Balanced',
+    colorName: top ? nearestColorName(top.r, top.g, top.b) : 'Neutral',
+    colors: palette.slice(0, 5).map((c) => rgbToHex(c.r, c.g, c.b)),
+    tags,
+    overlay,
+    themeId,
+    exif,
+    focalLabel: focalBucket(exif && exif.focalMm),
+    apertureLabel: apertureBucket(exif && exif.fNumber),
+    hasLocation: !!(exif && exif.lat != null && exif.lon != null),
+    savedAt
+  };
+}
+
 async function saveToAlbum() {
   if (!currentImageData || !currentImage) return;
   const tags = els.tagsInput.value.split(',').map((t) => t.trim()).filter(Boolean);
@@ -1029,38 +1118,23 @@ async function saveToAlbum() {
     updateSaveButtonLabel();
   }
 
-  const w = els.imageCanvas.width, h = els.imageCanvas.height;
-  const aspect = w / h;
-  const aspectLabel = aspect > 1.15 ? 'Landscape' : aspect < 0.87 ? 'Portrait' : 'Square';
-  const brightnessLabel = avgLuminance > 170 ? 'Bright' : avgLuminance < 85 ? 'Dark' : 'Balanced';
-  const colors = currentPalette.slice(0, 5).map((c) => rgbToHex(c.r, c.g, c.b));
-  const colorName = currentPalette[0] ? nearestColorName(currentPalette[0].r, currentPalette[0].g, currentPalette[0].b) : 'Neutral';
-  const exif = currentExif;
-
   els.saveBtn.disabled = true;
   try {
     const full = drawToCanvas(currentImage, ALBUM_MAX_DIM);
     const imageId = uid();
     await putImage(imageId, await canvasToBlob(full, 'image/jpeg', 0.85));
 
-    state.album.unshift({
-      id: uid(),
+    state.album.unshift(albumRecord({
       imageId,
       width: full.width,
       height: full.height,
-      aspectLabel,
-      brightnessLabel,
-      colorName,
-      colors,
+      avgLum: avgLuminance,
+      palette: currentPalette,
+      exif: currentExif,
       tags,
       overlay: overlaySnapshot(),
-      themeId: state.activeWalk ? state.activeWalk.themeId : null,
-      exif,
-      focalLabel: focalBucket(exif && exif.focalMm),
-      apertureLabel: apertureBucket(exif && exif.fNumber),
-      hasLocation: !!(exif && exif.lat != null && exif.lon != null),
-      savedAt: Date.now()
-    });
+      themeId: state.activeWalk ? state.activeWalk.themeId : null
+    }));
     save();
     logFrame();
     window.dispatchEvent(new CustomEvent('photowalk:stats-changed'));
@@ -1116,7 +1190,7 @@ async function exportBreakdown() {
       harmony: rel ? rel.label : '',
       tonalTitle: `Tonal key: ${tonalKey(summary).title}`,
       tonalText: summary.caption,
-      takeaway: document.getElementById('takeawayText').textContent,
+      takeaway: takeawayText(currentPalette, summary, currentExif),
       exifRows: exifPairs(currentExif)
     });
   } finally {

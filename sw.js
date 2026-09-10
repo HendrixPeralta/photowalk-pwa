@@ -1,4 +1,4 @@
-const CACHE_NAME = 'photowalk-v30';
+const CACHE_NAME = 'photowalk-v33';
 const RUNTIME_CACHE = 'photowalk-runtime-v2';
 const CURRENT_CACHES = [CACHE_NAME, RUNTIME_CACHE];
 
@@ -39,9 +39,23 @@ const PRECACHE_URLS = [
   './js/demopanel.js',
   './js/review.js',
   './js/demo.js',
+  './js/seedphotos.js',
   './js/app.js',
   './icons/icon.svg',
-  './icons/icon-maskable.svg'
+  './icons/icon-maskable.svg',
+  // The bundled reference library (seedphotos.js) and the Analysis tab's
+  // default frame. Precached because both are expected to be there on a
+  // first run, which may already be offline.
+  './photos/a_1.jpg',
+  './photos/dr-3474.jpg',
+  './photos/a_49.jpg',
+  './photos/s.jpg',
+  './photos/a.jpg',
+  './photos/a_9.jpg',
+  './photos/a_31.jpg',
+  './photos/a_32.jpg',
+  './photos/a_25.jpg',
+  './photos/story-6762.jpg'
 ];
 
 // Public-domain concept examples are fetched from here and cached so the

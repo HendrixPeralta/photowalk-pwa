@@ -45,6 +45,10 @@ function defaultState() {
     // starting history: { seed, days, seededAt }. Its presence is what stops a
     // second backstory ever being written over real practice.
     seededHistory: null,
+    // Set once by seedphotos.js when a new profile is handed the bundled
+    // starter reference library: { count, seededAt }. Its presence is what
+    // keeps a deleted starter reference deleted.
+    seededAlbum: null,
 
     reminder: { enabled: false, time: '18:00', days: [1, 3, 5] } // days: 0=Sun
   };

@@ -1,6 +1,7 @@
 /**
- * The written half of the Analysis screen: the tonal-key verdict, the colour
- * gamut deconstruction, and the takeaway note.
+ * The written half of the Analysis screen: the tonal-key verdict and the
+ * colour gamut deconstruction, plus the takeaway paragraph the export sheet
+ * prints.
  *
  * All of it is rule-based arithmetic over the histogram, the palette and the
  * EXIF block — the same numbers already on screen, phrased. Nothing is sent
@@ -26,9 +27,7 @@ export function initDeconstruct() {
     gamutBar: document.getElementById('gamutBar'),
     gamutSpecs: document.getElementById('gamutSpecs'),
     harmonyRow: document.getElementById('harmonyRow'),
-    harmonyName: document.getElementById('harmonyName'),
-    takeaway: document.getElementById('takeawayNote'),
-    takeawayText: document.getElementById('takeawayText')
+    harmonyName: document.getElementById('harmonyName')
   };
 
   els.gamutSpecs.addEventListener('click', (e) => {
@@ -146,8 +145,7 @@ export function renderGamut(palette) {
  * Every clause is guarded by the measurement that justifies it, so a photo
  * with no EXIF simply gets a shorter note rather than an invented one.
  */
-export function renderTakeaway(palette, summary, exif) {
-  if (!els.takeaway) return;
+export function takeawayText(palette, summary, exif) {
   const key = tonalKey(summary);
   const rel = palette.length ? paletteRelationship(palette) : null;
   const parts = [];
@@ -179,8 +177,7 @@ export function renderTakeaway(palette, summary, exif) {
       : `At ${exif.focalLength} the background compresses, which is what stacks the layers together.`);
   }
 
-  els.takeawayText.textContent = parts.join(' ');
-  els.takeaway.classList.remove('hidden');
+  return parts.join(' ');
 }
 
 /* ---------- Header + reset ---------- */
@@ -193,7 +190,6 @@ export function setFrameLabel(index) {
 export function clearDeconstruct() {
   if (!els.tonalNote) return;
   els.tonalNote.classList.add('hidden');
-  els.takeaway.classList.add('hidden');
   els.harmonyRow.hidden = true;
   els.gamutBar.innerHTML = '';
   els.gamutSpecs.innerHTML = '';

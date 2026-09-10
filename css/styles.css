@@ -1004,7 +1004,47 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
   border-radius: 4px;
 }
 
-.exif-block { font-size: 0.88rem; }
+/* Shot settings, engraved under the frame. Monospace and tabular figures so
+   the values hold their column when you flick between two photos. */
+.shot-strip {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.shot-line {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
+}
+.shot-exposure {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.01em;
+}
+.shot-gear {
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--text-dim);
+}
+/* A dot rather than a glyph in the markup, so it is never read aloud or
+   selected when the settings are copied. */
+.shot-sep {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.45;
+  flex-shrink: 0;
+}
+.shot-exposure .shot-sep { background: var(--accent); opacity: 0.8; }
+
 .exif-list { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; }
 .exif-list dt { color: var(--text-dim); }
 .exif-list dd { margin: 0; font-weight: 600; }

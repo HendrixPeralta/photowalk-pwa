@@ -547,6 +547,13 @@
                 <canvas id="overlayCanvas"></canvas>
               </div>
             </div>
+            <!-- The exposure triangle sits with the frame, the way it is
+                 engraved on a camera: you read it while looking at the shot,
+                 not after scrolling past the scopes. -->
+            <div id="shotStrip" class="shot-strip hidden">
+              <p class="shot-line shot-exposure" id="shotExposure"></p>
+              <p class="shot-line shot-gear" id="shotGear"></p>
+            </div>
           </div>
           <div class="compare-pane hidden" id="refPane">
             <p class="compare-label">Reference</p>
@@ -672,17 +679,6 @@
             </div>
           </div>
         </details>
-
-        <h4 class="subsection-title">Optical Payload &amp; EXIF</h4>
-        <div id="exifBlock" class="exif-block"></div>
-
-        <div id="takeawayNote" class="diag-note hidden">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bulb"/></svg>
-          <div class="diag-note-body">
-            <div class="diag-note-head"><strong>Analysis takeaway</strong></div>
-            <p id="takeawayText"></p>
-          </div>
-        </div>
 
         <h4 class="subsection-title">Save to Reference Album</h4>
         <input type="text" id="tagsInput" class="text-input" placeholder="Tags, comma separated (e.g. bridge, sunset)">
