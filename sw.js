@@ -1,4 +1,4 @@
-const CACHE_NAME = 'photowalk-v26';
+const CACHE_NAME = 'photowalk-v27';
 const RUNTIME_CACHE = 'photowalk-runtime-v2';
 const CURRENT_CACHES = [CACHE_NAME, RUNTIME_CACHE];
 
@@ -22,6 +22,7 @@ const PRECACHE_URLS = [
   './js/heatmap.js',
   './js/interpret.js',
   './js/scopes.js',
+  './js/tonecurve.js',
   './js/rewards.js',
   './js/reminders.js',
   './js/milestones.js',

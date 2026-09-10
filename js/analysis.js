@@ -10,6 +10,10 @@ import {
 } from './interpret.js';
 import { computeScopes, drawWaveform, drawParade, drawVectorscope, drawChromaticity } from './scopes.js';
 import {
+  initToneCurve, drawToneCurve, toneCurveSummary, resetToneCurve,
+  setToneCurveHistogram, clearToneCurve, toneCurveTableValues, isToneCurveIdentity
+} from './tonecurve.js';
+import {
   initDeconstruct, renderTonalKey, renderGamut, renderTakeaway,
   setFrameLabel, clearDeconstruct, tonalKey, gamutClusters
 } from './deconstruct.js';
@@ -47,7 +51,10 @@ const SCOPES = [
   { key: 'waveform', draw: drawWaveform, read: waveformSummary },
   { key: 'parade', draw: drawParade, read: paradeSummary },
   { key: 'vectorscope', draw: drawVectorscope, read: vectorscopeSummary },
-  { key: 'cie', draw: drawChromaticity, read: chromaticitySummary }
+  { key: 'cie', draw: drawChromaticity, read: chromaticitySummary },
+  // Unlike the four above this one owns state and takes input, so it draws
+  // from its own module rather than from the computed scope buffers.
+  { key: 'tonecurve', draw: drawToneCurve, read: toneCurveSummary }
 ];
 
 let els = {};
@@ -112,6 +119,7 @@ export function initAnalysis() {
       canvas: document.getElementById(`${scope.key}Canvas`),
       caption: document.getElementById(`${scope.key}Caption`)
     })),
+    curveResetBtn: document.getElementById('curveResetBtn'),
     paletteRow: document.getElementById('paletteRow'),
     paletteCaption: document.getElementById('paletteCaption'),
     exifBlock: document.getElementById('exifBlock'),
@@ -173,6 +181,9 @@ export function initAnalysis() {
     const btn = e.target.closest('.chip-btn');
     if (btn) setScopeView(btn.dataset.scope);
   });
+
+  initToneCurve(document.getElementById('tonecurveCanvas'), refreshToneCurve);
+  els.curveResetBtn.addEventListener('click', resetToneCurve);
 
   // Scope canvases measure zero wide while the Advanced panel is folded away,
   // so they are only drawn once opening it has given them a real box.
@@ -271,6 +282,12 @@ export async function analyzeImage(img, { exif = null, countStat = false, albumI
   avgLuminance = currentHist.avgLum;
   currentPalette = computePalette(currentImageData);
   currentScopes = computeScopes(currentImageData);
+
+  // A curve belongs to the frame it was drawn against, so a new photo starts
+  // linear and inherits the new histogram as its backdrop.
+  clearToneCurve();
+  setToneCurveHistogram(currentHist.bins);
+  applyToneCurveToPreview();
 
   // Reveal before drawing: the histogram and guide-line widths measure the
   // on-screen layout, which is zero while the workspace is display:none.
@@ -706,6 +723,40 @@ function drawScopes() {
   }
 }
 
+/**
+ * Called on every pointermove while a curve point is dragged, so it does the
+ * cheap things only: repaint one canvas and swap three filter attributes.
+ * The image itself is never re-read.
+ */
+function refreshToneCurve() {
+  const entry = els.scopeCells.find((s) => s.key === 'tonecurve');
+  if (!entry) return;
+
+  if (!entry.cell.classList.contains('hidden') && els.scopesDetails.open) {
+    drawToneCurve(entry.canvas);
+    const reading = toneCurveSummary();
+    entry.caption.innerHTML = `<strong>${escapeHtml(reading.label)}.</strong> ${escapeHtml(reading.caption)}`;
+  }
+
+  applyToneCurveToPreview();
+}
+
+/**
+ * An identity curve drops the filter entirely rather than applying a no-op
+ * one: it keeps the untouched preview bit-exact and off the filter path.
+ */
+function applyToneCurveToPreview() {
+  const identity = isToneCurveIdentity();
+  els.imageCanvas.style.filter = identity ? '' : 'url(#toneCurveFilter)';
+  els.curveResetBtn.disabled = identity;
+  if (identity) return;
+
+  const table = toneCurveTableValues();
+  for (const id of ['toneCurveR', 'toneCurveG', 'toneCurveB']) {
+    document.getElementById(id).setAttribute('tableValues', table);
+  }
+}
+
 /* ---------- Palette ---------- */
 
 function computePalette(imageData, maxSwatches = 6) {
@@ -1024,6 +1075,8 @@ function resetWorkspace() {
   els.input.value = '';
   els.workspace.classList.add('hidden');
   els.empty.classList.remove('hidden');
+  clearToneCurve();
+  applyToneCurveToPreview();
   clearDeconstruct();
 }
 

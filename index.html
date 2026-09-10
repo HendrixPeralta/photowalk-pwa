@@ -123,6 +123,18 @@
     <g id="i-user" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
       <circle cx="12" cy="8" r="3.4"/><path d="M5 20c1.2-3.4 3.8-5 7-5s5.8 1.6 7 5"/>
     </g>
+
+    <!-- The tone curve is previewed through this rather than by rewriting
+         pixels: feComponentTransfer is a GPU lookup, so a drag stays smooth
+         on a phone where a per-frame getImageData pass would not.
+         tableValues is rewritten by tonecurve.js on every change. -->
+    <filter id="toneCurveFilter" color-interpolation-filters="sRGB">
+      <feComponentTransfer>
+        <feFuncR id="toneCurveR" type="table" tableValues="0 1"/>
+        <feFuncG id="toneCurveG" type="table" tableValues="0 1"/>
+        <feFuncB id="toneCurveB" type="table" tableValues="0 1"/>
+      </feComponentTransfer>
+    </filter>
   </defs>
 </svg>
 
@@ -603,7 +615,7 @@
         <details id="scopesDetails" class="theme-card collapse-card scopes-details">
           <summary class="collapse-summary">
             <span class="collapse-title">Advanced: Scopes</span>
-            <span class="muted collapse-meta">Waveform, parade, vector, CIE</span>
+            <span class="muted collapse-meta">Waveform, parade, vector, CIE, tone curve</span>
             <svg class="collapse-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -614,7 +626,8 @@
               <button type="button" class="chip-btn" data-scope="parade">Parade</button>
               <button type="button" class="chip-btn" data-scope="vectorscope">Vector</button>
               <button type="button" class="chip-btn" data-scope="cie">CIE</button>
-              <button type="button" class="chip-btn" data-scope="all">All 4</button>
+              <button type="button" class="chip-btn" data-scope="tonecurve">Tone Curve</button>
+              <button type="button" class="chip-btn" data-scope="all">All 5</button>
             </div>
             <div id="scopeGrid" class="scope-grid">
               <figure class="scope-cell" data-scope="waveform">
@@ -636,6 +649,15 @@
                 <figcaption class="scope-name">CIE Chromaticity <span>which colours the frame occupies</span></figcaption>
                 <canvas id="cieCanvas" class="scope-canvas"></canvas>
                 <p id="cieCaption" class="hint scope-caption"></p>
+              </figure>
+              <figure class="scope-cell" data-scope="tonecurve">
+                <figcaption class="scope-name">Tone Curve <span>drag to reshape tones and watch the cost</span></figcaption>
+                <canvas id="tonecurveCanvas" class="scope-canvas curve-canvas"></canvas>
+                <div class="curve-actions">
+                  <button type="button" id="curveResetBtn" class="btn btn-ghost btn-sm">Reset curve</button>
+                  <span class="hint curve-hint">Tap to add a point · double-tap one to remove it</span>
+                </div>
+                <p id="tonecurveCaption" class="hint scope-caption"></p>
               </figure>
             </div>
           </div>
