@@ -1,4 +1,4 @@
-const CACHE_NAME = 'photowalk-v27';
+const CACHE_NAME = 'photowalk-v28';
 const RUNTIME_CACHE = 'photowalk-runtime-v2';
 const CURRENT_CACHES = [CACHE_NAME, RUNTIME_CACHE];
 
@@ -37,6 +37,7 @@ const PRECACHE_URLS = [
   './js/share.js',
   './js/backstory.js',
   './js/demopanel.js',
+  './js/review.js',
   './js/demo.js',
   './js/app.js',
   './icons/icon.svg',
