@@ -958,6 +958,25 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
   display: block;
 }
 .scope-grid-all .scope-canvas { height: 150px; }
+
+/* The one scope you touch. touch-action:none stops the browser claiming a
+   drag as a page scroll, which would make a point impossible to pull down. */
+.curve-canvas {
+  touch-action: none;
+  cursor: crosshair;
+  height: 260px;
+}
+.scope-grid-all .curve-canvas { height: 180px; }
+.curve-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0 6px;
+  flex-wrap: wrap;
+}
+.curve-hint { margin: 0; font-size: 0.72rem; }
+.btn-sm { padding: 6px 11px; font-size: 0.8rem; }
+.btn-sm:disabled { opacity: 0.45; pointer-events: none; }
 .scope-grid-all .scope-name span { display: none; }
 .scope-caption { margin-bottom: 0; }
 
