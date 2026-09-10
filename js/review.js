@@ -14,13 +14,17 @@
 
 import { showToast } from './toast.js';
 
-// Paste the Apps Script /exec URL from tools/review-endpoint.gs here.
+// The Apps Script web app from tools/review-endpoint.gs. Public on purpose:
+// it is append-only, so the worst it can leak is the ability to add a row.
 //
-// Empty is a safe state rather than a broken one: the form still works and
-// reviews still queue, and the backlog goes out on the first load after this
-// is filled in. That way collecting feedback is never blocked on the endpoint
-// existing yet.
-const ENDPOINT = '';
+// Blanking this is a safe state rather than a broken one — the form still
+// works and reviews still queue, and the backlog goes out on the first load
+// after a URL comes back.
+//
+// Re-deploying the script under "New deployment" mints a *different* /exec
+// URL and leaves this one pinned to the old code; use Manage deployments ->
+// edit -> New version to keep this URL working.
+const ENDPOINT = 'https://script.google.com/macros/s/AKfycbwPZC5YSPUaSVIuMKn6FZCd0dbHcwmqv2ksedbLDC2fnxo0CAYMd_faEAHaHGNgO63QVw/exec';
 
 const QUEUE_KEY = 'photowalk:review-queue';
 const MAX_QUEUED = 25; // a queue longer than this is a bug, not a busy room
