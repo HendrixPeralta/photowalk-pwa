@@ -869,6 +869,8 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
 }
 
 .overlay-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+/* The strip already sets the gap to the guide row; don't stack a second one. */
+.shot-strip + .overlay-controls, .compare-strip + .overlay-controls { margin-top: 0; }
 
 /* The guide row sits on one line under the frame. The chips hold their size and
    the guide select absorbs the squeeze, ellipsising rather than dropping Fit
@@ -1006,22 +1008,28 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
 
 /* Shot settings, engraved under the frame. Monospace and tabular figures so
    the values hold their column when you flick between two photos. */
+/* Spacing groups the strip with the frame, not with the controls under it:
+   tight between its own two lines, close to the image it captions, and a
+   clear step down to the guide row, which is a different kind of thing. */
 .shot-strip {
-  margin-top: 8px;
+  margin: 10px 0 20px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
 }
 .shot-line {
   margin: 0;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 14px;
   font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   font-variant-numeric: tabular-nums;
-  line-height: 1.35;
+  line-height: 1.3;
 }
+/* The second line carries longer text, so it needs slightly less air to read
+   as one unit rather than as scattered fragments. */
+.shot-gear { gap: 11px; }
 .shot-exposure {
   font-size: 0.92rem;
   font-weight: 600;
@@ -1044,6 +1052,16 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
   flex-shrink: 0;
 }
 .shot-exposure .shot-sep { background: var(--accent); opacity: 0.8; }
+
+/* A field the file never recorded. Amber rather than dimmed grey: this is
+   information the photo is missing, which is worth noticing, not chrome to
+   be skipped over. */
+.shot-missing {
+  color: var(--accent);
+  opacity: 0.85;
+  letter-spacing: -0.05em;
+}
+.shot-gear .shot-missing { font-size: inherit; }
 
 .exif-list { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; }
 .exif-list dt { color: var(--text-dim); }

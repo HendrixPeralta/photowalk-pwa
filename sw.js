@@ -1,4 +1,4 @@
-const CACHE_NAME = 'photowalk-v33';
+const CACHE_NAME = 'photowalk-v34';
 const RUNTIME_CACHE = 'photowalk-runtime-v2';
 const CURRENT_CACHES = [CACHE_NAME, RUNTIME_CACHE];
 
@@ -55,7 +55,7 @@ const PRECACHE_URLS = [
   './photos/a_31.jpg',
   './photos/a_32.jpg',
   './photos/a_25.jpg',
-  './photos/story-6762.jpg'
+  './photos/a_33.jpg'
 ];
 
 // Public-domain concept examples are fetched from here and cached so the

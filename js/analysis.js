@@ -348,7 +348,7 @@ export async function analyzeImage(img, { exif = null, countStat = false, albumI
 // the histogram, the scopes or the tone curve against — every instrument on
 // the tab is blank until they go and find a photo. This frame ships with the
 // app so the whole panel is live on the first visit.
-const DEFAULT_PHOTO_URL = './photos/story-6762.jpg';
+const DEFAULT_PHOTO_URL = './photos/a_33.jpg';
 let defaultPhotoTried = false;
 
 /**
@@ -873,17 +873,27 @@ function renderPalette(palette) {
  */
 function renderShotStrip(exif) {
   const pick = (key) => (exif ? exif[key] : null);
-  const exposure = [pick('aperture'), pick('shutter'), pick('iso')].filter(Boolean);
-  const gear = [pick('focalLength'), [exif?.make, exif?.model].filter(Boolean).join(' ')].filter(Boolean);
+  const exposure = [pick('aperture'), pick('shutter'), pick('iso')];
+  const gear = [pick('focalLength'), [exif?.make, exif?.model].filter(Boolean).join(' ') || null];
 
-  els.shotExposure.innerHTML = exposure
-    .map((v) => `<span>${escapeHtml(v)}</span>`).join('<i class="shot-sep" aria-hidden="true"></i>');
-  els.shotGear.innerHTML = gear
-    .map((v) => `<span>${escapeHtml(v)}</span>`).join('<i class="shot-sep" aria-hidden="true"></i>');
+  els.shotExposure.innerHTML = shotSlots(exposure);
+  els.shotGear.innerHTML = shotSlots(gear);
+  els.shotStrip.classList.remove('hidden');
+}
 
-  els.shotExposure.classList.toggle('hidden', !exposure.length);
-  els.shotGear.classList.toggle('hidden', !gear.length);
-  els.shotStrip.classList.toggle('hidden', !exposure.length && !gear.length);
+/**
+ * Every slot is rendered whether or not the file filled it, a missing one as
+ * a dash. The strip keeps its shape between photos that way, and an absent
+ * setting reads as "this file never recorded it" rather than as the app
+ * having nothing to say — which is the more common case than people expect,
+ * since screenshots and messaging apps strip EXIF on the way through.
+ */
+function shotSlots(values) {
+  return values
+    .map((v) => (v
+      ? `<span>${escapeHtml(v)}</span>`
+      : '<span class="shot-missing" title="Not recorded in this file">--</span>'))
+    .join('<i class="shot-sep" aria-hidden="true"></i>');
 }
 
 /** The readable EXIF fields as plain [label, value] pairs. */
