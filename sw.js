@@ -1,4 +1,4 @@
-const CACHE_NAME = 'photowalk-v34';
+const CACHE_NAME = 'photowalk-v37';
 const RUNTIME_CACHE = 'photowalk-runtime-v2';
 const CURRENT_CACHES = [CACHE_NAME, RUNTIME_CACHE];
 
@@ -49,11 +49,8 @@ const PRECACHE_URLS = [
   './photos/a_1.jpg',
   './photos/dr-3474.jpg',
   './photos/a_49.jpg',
-  './photos/s.jpg',
   './photos/a.jpg',
-  './photos/a_9.jpg',
   './photos/a_31.jpg',
-  './photos/a_32.jpg',
   './photos/a_25.jpg',
   './photos/a_33.jpg'
 ];

@@ -29,12 +29,20 @@ const BUNDLED = [
   'a_1.jpg',
   'dr-3474.jpg',
   'a_49.jpg',
-  's.jpg',
   'a.jpg',
-  'a_9.jpg',
   'a_31.jpg',
-  'a_32.jpg',
   'a_25.jpg'
+];
+
+// Frames that used to ship and have since been dropped. A profile seeded
+// before they were retired still holds them, so they are matched on the one
+// field that survives in the saved record — the capture time read off the
+// file — and taken back out on the next boot. Records written from now on
+// carry `seedName`, which makes any future retirement a name match.
+const RETIRED = [
+  { name: 'a_32.jpg', dateTaken: '2022:10:16 18:12:47' },
+  { name: 'a_9.jpg', dateTaken: '2022:10:16 14:28:20' },
+  { name: 's.jpg', dateTaken: '2022:03:21 16:32:54' }
 ];
 
 /**
@@ -68,7 +76,8 @@ async function buildRecord(name) {
       }),
       // Marks it as ours, so `?photos=clear` can take back exactly what the
       // seed put in and leave the user's own references alone.
-      seeded: true
+      seeded: true,
+      seedName: name
     };
   } catch (err) {
     console.warn(`PhotoWalk: could not seed ${name}.`, err);
@@ -77,9 +86,9 @@ async function buildRecord(name) {
 }
 
 /**
- * Writes the whole starter library. Sequential on purpose: nine 1600px decodes
- * at once spikes memory on a phone, and this runs while the rest of the app is
- * still booting.
+ * Writes the whole starter library. Sequential on purpose: half a dozen
+ * 1600px decodes at once spikes memory on a phone, and this runs while the
+ * rest of the app is still booting.
  */
 export async function seedBundledPhotos() {
   const records = [];
@@ -100,6 +109,40 @@ export async function seedBundledPhotos() {
   window.dispatchEvent(new CustomEvent('photowalk:stats-changed'));
 
   return { count: records.length, requested: BUNDLED.length };
+}
+
+/** True when `item` is a seeded copy of a frame that no longer ships. */
+function isRetired(item) {
+  if (!item.seeded) return false;
+  return RETIRED.some((r) => (
+    item.seedName === r.name
+    // dateTaken is only a match when both sides actually carry one, so a
+    // bundled frame with no EXIF date can never be swept up by accident.
+    || (!item.seedName && !!r.dateTaken && item.exif && item.exif.dateTaken === r.dateTaken)
+  ));
+}
+
+/**
+ * Drops seeded frames that have since been retired, pixels included. Runs on
+ * every boot: the seed itself only ever runs once, so this is the only way a
+ * profile from an older build stops showing photos the app no longer ships.
+ * The user's own references are never touched.
+ */
+export async function pruneRetiredPhotos() {
+  const gone = state.album.filter(isRetired);
+  if (!gone.length) return { removed: 0 };
+
+  state.album = state.album.filter((item) => !isRetired(item));
+  if (state.seededAlbum) {
+    state.seededAlbum.count = Math.max(0, (state.seededAlbum.count || 0) - gone.length);
+  }
+  save();
+  window.dispatchEvent(new CustomEvent('photowalk:stats-changed'));
+
+  for (const item of gone) {
+    if (item.imageId) await deleteImage(item.imageId).catch(() => {});
+  }
+  return { removed: gone.length };
 }
 
 /** Seeds only a profile that has never been seeded before. */
@@ -134,6 +177,7 @@ export function installPhotoHooks() {
     seed: seedBundledPhotos,
     ensure: maybeSeedBundledPhotos,
     clear: clearBundledPhotos,
+    prune: pruneRetiredPhotos,
     status: () => ({
       ...(state.seededAlbum || { count: 0, seededAt: null }),
       bundled: BUNDLED.length,

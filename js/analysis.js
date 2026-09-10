@@ -45,7 +45,6 @@ const FLIPPABLE_OVERLAYS = ['golden-triangles'];
 const ROTATABLE_OVERLAYS = ['spiral-section', 'golden-spiral'];
 const PHI = (1 + Math.sqrt(5)) / 2;
 const ZOOM_MAX = 3;
-const LINE_HIT_PX = 20; // screen-px hit radius for grabbing a single guide line
 
 // Each scope pairs a renderer with the rule that puts its trace into words.
 const SCOPES = [
@@ -62,11 +61,9 @@ let els = {};
 let overlayType = 'thirds';
 let overlayFlip = false; // mirrors the triangle guide
 let overlayRotation = 0; // quarter-turns applied to the spiral guides
-// One normalized offset per guide line, so each can be dragged independently.
-let lineOffsets = { x: [0, 0], y: [0, 0] };
 let view = { zoom: 1, panX: 0, panY: 0 };
 let pointers = new Map(); // active pointers on the canvas, for pinch
-let gesture = null; // { kind: 'line' | 'pan' | 'pinch', ... }
+let gesture = null; // { kind: 'pan' | 'pinch', ... }
 
 let imageCtx = null;
 let overlayCtx = null;
@@ -159,7 +156,6 @@ export function initAnalysis() {
     drawOverlay();
   });
   els.resetGrid.addEventListener('click', () => {
-    lineOffsets = { x: [0, 0], y: [0, 0] };
     overlayFlip = false;
     overlayRotation = 0;
     drawOverlay();
@@ -304,15 +300,8 @@ export async function analyzeImage(img, { exif = null, countStat = false, albumI
   els.workspace.classList.remove('hidden');
 
   setViewTransform(1, 0, 0);
-  lineOffsets = { x: [0, 0], y: [0, 0] };
   if (restore && restore.overlay) {
     const o = restore.overlay;
-    if (o.lineOffsets && Array.isArray(o.lineOffsets.x) && Array.isArray(o.lineOffsets.y)) {
-      lineOffsets = {
-        x: [Number(o.lineOffsets.x[0]) || 0, Number(o.lineOffsets.x[1]) || 0],
-        y: [Number(o.lineOffsets.y[0]) || 0, Number(o.lineOffsets.y[1]) || 0]
-      };
-    }
     overlayFlip = !!o.flip;
     overlayRotation = Number.isInteger(o.rotation) ? ((o.rotation % 4) + 4) % 4 : 0;
     setOverlay(OVERLAY_TYPES.includes(o.type) ? o.type : overlayType);
@@ -410,11 +399,9 @@ function drawGuidesOn(ctx, canvas) {
   const px = rect.width ? w / rect.width : 1; // canvas px per on-screen px
 
   if (LINE_FRACTIONS[overlayType]) {
-    const [a, b] = LINE_FRACTIONS[overlayType];
-    const xs = [(a + lineOffsets.x[0]) * w, (b + lineOffsets.x[1]) * w];
-    const ys = [(a + lineOffsets.y[0]) * h, (b + lineOffsets.y[1]) * h];
-    xs.forEach((x) => drawGuideLine(ctx, x, 0, x, h, px));
-    ys.forEach((y) => drawGuideLine(ctx, 0, y, w, y, px));
+    const fractions = LINE_FRACTIONS[overlayType];
+    fractions.forEach((f) => drawGuideLine(ctx, f * w, 0, f * w, h, px));
+    fractions.forEach((f) => drawGuideLine(ctx, 0, f * h, w, f * h, px));
   } else if (overlayType === 'golden-triangles') {
     drawTriangleGuides(ctx, w, h, px);
   } else {
@@ -526,20 +513,6 @@ function strokeGuidePath(ctx, pts, px, alpha = 1) {
   ctx.stroke();
 }
 
-/** Nearest guide line within LINE_HIT_PX of the pointer, or null. */
-function hitTestLine(clientX, clientY) {
-  const rect = els.overlayCanvas.getBoundingClientRect();
-  if (!rect.width || !rect.height) return null;
-  let best = null;
-  LINE_FRACTIONS[overlayType].forEach((f, i) => {
-    const dx = Math.abs(clientX - (rect.left + (f + lineOffsets.x[i]) * rect.width));
-    if (dx <= LINE_HIT_PX && (!best || dx < best.d)) best = { axis: 'x', idx: i, d: dx };
-    const dy = Math.abs(clientY - (rect.top + (f + lineOffsets.y[i]) * rect.height));
-    if (dy <= LINE_HIT_PX && (!best || dy < best.d)) best = { axis: 'y', idx: i, d: dy };
-  });
-  return best;
-}
-
 function onPointerDown(e) {
   if (!currentImage) return;
   els.overlayCanvas.setPointerCapture(e.pointerId);
@@ -555,21 +528,9 @@ function onPointerDown(e) {
     return;
   }
 
-  const hit = LINE_FRACTIONS[overlayType] ? hitTestLine(e.clientX, e.clientY) : null;
-  if (hit) {
-    gesture = {
-      kind: 'line',
-      axis: hit.axis,
-      idx: hit.idx,
-      startX: e.clientX,
-      startY: e.clientY,
-      startOffset: lineOffsets[hit.axis][hit.idx]
-    };
-  } else if (view.zoom > 1) {
-    gesture = { kind: 'pan', startX: e.clientX, startY: e.clientY, startPanX: view.panX, startPanY: view.panY };
-  } else {
-    gesture = null;
-  }
+  gesture = view.zoom > 1
+    ? { kind: 'pan', startX: e.clientX, startY: e.clientY, startPanX: view.panX, startPanY: view.panY }
+    : null;
 }
 
 function onPointerMove(e) {
@@ -585,17 +546,7 @@ function onPointerMove(e) {
   }
   if (!gesture) return;
 
-  if (gesture.kind === 'line') {
-    const rect = els.overlayCanvas.getBoundingClientRect();
-    if (!rect.width || !rect.height) return;
-    const f = LINE_FRACTIONS[overlayType][gesture.idx];
-    const delta = gesture.axis === 'x'
-      ? (e.clientX - gesture.startX) / rect.width
-      : (e.clientY - gesture.startY) / rect.height;
-    // Clamp the line's resulting position, so no guide can leave the frame.
-    lineOffsets[gesture.axis][gesture.idx] = clamp(gesture.startOffset + delta, 0.02 - f, 0.98 - f);
-    drawOverlay();
-  } else if (gesture.kind === 'pan') {
+  if (gesture.kind === 'pan') {
     setViewTransform(
       view.zoom,
       gesture.startPanX + (e.clientX - gesture.startX),
@@ -1062,8 +1013,7 @@ function overlaySnapshot() {
   return {
     type: overlayType,
     flip: overlayFlip,
-    rotation: overlayRotation,
-    lineOffsets: { x: [...lineOffsets.x], y: [...lineOffsets.y] }
+    rotation: overlayRotation
   };
 }
 
@@ -1168,7 +1118,6 @@ function resetWorkspace() {
   currentScopes = null;
   albumItemId = null;
   exitCompare();
-  lineOffsets = { x: [0, 0], y: [0, 0] };
   setViewTransform(1, 0, 0);
   setOverlay('thirds');
   els.tagsInput.value = '';

@@ -191,6 +191,9 @@ async function maybeSeedStarterAlbum() {
     seeder.installPhotoHooks();
     if (value === 'clear') { await seeder.clearBundledPhotos(); return; }
     if (value === 'seed') { await seeder.seedBundledPhotos(); return; }
+    // Before seeding, not after: a profile from an older build keeps its
+    // frames until this sweeps out the ones that no longer ship.
+    await seeder.pruneRetiredPhotos();
     await seeder.maybeSeedBundledPhotos();
   } catch (err) {
     console.warn('PhotoWalk: could not seed the starter album.', err);
@@ -253,8 +256,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   showView('walks');
   handleLaunchIntent();
 
-  // Not awaited: nine fetches and nine decodes have no business holding up the
-  // first paint, and the album re-renders itself off stats-changed when they land.
+  // Not awaited: a fetch and a decode per bundled frame have no business
+  // holding up the first paint, and the album re-renders itself off
+  // stats-changed when they land.
   maybeSeedStarterAlbum();
 
   // The scheduling window only reaches two weeks out, so top it up every launch.

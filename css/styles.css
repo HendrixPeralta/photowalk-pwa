@@ -22,6 +22,12 @@
   --accent-contrast: #0d0e11;
   --cyan: #4cd7f6;             /* analytical meters, scopes, clipping */
   --cyan-deep: #03b5d3;
+  /* Amber's complement (hue 38 -> 221), kept clear of the cyan the scopes own.
+     Reserved for the one thing in the chrome that is an invitation rather than
+     an instrument, so it reads as "not part of the camera". */
+  --invite: #2563eb;
+  --invite-bright: #3b82f6;
+  --invite-glow: rgba(37, 99, 235, 0.5);
   --danger: #ffb4ab;
   --shadow: rgba(0, 0, 0, 0.55);
 
@@ -1107,7 +1113,13 @@ input[type="file"].text-input { padding: 8px; }
   border-radius: var(--radius-md);
   overflow: hidden;
   cursor: pointer;
-  background: var(--surface-0);
+  /* hydrateImages() sets only background-image, so the sizing lives here:
+     without it the tile paints the photo at natural size and shows a
+     1:1 crop of its top-left corner. */
+  background-color: var(--surface-0);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 .album-thumb-tag, .room-thumb-name {
   position: absolute;
@@ -2537,32 +2549,50 @@ input[type="file"].text-input { padding: 8px; }
    Auto margins centre it in the space left between the brand lockup and the
    right-hand actions. Kept in flow rather than absolutely centred so it can
    never end up underneath either neighbour on a narrow phone — the trade is
-   that it sits at the centre of the gap, not the exact centre of the bar. */
+   that it sits at the centre of the gap, not the exact centre of the bar.
+
+   Solid in amber's complement rather than another outlined amber chip: the bar
+   it sits in is all warm hairlines, so a cool fill is the only treatment that
+   does not read as one more piece of the instrument cluster. The star stays
+   amber against it, which is the complementary pair doing the work. */
 .topbar-review {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
   margin: 0 auto;
-  padding: 6px 12px;
+  padding: 6px 13px;
   min-height: 34px;
-  background: var(--surface-3);
-  border: 1px solid var(--accent-deep);
+  background: var(--invite);
+  border: 1px solid var(--invite-bright);
   border-radius: 999px;
-  color: var(--accent-strong);
+  color: #fff;                 /* 5.2:1 on the fill */
   font-family: var(--font-data);
   font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background 120ms ease, border-color 120ms ease;
+  /* Inset highlight for the moulded pill edge, outer glow to lift it off the
+     near-black bar. */
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 2px 12px var(--invite-glow);
+  transition: background 120ms ease, box-shadow 120ms ease, transform 120ms ease;
 }
-.topbar-review:hover { background: var(--surface-4); }
-.topbar-review:active { border-color: var(--accent); }
-.topbar-review:focus-visible { outline: none; border-color: var(--accent); }
+.topbar-review:hover {
+  background: var(--invite-bright);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 3px 16px var(--invite-glow);
+}
+.topbar-review:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+/* Ringed in the bar colour first so the focus ring reads on the fill itself. */
+.topbar-review:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--surface-0), 0 0 0 4px var(--invite-bright);
+}
 
-.topbar-review-star { font-size: 13px; line-height: 1; }
+.topbar-review-star { font-size: 13px; line-height: 1; color: var(--accent-strong); }
 
 /* Under ~420px the bar is carrying a 34px badge, a streak pill and the brand
    lockup already; drop to the star alone rather than let the title ellipsis
