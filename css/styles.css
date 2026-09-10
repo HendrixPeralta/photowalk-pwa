@@ -2456,7 +2456,7 @@ input[type="file"].text-input { padding: 8px; }
   border-color: var(--accent);
 }
 
-.review-card .text-input { margin-bottom: 8px; }
+#reviewText, #reviewName { margin-bottom: 8px; }
 
 .review-text {
   font: inherit;
@@ -2473,4 +2473,43 @@ input[type="file"].text-input { padding: 8px; }
   height: 1px;
   opacity: 0;
   pointer-events: none;
+}
+
+/* The top bar's review button.
+   Auto margins centre it in the space left between the brand lockup and the
+   right-hand actions. Kept in flow rather than absolutely centred so it can
+   never end up underneath either neighbour on a narrow phone — the trade is
+   that it sits at the centre of the gap, not the exact centre of the bar. */
+.topbar-review {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  margin: 0 auto;
+  padding: 6px 12px;
+  min-height: 34px;
+  background: var(--surface-3);
+  border: 1px solid var(--accent-deep);
+  border-radius: 999px;
+  color: var(--accent-strong);
+  font-family: var(--font-data);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+.topbar-review:hover { background: var(--surface-4); }
+.topbar-review:active { border-color: var(--accent); }
+.topbar-review:focus-visible { outline: none; border-color: var(--accent); }
+
+.topbar-review-star { font-size: 13px; line-height: 1; }
+
+/* Under ~420px the bar is carrying a 34px badge, a streak pill and the brand
+   lockup already; drop to the star alone rather than let the title ellipsis
+   eat itself. */
+@media (max-width: 420px) {
+  .topbar-review { padding: 6px 10px; }
+  .topbar-review-label { display: none; }
 }

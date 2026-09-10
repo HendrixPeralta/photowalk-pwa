@@ -7,12 +7,18 @@
 // one way, and it never reads anything back. No identifiers, no telemetry, no
 // photo data.
 //
+// The form lives in a modal rather than on a screen of its own, so the top-bar
+// button can reach it from wherever the demo happens to be — the moment someone
+// wants to say something is the moment they have just seen something, and
+// making them navigate to Settings first loses most of them.
+//
 // The queue lives under its own localStorage key rather than inside the state
 // blob, because demo.js parks and restores that blob wholesale — a review
 // written during a demo would evaporate the moment someone pressed
 // "Restore mine".
 
 import { showToast } from './toast.js';
+import { openModal, closeModal } from './modal.js';
 
 // The Apps Script web app from tools/review-endpoint.gs. Public on purpose:
 // it is append-only, so the worst it can leak is the ability to add a row.
@@ -32,11 +38,51 @@ const MAX_TEXT = 2000;
 const MAX_NAME = 80;
 const TIMEOUT_MS = 8000;
 
+// Only set while the modal is open; every other entry point has to cope with
+// there being no form on screen.
 let els = null;
 let rating = 0;
 let flushing = false;
 
 export function initReview() {
+  [document.getElementById('reviewTopBtn'), document.getElementById('reviewOpenBtn')]
+    .forEach((btn) => btn && btn.addEventListener('click', openReviewModal));
+
+  // A review written on venue wifi that drops mid-tap is the whole reason the
+  // queue exists; retry as soon as the browser says it has a connection again.
+  window.addEventListener('online', () => flushQueue());
+
+  flushQueue();
+}
+
+/* ---------- The form ---------- */
+
+export function openReviewModal() {
+  rating = 0;
+
+  openModal(`
+    <span class="label-caps" style="color:var(--accent-strong)">Feedback</span>
+    <h3 class="subsection-title" style="margin-top:6px">Leave a review</h3>
+    <p class="muted card-text">Tried PhotoWalk? Tell us what landed and what got in your way.</p>
+
+    <div id="reviewStars" class="review-stars" role="radiogroup" aria-label="Rating out of five"></div>
+
+    <label class="sr-only" for="reviewText">Your review</label>
+    <textarea id="reviewText" class="text-input review-text" rows="4" maxlength="${MAX_TEXT}"
+      placeholder="What worked? What got in your way?"></textarea>
+
+    <label class="sr-only" for="reviewName">Your name, optional</label>
+    <input type="text" id="reviewName" class="text-input" maxlength="${MAX_NAME}" placeholder="Name (optional)">
+
+    <!-- Honeypot: a real person never fills in a field they cannot see. -->
+    <input type="text" id="reviewWebsite" class="review-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+    <button type="button" id="reviewSendBtn" class="btn btn-accent btn-block">Send review</button>
+    <p id="reviewStatus" class="hint"></p>
+    <p class="hint">Held on this device and sent when you are online. Only the rating and the words you
+      type are sent — never your photos or your practice history.</p>
+  `, { onClose: forgetForm });
+
   els = {
     stars: document.getElementById('reviewStars'),
     text: document.getElementById('reviewText'),
@@ -45,17 +91,16 @@ export function initReview() {
     send: document.getElementById('reviewSendBtn'),
     status: document.getElementById('reviewStatus')
   };
-  if (!els.stars || !els.send) return; // markup not on this build
 
   buildStars();
   els.send.addEventListener('click', submit);
-
-  // A review written on venue wifi that drops mid-tap is the whole reason the
-  // queue exists; retry as soon as the browser says it has a connection again.
-  window.addEventListener('online', () => flushQueue());
-
   reportBacklog();
-  flushQueue();
+}
+
+/** The modal wipes its own markup on close, so drop the stale element refs. */
+function forgetForm() {
+  els = null;
+  rating = 0;
 }
 
 /* ---------- Rating ---------- */
@@ -84,6 +129,7 @@ function setRating(value) {
 }
 
 function paintStars() {
+  if (!els) return;
   els.stars.querySelectorAll('.review-star').forEach((btn) => {
     const on = Number(btn.dataset.value) <= rating;
     btn.classList.toggle('on', on);
@@ -94,6 +140,7 @@ function paintStars() {
 /* ---------- Submit ---------- */
 
 function submit() {
+  if (!els) return;
   const text = (els.text.value || '').trim().slice(0, MAX_TEXT);
   const name = (els.name.value || '').trim().slice(0, MAX_NAME);
 
@@ -102,11 +149,10 @@ function submit() {
     return;
   }
 
-  // Honeypot: a real person never fills in a field they cannot see. Accept the
-  // submission silently so a bot gets no signal about why it failed.
+  // Honeypot tripped. Close on the usual note, so a bot gets no signal about
+  // why nothing was recorded.
   if (els.honeypot && els.honeypot.value) {
-    resetForm();
-    showToast('Thanks — your review has been recorded.');
+    finish();
     return;
   }
 
@@ -118,16 +164,13 @@ function submit() {
     name
   });
 
-  resetForm();
-  showToast('Thanks — your review has been recorded.');
+  finish();
   flushQueue();
 }
 
-function resetForm() {
-  rating = 0;
-  paintStars();
-  els.text.value = '';
-  els.name.value = '';
+function finish() {
+  closeModal(); // fires forgetForm()
+  showToast('Thanks — your review has been recorded.');
 }
 
 function setStatus(message) {
@@ -135,6 +178,7 @@ function setStatus(message) {
 }
 
 function reportBacklog() {
+  if (!els) return;
   const pending = readQueue().length;
   if (!pending) { setStatus(''); return; }
   setStatus(pending === 1
