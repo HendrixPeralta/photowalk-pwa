@@ -2548,6 +2548,7 @@ input[type="file"].text-input { padding: 8px; }
   font-size: 12px;
   color: var(--text-dim);
 }
+.review-field-hint-block { display: block; margin: -4px 0 6px; }
 
 .review-chip-row {
   display: flex;
@@ -2561,6 +2562,15 @@ input[type="file"].text-input { padding: 8px; }
 .review-lang-toggle .chip-btn {
   background: var(--surface-3);
   border-color: var(--border-strong);
+}
+/* Same specificity as the surface-3 override above, but declared after it, so
+   without this the selected state lost its amber fill — leaving the active
+   chip's near-black text sitting on the same dark surface-3 as everything
+   else, unreadable. */
+.review-chip-row .chip-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
 }
 
 /* The shared .chip-btn text (11px) reads fine as a compact control elsewhere,

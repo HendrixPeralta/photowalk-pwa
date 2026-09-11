@@ -161,7 +161,8 @@ function renderForm() {
     <span class="label-caps review-field-label">${t.levelLabel}</span>
     <div id="reviewLevel" class="review-chip-row" role="radiogroup" aria-label="${t.levelLabel}"></div>
 
-    <span class="label-caps review-field-label">${t.featuresLabel} <span class="review-field-hint">${t.featuresHint}</span></span>
+    <span class="label-caps review-field-label">${t.featuresLabel}</span>
+    <span class="review-field-hint review-field-hint-block">${t.featuresHint}</span>
     <div id="reviewFeatures" class="review-chip-row" role="group" aria-label="${t.featuresLabel}"></div>
 
     <span class="label-caps review-field-label">${t.improveLabel} <span class="review-field-hint">${t.optionalHint}</span></span>
