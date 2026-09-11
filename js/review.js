@@ -181,8 +181,8 @@ function renderForm() {
     <input type="text" id="reviewWebsite" class="review-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 
     <button type="button" id="reviewSendBtn" class="btn btn-accent btn-block">${t.send}</button>
-    <p id="reviewStatus" class="hint"></p>
-    <p class="hint">${t.privacy}</p>
+    <p id="reviewStatus" class="hint review-hint"></p>
+    <p class="hint review-hint">${t.privacy}</p>
   `, { onClose: forgetForm });
 
   els = {
