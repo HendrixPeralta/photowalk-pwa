@@ -2526,7 +2526,26 @@ input[type="file"].text-input { padding: 8px; }
   border-color: var(--accent);
 }
 
-#reviewText, #reviewName { margin-bottom: 8px; }
+.review-modal-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+
+.review-lang-toggle { display: flex; gap: 4px; flex-shrink: 0; }
+.review-lang-toggle .chip-btn { padding: 4px 9px; min-height: 0; font-size: 10px; }
+
+.review-field-label { display: block; margin: 14px 0 6px; }
+.review-field-hint {
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 400;
+  color: var(--text-dim);
+}
+
+.review-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+#reviewProblemText, #reviewName { margin-top: 8px; margin-bottom: 8px; }
 
 .review-text {
   font: inherit;

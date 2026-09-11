@@ -26,10 +26,15 @@
  */
 
 var SHEET_NAME = 'Reviews';
-var HEADERS = ['Received', 'Submitted (device)', 'Rating', 'Name', 'Review', 'Source'];
+var HEADERS = [
+  'Received', 'Submitted (device)', 'Rating', 'Photography level', 'Features',
+  'Improve', 'Problem', 'Name', 'Source'
+];
 
 var MAX_TEXT = 4000;
 var MAX_NAME = 120;
+var MAX_FEATURES = 300;
+var LEVELS = ['beginner', 'hobbyist', 'pro'];
 
 // Crude flood guard: no more than this many rows in a rolling window. A class
 // of thirty submitting at once passes; a script hammering the URL does not.
@@ -57,9 +62,13 @@ function doPost(e) {
     var rating = Number(data.rating);
     if (!(rating >= 1 && rating <= 5)) rating = '';
 
-    var text = trim(data.text, MAX_TEXT);
+    var level = LEVELS.indexOf(data.level) >= 0 ? data.level : '';
+    var features = trim(data.features, MAX_FEATURES);
+    var improveText = trim(data.improveText, MAX_TEXT);
+    var problemText = trim(data.problemText, MAX_TEXT);
     var name = trim(data.name, MAX_NAME);
-    if (!text && !rating) return json({ ok: false, error: 'blank' });
+
+    if (!rating && !level && !features && !improveText && !problemText) return json({ ok: false, error: 'blank' });
 
     var sheet = ensureSheet();
     if (isFlooding(sheet)) return json({ ok: false, error: 'rate-limited' });
@@ -68,8 +77,11 @@ function doPost(e) {
       new Date(),
       trim(data.submittedAt, 40),
       rating,
+      level,
+      features,
+      improveText,
+      problemText,
       name,
-      text,
       trim(data.source, 40)
     ]);
 
@@ -96,7 +108,9 @@ function ensureSheet() {
     sheet.appendRow(HEADERS);
     sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight('bold');
     sheet.setFrozenRows(1);
-    sheet.setColumnWidth(5, 420);
+    sheet.setColumnWidth(5, 260); // Features
+    sheet.setColumnWidth(6, 420); // Improve
+    sheet.setColumnWidth(7, 420); // Problem
   }
   return sheet;
 }
