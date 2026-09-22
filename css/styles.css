@@ -2092,21 +2092,21 @@ input[type="file"].text-input { padding: 8px; }
 
 /* --- Analysis: diagnostic notes ------------------------------------------ */
 .diag-note {
-  display: flex;
-  gap: 10px;
   padding: 12px;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   margin-top: 10px;
 }
-.diag-note > svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--accent); }
-.diag-note-body { min-width: 0; }
+.diag-note-summary { padding: 0; }
+.diag-note-icon { width: 18px; height: 18px; flex-shrink: 0; color: var(--accent); }
 .diag-note-head {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
 }
 .diag-note-head strong {
   font-family: var(--font-display);
@@ -2124,7 +2124,7 @@ input[type="file"].text-input { padding: 8px; }
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-.diag-note p { margin: 6px 0 0; font-size: 13px; line-height: 19px; color: var(--text-dim); }
+.diag-note p { margin: 10px 0 0; padding-left: 28px; font-size: 13px; line-height: 19px; color: var(--text-dim); }
 
 /* --- Analysis: colour gamut deconstruction ------------------------------- */
 .gamut-head {

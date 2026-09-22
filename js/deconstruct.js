@@ -190,6 +190,7 @@ export function setFrameLabel(index) {
 export function clearDeconstruct() {
   if (!els.tonalNote) return;
   els.tonalNote.classList.add('hidden');
+  els.tonalNote.open = false;
   els.harmonyRow.hidden = true;
   els.gamutBar.innerHTML = '';
   els.gamutSpecs.innerHTML = '';
