@@ -132,6 +132,26 @@ export function rgbToHsl(r, g, b) {
   return { h, s, l };
 }
 
+/** sRGB -> CIE L*a*b* (D65 white point), for perceptually meaningful color distance. */
+export function rgbToLab(r, g, b) {
+  const toLinear = (v) => {
+    v /= 255;
+    return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  };
+  const rl = toLinear(r), gl = toLinear(g), bl = toLinear(b);
+  const x = (rl * 0.4124 + gl * 0.3576 + bl * 0.1805) / 0.95047;
+  const y = (rl * 0.2126 + gl * 0.7152 + bl * 0.0722) / 1;
+  const z = (rl * 0.0193 + gl * 0.1192 + bl * 0.9505) / 1.08883;
+  const f = (t) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+  const fx = f(x), fy = f(y), fz = f(z);
+  return { l: 116 * fy - 16, a: 500 * (fx - fy), b: 200 * (fy - fz) };
+}
+
+/** Euclidean distance between two Lab colors (CIE76 deltaE) — how different two colors actually look. */
+export function deltaE(lab1, lab2) {
+  return Math.sqrt((lab1.l - lab2.l) ** 2 + (lab1.a - lab2.a) ** 2 + (lab1.b - lab2.b) ** 2);
+}
+
 const HUE_NAMES = [
   [15, 'Red'], [45, 'Orange'], [70, 'Yellow'], [170, 'Green'],
   [200, 'Teal'], [255, 'Blue'], [290, 'Purple'], [330, 'Pink'], [360, 'Red']
