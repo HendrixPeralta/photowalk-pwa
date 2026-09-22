@@ -468,8 +468,8 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
 }
 .reward-leg {
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: baseline;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
   gap: 8px;
   font-size: 0.82rem;
 }

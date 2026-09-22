@@ -1,6 +1,7 @@
 import { state, save, totalActivityHours } from './store.js';
 import { showToast } from './toast.js';
-import { escapeHtml, uid, clamp, formatDate, formatHours, navigateTo } from './util.js';
+import { openModal } from './modal.js';
+import { escapeHtml, uid, clamp, formatDate, formatHours } from './util.js';
 
 // Rewards are priced in hours of shooting. Each one snapshots the lifetime hour
 // total when it's created, so "20h" always means twenty fresh hours of walking —
@@ -16,51 +17,28 @@ let els = {};
 
 export function initRewards() {
   els = {
-    list: document.getElementById('rewardsList'),
-    empty: document.getElementById('rewardsEmpty'),
-    title: document.getElementById('rewardTitleInput'),
-    hours: document.getElementById('rewardHoursInput'),
-    addBtn: document.getElementById('addRewardBtn'),
-    details: document.getElementById('rewardsDetails'),
-    detailsCount: document.getElementById('rewardsSummaryCount'),
     bar: document.getElementById('rewardBar')
   };
 
-  els.addBtn.addEventListener('click', addReward);
-  els.hours.addEventListener('keydown', (e) => { if (e.key === 'Enter') addReward(); });
-  els.title.addEventListener('keydown', (e) => { if (e.key === 'Enter') addReward(); });
-
-  els.list.addEventListener('click', (e) => {
+  els.bar.addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-action]');
     if (!btn) return;
     const { action, id } = btn.dataset;
-    if (action === 'claim') claimReward(id);
-    if (action === 'remove') removeReward(id);
+    if (action === 'manage') openManageRewardsModal();
+    if (action === 'claim') { claimReward(id); renderRewardBar(); }
   });
 
-  // Nothing to collapse when the list is empty, so start open for a first-time
-  // visitor and stay shut once there are rewards to summarize.
-  if (!state.rewards.length) els.details.open = true;
-
-  els.bar.addEventListener('click', (e) => {
-    if (!e.target.closest('button[data-action="manage"]')) return;
-    navigateTo('walks');
-    els.details.open = true;
-    els.details.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    els.title.focus();
-  });
-
-  renderRewards();
+  renderRewardBar();
 }
 
-function addReward() {
-  const title = els.title.value.trim();
-  const targetHours = Number(els.hours.value);
+function addReward(titleInput, hoursInput) {
+  const title = titleInput.value.trim();
+  const targetHours = Number(hoursInput.value);
 
-  if (!title) { showToast('Name the reward you are walking toward.'); return; }
+  if (!title) { showToast('Name the reward you are walking toward.'); return false; }
   if (!Number.isFinite(targetHours) || targetHours <= 0) {
     showToast('Set how many hours of shooting the reward costs.');
-    return;
+    return false;
   }
 
   state.rewards.push({
@@ -74,10 +52,10 @@ function addReward() {
   });
   save();
 
-  els.title.value = '';
-  els.hours.value = '';
-  renderRewards();
+  titleInput.value = '';
+  hoursInput.value = '';
   showToast('Reward set — hours you shoot from now on count toward it.');
+  return true;
 }
 
 function claimReward(id) {
@@ -86,7 +64,6 @@ function claimReward(id) {
   if (earnedHours(reward) < reward.targetHours) return;
   reward.claimedAt = Date.now();
   save();
-  renderRewards();
   showToast(`Enjoy it — you earned "${reward.title}" with ${formatHours(reward.targetHours)} of shooting.`, 6000);
 }
 
@@ -95,7 +72,6 @@ function removeReward(id) {
   if (idx === -1) return;
   state.rewards.splice(idx, 1);
   save();
-  renderRewards();
 }
 
 function earnedHours(reward) {
@@ -187,6 +163,7 @@ export function rewardTimeline() {
       kind: 'earned',
       label: 'Last',
       title: last.title,
+      id: last.id,
       pct: pctOf(targetTotalHours(last)),
       ready: !last.claimedAt,
       note: last.claimedAt ? `Claimed ${formatDate(last.claimedAt)}` : 'Earned — ready to claim'
@@ -234,6 +211,7 @@ function renderRewardBar() {
       <span class="reward-leg-label">${s.label}</span>
       <span class="reward-leg-title">${escapeHtml(s.title)}</span>
       <span class="reward-leg-note">${escapeHtml(s.note)}</span>
+      ${s.ready ? `<button type="button" class="btn btn-accent btn-sm" data-action="claim" data-id="${s.id}">Claim</button>` : ''}
     </li>`).join('');
 
   // Any progress at all should read as a visible nub rather than a hairline the
@@ -265,12 +243,11 @@ function renderRewardBar() {
 
 export function renderRewards() {
   renderRewardBar();
-  if (!els.list) return;
+}
 
+function rewardsListHtml() {
   const active = state.rewards.filter((r) => !r.claimedAt);
   const claimed = state.rewards.filter((r) => r.claimedAt).sort((a, b) => b.claimedAt - a.claimedAt);
-
-  els.empty.classList.toggle('hidden', state.rewards.length > 0);
 
   const activeHtml = active.map((r) => {
     const earned = earnedHours(r);
@@ -284,9 +261,8 @@ export function renderRewards() {
         </div>
         <div class="timer-track reward-track"><div class="timer-fill reward-fill" style="width:${pct}%"></div></div>
         <div class="reward-row reward-foot">
-          <span class="muted">${done ? 'Earned — treat yourself!' : formatHours(r.targetHours - earned) + ' of shooting to go'}</span>
+          <span class="muted">${done ? 'Earned — claim it from the Reward progress card above.' : formatHours(r.targetHours - earned) + ' of shooting to go'}</span>
           <span class="reward-actions">
-            ${done ? `<button type="button" class="btn btn-accent btn-sm" data-action="claim" data-id="${r.id}">Claim</button>` : ''}
             <button type="button" class="btn btn-ghost btn-sm" data-action="remove" data-id="${r.id}">Remove</button>
           </span>
         </div>
@@ -304,9 +280,48 @@ export function renderRewards() {
       </div>
     </li>`).join('');
 
-  els.list.innerHTML = activeHtml + claimedHtml;
+  return activeHtml + claimedHtml;
+}
 
-  els.detailsCount.textContent = state.rewards.length
-    ? `${active.length} active${claimed.length ? ` \u00b7 ${claimed.length} claimed` : ''}`
-    : 'None set';
+/**
+ * "Manage rewards" used to expand an always-on-page section; it now opens the
+ * same form and list in a modal, so the Walks screen doesn't carry a
+ * permanently-visible block that's only touched when pricing or removing a
+ * reward.
+ */
+function openManageRewardsModal() {
+  openModal(`
+    <h3>Hour rewards</h3>
+    <p class="muted card-text">Pick a treat and price it in shooting hours &mdash; every hour on the heatmap counts toward it.</p>
+    <div class="reward-form">
+      <input type="text" id="rewardTitleInput" class="text-input" placeholder="Reward (e.g. new camera strap)" maxlength="60">
+      <input type="number" id="rewardHoursInput" class="text-input reward-hours-input" placeholder="Hours" min="0.5" step="0.5" inputmode="decimal">
+      <button type="button" id="addRewardBtn" class="btn btn-primary">Set Reward</button>
+    </div>
+    <p id="rewardsEmpty" class="empty-state-sm ${state.rewards.length ? 'hidden' : ''}">No rewards yet &mdash; try &ldquo;New 35mm lens&rdquo; for 20 hours.</p>
+    <ul id="rewardsList" class="rewards-list">${rewardsListHtml()}</ul>
+  `);
+
+  const titleInput = document.getElementById('rewardTitleInput');
+  const hoursInput = document.getElementById('rewardHoursInput');
+  const list = document.getElementById('rewardsList');
+  const empty = document.getElementById('rewardsEmpty');
+
+  const refresh = () => {
+    empty.classList.toggle('hidden', state.rewards.length > 0);
+    list.innerHTML = rewardsListHtml();
+    renderRewardBar();
+  };
+
+  const submitAdd = () => { if (addReward(titleInput, hoursInput)) refresh(); };
+  document.getElementById('addRewardBtn').addEventListener('click', submitAdd);
+  hoursInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitAdd(); });
+  titleInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitAdd(); });
+
+  list.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    const { action, id } = btn.dataset;
+    if (action === 'remove') { removeReward(id); refresh(); }
+  });
 }
