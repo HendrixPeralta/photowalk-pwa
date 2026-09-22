@@ -1,12 +1,13 @@
-import { state, save, addActivityHours, recordWalk, themeWalkCounts } from './store.js';
-import { CONCEPTS, CONCEPT_QUERIES, THEMES, suggestTheme, renderConceptCard, allChallenges } from './concepts.js';
-import { fetchConceptPhotos, safeImageUrl } from './openverse.js';
+import { state, save, addActivityHours, recordWalk, themeWalkCounts, totalActivityHours, totalFramesLogged } from './store.js';
+import { THEMES, suggestTheme, allChallenges } from './concepts.js';
 import { openModal, closeModal } from './modal.js';
 import { showToast } from './toast.js';
 import { escapeHtml, navigateTo, formatHours, uid } from './util.js';
 import { renderLaunchMeta } from './walkscreen.js';
 import { activeRewardProgress, claimRewardUnlocks } from './rewards.js';
 import { claimNewMilestones } from './milestones.js';
+import { hydrateImages } from './db.js';
+import { analyzeStoredImage } from './analysis.js';
 
 const DURATIONS = [
   { value: 2, label: '2 min (quick demo)' },
@@ -36,29 +37,11 @@ export function initWalks() {
   els = {
     modeCasual: document.getElementById('modeCasualBtn'),
     modeGuided: document.getElementById('modeGuidedBtn'),
-    durationRow: document.getElementById('durationRow'),
-    durationSelect: document.getElementById('durationSelect'),
-    quickDurationSelect: document.getElementById('quickDurationSelect'),
-    getThemeBtn: document.getElementById('getThemeBtn'),
-    customThemeBtn: document.getElementById('customThemeBtn'),
     savedThemesList: document.getElementById('savedThemesList'),
     savedThemesEmpty: document.getElementById('savedThemesEmpty'),
     savedThemesCount: document.getElementById('savedThemesCount'),
-    themeCard: document.getElementById('themeCard'),
-    themeTitle: document.getElementById('themeTitle'),
-    themeBrief: document.getElementById('themeBrief'),
-    themeReason: document.getElementById('themeReason'),
-    viewConceptsBtn: document.getElementById('viewConceptsBtn'),
-    editThemeBtn: document.getElementById('editThemeBtn'),
-    dismissThemeBtn: document.getElementById('dismissThemeBtn'),
-    challengesSection: document.getElementById('challengesSection'),
-    challengesList: document.getElementById('challengesList'),
-    notifBtn: document.getElementById('notifBtn'),
     startWalkBtn: document.getElementById('startWalkBtn'),
     finishWalkBtn: document.getElementById('finishWalkBtn'),
-    timerSection: document.getElementById('timerSection'),
-    timerDisplay: document.getElementById('timerDisplay'),
-    timerBar: document.getElementById('timerBar'),
     modeHint: document.getElementById('modeHint'),
     quickStart: document.getElementById('quickStart'),
     homePanel: document.getElementById('homeWalkPanel'),
@@ -72,18 +55,11 @@ export function initWalks() {
     homeBriefBtn: document.getElementById('homeWalkBriefBtn')
   };
 
-  const durationOptions = DURATIONS.map((d) => `<option value="${d.value}">${d.label}</option>`).join('');
-  els.durationSelect.innerHTML = durationOptions;
-  els.quickDurationSelect.innerHTML = durationOptions;
-  syncDurationSelects();
-  [els.durationSelect, els.quickDurationSelect].forEach((sel) => {
-    sel.addEventListener('change', () => setGuidedDuration(Number(sel.value)));
-  });
-
   els.modeCasual.addEventListener('click', () => setMode('casual'));
   els.modeGuided.addEventListener('click', () => setMode('guided'));
-  els.getThemeBtn.addEventListener('click', pickTheme);
-  els.customThemeBtn.addEventListener('click', () => openThemeEditorModal());
+  document.querySelectorAll('.mode-card-info').forEach((btn) => {
+    btn.addEventListener('click', () => openModeInfoModal(btn.dataset.modeInfo));
+  });
   els.savedThemesList.addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-action]');
     if (!btn) return;
@@ -92,9 +68,6 @@ export function initWalks() {
     if (action === 'edit') editSavedTheme(id);
     if (action === 'remove') removeSavedTheme(id);
   });
-  els.viewConceptsBtn.addEventListener('click', () => theme && openConceptModal(theme));
-  els.editThemeBtn.addEventListener('click', () => theme && openThemeEditorModal(theme));
-  els.dismissThemeBtn.addEventListener('click', dismissTheme);
   els.startWalkBtn.addEventListener('click', launchWalk);
   els.finishWalkBtn.addEventListener('click', () => finishWalk(false));
   els.homeStopBtn.addEventListener('click', () => finishWalk(false));
@@ -108,11 +81,8 @@ export function initWalks() {
     toggleChallenge(Number(box.dataset.idx), box.checked);
     syncChallengeChecks();
   });
-  els.notifBtn.addEventListener('click', enableNotifications);
-
   if ('Notification' in window && Notification.permission === 'granted') {
     notifyGranted = true;
-    els.notifBtn.classList.add('hidden');
   }
 
   // Background tabs get their timers throttled to about once a minute, so catch
@@ -127,12 +97,11 @@ export function initWalks() {
   renderSavedThemes();
 }
 
-/** The guided length is a preference: quick-start has no room to ask for it. */
+/** The guided length lives only in the walk brief now; this just persists the pick. */
 function setGuidedDuration(minutes) {
   const valid = DURATIONS.some((d) => d.value === minutes);
   state.profile.guidedDurationMin = valid ? minutes : DEFAULT_GUIDED_MIN;
   save();
-  syncDurationSelects();
 }
 
 function guidedDurationMin() {
@@ -140,26 +109,40 @@ function guidedDurationMin() {
   return DURATIONS.some((d) => d.value === stored) ? stored : DEFAULT_GUIDED_MIN;
 }
 
-function syncDurationSelects() {
-  const value = String(guidedDurationMin());
-  els.durationSelect.value = value;
-  els.quickDurationSelect.value = value;
-}
-
 function setMode(next) {
   if (state.activeWalk) return; // finish the walk you're on before switching
   applyMode(next);
 }
 
+const MODE_INFO = {
+  casual: {
+    title: 'Casual Walk Mode',
+    desc: 'Broad, relaxed inspiration. Just a theme to shoot, finished whenever you’re done.'
+  },
+  guided: {
+    title: 'Guided Sprint Mode',
+    desc: 'The same themes, plus mini-challenges, a countdown and mid-walk nudges.'
+  }
+};
+
+function openModeInfoModal(key) {
+  const info = MODE_INFO[key];
+  if (!info) return;
+  openModal(`
+    <h3>${info.title}</h3>
+    <p class="muted card-text">${info.desc}</p>
+  `);
+}
+
 /**
- * The hero Start Photowalk button. With a theme already on screen this is the
- * old Start Walk; without one it picks a theme and opens the brief, which is
- * what the two Home quick-start cards used to do.
+ * The hero Start Photowalk button. Picking a theme (or rerolling/building one)
+ * now happens inside the walk-brief popup this always opens, rather than on
+ * the tab itself — so a fresh theme is picked here if none is on hand yet.
  */
 export function launchWalk() {
   if (state.activeWalk) return;
-  if (theme) startWalk();
-  else quickStartWalk(mode);
+  if (!theme) pickTheme();
+  startWalk();
 }
 
 /**
@@ -176,44 +159,29 @@ function applyMode(next) {
   mode = next;
   els.modeCasual.classList.toggle('active', mode === 'casual');
   els.modeGuided.classList.toggle('active', mode === 'guided');
-  els.durationRow.classList.toggle('hidden', mode !== 'guided');
-  setBtnLabel(els.startWalkBtn, theme ? 'Start Walk' : 'Start Photowalk');
+  setBtnLabel(els.startWalkBtn, 'Start Photowalk');
   setBtnLabel(els.finishWalkBtn, 'Stop Walk');
   renderLaunchMeta(mode);
-  if (theme) renderThemeCard();
 }
 
 function pickTheme() {
-  if (state.activeWalk) return;
   const picked = suggestTheme(theme && theme.id, themeWalkCounts());
   useTheme(picked.theme, picked.reason);
 }
 
-/** Puts any theme (random pick, custom build, or a saved one) on screen and ready to start. */
+/**
+ * Puts a theme (random pick, custom build, or a saved one) on hand for the
+ * walk brief. If a walk is already open on its brief (not yet shooting), the
+ * record is kept in sync too, so rerolling or editing mid-brief sticks.
+ */
 function useTheme(t, reason = '') {
-  if (state.activeWalk) return;
   theme = t;
   themeReason = reason;
-  els.getThemeBtn.textContent = 'New Theme';
-  // Hand the accent over to Start Walk: rerolling is the fallback now, not the
-  // main action, and two accent buttons on screen read as two primary choices.
-  els.getThemeBtn.classList.replace('btn-accent', 'btn-primary');
-  setBtnLabel(els.startWalkBtn, 'Start Walk');
-  renderThemeCard();
-  els.startWalkBtn.classList.remove('hidden');
-  els.finishWalkBtn.classList.add('hidden');
-}
-
-/**
- * Puts the suggested theme away without starting a walk. Reuses the same
- * teardown as finishing one, so there is exactly one definition of "no theme
- * on screen" — the only extra work is dropping the theme this module is holding.
- */
-function dismissTheme() {
-  if (state.activeWalk) return; // stop the walk first; the card is live then
-  theme = null;
-  themeReason = '';
-  resetThemeUi();
+  if (state.activeWalk && !state.activeWalk.startedAt) {
+    state.activeWalk.themeId = t.id;
+    state.activeWalk.challengesChecked = new Array(challengesFor().length).fill(false);
+    save();
+  }
 }
 
 /**
@@ -225,19 +193,6 @@ function dismissTheme() {
 function challengesFor(t = theme) {
   const walkMode = state.activeWalk ? state.activeWalk.mode : mode;
   return t && walkMode === 'guided' ? t.challenges : [];
-}
-
-function renderThemeCard() {
-  const challenges = challengesFor();
-  els.themeCard.classList.remove('hidden');
-  els.challengesSection.classList.toggle('hidden', !challenges.length);
-  els.themeTitle.textContent = theme.title;
-  els.themeBrief.textContent = theme.brief;
-  els.themeReason.textContent = themeReason;
-  els.themeReason.classList.toggle('hidden', !themeReason);
-  els.viewConceptsBtn.classList.toggle('hidden', !theme.concepts.length);
-  els.challengesList.innerHTML = challengeListHtml(challenges);
-  syncChallengeChecks();
 }
 
 function challengeListHtml(list) {
@@ -277,8 +232,13 @@ function toggleChallenge(idx, checked) {
  * new custom theme instead, since the built-in list is shared and can't be
  * rewritten per user.
  */
-function openThemeEditorModal(existingTheme = null) {
-  if (state.activeWalk) { showToast('Finish your current walk before editing a theme.'); return; }
+function openThemeEditorModal(existingTheme = null, { onSaved } = {}) {
+  // Once shooting has actually started the theme is locked in; before that
+  // (still on the brief, or no walk open at all) it's fair game.
+  if (state.activeWalk && state.activeWalk.startedAt) {
+    showToast('Finish your current walk before editing a theme.');
+    return;
+  }
 
   const editingCustomId = existingTheme && state.customThemes.some((t) => t.id === existingTheme.id)
     ? existingTheme.id
@@ -374,11 +334,12 @@ function openThemeEditorModal(existingTheme = null) {
     renderSavedThemes();
     closeModal();
     useTheme(saved, 'Your own custom theme.');
+    if (onSaved) onSaved(saved); else navigateTo('walks');
     showToast(editingCustomId ? 'Theme updated.' : 'Custom theme saved.');
   });
 }
 
-function renderSavedThemes() {
+export function renderSavedThemes() {
   if (!els.savedThemesList) return;
   const list = state.customThemes;
   els.savedThemesEmpty.classList.toggle('hidden', list.length > 0);
@@ -407,6 +368,7 @@ function useSavedTheme(id) {
   const t = state.customThemes.find((x) => x.id === id);
   if (!t) return;
   useTheme(t, 'Your own custom theme.');
+  navigateTo('walks');
 }
 
 function removeSavedTheme(id) {
@@ -416,12 +378,15 @@ function removeSavedTheme(id) {
 }
 
 /**
- * The walk brief: what you are shooting and what to try. Pops up on start so a
- * one-tap walk still tells you your theme, and stays reachable from the Home
- * panel for the rest of the walk. Its checkboxes are live.
+ * The walk brief: what you are shooting and what to try. Pops up on start —
+ * before shooting begins this is also where the theme itself gets settled
+ * (Change Theme, or a quick edit right next to its name) — and stays reachable
+ * from the Home panel for the rest of the walk, read-only once shooting has
+ * actually started. Its checkboxes are live.
  */
 function openWalkBrief() {
   const w = state.activeWalk;
+  const preShooting = Boolean(w && !w.startedAt);
   const modeLine = w && w.mode === 'guided'
     ? `Guided walk &middot; ${w.durationMin} min on the clock`
     : 'Casual walk &middot; no timer, stop it whenever you are done';
@@ -431,98 +396,109 @@ function openWalkBrief() {
     ? `<h4 class="subsection-title">Mini-challenges</h4>
        <ul class="challenges-list">${challengeListHtml(briefChallenges)}</ul>`
     : '';
-  const conceptsBtn = theme.concepts.length
-    ? `<button type="button" id="briefConceptsBtn" class="btn btn-ghost btn-block">View concept examples</button>`
+
+  // Length is only decided before the clock starts — changing it mid-walk
+  // would disagree with nudges and hours already banked against the old plan.
+  const durationField = preShooting && w.mode === 'guided' ? `
+    <div class="field-row" style="margin-top:8px">
+      <label for="briefDurationSelect">Walk length</label>
+      <select id="briefDurationSelect"></select>
+    </div>` : '';
+
+  // Settling the theme — editing it in place or swapping it out entirely —
+  // only makes sense before the clock has actually started; once shooting
+  // begins this reopens as a read-only recap.
+  const editBtn = preShooting
+    ? `<button type="button" id="briefEditBtn" class="btn btn-ghost btn-sm">Edit</button>`
+    : '';
+  const changeThemeBtn = preShooting
+    ? `<button type="button" id="briefChangeThemeBtn" class="btn btn-ghost btn-block" style="margin-top:10px">Change Theme</button>`
     : '';
 
   openModal(`
-    <h3>${escapeHtml(theme.title)}</h3>
+    <div class="walk-brief-head">
+      <h3>${escapeHtml(theme.title)}</h3>
+      ${editBtn}
+    </div>
     <p class="muted">${escapeHtml(theme.brief)}</p>
     ${themeReason ? `<p class="theme-reason">${escapeHtml(themeReason)}</p>` : ''}
     <p class="walk-brief-mode">${modeLine}</p>
+    ${durationField}
     ${challenges}
+    ${changeThemeBtn}
     <div class="theme-actions">
       <button type="button" id="briefGoBtn" class="btn btn-accent btn-block">Start shooting</button>
-      ${conceptsBtn}
-      <button type="button" id="briefStopBtn" class="btn btn-ghost btn-block">Stop walk</button>
     </div>
   `);
 
   syncChallengeChecks();
 
+  const briefDurationSelect = document.getElementById('briefDurationSelect');
+  if (briefDurationSelect) {
+    briefDurationSelect.innerHTML = DURATIONS.map((d) => `<option value="${d.value}">${d.label}</option>`).join('');
+    briefDurationSelect.value = String(w.durationMin);
+    briefDurationSelect.addEventListener('change', () => {
+      w.durationMin = Number(briefDurationSelect.value);
+      setGuidedDuration(w.durationMin);
+      openWalkBrief();
+    });
+  }
+
+  if (preShooting) {
+    document.getElementById('briefEditBtn').addEventListener('click', () => {
+      openThemeEditorModal(theme, { onSaved: () => openWalkBrief() });
+    });
+    document.getElementById('briefChangeThemeBtn').addEventListener('click', openThemePickerModal);
+  }
+
   document.getElementById('briefGoBtn').addEventListener('click', () => {
     if (state.activeWalk && !state.activeWalk.startedAt) beginShooting();
     closeModal();
   });
-  const briefConceptsBtn = document.getElementById('briefConceptsBtn');
-  if (briefConceptsBtn) briefConceptsBtn.addEventListener('click', () => openConceptModal(theme));
-  document.getElementById('briefStopBtn').addEventListener('click', () => {
-    closeModal();
-    finishWalk(false);
-  });
-}
-
-/* ---------- Concept explainer ---------- */
-
-function openConceptModal(t) {
-  const cards = t.concepts.map(renderConceptCard).join('');
-
-  openModal(`
-    <h3>${escapeHtml(t.title)}</h3>
-    <p class="muted">What to look for before you shoot:</p>
-    <div class="concept-grid">${cards}</div>
-  `);
-
-  loadConceptPhotos(t);
 }
 
 /**
- * Layers real public-domain examples on top of the built-in diagrams. Entirely
- * optional: offline, rate-limited, or blocked, the diagrams stand on their own.
+ * Change Theme: every built-in theme plus any of the user's own, and a
+ * Randomize shortcut for when nothing in the list is calling out. Picking one
+ * (or building a fresh custom one) drops straight back into the brief.
  */
-async function loadConceptPhotos(t) {
-  if (navigator.onLine === false) return;
+function openThemePickerModal() {
+  const pickRow = (t, source) => `
+    <button type="button" class="quick-card theme-pick-item" data-id="${t.id}" data-source="${source}">
+      <strong>${escapeHtml(t.title)}</strong>
+      <span class="muted card-text">${escapeHtml(t.brief)}</span>
+    </button>`;
 
-  for (const key of t.concepts) {
-    const holder = document.querySelector(`.concept-photos[data-concept="${key}"]`);
-    if (!holder) continue;
+  const customHtml = state.customThemes.length ? `
+    <h4 class="subsection-title">My Themes</h4>
+    <div class="theme-pick-list">${state.customThemes.map((t) => pickRow(t, 'custom')).join('')}</div>` : '';
 
-    const photos = await fetchConceptPhotos(key, CONCEPT_QUERIES[key] || CONCEPTS[key].title);
-    if (!holder.isConnected || !photos.length) continue;
+  openModal(`
+    <h3>Change Theme</h3>
+    <button type="button" id="randomizeThemeBtn" class="btn btn-accent btn-block">Randomize</button>
+    <button type="button" id="buildThemeBtn" class="btn btn-ghost btn-block" style="margin-top:8px">Build a Custom Theme</button>
+    ${customHtml}
+    <h4 class="subsection-title">All Themes</h4>
+    <div class="theme-pick-list">${THEMES.map((t) => pickRow(t, 'builtin')).join('')}</div>
+  `);
 
-    const strip = photos.map((p) => {
-      const thumb = safeImageUrl(p.thumbnail);
-      const source = safeImageUrl(p.source);
-      if (!thumb) return '';
-      const label = `${p.title} — ${p.creator} (${p.license})`;
-      const img = `<span class="concept-photo" style="background-image:url('${thumb}')"></span>`;
-      return source
-        ? `<a href="${escapeHtml(source)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(label)}">${img}</a>`
-        : `<span title="${escapeHtml(label)}">${img}</span>`;
-    }).join('');
-
-    if (!strip) continue;
-    holder.innerHTML = `<div class="concept-photo-strip">${strip}</div>`
-      + '<p class="concept-credit">Public-domain examples via Openverse</p>';
-  }
-}
-
-/* ---------- Notifications ---------- */
-
-function enableNotifications() {
-  if (!('Notification' in window)) {
-    showToast('Notifications are not supported in this browser — in-app alerts will still work.');
-    return;
-  }
-  Notification.requestPermission().then((perm) => {
-    notifyGranted = perm === 'granted';
-    if (notifyGranted) {
-      els.notifBtn.classList.add('hidden');
-      if (state.activeWalk && state.activeWalk.mode === 'guided') scheduleTriggeredNudges();
-    }
-    showToast(notifyGranted
-      ? 'Notifications enabled for this walk.'
-      : 'Notifications stayed off — in-app alerts will still work.');
+  document.getElementById('randomizeThemeBtn').addEventListener('click', () => {
+    pickTheme();
+    openWalkBrief();
+  });
+  document.getElementById('buildThemeBtn').addEventListener('click', () => {
+    openThemeEditorModal(null, { onSaved: () => openWalkBrief() });
+  });
+  document.querySelectorAll('.theme-pick-item').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const { id, source } = btn.dataset;
+      const t = source === 'custom'
+        ? state.customThemes.find((x) => x.id === id)
+        : THEMES.find((x) => x.id === id);
+      if (!t) return;
+      useTheme(t, source === 'custom' ? 'Your own custom theme.' : '');
+      openWalkBrief();
+    });
   });
 }
 
@@ -627,14 +603,16 @@ function fireDueNudges() {
 
 /* ---------- Walk lifecycle ---------- */
 
-function startWalk({ brief = false } = {}) {
+/** Opens a walk on its brief — nothing is logged and the clock hasn't started
+ *  until "Start shooting" is tapped there. */
+function startWalk() {
   if (!theme || state.activeWalk) return;
   const guided = mode === 'guided';
 
   state.activeWalk = {
     mode,
     themeId: theme.id,
-    startedAt: brief ? null : Date.now(),
+    startedAt: null,
     durationMin: guided ? guidedDurationMin() : null,
     challengesChecked: new Array(challengesFor().length).fill(false),
     nudges: [],
@@ -644,17 +622,12 @@ function startWalk({ brief = false } = {}) {
   save();
 
   applyActiveWalkUi();
-  if (brief) openWalkBrief();
-  else beginShooting();
+  openWalkBrief();
   window.dispatchEvent(new CustomEvent('photowalk:walk-changed'));
   window.dispatchEvent(new CustomEvent('photowalk:stats-changed'));
 }
 
-/**
- * Starts the clock. Called right away for a manual Start Walk, or deferred
- * until "Start shooting" is tapped so a quick-start walk doesn't burn shooting
- * time while its brief is still up.
- */
+/** Starts the clock once "Start shooting" is tapped in the walk brief. */
 function beginShooting() {
   const w = state.activeWalk;
   w.startedAt = Date.now();
@@ -664,6 +637,7 @@ function beginShooting() {
   }
   save();
   runTimer();
+  navigateTo('hud');
 }
 
 function restoreActiveWalk() {
@@ -674,24 +648,14 @@ function restoreActiveWalk() {
 
   theme = t;
   applyMode(w.mode);
-  els.getThemeBtn.textContent = 'New Theme';
-  if (w.mode === 'guided') els.durationSelect.value = String(w.durationMin);
-  els.quickDurationSelect.disabled = true;
-  renderThemeCard();
   applyActiveWalkUi();
   if (w.startedAt && !w.pausedAt) runTimer();
   else if (!w.startedAt) openWalkBrief();
 }
 
 function applyActiveWalkUi() {
-  els.getThemeBtn.disabled = true;
-  els.editThemeBtn.disabled = true;
-  els.dismissThemeBtn.disabled = true;
-  els.durationSelect.disabled = true;
-  els.quickDurationSelect.disabled = true;
   els.startWalkBtn.classList.add('hidden');
   els.finishWalkBtn.classList.remove('hidden');
-  els.timerSection.classList.toggle('hidden', state.activeWalk.mode !== 'guided');
   els.modeCasual.disabled = true;
   els.modeGuided.disabled = true;
   els.modeHint.classList.remove('hidden');
@@ -699,22 +663,12 @@ function applyActiveWalkUi() {
 }
 
 function resetThemeUi() {
-  els.getThemeBtn.disabled = false;
-  els.editThemeBtn.disabled = false;
-  els.dismissThemeBtn.disabled = false;
-  els.getThemeBtn.textContent = 'Get a Theme';
-  els.getThemeBtn.classList.replace('btn-primary', 'btn-accent');
   setBtnLabel(els.startWalkBtn, 'Start Photowalk');
-  els.durationSelect.disabled = false;
-  els.quickDurationSelect.disabled = false;
-  syncDurationSelects();
   // The launcher stays put. It needed a theme back when it only started a
   // themed walk; it quick-starts one now, so hiding it on the way back to idle
   // left the screen with no way to start a walk until the next reload.
   els.startWalkBtn.classList.remove('hidden');
   els.finishWalkBtn.classList.add('hidden');
-  els.timerSection.classList.add('hidden');
-  els.themeCard.classList.add('hidden');
   els.modeCasual.disabled = false;
   els.modeGuided.disabled = false;
   els.modeHint.classList.add('hidden');
@@ -757,8 +711,6 @@ function tick() {
 
   const remaining = totalMs - elapsed;
   const pct = Math.max(0, Math.min(100, (elapsed / totalMs) * 100)) + '%';
-  els.timerDisplay.textContent = clockText(remaining);
-  els.timerBar.style.width = pct;
   els.homeTimer.textContent = clockText(remaining);
   els.homeBar.style.width = pct;
 }
@@ -850,12 +802,49 @@ function finishWalk(auto) {
     return;
   }
 
+  // A timed-out guided walk has already run its course — nothing to confirm.
+  // A manual stop is the one action here with no undo, so gate it behind an
+  // explicit confirmation rather than finalizing the instant it's tapped.
+  if (auto) {
+    finalizeWalk(w, auto);
+    return;
+  }
+  confirmCompleteWalk(() => finalizeWalk(w, auto));
+}
+
+function finalizeWalk(w, auto) {
   const measured = computeElapsedHours(w);
   if (w.mode === 'casual' && measured > CASUAL_CONFIRM_HOURS) {
     confirmLoggedHours(measured, (hours) => completeWalk(w, hours, auto));
     return;
   }
   completeWalk(w, measured, auto);
+}
+
+/**
+ * The one gate between tapping Complete/Stop and the walk actually ending —
+ * without it there was no way to back out of a slip once the popup appeared.
+ */
+function confirmCompleteWalk(onConfirm) {
+  let settled = false;
+
+  openModal(`
+    <h3>Complete this walk?</h3>
+    <p class="muted">This ends the walk and logs your time — there's no undo from here.</p>
+    <div class="theme-actions">
+      <button type="button" id="confirmCompleteBtn" class="btn btn-danger btn-block">Complete Walk</button>
+      <button type="button" id="cancelCompleteBtn" class="btn btn-ghost btn-block">Keep Shooting</button>
+    </div>
+  `, {
+    onClose: () => { if (!settled) showToast('Still on your walk.'); }
+  });
+
+  document.getElementById('confirmCompleteBtn').addEventListener('click', () => {
+    settled = true;
+    closeModal();
+    onConfirm();
+  });
+  document.getElementById('cancelCompleteBtn').addEventListener('click', () => closeModal());
 }
 
 /**
@@ -899,6 +888,7 @@ function completeWalk(w, hours, auto) {
   cancelScheduledNudges();
 
   const finishedTheme = theme;
+  const walkFrames = w.frames || [];
   const challengesDone = (w.challengesChecked || []).filter(Boolean).length;
   const record = {
     id: uid(),
@@ -930,14 +920,16 @@ function completeWalk(w, hours, auto) {
   const unlockedRewards = claimRewardUnlocks();
   const milestones = claimNewMilestones(record);
 
-  openWalkSummary(finishedTheme, record, hours, auto, unlockedRewards, milestones);
+  openWalkSummary(finishedTheme, record, hours, walkFrames, auto, unlockedRewards, milestones);
   window.dispatchEvent(new CustomEvent('photowalk:walk-changed'));
   window.dispatchEvent(new CustomEvent('photowalk:stats-changed'));
 }
 
-function openWalkSummary(t, record, hours, auto, unlockedRewards, milestones) {
+function openWalkSummary(t, record, hours, walkFrames, auto, unlockedRewards, milestones) {
+  const totalHours = totalActivityHours();
+  const totalFrames = totalFramesLogged();
   const challengeLine = t.challenges.length
-    ? `<p class="muted">${record.challengesDone} of ${t.challenges.length} mini-challenges done</p>`
+    ? `<p>${record.challengesDone} of ${t.challenges.length} mini-challenges done</p>`
     : '';
 
   const unlockedHtml = unlockedRewards.map((r) => `
@@ -972,28 +964,83 @@ function openWalkSummary(t, record, hours, auto, unlockedRewards, milestones) {
 
   openModal(`
     <h3>${auto ? "Time's up — nice work!" : 'Walk complete!'}</h3>
-    <p class="summary-hours">+${formatHours(hours)} logged</p>
-    <p class="muted">${escapeHtml(t.title)}</p>
-    ${challengeLine}
+    <div class="summary-stats-row">
+      <div class="summary-stat">
+        <span class="summary-stat-value">${formatHours(totalHours)}</span>
+        <span class="summary-stat-delta">+${formatHours(hours)} this walk</span>
+      </div>
+      <div class="summary-stat">
+        <span class="summary-stat-value">${totalFrames}</span>
+        <span class="summary-stat-delta">+${walkFrames.length} this walk</span>
+      </div>
+    </div>
+
+    <div class="summary-theme-recap">
+      <span class="label-caps">Theme</span>
+      <strong>${escapeHtml(t.title)}</strong>
+      ${challengeLine}
+    </div>
+
     ${winsHtml}
     ${towardHtml}
-    <p>Study your shots while the walk is fresh — pick your best three and check them against the theme.</p>
+
+    <p class="muted card-text" style="margin-top:14px">Study your shots while the walk is fresh — pick your best three and check them against the theme.</p>
+    <div class="theme-btn-row" style="margin-top:10px">
+      <button type="button" id="walkAnalyzeBtn" class="btn btn-accent">Analyze your best shots</button>
+      <button type="button" id="walkShareBtn" class="btn btn-primary btn-icon-only" aria-label="Share your shots">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-share"/></svg>
+      </button>
+    </div>
     <div class="theme-actions">
-      <button type="button" id="walkAnalyzeBtn" class="btn btn-accent btn-block">Analyze your best shots</button>
-      <button type="button" id="walkShareBtn" class="btn btn-primary btn-block">Share your shots</button>
       <button type="button" id="walkDoneBtn" class="btn btn-ghost btn-block">Done</button>
     </div>
   `);
 
-  document.getElementById('walkAnalyzeBtn').addEventListener('click', () => {
-    closeModal();
-    navigateTo('analyze');
-  });
+  document.getElementById('walkAnalyzeBtn').addEventListener('click', () => openFramePickerModal(walkFrames));
   document.getElementById('walkShareBtn').addEventListener('click', () => {
     closeModal();
     navigateTo('share');
   });
   document.getElementById('walkDoneBtn').addEventListener('click', closeModal);
+}
+
+/** Lets the walk-complete popup's "Analyze" hand off to a specific frame
+ *  instead of guessing — always shown, so the choice is always the user's. */
+function openFramePickerModal(frames) {
+  if (!frames.length) {
+    openModal(`
+      <h3>Pick a photo to analyze</h3>
+      <p class="empty-state-sm">No frames logged on this walk.</p>
+      <button type="button" id="frameFallbackBtn" class="btn btn-accent btn-block">Analyze a sample photo instead</button>
+    `);
+    document.getElementById('frameFallbackBtn').addEventListener('click', () => {
+      closeModal();
+      navigateTo('analyze');
+    });
+    return;
+  }
+
+  const thumbsHtml = frames.map((f) => `
+    <button type="button" class="album-thumb" data-image-id="${f.imageId}" data-image="${f.imageId}">
+      <span class="album-thumb-tag">#${f.index}</span>
+    </button>`).join('');
+
+  openModal(`
+    <h3>Pick a photo to analyze</h3>
+    <div class="album-grid" id="framePickGrid">${thumbsHtml}</div>
+  `);
+
+  const grid = document.getElementById('framePickGrid');
+  hydrateImages(grid);
+  grid.addEventListener('click', (e) => {
+    const thumb = e.target.closest('.album-thumb');
+    if (!thumb) return;
+    const frame = frames.find((f) => f.imageId === thumb.dataset.imageId);
+    if (!frame) return;
+    closeModal();
+    navigateTo('analyze');
+    analyzeStoredImage(frame.imageId, { exif: frame.exif });
+  });
 }
 
 function updateStreakAndStats() {
@@ -1010,16 +1057,3 @@ function updateStreakAndStats() {
   save();
 }
 
-/**
- * The Home tab's one-tap start: pick a theme, start the walk, and show the brief
- * pop-up. Home itself turns into the running-walk panel with the clock and Stop.
- */
-export function quickStartWalk(targetMode) {
-  if (state.activeWalk) {
-    showToast('You are already on a walk — stop it first.');
-    return;
-  }
-  applyMode(targetMode);
-  pickTheme();
-  startWalk({ brief: true });
-}

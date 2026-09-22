@@ -4,7 +4,7 @@ import { formatHours } from './util.js';
 import { initModal } from './modal.js';
 import { initToast, showToast } from './toast.js';
 import {
-  initWalks, renderHomeWalkState, pauseWalk, resumeWalk, activeTheme, finishActiveWalk
+  initWalks, renderHomeWalkState, pauseWalk, resumeWalk, activeTheme, finishActiveWalk, renderSavedThemes
 } from './walks.js';
 import { initWalkScreen, renderWalkScreen } from './walkscreen.js';
 import { initHud, renderHud, pauseHudRendering } from './hud.js';
@@ -27,7 +27,8 @@ const SCREEN_TITLES = {
   analyze: 'Analysis',
   album: 'Album',
   share: 'Partners',
-  settings: 'Settings'
+  settings: 'Settings',
+  themes: 'My Themes'
 };
 
 function showView(name) {
@@ -42,6 +43,7 @@ function showView(name) {
   if (name === 'hud') renderHud();
   if (name === 'album') renderAlbum();
   if (name === 'share') renderShare();
+  if (name === 'themes') renderSavedThemes();
   // Deliberately on first view rather than at boot: the default frame costs a
   // fetch and four scope passes, and most sessions never open this tab.
   if (name === 'analyze') loadDefaultPhoto();
