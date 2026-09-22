@@ -169,6 +169,11 @@ export function totalActivityHours() {
   return Object.values(state.activityLog).reduce((sum, h) => sum + (h || 0), 0);
 }
 
+/** Lifetime frames exposed, summed from the same daily log the film strip reads. */
+export function totalFramesLogged() {
+  return Object.values(state.frameLog || {}).reduce((sum, n) => sum + (n || 0), 0);
+}
+
 /** Midnight at the start of the given period's current instance: this week/month/year. */
 function periodStart(period, now = new Date()) {
   const d = new Date(now);

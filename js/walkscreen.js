@@ -29,8 +29,7 @@ export function initWalkScreen() {
     framesNote: document.getElementById('cadenceFramesNote'),
     launchFix: document.getElementById('launchFix'),
     launchFixText: document.getElementById('launchFixText'),
-    launchMode: document.getElementById('launchModeLabel'),
-    guidedBadge: document.getElementById('guidedPacingBadge')
+    launchMode: document.getElementById('launchModeLabel')
   };
 
   // The badge is the affordance for granting location — it says as much when
@@ -193,7 +192,6 @@ export function renderLaunchMeta(mode = null) {
   const active = mode || (document.getElementById('modeGuidedBtn').classList.contains('active') ? 'guided' : 'casual');
   const minutes = Number(state.profile.guidedDurationMin) || 30;
   els.launchMode.textContent = active === 'guided' ? `Guided · ${minutes}m Sprint` : 'Casual Mode';
-  if (els.guidedBadge) els.guidedBadge.textContent = `${minutes}m Pacing`;
 
   const fix = cachedFix();
   if (fix && fixIsFresh(fix)) {

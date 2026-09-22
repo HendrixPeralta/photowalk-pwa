@@ -1,7 +1,7 @@
 import { navigateTo } from './util.js';
 import { showToast } from './toast.js';
 
-// The side menu fronts the screens that have no tab of their own (Settings).
+// The side menu fronts the screens that have no tab of their own (My Themes, Settings).
 // The user card at the foot is where Google sign-in will land.
 
 let root = null;
