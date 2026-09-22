@@ -200,44 +200,63 @@ function exposureLine(exif) {
 }
 
 async function onFramePicked(e) {
-  const file = e.target.files && e.target.files[0];
+  const files = Array.from(e.target.files || []);
   e.target.value = '';
-  if (!file) return;
+  if (!files.length) return;
   const w = state.activeWalk;
   if (!w) return;
 
-  try {
-    const exif = await readExif(file);
-    const bitmap = await createImageBitmap(file);
-    // Field frames are a log, not the library: a 640px thumbnail is plenty and
-    // keeps a long walk from eating the storage quota.
-    const canvas = drawToCanvas(bitmap, 640);
-    const blob = await canvasToBlob(canvas, 'image/jpeg', 0.8);
-    const imageId = uid();
-    await putImage(imageId, blob);
+  w.frames = w.frames || [];
+  let logged = 0;
+  let lastFrame = null;
 
-    w.frames = w.frames || [];
-    const frame = {
-      id: uid(),
-      imageId,
-      index: w.frames.length + 1,
-      at: Date.now(),
-      label: '',
-      exposure: exposureLine(exif),
-      exif: exif || null,
-      fix: fixIsFresh() ? cachedFix() : null
-    };
-    w.frames.push(frame);
+  // Sequential, not Promise.all: each frame's index depends on how many are
+  // already on the walk, so two decodes racing would hand out duplicate numbers.
+  for (const file of files) {
+    try {
+      const exif = await readExif(file);
+      const bitmap = await createImageBitmap(file);
+      // Field frames are a log, not the library: a 640px thumbnail is plenty and
+      // keeps a long walk from eating the storage quota.
+      const canvas = drawToCanvas(bitmap, 640);
+      const blob = await canvasToBlob(canvas, 'image/jpeg', 0.8);
+      const imageId = uid();
+      await putImage(imageId, blob);
+
+      const frame = {
+        id: uid(),
+        imageId,
+        index: w.frames.length + 1,
+        at: Date.now(),
+        label: '',
+        exposure: exposureLine(exif),
+        exif: exif || null,
+        fix: fixIsFresh() ? cachedFix() : null
+      };
+      w.frames.push(frame);
+      logFrame(localDateKey(new Date(frame.at)));
+      lastFrame = frame;
+      logged += 1;
+    } catch (err) {
+      console.warn('PhotoWalk: could not log that frame.', err);
+    }
+  }
+
+  if (logged) {
     save();
-    logFrame(localDateKey(new Date(frame.at)));
-
     renderCaptureStrip();
     tickHud();
-    showToast(`Frame #${frame.index} logged${frame.exposure ? ' · ' + frame.exposure : ''}.`);
     window.dispatchEvent(new CustomEvent('photowalk:stats-changed'));
-  } catch (err) {
-    console.warn('PhotoWalk: could not log that frame.', err);
-    showToast('Could not read that photo — try another file.');
+  }
+
+  if (logged === files.length) {
+    showToast(logged > 1
+      ? `${logged} frames logged.`
+      : `Frame #${lastFrame.index} logged${lastFrame.exposure ? ' · ' + lastFrame.exposure : ''}.`);
+  } else if (logged > 0) {
+    showToast(`${logged} of ${files.length} frames logged — the rest couldn't be read.`);
+  } else {
+    showToast('Could not read those photos — try again.');
   }
 }
 

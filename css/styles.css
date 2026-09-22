@@ -2069,16 +2069,8 @@ input[type="file"].text-input { padding: 8px; }
 .log-btn {
   width: 100%;
   min-height: 56px;
-  font-size: 16px;
+  font-size: 14px;
   letter-spacing: 0.02em;
-}
-.log-btn .log-btn-tag {
-  padding: 2px 6px;
-  background: var(--accent-deep);
-  border-radius: var(--radius-sm);
-  color: var(--accent-strong);
-  font-family: var(--font-data);
-  font-size: 11px;
 }
 
 .hud-footer-row {
@@ -2087,6 +2079,9 @@ input[type="file"].text-input { padding: 8px; }
   gap: 8px;
   margin-top: 16px;
 }
+/* .btn-danger-solid carries its own top margin for when it's stacked alone;
+   paired with Pause Walk in this grid row, that would misalign the two tops. */
+.hud-footer-row .btn-danger-solid { margin-top: 0; }
 
 .hud-idle {
   text-align: center;

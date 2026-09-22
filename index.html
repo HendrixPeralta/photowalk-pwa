@@ -422,23 +422,24 @@
           <span class="label-caps">Quick Capture Log</span>
           <span class="log-last" id="hudLogLast">No frames yet</span>
         </div>
-        <button type="button" id="hudLogFrameBtn" class="btn btn-accent log-btn">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-camera"/></svg>
-          <span id="hudLogFrameLabel">Log Frame #1</span>
-          <span class="log-btn-tag">+EXIF</span>
-        </button>
-        <input type="file" id="hudFrameInput" accept="image/*" class="visually-hidden">
-        <button type="button" id="hudPinBtn" class="btn btn-primary btn-block" style="margin-top:8px">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pin"/></svg>
-          Open in Maps
-        </button>
+        <div class="hud-footer-row">
+          <button type="button" id="hudLogFrameBtn" class="btn btn-accent log-btn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-camera"/></svg>
+            <span id="hudLogFrameLabel">Log Frame #1</span>
+          </button>
+          <button type="button" id="hudPinBtn" class="btn btn-primary log-btn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pin"/></svg>
+            Open in Maps
+          </button>
+        </div>
+        <input type="file" id="hudFrameInput" accept="image/*" multiple class="visually-hidden">
 
         <div class="hud-footer-row">
           <button type="button" id="hudPauseBtn" class="btn btn-primary">
             <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pause"/></svg>
             <span data-label>Pause Walk</span>
           </button>
-          <button type="button" id="hudCompleteBtn" class="btn btn-accent">
+          <button type="button" id="hudCompleteBtn" class="btn btn-danger-solid">
             <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-flag"/></svg>
             Complete
           </button>
