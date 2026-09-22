@@ -865,6 +865,10 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
   border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--surface-2);
+  touch-action: pan-y;
+}
+.canvas-stack.zoomed {
+  /* Once zoomed, a one-finger drag pans the image instead of scrolling the page. */
   touch-action: none;
 }
 .canvas-stack canvas {

@@ -582,6 +582,9 @@ function setViewTransform(zoom, panX, panY) {
   view.panX = view.zoom === 1 ? 0 : clamp(panX, rect.width * (1 - view.zoom), 0);
   view.panY = view.zoom === 1 ? 0 : clamp(panY, rect.height * (1 - view.zoom), 0);
   els.inner.style.transform = `translate(${view.panX}px, ${view.panY}px) scale(${view.zoom})`;
+  // At 1x, leave touch-action alone so a one-finger drag on the picture scrolls the page;
+  // once zoomed, switch it off so the same drag pans the image instead.
+  els.stack.classList.toggle('zoomed', view.zoom > 1);
   drawOverlay(); // keep guide-line screen width constant across zoom levels
 }
 
