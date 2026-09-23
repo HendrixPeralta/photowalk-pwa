@@ -330,6 +330,27 @@
         </div>
       </div>
 
+      <div class="theme-card" id="walkPartnersCard">
+        <h4 class="subsection-title" style="margin-top:0">Walk Partners</h4>
+        <div id="walkPartnersJoin">
+          <p class="muted card-text">
+            Demo mode: rooms sync across tabs open on this browser, simulating a closed debrief space for
+            your walk partners without a backend.
+          </p>
+          <input type="text" id="roomThemeInput" class="text-input" placeholder="Theme (optional)">
+          <button type="button" id="createRoomBtn" class="btn btn-accent btn-block">Create Room</button>
+          <div class="theme-btn-row" style="margin-top:8px">
+            <input type="text" id="joinCodeInput" class="text-input" placeholder="Room code">
+            <button type="button" id="joinRoomBtn" class="btn btn-primary">Join</button>
+          </div>
+          <p id="shareError" class="error-text"></p>
+        </div>
+        <div id="walkPartnersActive" class="hidden">
+          <p class="muted card-text">Room <strong id="walkRoomCode"></strong> is open for your walk partners.</p>
+          <button type="button" id="manageRoomBtn" class="btn btn-primary btn-block">Manage Room</button>
+        </div>
+      </div>
+
       <h2 class="section-title">Reward progress</h2>
       <div class="theme-card reward-progress-card">
         <div id="rewardBar" class="reward-bar"></div>
@@ -697,30 +718,9 @@
 
       <p id="sharedFilesNotice" class="banner shared-notice hidden"></p>
 
-      <div id="shareJoinSection">
-        <div class="debrief-head">
-          <span class="debrief-head-left">
-            <span class="solar-dot"></span>
-            <span class="label-caps">Debrief Vault</span>
-          </span>
-          <span class="debrief-privacy">PRIVATE SESSION</span>
-        </div>
-        <p class="muted card-text">
-          Demo mode: rooms sync across tabs open on this browser, simulating a closed debrief space for
-          your walk partners without a backend.
-        </p>
-
-        <div class="theme-card">
-          <h4 class="subsection-title" style="margin-top:0">Create a Room</h4>
-          <input type="text" id="roomThemeInput" class="text-input" placeholder="Theme (optional)">
-          <button type="button" id="createRoomBtn" class="btn btn-accent btn-block">Create Room</button>
-        </div>
-        <div class="theme-card">
-          <h4 class="subsection-title" style="margin-top:0">Join a Room</h4>
-          <input type="text" id="joinCodeInput" class="text-input" placeholder="Room code">
-          <button type="button" id="joinRoomBtn" class="btn btn-primary btn-block">Join Room</button>
-          <p id="shareError" class="error-text"></p>
-        </div>
+      <div id="shareNoRoomState" class="empty-state">
+        <p>No active room yet. Create or join one with your walk partners from the Walks tab.</p>
+        <button type="button" id="shareGoWalksBtn" class="btn btn-accent">Go to Walks</button>
       </div>
 
       <div id="shareRoomSection" class="hidden">
@@ -916,10 +916,6 @@
     <button type="button" class="nav-btn" data-view="album">
       <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-library"/></svg>
       <span>Album</span>
-    </button>
-    <button type="button" class="nav-btn" data-view="share">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chat"/></svg>
-      <span>Partners</span>
     </button>
   </nav>
 

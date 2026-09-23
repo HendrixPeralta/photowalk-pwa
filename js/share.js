@@ -16,7 +16,12 @@ let sharedFiles = [];
 
 export function initShare() {
   els = {
-    joinSection: document.getElementById('shareJoinSection'),
+    partnersJoin: document.getElementById('walkPartnersJoin'),
+    partnersActive: document.getElementById('walkPartnersActive'),
+    walkRoomCode: document.getElementById('walkRoomCode'),
+    manageRoomBtn: document.getElementById('manageRoomBtn'),
+    noRoomState: document.getElementById('shareNoRoomState'),
+    goWalksBtn: document.getElementById('shareGoWalksBtn'),
     roomSection: document.getElementById('shareRoomSection'),
     themeInput: document.getElementById('roomThemeInput'),
     createBtn: document.getElementById('createRoomBtn'),
@@ -44,6 +49,8 @@ export function initShare() {
   els.createBtn.addEventListener('click', createRoom);
   els.joinBtn.addEventListener('click', () => joinRoom(els.joinCodeInput.value));
   els.joinCodeInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') joinRoom(els.joinCodeInput.value); });
+  els.manageRoomBtn.addEventListener('click', () => navigateTo('share'));
+  els.goWalksBtn.addEventListener('click', () => navigateTo('walks'));
   els.copyBtn.addEventListener('click', copyInvite);
   els.leaveBtn.addEventListener('click', leaveRoom);
   els.uploadBtn.addEventListener('click', uploadPhotos);
@@ -68,9 +75,12 @@ function inviteUrl(code) {
 }
 
 export function renderShare() {
-  if (!els.joinSection) return;
+  if (!els.partnersJoin) return;
   const room = state.currentRoom ? state.rooms[state.currentRoom] : null;
-  els.joinSection.classList.toggle('hidden', !!room);
+  els.partnersJoin.classList.toggle('hidden', !!room);
+  els.partnersActive.classList.toggle('hidden', !room);
+  if (room) els.walkRoomCode.textContent = room.code;
+  els.noRoomState.classList.toggle('hidden', !!room);
   els.roomSection.classList.toggle('hidden', !room);
   renderSharedNotice();
   if (!room) return;
@@ -113,7 +123,7 @@ function renderSharedNotice() {
   // what to do next) when the share sheet hands us photos before there's a room.
   els.sharedNotice.textContent = state.currentRoom
     ? `${count} ready from your share sheet — press Upload to post them.`
-    : `${count} ready from your share sheet — create or join a room to post them.`;
+    : `${count} ready from your share sheet — create or join a room from the Walks tab to post them.`;
 }
 
 /** Called on boot when the OS share sheet handed PhotoWalk some images. */
