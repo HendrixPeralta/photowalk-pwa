@@ -2198,46 +2198,34 @@ input[type="file"].text-input { padding: 8px; }
 /* Segmented dominance tape: each swatch is as wide as its share of the frame. */
 .gamut-bar {
   display: flex;
-  height: 26px;
+  height: 44px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   overflow: hidden;
   margin-bottom: 8px;
 }
-.gamut-bar span { display: block; height: 100%; }
-
-.gamut-specs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-}
-.gamut-spec {
+.gamut-bar-swatch {
+  display: block;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  border: none;
+  padding: 0;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 6px 8px;
-  background: var(--surface-2);
-  border-radius: var(--radius-sm);
-  min-width: 0;
 }
-.gamut-spec-chip {
-  width: 14px; height: 14px;
-  flex-shrink: 0;
-  border: 1px solid var(--border);
-  border-radius: 2px;
-}
-.gamut-spec-hex {
+.gamut-bar-hex {
+  position: absolute;
+  left: 4px;
+  bottom: 3px;
+  padding: 1px 3px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
   font-family: var(--font-data);
-  font-size: 11px;
-  text-transform: uppercase;
-}
-.gamut-spec-pct {
-  margin-left: auto;
-  font-family: var(--font-data);
-  font-size: 10px;
-  color: var(--text-dim);
+  font-size: 9px;
+  line-height: 1.2;
   white-space: nowrap;
+  pointer-events: none;
 }
 
 /* --- Partners: debrief header -------------------------------------------- */

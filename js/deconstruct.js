@@ -24,15 +24,14 @@ export function initDeconstruct() {
     tonalTag: document.getElementById('tonalKeyTag'),
     tonalText: document.getElementById('tonalKeyText'),
     gamutBar: document.getElementById('gamutBar'),
-    gamutSpecs: document.getElementById('gamutSpecs'),
     harmonyRow: document.getElementById('harmonyRow'),
     harmonyName: document.getElementById('harmonyName')
   };
 
-  els.gamutSpecs.addEventListener('click', (e) => {
-    const spec = e.target.closest('.gamut-spec');
-    if (!spec) return;
-    const hex = spec.dataset.hex;
+  els.gamutBar.addEventListener('click', (e) => {
+    const swatch = e.target.closest('.gamut-bar-swatch');
+    if (!swatch) return;
+    const hex = swatch.dataset.hex;
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(hex).then(() => showToast(`Copied ${hex}`)).catch(() => showToast(hex));
     } else {
@@ -112,16 +111,10 @@ export function renderGamut(palette) {
   if (!els.gamutBar) return;
   const clusters = gamutClusters(palette);
 
-  els.gamutBar.innerHTML = clusters
-    .map((c) => `<span style="background:${c.hex};width:${(c.share * 100).toFixed(2)}%" title="${c.hex}: ${Math.round(c.share * 100)}%"></span>`)
-    .join('');
-
-  els.gamutSpecs.innerHTML = clusters.map((c) => `
-    <div class="gamut-spec" data-hex="${c.hex}" title="Copy ${c.hex}">
-      <span class="gamut-spec-chip" style="background:${c.hex}"></span>
-      <span class="gamut-spec-hex">${escapeHtml(c.hex)}</span>
-      <span class="gamut-spec-pct">${Math.round(c.share * 100)}% ${c.role}</span>
-    </div>`).join('');
+  els.gamutBar.innerHTML = clusters.map((c) => `
+    <button type="button" class="gamut-bar-swatch" style="background:${c.hex};width:${(c.share * 100).toFixed(2)}%" data-hex="${c.hex}" title="${c.hex}, ${Math.round(c.share * 100)}%. Click to copy.">
+      <span class="gamut-bar-hex">${escapeHtml(c.hex)}</span>
+    </button>`).join('');
 
   if (palette.length) {
     const rel = paletteRelationship(palette);
@@ -188,6 +181,5 @@ export function clearDeconstruct() {
   els.tonalNote.open = false;
   els.harmonyRow.hidden = true;
   els.gamutBar.innerHTML = '';
-  els.gamutSpecs.innerHTML = '';
   setFrameLabel(null);
 }
