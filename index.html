@@ -279,32 +279,27 @@
       <div id="quickStart">
         <div class="log-head">
           <span class="label-caps">Field Objective Setting</span>
+          <button type="button" id="modeInfoBtn" class="section-help-btn" aria-label="About walk modes">?</button>
           <span class="log-last">Tap to switch</span>
         </div>
 
         <div class="mode-cards">
-          <div class="mode-card-wrap">
-            <button type="button" id="modeCasualBtn" class="mode-card active">
-              <span class="mode-card-head">
-                <span class="mode-card-title">
-                  <span class="mode-card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-lens"/></svg></span>
-                  <strong>Casual Walk</strong>
-                </span>
+          <button type="button" id="modeCasualBtn" class="mode-card active">
+            <span class="mode-card-head">
+              <span class="mode-card-title">
+                <span class="mode-card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-lens"/></svg></span>
+                <strong>Casual Walk</strong>
               </span>
-            </button>
-            <button type="button" class="mode-card-info" data-mode-info="casual" aria-label="About Casual Walk mode">?</button>
-          </div>
-          <div class="mode-card-wrap">
-            <button type="button" id="modeGuidedBtn" class="mode-card">
-              <span class="mode-card-head">
-                <span class="mode-card-title">
-                  <span class="mode-card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-timer"/></svg></span>
-                  <strong>Guided Sprint</strong>
-                </span>
+            </span>
+          </button>
+          <button type="button" id="modeGuidedBtn" class="mode-card">
+            <span class="mode-card-head">
+              <span class="mode-card-title">
+                <span class="mode-card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-timer"/></svg></span>
+                <strong>Guided Sprint</strong>
               </span>
-            </button>
-            <button type="button" class="mode-card-info" data-mode-info="guided" aria-label="About Guided Sprint mode">?</button>
-          </div>
+            </span>
+          </button>
         </div>
 
         <p id="modeHint" class="hint hidden">Finish your current walk to switch modes.</p>
