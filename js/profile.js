@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import { navigateTo } from './util.js';
 import { showToast } from './toast.js';
 
@@ -25,7 +26,7 @@ export function initProfile() {
   });
 
   document.getElementById('drawerUserBtn').addEventListener('click', () => {
-    showToast('Google sign-in is coming soon. PhotoEYE works fully without an account.', 4000);
+    showToast(t('Google sign-in is coming soon. PhotoEYE works fully without an account.'), 4000);
   });
 }
 

@@ -10,6 +10,8 @@
  * it never rides along in exports or the demo fixture.
  */
 
+import { t } from './i18n.js';
+
 const FIX_KEY = 'photowalk:fix';
 const FIX_MAX_AGE_MS = 12 * 3600 * 1000; // a day-old city-level fix is still fine for sun math
 
@@ -55,7 +57,7 @@ export function geolocationSupported() {
  */
 export function requestFix({ highAccuracy = false, timeout = 12000 } = {}) {
   return new Promise((resolve, reject) => {
-    if (!geolocationSupported()) { reject(new Error('This browser has no location support.')); return; }
+    if (!geolocationSupported()) { reject(new Error(t('This browser has no location support.'))); return; }
     navigator.geolocation.getCurrentPosition(
       (pos) => resolve(storeFix(pos)),
       (err) => reject(new Error(describe(err))),
@@ -70,7 +72,7 @@ export function requestFix({ highAccuracy = false, timeout = 12000 } = {}) {
  */
 export function watchPosition(onPoint, onError) {
   if (!geolocationSupported()) {
-    if (onError) onError(new Error('This browser has no location support.'));
+    if (onError) onError(new Error(t('This browser has no location support.')));
     return () => {};
   }
   stopWatching();
@@ -93,10 +95,10 @@ export function isWatching() {
 }
 
 function describe(err) {
-  if (err && err.code === 1) return 'Location permission denied.';
-  if (err && err.code === 2) return "Couldn't find your location.";
-  if (err && err.code === 3) return 'Location request timed out.';
-  return 'Location is unavailable.';
+  if (err && err.code === 1) return t('Location permission denied.');
+  if (err && err.code === 2) return t("Couldn't find your location.");
+  if (err && err.code === 3) return t('Location request timed out.');
+  return t('Location is unavailable.');
 }
 
 /** Great-circle distance between two fixes, in metres. */

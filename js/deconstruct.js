@@ -10,7 +10,8 @@
  */
 
 import { rgbToHex, escapeHtml } from './util.js';
-import { paletteRelationship } from './interpret.js';
+import { paletteRelationship, joinSentences } from './interpret.js';
+import { t } from './i18n.js';
 import { showToast } from './toast.js';
 
 let els = {};
@@ -32,7 +33,7 @@ export function initDeconstruct() {
     if (!swatch) return;
     const hex = swatch.dataset.hex;
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(hex).then(() => showToast(`Copied ${hex}`)).catch(() => showToast(hex));
+      navigator.clipboard.writeText(hex).then(() => showToast(t('Copied {hex}', { hex }))).catch(() => showToast(hex));
     } else {
       showToast(hex);
     }
@@ -42,14 +43,18 @@ export function initDeconstruct() {
 /* ---------- Tonal key ---------- */
 
 
-/** Names the tonal key from the histogram's shadow/mid/highlight split. */
+/**
+ * Names the tonal key from the histogram's shadow/mid/highlight split.
+ * `phrase` is the title as it reads mid-sentence (lowercased in English), so
+ * the takeaway never has to lowercase a translated string.
+ */
 export function tonalKey(summary) {
   const { shadows, highs } = summary;
-  if (shadows > 0.5) return { title: 'Low-key (mostly dark)', tag: 'Moody' };
-  if (highs > 0.5) return { title: 'High-key (mostly bright)', tag: 'Airy' };
-  if (shadows > 0.28 && highs > 0.28) return { title: 'High contrast', tag: 'Punchy' };
-  if (shadows < 0.08 && highs < 0.08) return { title: 'Low contrast', tag: 'Soft' };
-  return { title: 'Balanced', tag: 'Even' };
+  if (shadows > 0.5) return { title: t('Low-key (mostly dark)'), phrase: t('low-key (mostly dark)'), tag: t('Moody') };
+  if (highs > 0.5) return { title: t('High-key (mostly bright)'), phrase: t('high-key (mostly bright)'), tag: t('Airy') };
+  if (shadows > 0.28 && highs > 0.28) return { title: t('High contrast'), phrase: t('high contrast'), tag: t('Punchy') };
+  if (shadows < 0.08 && highs < 0.08) return { title: t('Low contrast'), phrase: t('low contrast'), tag: t('Soft') };
+  return { title: t('Balanced'), phrase: t('balanced'), tag: t('Even') };
 }
 
 /** Share of the frame sitting in the very first and very last histogram bin. */
@@ -63,15 +68,18 @@ export function renderTonalKey(bins, summary) {
   const key = tonalKey(summary);
   const clip = clipShares(bins);
 
-  els.tonalTitle.textContent = `Tonal key: ${key.title}`;
+  els.tonalTitle.textContent = t('Tonal key: {title}', { title: key.title });
   els.tonalTag.textContent = key.tag;
 
   const dominant = summary.shadows >= summary.highs
-    ? `${Math.round(summary.shadows * 100)}% of the photo is in the darker tones`
-    : `${Math.round(summary.highs * 100)}% of the photo is in the brighter tones`;
+    ? t('{pct}% of the photo is in the darker tones.', { pct: Math.round(summary.shadows * 100) })
+    : t('{pct}% of the photo is in the brighter tones.', { pct: Math.round(summary.highs * 100) });
 
-  const clipLine = `Pure black: ${(clip.black * 100).toFixed(1)}% · pure white: ${(clip.white * 100).toFixed(1)}%.`;
-  els.tonalText.textContent = `${dominant}. ${clipLine} ${summary.caption}`;
+  const clipLine = t('Pure black: {black}% · pure white: {white}%.', {
+    black: (clip.black * 100).toFixed(1),
+    white: (clip.white * 100).toFixed(1)
+  });
+  els.tonalText.textContent = joinSentences([dominant, clipLine, summary.caption]);
   els.tonalNote.classList.remove('hidden');
 }
 
@@ -111,7 +119,7 @@ export function renderGamut(palette) {
   const clusters = gamutClusters(palette);
 
   els.gamutBar.innerHTML = clusters.map((c) => `
-    <button type="button" class="gamut-bar-swatch" style="background:${c.hex};width:${(c.share * 100).toFixed(2)}%" data-hex="${c.hex}" title="${c.hex}, ${Math.round(c.share * 100)}%. Click to copy.">
+    <button type="button" class="gamut-bar-swatch" style="background:${c.hex};width:${(c.share * 100).toFixed(2)}%" data-hex="${c.hex}" title="${t('{hex}, {pct}%. Click to copy.', { hex: c.hex, pct: Math.round(c.share * 100) })}">
       <span class="gamut-bar-hex">${escapeHtml(c.hex)}</span>
     </button>`).join('');
 
@@ -139,32 +147,33 @@ export function takeawayText(palette, summary, exif) {
 
   if (exif && exif.aperture && exif.shutter) {
     const at = [exif.shutter, exif.aperture.replace('f/', 'ƒ/'), exif.iso].filter(Boolean).join(' · ');
-    parts.push(`Shot at ${at}, the photo comes out ${key.title.toLowerCase()}.`);
+    parts.push(t('Shot at {at}, the photo comes out {key}.', { at, key: key.phrase }));
   } else {
-    parts.push(`The photo comes out ${key.title.toLowerCase()}.`);
+    parts.push(t('The photo comes out {key}.', { key: key.phrase }));
   }
 
   if (summary.shadows > 0.5) {
-    parts.push('Most of the scene falls into darkness, so whatever is lit becomes the focus.');
+    parts.push(t('Most of the scene falls into darkness, so whatever is lit becomes the focus.'));
   } else if (summary.highs > 0.5) {
-    parts.push('Tones are bright and airy. That softens texture but keeps the subject easy to see against a light background.');
+    parts.push(t('Tones are bright and airy. That softens texture but keeps the subject easy to see against a light background.'));
   } else if (summary.shadows > 0.28 && summary.highs > 0.28) {
-    parts.push('Strong darks and brights with little in between make shapes and edges stand out.');
+    parts.push(t('Strong darks and brights with little in between make shapes and edges stand out.'));
   }
 
-  if (summary.clippedWhite) parts.push("Some bright areas are pure white, and editing can't bring that detail back.");
-  if (summary.clippedBlack) parts.push('Some dark areas are pure black, with no detail left to brighten.');
+  if (summary.clippedWhite) parts.push(t("Some bright areas are pure white, and editing can't bring that detail back."));
+  if (summary.clippedBlack) parts.push(t('Some dark areas are pure black, with no detail left to brighten.'));
 
-  if (rel) parts.push(`Color: ${rel.label.toLowerCase()}. ${rel.caption}`);
+  // The label is already translated; lowercasing only affects English.
+  if (rel) parts.push(t('Color: {harmony}.', { harmony: rel.label.toLowerCase() }), rel.caption);
 
   if (exif && exif.focalMm) {
     const wide = exif.focalMm < 35;
     parts.push(wide
-      ? `At ${exif.focalLength} (wide), you were close enough for the foreground to play a big part.`
-      : `At ${exif.focalLength} (zoomed in), the background looks pulled closer, stacking the layers together.`);
+      ? t('At {focal} (wide), you were close enough for the foreground to play a big part.', { focal: exif.focalLength })
+      : t('At {focal} (zoomed in), the background looks pulled closer, stacking the layers together.', { focal: exif.focalLength }));
   }
 
-  return parts.join(' ');
+  return joinSentences(parts);
 }
 
 /* ---------- Reset ---------- */

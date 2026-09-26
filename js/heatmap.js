@@ -1,12 +1,17 @@
+import { t, dateLocale } from './i18n.js';
 import { state, save, hoursInPeriod, hoursForThemeInPeriod } from './store.js';
 import { THEMES } from './concepts.js';
 import { localDateKey, formatHours, clamp, uid, escapeHtml } from './util.js';
 import { showToast } from './toast.js';
 
 const WEEKS = 52;
-const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTH_NAMES = [t('Jan'), t('Feb'), t('Mar'), t('Apr'), t('May'), t('Jun'), t('Jul'), t('Aug'), t('Sep'), t('Oct'), t('Nov'), t('Dec')];
 
-const PERIOD_LABEL = { week: 'week', month: 'month', year: 'year' };
+// Whole sentences per period, so Japanese can place the period word where it needs to.
+const GOAL_MET_TEXT = { week: 'Goal met: {done} this week', month: 'Goal met: {done} this month', year: 'Goal met: {done} this year' };
+const GOAL_PROGRESS_TEXT = { week: '{done} of {goal} this week', month: '{done} of {goal} this month', year: '{done} of {goal} this year' };
+const PER_PERIOD_TEXT = { week: '{done} / {goal} per week', month: '{done} / {goal} per month', year: '{done} / {goal} per year' };
+const MET_THIS_PERIOD_TEXT = { week: 'Goal met this week', month: 'Goal met this month', year: 'Goal met this year' };
 
 // Different periods call for different-sized quick-picks — "3h" makes no sense
 // as a yearly suggestion, and "300h" makes no sense as a weekly one.
@@ -81,12 +86,12 @@ export function initHeatmap() {
 
 /** Built-in themes plus anything the user has built themselves, for the goal picker. */
 function allThemesForPicker() {
-  return [...THEMES, ...state.customThemes].map((t) => ({ id: t.id, title: t.title }));
+  return [...THEMES, ...state.customThemes].map((th) => ({ id: th.id, title: th.title }));
 }
 
 function themeTitle(id) {
-  const t = THEMES.find((x) => x.id === id) || state.customThemes.find((x) => x.id === id);
-  return t ? t.title : 'Deleted theme';
+  const theme = THEMES.find((x) => x.id === id) || state.customThemes.find((x) => x.id === id);
+  return theme ? theme.title : t('Deleted theme');
 }
 
 function addThemeGoal() {
@@ -94,10 +99,10 @@ function addThemeGoal() {
   const hours = Number(els.themeGoalHours.value);
   const period = els.themeGoalPeriod.value;
 
-  if (!themeId) { showToast('Pick a theme to set a goal for.'); return; }
-  if (!Number.isFinite(hours) || hours <= 0) { showToast('Set how many hours the goal targets.'); return; }
+  if (!themeId) { showToast(t('Pick a theme to set a goal for.')); return; }
+  if (!Number.isFinite(hours) || hours <= 0) { showToast(t('Set how many hours the goal targets.')); return; }
   if (state.profile.themeGoals.some((g) => g.themeId === themeId && g.period === period)) {
-    showToast('That theme already has a goal for this period. Remove it first to set a new one.');
+    showToast(t('That theme already has a goal for this period. Remove it first to set a new one.'));
     return;
   }
 
@@ -105,7 +110,7 @@ function addThemeGoal() {
   save();
   els.themeGoalHours.value = '';
   renderThemeGoals();
-  showToast('Theme goal set.');
+  showToast(t('Theme goal set.'));
 }
 
 /**
@@ -125,12 +130,12 @@ function renderWeeklyGoal() {
   });
   els.goalHoursInput.value = String(state.profile.goals[period] ?? '');
   els.goalPresets.innerHTML = GOAL_PRESETS[period].map((h) => `
-    <button type="button" class="chip-btn ${h === state.profile.goals[period] ? 'active' : ''}" data-preset="${h}">${h}h</button>
+    <button type="button" class="chip-btn ${h === state.profile.goals[period] ? 'active' : ''}" data-preset="${h}">${t('{n}h', { n: h })}</button>
   `).join('');
   els.goalBar.style.width = pct + '%';
   els.goalText.textContent = done >= goal
-    ? `Goal met: ${formatHours(done)} this ${PERIOD_LABEL[period]}`
-    : `${formatHours(done)} of ${formatHours(goal)} this ${PERIOD_LABEL[period]}`;
+    ? t(GOAL_MET_TEXT[period], { done: formatHours(done) })
+    : t(GOAL_PROGRESS_TEXT[period], { done: formatHours(done), goal: formatHours(goal) });
 }
 
 function renderThemeGoals() {
@@ -138,12 +143,12 @@ function renderThemeGoals() {
 
   const options = allThemesForPicker();
   const prevValue = els.themeGoalSelect.value;
-  els.themeGoalSelect.innerHTML = options.map((t) => `<option value="${t.id}">${escapeHtml(t.title)}</option>`).join('');
-  if (options.some((t) => t.id === prevValue)) els.themeGoalSelect.value = prevValue;
+  els.themeGoalSelect.innerHTML = options.map((th) => `<option value="${th.id}">${escapeHtml(th.title)}</option>`).join('');
+  if (options.some((th) => th.id === prevValue)) els.themeGoalSelect.value = prevValue;
 
   const goals = state.profile.themeGoals;
   els.themeGoalsEmpty.classList.toggle('hidden', goals.length > 0);
-  els.themeGoalsCount.textContent = goals.length ? `${goals.length} set` : 'None yet';
+  els.themeGoalsCount.textContent = goals.length ? t('{n} set', { n: goals.length }) : t('None yet');
 
   els.themeGoalsList.innerHTML = goals.map((g) => {
     const done = hoursForThemeInPeriod(g.themeId, g.period);
@@ -153,13 +158,13 @@ function renderThemeGoals() {
       <li class="reward-item ${met ? 'reward-item-ready' : ''}">
         <div class="reward-row">
           <span class="reward-title">${escapeHtml(themeTitle(g.themeId))}</span>
-          <span class="reward-hours">${formatHours(Math.min(done, g.hours))} / ${formatHours(g.hours)} per ${PERIOD_LABEL[g.period]}</span>
+          <span class="reward-hours">${t(PER_PERIOD_TEXT[g.period], { done: formatHours(Math.min(done, g.hours)), goal: formatHours(g.hours) })}</span>
         </div>
         <div class="timer-track reward-track"><div class="timer-fill reward-fill" style="width:${pct}%"></div></div>
         <div class="reward-row reward-foot">
-          <span class="muted">${met ? 'Goal met this ' + PERIOD_LABEL[g.period] : formatHours(g.hours - done) + ' to go'}</span>
+          <span class="muted">${met ? t(MET_THIS_PERIOD_TEXT[g.period]) : t('{hours} to go', { hours: formatHours(g.hours - done) })}</span>
           <span class="reward-actions">
-            <button type="button" class="btn btn-ghost btn-sm" data-remove-id="${g.id}">Remove</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-remove-id="${g.id}">${t('Remove')}</button>
           </span>
         </div>
       </li>`;
@@ -219,13 +224,16 @@ export function renderHeatmap() {
         const key = localDateKey(day);
         const hours = state.activityLog[key] || 0;
         if (hours > 0) { totalHours += hours; activeDays += 1; }
-        const label = `${day.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}: ${hours > 0 ? formatHours(hours) + ' shooting' : 'no walk logged'}`;
+        const date = day.toLocaleDateString(dateLocale, { month: 'short', day: 'numeric' });
+        const label = hours > 0
+          ? t('{date}: {hours} shooting', { date, hours: formatHours(hours) })
+          : t('{date}: no walk logged', { date });
         return `<span class="heatmap-day" data-level="${levelFor(hours)}" title="${label}"></span>`;
       }).join('')}
     </div>
   `).join('');
 
-  els.summary.textContent = `${activeDays} day${activeDays === 1 ? '' : 's'} out in the last year · ${formatHours(totalHours)} shooting`;
+  els.summary.textContent = t(activeDays === 1 ? '{n} day out in the last year · {hours} shooting' : '{n} days out in the last year · {hours} shooting', { n: activeDays, hours: formatHours(totalHours) });
 
   renderWeeklyGoal();
   renderThemeGoals();

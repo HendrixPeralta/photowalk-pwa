@@ -4,11 +4,12 @@
 // sourced photography — no copyright risk, and it renders fully offline.
 
 import { escapeHtml } from './util.js';
+import { t } from './i18n.js';
 
 export const CONCEPTS = {
   'thirds': {
-    title: 'Rule of Thirds',
-    tip: 'Place key subjects along the grid lines or their intersections instead of dead center.',
+    title: t('Rule of Thirds'),
+    tip: t('Place key subjects along the grid lines or their intersections instead of dead center.'),
     svg: `<svg viewBox="0 0 200 140"><rect width="200" height="140" class="bg"/>
       <line x1="66.6" y1="0" x2="66.6" y2="140" class="grid"/>
       <line x1="133.3" y1="0" x2="133.3" y2="140" class="grid"/>
@@ -17,8 +18,8 @@ export const CONCEPTS = {
       <circle cx="133.3" cy="46.6" r="9" class="accent-fill"/></svg>`
   },
   'golden': {
-    title: 'Golden Ratio',
-    tip: 'A softer take on the rule of thirds. The spiral leads the eye naturally toward the subject.',
+    title: t('Golden Ratio'),
+    tip: t('A softer take on the rule of thirds. The spiral leads the eye naturally toward the subject.'),
     svg: `<svg viewBox="0 0 200 140"><rect width="200" height="140" class="bg"/>
       <line x1="76.4" y1="0" x2="76.4" y2="140" class="grid"/>
       <line x1="123.6" y1="0" x2="123.6" y2="140" class="grid"/>
@@ -27,39 +28,39 @@ export const CONCEPTS = {
       <path d="M200,140 A140,140 0 0 0 60,0" class="spiral"/></svg>`
   },
   'leading-lines': {
-    title: 'Leading Lines',
-    tip: 'Use roads, rails, or fences that draw the eye toward your subject.',
+    title: t('Leading Lines'),
+    tip: t('Use roads, rails, or fences that draw the eye toward your subject.'),
     svg: `<svg viewBox="0 0 200 140"><rect width="200" height="140" class="bg"/>
       <path d="M-10,150 L120,30" class="line"/>
       <path d="M210,150 L120,30" class="line"/>
       <circle cx="120" cy="30" r="7" class="accent-fill"/></svg>`
   },
   'reflection': {
-    title: 'Reflections & Symmetry',
-    tip: 'Still water, glass, and mirrors let you double a subject for a neat, balanced look.',
+    title: t('Reflections & Symmetry'),
+    tip: t('Still water, glass, and mirrors let you double a subject for a neat, balanced look.'),
     svg: `<svg viewBox="0 0 200 140"><rect width="200" height="140" class="bg"/>
       <line x1="0" y1="70" x2="200" y2="70" class="grid"/>
       <path d="M100,20 L130,65 H70 Z" class="shape"/>
       <path d="M100,120 L130,75 H70 Z" class="shape shape-dim"/></svg>`
   },
   'framing': {
-    title: 'Natural Framing',
-    tip: 'Shoot through doorways, arches, or branches to add depth and draw focus inward.',
+    title: t('Natural Framing'),
+    tip: t('Shoot through doorways, arches, or branches to add depth and draw focus inward.'),
     svg: `<svg viewBox="0 0 200 140"><rect width="200" height="140" class="bg-dark"/>
       <rect x="30" y="15" width="140" height="110" class="bg"/>
       <circle cx="100" cy="70" r="16" class="accent-fill"/></svg>`
   },
   'silhouette': {
-    title: 'Silhouette',
-    tip: 'Tap the bright background to set exposure, so your subject turns into a dark, solid shape.',
+    title: t('Silhouette'),
+    tip: t('Tap the bright background to set exposure, so your subject turns into a dark, solid shape.'),
     svg: `<svg viewBox="0 0 200 140"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0" class="sky-top"/><stop offset="1" class="sky-bottom"/></linearGradient></defs>
       <rect width="200" height="140" fill="url(#sky)"/>
       <path d="M0,140 L40,80 L70,110 L110,60 L150,100 L200,70 L200,140 Z" class="silhouette"/></svg>`
   },
   'texture-pattern': {
-    title: 'Texture & Pattern',
-    tip: 'Fill the whole frame with a repeating pattern, then look for the one break in it.',
+    title: t('Texture & Pattern'),
+    tip: t('Fill the whole frame with a repeating pattern, then look for the one break in it.'),
     svg: `<svg viewBox="0 0 200 140"><rect width="200" height="140" class="bg"/>
       <g class="pattern-fill">${Array.from({ length: 6 }).map((_, row) =>
         Array.from({ length: 8 }).map((_, col) => {
@@ -70,14 +71,14 @@ export const CONCEPTS = {
       <rect x="129" y="73" width="17" height="17" rx="3" class="accent-fill"/></svg>`
   },
   'negative-space': {
-    title: 'Negative Space',
-    tip: 'Let empty sky, wall, or floor dominate the frame so the small subject reads clearly.',
+    title: t('Negative Space'),
+    tip: t('Let empty sky, wall, or floor dominate the frame so the small subject reads clearly.'),
     svg: `<svg viewBox="0 0 200 140"><rect width="200" height="140" class="bg"/>
       <circle cx="168" cy="112" r="9" class="accent-fill"/></svg>`
   },
   'warm-light': {
-    title: 'Golden Hour Light',
-    tip: 'Shoot when the sun is low for warm color and long, dramatic shadows.',
+    title: t('Golden Hour Light'),
+    tip: t('Shoot when the sun is low for warm color and long, dramatic shadows.'),
     svg: `<svg viewBox="0 0 200 140"><defs><linearGradient id="warm" x1="0" y1="0" x2="1" y2="1">
         <stop offset="0" class="warm-a"/><stop offset="1" class="warm-b"/></linearGradient></defs>
       <rect width="200" height="140" fill="url(#warm)"/>
@@ -85,16 +86,16 @@ export const CONCEPTS = {
       <path d="M20,140 L60,140 L100,90 L90,90 Z" class="shadow"/></svg>`
   },
   'layers-depth': {
-    title: 'Layers & Depth',
-    tip: 'Combine a foreground, subject, and background so the frame reads in three dimensions.',
+    title: t('Layers & Depth'),
+    tip: t('Combine a foreground, subject, and background so the frame reads in three dimensions.'),
     svg: `<svg viewBox="0 0 200 140"><rect width="200" height="140" class="bg"/>
       <rect x="20" y="20" width="120" height="90" rx="10" class="layer layer-3"/>
       <rect x="50" y="35" width="120" height="90" rx="10" class="layer layer-2"/>
       <rect x="80" y="50" width="100" height="75" rx="10" class="layer layer-1"/></svg>`
   },
   'color-pop': {
-    title: 'Color Pop',
-    tip: 'One saturated color against a muted scene reads instantly as the subject.',
+    title: t('Color Pop'),
+    tip: t('One saturated color against a muted scene reads instantly as the subject.'),
     svg: `<svg viewBox="0 0 200 140"><rect width="200" height="140" class="bg"/>
       <circle cx="45" cy="45" r="16" class="muted"/>
       <circle cx="95" cy="90" r="16" class="muted"/>
@@ -102,8 +103,8 @@ export const CONCEPTS = {
       <circle cx="150" cy="95" r="18" class="accent-fill"/></svg>`
   },
   'shallow-dof': {
-    title: 'Shallow Depth of Field',
-    tip: "A wide aperture (a small f-number like f/1.8) or your phone's Portrait mode blurs the background so one sharp subject stands out.",
+    title: t('Shallow Depth of Field'),
+    tip: t("A wide aperture (a small f-number like f/1.8) or your phone's Portrait mode blurs the background so one sharp subject stands out."),
     svg: `<svg viewBox="0 0 200 140"><defs><filter id="blur"><feGaussianBlur stdDeviation="4"/></filter></defs>
       <rect width="200" height="140" class="bg"/>
       <g filter="url(#blur)" class="muted">
@@ -113,8 +114,8 @@ export const CONCEPTS = {
       <circle cx="100" cy="70" r="24" class="accent-fill"/></svg>`
   },
   'motion-blur': {
-    title: 'Motion & Blur',
-    tip: 'Let moving things blur while something still stays sharp, or move the camera along with the motion.',
+    title: t('Motion & Blur'),
+    tip: t('Let moving things blur while something still stays sharp, or move the camera along with the motion.'),
     svg: `<svg viewBox="0 0 200 140"><defs><filter id="mblur" x="-40%" width="180%"><feGaussianBlur stdDeviation="6 0.3"/></filter></defs>
       <rect width="200" height="140" class="bg"/>
       <g filter="url(#mblur)" class="muted">
@@ -123,24 +124,24 @@ export const CONCEPTS = {
       <circle cx="150" cy="67" r="17" class="accent-fill"/></svg>`
   },
   'low-angle': {
-    title: 'Change Your Angle',
-    tip: 'Shoot from your knees or point straight up. Unusual angles make familiar places look new.',
+    title: t('Change Your Angle'),
+    tip: t('Shoot from your knees or point straight up. Unusual angles make familiar places look new.'),
     svg: `<svg viewBox="0 0 200 140"><rect width="200" height="140" class="bg"/>
       <path d="M0,140 L78,22 L90,22 L44,140 Z" class="layer layer-2"/>
       <path d="M200,140 L122,22 L110,22 L156,140 Z" class="layer layer-2"/>
       <circle cx="100" cy="36" r="10" class="accent-fill"/></svg>`
   },
   'scale-contrast': {
-    title: 'Sense of Scale',
-    tip: 'A tiny figure beside something huge tells the viewer exactly how big the scene is.',
+    title: t('Sense of Scale'),
+    tip: t('A tiny figure beside something huge tells the viewer exactly how big the scene is.'),
     svg: `<svg viewBox="0 0 200 140"><rect width="200" height="140" class="bg"/>
       <path d="M35,140 L35,25 L115,25 L115,140 Z" class="muted"/>
       <line x1="0" y1="128" x2="200" y2="128" class="grid"/>
       <circle cx="155" cy="121" r="6" class="accent-fill"/></svg>`
   },
   'night-glow': {
-    title: 'Night Glow',
-    tip: "After dark, lights become the subject. Hold your phone steady and tap on the lights so they don't blow out.",
+    title: t('Night Glow'),
+    tip: t("After dark, lights become the subject. Hold your phone steady and tap on the lights so they don't blow out."),
     svg: `<svg viewBox="0 0 200 140"><defs><filter id="nglow"><feGaussianBlur stdDeviation="2.5"/></filter></defs>
       <rect width="200" height="140" class="bg-dark"/>
       <g filter="url(#nglow)">
@@ -176,266 +177,266 @@ export const CONCEPT_QUERIES = {
 export const THEMES = [
   {
     id: 'shadows-silhouettes',
-    title: 'Shadows & Silhouettes',
-    brief: 'Hunt for hard light, long shadows, and shapes stripped of detail.',
+    title: t('Shadows & Silhouettes'),
+    brief: t('Hunt for hard light, long shadows, and shapes stripped of detail.'),
     concepts: ['silhouette', 'warm-light'],
     challenges: [
-      'Shoot when the sun is low and behind your subject',
-      'Find a hard-edged shadow on a wall or sidewalk',
-      'Turn a person or object into a pure silhouette'
+      t('Shoot when the sun is low and behind your subject'),
+      t('Find a hard-edged shadow on a wall or sidewalk'),
+      t('Turn a person or object into a pure silhouette')
     ]
   },
   {
     id: 'leading-lines',
-    title: 'Leading Lines',
-    brief: 'Find lines in the environment that pull the eye through the frame.',
+    title: t('Leading Lines'),
+    brief: t('Find lines in the environment that pull the eye through the frame.'),
     concepts: ['leading-lines', 'thirds'],
     challenges: [
-      'Find a road, rail, or fence that leads into the frame',
-      "Get low to exaggerate the line's pull",
-      'Place your subject where the lines converge'
+      t('Find a road, rail, or fence that leads into the frame'),
+      t("Get low to exaggerate the line's pull"),
+      t('Place your subject where the lines converge')
     ]
   },
   {
     id: 'reflections',
-    title: 'Reflections',
-    brief: 'Puddles, glass, and still water double the world in interesting ways.',
+    title: t('Reflections'),
+    brief: t('Puddles, glass, and still water double the world in interesting ways.'),
     concepts: ['reflection', 'thirds'],
     challenges: [
-      'Find a puddle, window, or still water',
-      'Try a low angle to fill the frame with the reflection',
-      'Shoot one where the real subject is barely visible'
+      t('Find a puddle, window, or still water'),
+      t('Try a low angle to fill the frame with the reflection'),
+      t('Shoot one where the real subject is barely visible')
     ]
   },
   {
     id: 'urban-textures',
-    title: 'Urban Textures',
-    brief: 'Peeling paint, brick, tile. Get close and let pattern be the subject.',
+    title: t('Urban Textures'),
+    brief: t('Peeling paint, brick, tile. Get close and let pattern be the subject.'),
     concepts: ['texture-pattern', 'negative-space'],
     challenges: [
-      'Fill the frame with one repeating pattern',
-      'Photograph a texture up close, with no context',
-      'Look for a break or imperfection in a repetition'
+      t('Fill the frame with one repeating pattern'),
+      t('Photograph a texture up close, with no context'),
+      t('Look for a break or imperfection in a repetition')
     ]
   },
   {
     id: 'golden-hour',
-    title: 'Golden Hour Glow',
-    brief: 'Time your walk around sunrise or sunset for warm, directional light.',
+    title: t('Golden Hour Glow'),
+    brief: t('Time your walk around sunrise or sunset for warm, directional light.'),
     concepts: ['warm-light', 'silhouette'],
     challenges: [
-      'Shoot 30 minutes before sunset',
-      'Put the sun behind your subject and tap the sky to set exposure',
-      'Capture a long shadow stretching across the frame'
+      t('Shoot 30 minutes before sunset'),
+      t('Put the sun behind your subject and tap the sky to set exposure'),
+      t('Capture a long shadow stretching across the frame')
     ]
   },
   {
     id: 'framing-doorways',
-    title: 'Framing & Doorways',
-    brief: 'Use the environment itself to build a frame around your subject.',
+    title: t('Framing & Doorways'),
+    brief: t('Use the environment itself to build a frame around your subject.'),
     concepts: ['framing', 'layers-depth'],
     challenges: [
-      'Shoot through a doorway, window, or archway',
-      'Use foliage or an object to frame the edges',
-      'Add a second layer of depth behind the frame'
+      t('Shoot through a doorway, window, or archway'),
+      t('Use foliage or an object to frame the edges'),
+      t('Add a second layer of depth behind the frame')
     ]
   },
   {
     id: 'color-pop',
-    title: 'Color Pop',
-    brief: 'One bold color against a muted scene is an instant subject.',
+    title: t('Color Pop'),
+    brief: t('One bold color against a muted scene is an instant subject.'),
     concepts: ['color-pop'],
     challenges: [
-      'Find one bright color against a muted background',
-      'Shoot mostly grayscale, then find the one exception',
-      'Try it with a person wearing a bold color'
+      t('Find one bright color against a muted background'),
+      t('Shoot mostly grayscale, then find the one exception'),
+      t('Try it with a person wearing a bold color')
     ]
   },
   {
     id: 'street-candid',
-    title: 'Street Candid',
-    brief: 'Practice patience: wait for a moment to happen instead of chasing it.',
+    title: t('Street Candid'),
+    brief: t('Practice patience: wait for a moment to happen instead of chasing it.'),
     concepts: ['layers-depth', 'negative-space'],
     challenges: [
-      'Capture a stranger in motion, respectfully, in public',
-      'Wait in one spot for a moment to come to you',
-      'Look for overlapping layers: foreground, subject, background'
+      t('Capture a stranger in motion, respectfully, in public'),
+      t('Wait in one spot for a moment to come to you'),
+      t('Look for overlapping layers: foreground, subject, background')
     ]
   },
   {
     id: 'macro-details',
-    title: 'Macro Details',
-    brief: 'Get close to something people usually walk past.',
+    title: t('Macro Details'),
+    brief: t('Get close to something people usually walk past.'),
     concepts: ['shallow-dof', 'texture-pattern'],
     challenges: [
-      'Get as close as your lens allows',
-      'Isolate one small detail with a blurred background',
-      'Photograph something people usually overlook'
+      t('Get as close as your lens allows'),
+      t('Isolate one small detail with a blurred background'),
+      t('Photograph something people usually overlook')
     ]
   },
   {
     id: 'negative-space',
-    title: 'Negative Space',
-    brief: 'Give your subject room to breathe in a mostly-empty frame.',
+    title: t('Negative Space'),
+    brief: t('Give your subject room to breathe in a mostly-empty frame.'),
     concepts: ['negative-space', 'color-pop'],
     challenges: [
-      'Place your subject small in a large empty area',
-      'Use a plain sky, wall, or floor as the space',
-      'Leave more empty room than feels comfortable'
+      t('Place your subject small in a large empty area'),
+      t('Use a plain sky, wall, or floor as the space'),
+      t('Leave more empty room than feels comfortable')
     ]
   },
   {
     id: 'motion-rhythm',
-    title: 'Motion & Rhythm',
-    brief: 'Bikes, buses, birds: let the city move through your frame.',
+    title: t('Motion & Rhythm'),
+    brief: t('Bikes, buses, birds: let the city move through your frame.'),
     concepts: ['motion-blur', 'leading-lines'],
     challenges: [
-      'Capture something moving while the background stays sharp',
-      'Pan with a moving subject so the background streaks instead',
-      'Freeze a moment mid-motion: a step, a jump, a splash'
+      t('Capture something moving while the background stays sharp'),
+      t('Pan with a moving subject so the background streaks instead'),
+      t('Freeze a moment mid-motion: a step, a jump, a splash')
     ]
   },
   {
     id: 'look-up',
-    title: 'Look Up',
-    brief: 'Everything above eye level: rooftops, wires, trees, sky.',
+    title: t('Look Up'),
+    brief: t('Everything above eye level: rooftops, wires, trees, sky.'),
     concepts: ['low-angle', 'negative-space'],
     challenges: [
-      'Point the camera straight up and shoot what converges',
-      'Frame a rooftop, wire, or branch against plain sky',
-      'Shoot a tall subject from its base to exaggerate its height'
+      t('Point the camera straight up and shoot what converges'),
+      t('Frame a rooftop, wire, or branch against plain sky'),
+      t('Shoot a tall subject from its base to exaggerate its height')
     ]
   },
   {
     id: 'ground-level',
-    title: 'Ground Level',
-    brief: 'Drop the camera to your ankles and shoot the world from below.',
+    title: t('Ground Level'),
+    brief: t('Drop the camera to your ankles and shoot the world from below.'),
     concepts: ['low-angle', 'leading-lines'],
     challenges: [
-      'Shoot with the camera resting on the ground',
-      'Use the pavement itself as a giant foreground',
-      'Catch feet, wheels, or paws passing at their own eye level'
+      t('Shoot with the camera resting on the ground'),
+      t('Use the pavement itself as a giant foreground'),
+      t('Catch feet, wheels, or paws passing at their own eye level')
     ]
   },
   {
     id: 'sense-of-scale',
-    title: 'Sense of Scale',
-    brief: 'Pair something tiny with something huge and let the contrast speak.',
+    title: t('Sense of Scale'),
+    brief: t('Pair something tiny with something huge and let the contrast speak.'),
     concepts: ['scale-contrast', 'negative-space'],
     challenges: [
-      'Photograph a person dwarfed by a building or landscape',
-      'Include something familiar to make a big scene measurable',
-      'Reverse it: shoot something tiny so it looks monumental'
+      t('Photograph a person dwarfed by a building or landscape'),
+      t('Include something familiar to make a big scene measurable'),
+      t('Reverse it: shoot something tiny so it looks monumental')
     ]
   },
   {
     id: 'night-lights',
-    title: 'Night Lights',
-    brief: 'After dark the light sources become the subjects.',
+    title: t('Night Lights'),
+    brief: t('After dark the light sources become the subjects.'),
     concepts: ['night-glow', 'color-pop'],
     challenges: [
-      'Shoot a lit window, sign, or streetlamp against the dark',
-      'Brace your phone on something solid and hold still',
-      'Find two different colors of light in one frame'
+      t('Shoot a lit window, sign, or streetlamp against the dark'),
+      t('Brace your phone on something solid and hold still'),
+      t('Find two different colors of light in one frame')
     ]
   },
   {
     id: 'weather-mood',
-    title: 'Weather & Mood',
-    brief: 'Rain, fog, wind, and heavy clouds do the atmosphere for you.',
+    title: t('Weather & Mood'),
+    brief: t('Rain, fog, wind, and heavy clouds do the atmosphere for you.'),
     concepts: ['negative-space', 'layers-depth'],
     challenges: [
-      'Make the weather itself visible in the frame',
-      'Shoot how the light changes under clouds or through fog',
-      'Find someone or something reacting to the weather'
+      t('Make the weather itself visible in the frame'),
+      t('Shoot how the light changes under clouds or through fog'),
+      t('Find someone or something reacting to the weather')
     ]
   },
   {
     id: 'signs-letters',
-    title: 'Signs & Letters',
-    brief: 'Hunt for lettering: hand-painted, neon, worn, or accidental.',
+    title: t('Signs & Letters'),
+    brief: t('Hunt for lettering: hand-painted, neon, worn, or accidental.'),
     concepts: ['color-pop', 'texture-pattern'],
     challenges: [
-      'Photograph a sign so old it has become texture',
-      'Isolate a single letter or number as the subject',
-      'Find words that mean something new out of context'
+      t('Photograph a sign so old it has become texture'),
+      t('Isolate a single letter or number as the subject'),
+      t('Find words that mean something new out of context')
     ]
   },
   {
     id: 'nature-in-city',
-    title: 'Nature in the City',
-    brief: 'Find nature pushing back: weeds, roots, moss, and birds.',
+    title: t('Nature in the City'),
+    brief: t('Find nature pushing back: weeds, roots, moss, and birds.'),
     concepts: ['framing', 'shallow-dof'],
     challenges: [
-      'Photograph a plant growing where it should not',
-      'Frame something man-made through leaves or branches',
-      'Get close to one small living detail and blur the city behind it'
+      t('Photograph a plant growing where it should not'),
+      t('Frame something man-made through leaves or branches'),
+      t('Get close to one small living detail and blur the city behind it')
     ]
   },
   {
     id: 'curves-spirals',
-    title: 'Curves & Spirals',
-    brief: 'Skip the straight lines. Hunt for arcs, bends, and coils instead.',
+    title: t('Curves & Spirals'),
+    brief: t('Skip the straight lines. Hunt for arcs, bends, and coils instead.'),
     concepts: ['golden', 'leading-lines'],
     challenges: [
-      'Find a staircase, ramp, or road that curves through the frame',
-      'Let one arc carry the eye from a corner to your subject',
-      'Shoot a spiral: a shell, a hose, or a stairwell from above or below'
+      t('Find a staircase, ramp, or road that curves through the frame'),
+      t('Let one arc carry the eye from a corner to your subject'),
+      t('Shoot a spiral: a shell, a hose, or a stairwell from above or below')
     ]
   },
   {
     id: 'symmetry-hunt',
-    title: 'Symmetry Hunt',
-    brief: 'Find scenes that mirror themselves, then decide whether to break them.',
+    title: t('Symmetry Hunt'),
+    brief: t('Find scenes that mirror themselves, then decide whether to break them.'),
     concepts: ['reflection', 'framing'],
     challenges: [
-      'Center a perfectly symmetrical scene, dead-on',
-      'Use a reflection to complete the symmetry',
-      'Break it: add one off-center element to a symmetrical frame'
+      t('Center a perfectly symmetrical scene, dead-on'),
+      t('Use a reflection to complete the symmetry'),
+      t('Break it: add one off-center element to a symmetrical frame')
     ]
   },
   {
     id: 'minimal-geometry',
-    title: 'Minimal Geometry',
-    brief: 'Reduce the world to shapes: blocks of color, edges, and empty space.',
+    title: t('Minimal Geometry'),
+    brief: t('Reduce the world to shapes: blocks of color, edges, and empty space.'),
     concepts: ['negative-space', 'thirds'],
     challenges: [
-      'Shoot a frame with three or fewer shapes in it',
-      'Line up an edge in the scene with a rule-of-thirds line',
-      'Make a photo that reads as abstract until you look twice'
+      t('Shoot a frame with three or fewer shapes in it'),
+      t('Line up an edge in the scene with a rule-of-thirds line'),
+      t('Make a photo that reads as abstract until you look twice')
     ]
   },
   {
     id: 'wear-and-decay',
-    title: 'Wear & Decay',
-    brief: 'Rust, cracks, and fading paint. Photograph what time leaves behind.',
+    title: t('Wear & Decay'),
+    brief: t('Rust, cracks, and fading paint. Photograph what time leaves behind.'),
     concepts: ['texture-pattern', 'layers-depth'],
     challenges: [
-      'Find something old beside something new in one frame',
-      'Get close enough that rust or peeling paint becomes a landscape',
-      'Make a repair the subject: tape, a patch, or a weld'
+      t('Find something old beside something new in one frame'),
+      t('Get close enough that rust or peeling paint becomes a landscape'),
+      t('Make a repair the subject: tape, a patch, or a weld')
     ]
   },
   {
     id: 'transit-waiting',
-    title: 'Transit & Waiting',
-    brief: 'Stations, stops, and platforms: the in-between places people pass through.',
+    title: t('Transit & Waiting'),
+    brief: t('Stations, stops, and platforms: the in-between places people pass through.'),
     concepts: ['leading-lines', 'motion-blur'],
     challenges: [
-      'Use tracks, platform edges, or queue lines to lead the eye',
-      'Contrast someone waiting still with something rushing past',
-      'Shoot the moment of arrival or departure, not the ride'
+      t('Use tracks, platform edges, or queue lines to lead the eye'),
+      t('Contrast someone waiting still with something rushing past'),
+      t('Shoot the moment of arrival or departure, not the ride')
     ]
   },
   {
     id: 'hands-at-work',
-    title: 'Hands at Work',
-    brief: 'Vendors, makers, gardeners. Tell a story through hands, not faces.',
+    title: t('Hands at Work'),
+    brief: t('Vendors, makers, gardeners. Tell a story through hands, not faces.'),
     concepts: ['shallow-dof', 'motion-blur'],
     challenges: [
-      'Photograph hands mid-task, respectfully, in public',
-      'Isolate the hands with a blurred background',
-      'Include the tool or material, and let it explain the job'
+      t('Photograph hands mid-task, respectfully, in public'),
+      t('Isolate the hands with a blurred background'),
+      t('Include the tool or material, and let it explain the job')
     ]
   }
 ];
@@ -444,8 +445,8 @@ export const THEMES = [
 export function allChallenges() {
   const seen = new Set();
   const list = [];
-  for (const t of THEMES) {
-    for (const c of t.challenges) {
+  for (const th of THEMES) {
+    for (const c of th.challenges) {
       if (!seen.has(c)) { seen.add(c); list.push(c); }
     }
   }
@@ -495,38 +496,38 @@ const GOLDEN_HOUR_DISCOUNT = 2;
  */
 export function suggestTheme(excludeId, counts = {}, now = new Date()) {
   const bucket = timeOfDayBucket(now);
-  let pool = THEMES.filter((t) => t.id !== excludeId);
+  let pool = THEMES.filter((th) => th.id !== excludeId);
   if (bucket !== 'dark') {
-    const daylight = pool.filter((t) => !NIGHT_THEMES.includes(t.id));
+    const daylight = pool.filter((th) => !NIGHT_THEMES.includes(th.id));
     if (daylight.length) pool = daylight;
   }
 
   let candidates = pool;
   if (bucket === 'dark') {
-    const afterDark = pool.filter((t) => !LOW_SUN_THEMES.includes(t.id));
+    const afterDark = pool.filter((th) => !LOW_SUN_THEMES.includes(th.id));
     if (afterDark.length) candidates = afterDark;
   }
 
-  const effectiveCount = (t) => {
-    const base = counts[t.id] || 0;
-    return bucket === 'golden' && LOW_SUN_THEMES.includes(t.id)
+  const effectiveCount = (th) => {
+    const base = counts[th.id] || 0;
+    return bucket === 'golden' && LOW_SUN_THEMES.includes(th.id)
       ? Math.max(0, base - GOLDEN_HOUR_DISCOUNT)
       : base;
   };
 
   const fewest = Math.min(...candidates.map(effectiveCount));
-  const leastPracticed = candidates.filter((t) => effectiveCount(t) === fewest);
+  const leastPracticed = candidates.filter((th) => effectiveCount(th) === fewest);
   const theme = leastPracticed[Math.floor(Math.random() * leastPracticed.length)];
 
   let reason;
   if (bucket === 'golden' && LOW_SUN_THEMES.includes(theme.id)) {
-    reason = 'The sun is getting low, perfect timing for this one.';
+    reason = t('The sun is getting low, perfect timing for this one.');
   } else if (NIGHT_THEMES.includes(theme.id)) {
-    reason = "It's dark out, perfect timing for this one.";
+    reason = t("It's dark out, perfect timing for this one.");
   } else {
     reason = (counts[theme.id] || 0) === 0
-      ? "You haven't walked this theme yet."
-      : 'One of your least-practiced themes.';
+      ? t("You haven't walked this theme yet.")
+      : t('One of your least-practiced themes.');
   }
   return { theme, reason };
 }

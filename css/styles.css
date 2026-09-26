@@ -36,9 +36,12 @@
   --radius-md: 4px;
   --radius-sm: 2px;
 
-  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-body: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-data: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, var(--font-ja), sans-serif;
+  --font-body: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, var(--font-ja), sans-serif;
+  --font-data: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, var(--font-ja), monospace;
+  /* Japanese system fonts, so kana and kanji get a real UI face rather than
+     whatever the browser falls back to. */
+  --font-ja: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic UI', Meiryo;
 
   /* The heatmap's column pitch. The month labels and the day squares are two
      separate flex rows that have to stay in register across 53 columns, so
@@ -806,6 +809,7 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
   padding: 12px;
   margin-bottom: 12px;
 }
+#walkPartnersCard { margin-top: 16px; }
 .theme-card h3 { margin: 0 0 4px; font-family: var(--font-display); font-size: 18px; font-weight: 600; }
 .theme-card > .btn { margin-top: 10px; }
 

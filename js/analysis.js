@@ -19,6 +19,7 @@ import {
   clearDeconstruct, tonalKey, gamutClusters
 } from './deconstruct.js';
 import { exportBreakdownSheet } from './sheet.js';
+import { t } from './i18n.js';
 import { logFrame } from './walkscreen.js';
 import {
   escapeHtml, uid, clamp, loadImage, readFileAsDataUrl, rgbToHex, nearestColorName,
@@ -62,6 +63,12 @@ const SCOPES = [
 ];
 
 let els = {};
+
+/** A { label, caption } reading as "<strong>Label.</strong> Caption." */
+const readingHtml = (reading) => t('<strong>{label}.</strong> {caption}', {
+  label: escapeHtml(reading.label),
+  caption: escapeHtml(reading.caption)
+});
 let overlayType = 'thirds';
 let overlayFlip = false; // mirrors the triangle guide
 let overlayRotation = 0; // quarter-turns applied to the spiral guides
@@ -216,7 +223,7 @@ export function initAnalysis() {
   els.exportBreakdownBtn.addEventListener('click', exportBreakdown);
   els.shareToDebriefBtn.addEventListener('click', () => {
     navigateTo('share');
-    showToast('Upload this photo to share it with your room.');
+    showToast(t('Upload this photo to share it with your room.'));
   });
   els.anotherBtn.addEventListener('click', resetWorkspace);
 
@@ -246,8 +253,8 @@ async function handleFile(file) {
     // Safari is the only browser that decodes HEIC, and it's the default
     // format on iPhones — so say which problem this is.
     showToast(await isHeif(file)
-      ? "This browser can't open HEIC photos. Save the photo as a JPEG and try again."
-      : 'That file could not be opened as an image.');
+      ? t("This browser can't open HEIC photos. Save the photo as a JPEG and try again.")
+      : t('That file could not be opened as an image.'));
     els.shotStrip.classList.add('hidden');
     els.input.value = '';
     return;
@@ -372,14 +379,14 @@ export async function loadDefaultPhoto() {
 export async function analyzeStoredImage(imageId, opts = {}) {
   const url = await imageUrl(imageId);
   if (!url) {
-    showToast('This photo is missing from storage.');
+    showToast(t('This photo is missing from storage.'));
     return false;
   }
   let img;
   try {
     img = await loadImage(url);
   } catch (err) {
-    showToast('Could not open this photo.');
+    showToast(t('Could not open this photo.'));
     return false;
   }
   await analyzeImage(img, { countStat: false, ...opts });
@@ -652,9 +659,9 @@ function drawHistogram(canvas, bins, summary) {
   ctx.font = '600 9px system-ui, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.5)';
   ctx.textAlign = 'center';
-  ctx.fillText(narrow ? 'S' : 'Shadows', s0 / 2, 11);
-  ctx.fillText(narrow ? 'M' : 'Mids', (s0 + s1) / 2, 11);
-  ctx.fillText(narrow ? 'H' : 'Highlights', (s1 + w) / 2, 11);
+  ctx.fillText(narrow ? t('S') : t('Shadows'), s0 / 2, 11);
+  ctx.fillText(narrow ? t('M') : t('Mids'), (s0 + s1) / 2, 11);
+  ctx.fillText(narrow ? t('H') : t('Highlights'), (s1 + w) / 2, 11);
 
   let maxCount = 1;
   bins.forEach((bin) => { maxCount = Math.max(maxCount, bin.r, bin.g, bin.b, bin.lum); });
@@ -718,7 +725,7 @@ function drawScopes() {
     if (entry.cell.classList.contains('hidden')) continue;
     entry.draw(entry.canvas, currentScopes);
     const reading = entry.read(currentScopes.stats);
-    entry.caption.innerHTML = `<strong>${escapeHtml(reading.label)}.</strong> ${escapeHtml(reading.caption)}`;
+    entry.caption.innerHTML = readingHtml(reading);
   }
 }
 
@@ -737,13 +744,13 @@ function refreshToneCurve() {
   });
   els.curveResetBtn.classList.toggle('hidden', !adjusting);
   els.curveHint.textContent = adjusting
-    ? 'Tap to add a point · double-tap one to remove it'
-    : 'This is measured from your photo. Switch to Adjust to try changes.';
+    ? t('Tap to add a point · double-tap one to remove it')
+    : t('This is measured from your photo. Switch to Adjust to try changes.');
 
   if (!entry.cell.classList.contains('hidden') && els.scopesDetails.open) {
     drawToneCurve(entry.canvas);
     const reading = toneCurveSummary();
-    entry.caption.innerHTML = `<strong>${escapeHtml(reading.label)}.</strong> ${escapeHtml(reading.caption)}`;
+    entry.caption.innerHTML = readingHtml(reading);
   }
 
   applyToneCurveToPreview();
@@ -800,14 +807,14 @@ function computePalette(imageData, maxSwatches = 6) {
 function renderPalette(palette) {
   els.paletteRow.innerHTML = palette.map((c) => {
     const hex = rgbToHex(c.r, c.g, c.b);
-    return `<button type="button" class="swatch" style="background:${hex}" data-hex="${hex}" title="Copy ${hex}">
+    return `<button type="button" class="swatch" style="background:${hex}" data-hex="${hex}" title="${t('Copy {hex}', { hex })}">
       <span>${escapeHtml(hex)}</span>
     </button>`;
-  }).join('') || '<p class="muted">No colors extracted.</p>';
+  }).join('') || `<p class="muted">${t('No colors extracted.')}</p>`;
 
   if (palette.length) {
     const rel = paletteRelationship(palette);
-    els.paletteCaption.innerHTML = `<strong>${escapeHtml(rel.label)}.</strong> ${escapeHtml(rel.caption)}`;
+    els.paletteCaption.innerHTML = readingHtml(rel);
   } else {
     els.paletteCaption.textContent = '';
   }
@@ -816,7 +823,7 @@ function renderPalette(palette) {
     sw.addEventListener('click', () => {
       const hex = sw.dataset.hex;
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(hex).then(() => showToast(`Copied ${hex}`)).catch(() => showToast(hex));
+        navigator.clipboard.writeText(hex).then(() => showToast(t('Copied {hex}', { hex }))).catch(() => showToast(hex));
       } else {
         showToast(hex);
       }
@@ -852,12 +859,15 @@ function shotSlots(values) {
   return values
     .map((v) => (v
       ? `<span>${escapeHtml(v)}</span>`
-      : '<span class="shot-missing" title="Not recorded in this file">--</span>'))
+      : `<span class="shot-missing" title="${t('Not recorded in this file')}">--</span>`))
     .join('<i class="shot-sep" aria-hidden="true"></i>');
 }
 
-/** The readable EXIF fields as plain [label, value] pairs. */
-export function exifPairs(exif) {
+/**
+ * The readable EXIF fields as [English label, value] pairs. The English label
+ * doubles as the id `skip` matches on; it is only translated for display.
+ */
+function rawExifPairs(exif) {
   if (!exif) return [];
   const pairs = [
     ['Camera', [exif.make, exif.model].filter(Boolean).join(' ')],
@@ -871,6 +881,11 @@ export function exifPairs(exif) {
   return pairs;
 }
 
+/** The readable EXIF fields as plain [label, value] pairs, labels translated. */
+export function exifPairs(exif) {
+  return rawExifPairs(exif).map(([k, v]) => [t(k), v]);
+}
+
 /**
  * Shared by the analysis pane and the album detail sheet. `skip` omits labels
  * already shown elsewhere — the analysis pane puts these under the frame, but
@@ -878,14 +893,14 @@ export function exifPairs(exif) {
  */
 export function exifRows(exif, { skip = [] } = {}) {
   if (!exif) return [];
-  const rows = exifPairs(exif)
+  const rows = rawExifPairs(exif)
     .filter(([k]) => k !== 'Location' && !skip.includes(k))
-    .map(([k, v]) => `<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v)}</dd>`);
+    .map(([k, v]) => `<dt>${escapeHtml(t(k))}</dt><dd>${escapeHtml(v)}</dd>`);
 
   if (exif.lat != null && exif.lon != null) {
     const label = formatCoords(exif.lat, exif.lon);
     const href = `https://www.openstreetmap.org/?mlat=${exif.lat}&mlon=${exif.lon}#map=15/${exif.lat}/${exif.lon}`;
-    rows.push(`<dt>Location</dt><dd><a class="exif-link" href="${escapeHtml(href)}" `
+    rows.push(`<dt>${t('Location')}</dt><dd><a class="exif-link" href="${escapeHtml(href)}" `
       + `target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a></dd>`);
   }
   return rows;
@@ -898,7 +913,7 @@ function renderPinnedTip() {
   const lastWalk = state.lastWalk;
   const fresh = lastWalk && !lastWalk.tipDismissed && Date.now() - lastWalk.endedAt < 24 * 3600000;
   const theme = fresh
-    ? THEMES.find((t) => t.id === lastWalk.themeId) || state.customThemes.find((t) => t.id === lastWalk.themeId)
+    ? THEMES.find((th) => th.id === lastWalk.themeId) || state.customThemes.find((th) => th.id === lastWalk.themeId)
     : null;
   els.pinnedTip.classList.toggle('hidden', !theme);
   if (!theme) return;
@@ -910,9 +925,9 @@ function renderPinnedTip() {
     .join('');
 
   els.pinnedTip.innerHTML = `
-    <p class="pinned-tip-head">Today's walk theme: <strong>${escapeHtml(theme.title)}</strong> — check your shots against it.</p>
+    <p class="pinned-tip-head">${t("Today's walk theme: <strong>{theme}</strong>. Check your shots against it.", { theme: escapeHtml(theme.title) })}</p>
     ${tips}
-    <button type="button" id="dismissPinnedTipBtn" class="btn btn-ghost btn-sm">Dismiss</button>`;
+    <button type="button" id="dismissPinnedTipBtn" class="btn btn-ghost btn-sm">${t('Dismiss')}</button>`;
 
   document.getElementById('dismissPinnedTipBtn').addEventListener('click', () => {
     state.lastWalk.tipDismissed = true;
@@ -926,17 +941,17 @@ function renderPinnedTip() {
 function openComparePicker() {
   const candidates = state.album.filter((item) => item.id !== albumItemId && item.imageId);
   if (!candidates.length) {
-    showToast('Save a reference to your album first, then compare against it.');
+    showToast(t('Save a reference to your album first, then compare against it.'));
     return;
   }
 
   openModal(`
-    <h3>Compare with a reference</h3>
-    <p class="muted">Same guides on both, both histograms — study what their frame does that yours doesn't.</p>
+    <h3>${t('Compare with a reference')}</h3>
+    <p class="muted">${t("Same guides on both, both histograms. Study what their photo does that yours doesn't.")}</p>
     <div class="album-grid compare-pick-grid" id="comparePickGrid">
       ${candidates.map((item) => `
         <button type="button" class="album-thumb" data-id="${escapeHtml(item.id)}" data-image="${escapeHtml(item.imageId)}">
-          <span class="album-thumb-tag">${escapeHtml(item.aspectLabel || '')}</span>
+          <span class="album-thumb-tag">${escapeHtml(item.aspectLabel ? t(item.aspectLabel) : '')}</span>
         </button>`).join('')}
     </div>
   `);
@@ -955,14 +970,14 @@ function openComparePicker() {
 async function enterCompare(item) {
   const url = await imageUrl(item.imageId);
   if (!url) {
-    showToast('This reference is missing from storage.');
+    showToast(t('This reference is missing from storage.'));
     return;
   }
   let img;
   try {
     img = await loadImage(url);
   } catch (err) {
-    showToast('Could not open that reference.');
+    showToast(t('Could not open that reference.'));
     return;
   }
 
@@ -1014,7 +1029,7 @@ function exitCompare() {
 
 function updateSaveButtonLabel() {
   const slot = els.saveBtn.querySelector('[data-label]');
-  const label = albumItemId ? 'Update Reference' : 'Save to Reference Album';
+  const label = albumItemId ? t('Update Reference') : t('Save to Reference Album');
   if (slot) slot.textContent = label; else els.saveBtn.textContent = label;
 }
 
@@ -1070,7 +1085,7 @@ export function albumRecord({
 
 async function saveToAlbum() {
   if (!currentImageData || !currentImage) return;
-  const tags = els.tagsInput.value.split(',').map((t) => t.trim()).filter(Boolean);
+  const tags = els.tagsInput.value.split(',').map((tag) => tag.trim()).filter(Boolean);
 
   // Re-analyzing a saved reference updates it in place rather than duplicating.
   if (albumItemId) {
@@ -1079,7 +1094,7 @@ async function saveToAlbum() {
       item.tags = tags;
       item.overlay = overlaySnapshot();
       save();
-      showToast('Reference updated.');
+      showToast(t('Reference updated.'));
       window.dispatchEvent(new CustomEvent('photowalk:stats-changed'));
       return;
     }
@@ -1108,11 +1123,11 @@ async function saveToAlbum() {
     logFrame();
     window.dispatchEvent(new CustomEvent('photowalk:stats-changed'));
     els.tagsInput.value = '';
-    showToast('Saved to your Reference Album.');
+    showToast(t('Saved to your Reference Album.'));
     warnIfStorageTight();
   } catch (err) {
     console.warn('PhotoWalk: could not save reference.', err);
-    showToast("Couldn't save this reference. Your device may be out of storage.");
+    showToast(t("Couldn't save this reference. Your device may be out of storage."));
   } finally {
     els.saveBtn.disabled = false;
   }
@@ -1144,7 +1159,7 @@ function resetWorkspace() {
  * it is already visible here — the sheet just makes it portable.
  */
 async function exportBreakdown() {
-  if (!currentHist || !currentImage) { showToast('Load a photo first.'); return; }
+  if (!currentHist || !currentImage) { showToast(t('Load a photo first.')); return; }
   const summary = histogramSummary(currentHist.bins);
   const rel = currentPalette.length ? paletteRelationship(currentPalette) : null;
 
@@ -1156,7 +1171,7 @@ async function exportBreakdown() {
       histogramCanvas: els.histogramCanvas,
       clusters: gamutClusters(currentPalette),
       harmony: rel ? rel.label : '',
-      tonalTitle: `Tonal key: ${tonalKey(summary).title}`,
+      tonalTitle: t('Tonal key: {title}', { title: tonalKey(summary).title }),
       tonalText: summary.caption,
       takeaway: takeawayText(currentPalette, summary, currentExif),
       exifRows: exifPairs(currentExif)

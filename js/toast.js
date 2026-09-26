@@ -1,3 +1,5 @@
+import { t } from './i18n.js';
+
 let container = null;
 
 export function initToast(el) {
@@ -25,7 +27,7 @@ export function showToast(message, duration = 4000) {
   const close = document.createElement('button');
   close.type = 'button';
   close.className = 'toast-close';
-  close.setAttribute('aria-label', 'Dismiss');
+  close.setAttribute('aria-label', t('Dismiss'));
   close.textContent = '×';
   close.addEventListener('click', () => dismiss(el));
 
