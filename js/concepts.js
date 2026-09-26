@@ -18,7 +18,7 @@ export const CONCEPTS = {
   },
   'golden': {
     title: 'Golden Ratio',
-    tip: 'A gentler alternative to thirds — the spiral pulls the eye toward the subject naturally.',
+    tip: 'A softer take on the rule of thirds. The spiral leads the eye naturally toward the subject.',
     svg: `<svg viewBox="0 0 200 140"><rect width="200" height="140" class="bg"/>
       <line x1="76.4" y1="0" x2="76.4" y2="140" class="grid"/>
       <line x1="123.6" y1="0" x2="123.6" y2="140" class="grid"/>
@@ -36,7 +36,7 @@ export const CONCEPTS = {
   },
   'reflection': {
     title: 'Reflections & Symmetry',
-    tip: 'Still water, glass, and mirrors let you double a subject and flatten the frame.',
+    tip: 'Still water, glass, and mirrors let you double a subject for a neat, balanced look.',
     svg: `<svg viewBox="0 0 200 140"><rect width="200" height="140" class="bg"/>
       <line x1="0" y1="70" x2="200" y2="70" class="grid"/>
       <path d="M100,20 L130,65 H70 Z" class="shape"/>
@@ -51,7 +51,7 @@ export const CONCEPTS = {
   },
   'silhouette': {
     title: 'Silhouette',
-    tip: 'Expose for a bright background so your subject turns into a graphic, detail-free shape.',
+    tip: 'Tap the bright background to set exposure, so your subject turns into a dark, solid shape.',
     svg: `<svg viewBox="0 0 200 140"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0" class="sky-top"/><stop offset="1" class="sky-bottom"/></linearGradient></defs>
       <rect width="200" height="140" fill="url(#sky)"/>
@@ -77,7 +77,7 @@ export const CONCEPTS = {
   },
   'warm-light': {
     title: 'Golden Hour Light',
-    tip: 'Shoot low sun for warm color and long, dramatic shadows.',
+    tip: 'Shoot when the sun is low for warm color and long, dramatic shadows.',
     svg: `<svg viewBox="0 0 200 140"><defs><linearGradient id="warm" x1="0" y1="0" x2="1" y2="1">
         <stop offset="0" class="warm-a"/><stop offset="1" class="warm-b"/></linearGradient></defs>
       <rect width="200" height="140" fill="url(#warm)"/>
@@ -103,7 +103,7 @@ export const CONCEPTS = {
   },
   'shallow-dof': {
     title: 'Shallow Depth of Field',
-    tip: 'A wide aperture blurs the background so one sharp subject stands out.',
+    tip: "A wide aperture (a small f-number like f/1.8) or your phone's Portrait mode blurs the background so one sharp subject stands out.",
     svg: `<svg viewBox="0 0 200 140"><defs><filter id="blur"><feGaussianBlur stdDeviation="4"/></filter></defs>
       <rect width="200" height="140" class="bg"/>
       <g filter="url(#blur)" class="muted">
@@ -114,7 +114,7 @@ export const CONCEPTS = {
   },
   'motion-blur': {
     title: 'Motion & Blur',
-    tip: 'Let moving subjects streak while something still stays sharp — or pan with the motion.',
+    tip: 'Let moving things blur while something still stays sharp, or move the camera along with the motion.',
     svg: `<svg viewBox="0 0 200 140"><defs><filter id="mblur" x="-40%" width="180%"><feGaussianBlur stdDeviation="6 0.3"/></filter></defs>
       <rect width="200" height="140" class="bg"/>
       <g filter="url(#mblur)" class="muted">
@@ -124,7 +124,7 @@ export const CONCEPTS = {
   },
   'low-angle': {
     title: 'Change Your Angle',
-    tip: 'Shoot from your knees or point straight up — unfamiliar angles make familiar places new.',
+    tip: 'Shoot from your knees or point straight up. Unusual angles make familiar places look new.',
     svg: `<svg viewBox="0 0 200 140"><rect width="200" height="140" class="bg"/>
       <path d="M0,140 L78,22 L90,22 L44,140 Z" class="layer layer-2"/>
       <path d="M200,140 L122,22 L110,22 L156,140 Z" class="layer layer-2"/>
@@ -140,7 +140,7 @@ export const CONCEPTS = {
   },
   'night-glow': {
     title: 'Night Glow',
-    tip: 'After dark, point lights become the subject — brace your phone and expose for the glow.',
+    tip: "After dark, lights become the subject. Hold your phone steady and tap on the lights so they don't blow out.",
     svg: `<svg viewBox="0 0 200 140"><defs><filter id="nglow"><feGaussianBlur stdDeviation="2.5"/></filter></defs>
       <rect width="200" height="140" class="bg-dark"/>
       <g filter="url(#nglow)">
@@ -210,7 +210,7 @@ export const THEMES = [
   {
     id: 'urban-textures',
     title: 'Urban Textures',
-    brief: 'Peeling paint, brick, tile — get close and let pattern be the subject.',
+    brief: 'Peeling paint, brick, tile. Get close and let pattern be the subject.',
     concepts: ['texture-pattern', 'negative-space'],
     challenges: [
       'Fill the frame with one repeating pattern',
@@ -225,7 +225,7 @@ export const THEMES = [
     concepts: ['warm-light', 'silhouette'],
     challenges: [
       'Shoot 30 minutes before sunset',
-      'Backlight a subject and expose for the sky',
+      'Put the sun behind your subject and tap the sky to set exposure',
       'Capture a long shadow stretching across the frame'
     ]
   },
@@ -254,7 +254,7 @@ export const THEMES = [
   {
     id: 'street-candid',
     title: 'Street Candid',
-    brief: 'Practice patience — wait for a moment instead of chasing it.',
+    brief: 'Practice patience: wait for a moment to happen instead of chasing it.',
     concepts: ['layers-depth', 'negative-space'],
     challenges: [
       'Capture a stranger in motion, respectfully, in public',
@@ -287,7 +287,7 @@ export const THEMES = [
   {
     id: 'motion-rhythm',
     title: 'Motion & Rhythm',
-    brief: 'Bikes, buses, birds — let the city move through your frame.',
+    brief: 'Bikes, buses, birds: let the city move through your frame.',
     concepts: ['motion-blur', 'leading-lines'],
     challenges: [
       'Capture something moving while the background stays sharp',
@@ -298,7 +298,7 @@ export const THEMES = [
   {
     id: 'look-up',
     title: 'Look Up',
-    brief: 'Everything above eye level — rooftops, wires, canopies, sky.',
+    brief: 'Everything above eye level: rooftops, wires, trees, sky.',
     concepts: ['low-angle', 'negative-space'],
     challenges: [
       'Point the camera straight up and shoot what converges',
@@ -353,7 +353,7 @@ export const THEMES = [
   {
     id: 'signs-letters',
     title: 'Signs & Letters',
-    brief: 'Hunt typography — hand-painted, neon, worn, or accidental.',
+    brief: 'Hunt for lettering: hand-painted, neon, worn, or accidental.',
     concepts: ['color-pop', 'texture-pattern'],
     challenges: [
       'Photograph a sign so old it has become texture',
@@ -364,7 +364,7 @@ export const THEMES = [
   {
     id: 'nature-in-city',
     title: 'Nature in the City',
-    brief: 'Find the green pushing back — weeds, roots, moss, and birds.',
+    brief: 'Find nature pushing back: weeds, roots, moss, and birds.',
     concepts: ['framing', 'shallow-dof'],
     challenges: [
       'Photograph a plant growing where it should not',
@@ -375,18 +375,18 @@ export const THEMES = [
   {
     id: 'curves-spirals',
     title: 'Curves & Spirals',
-    brief: 'Skip the straight lines — hunt arcs, bends, and coils instead.',
+    brief: 'Skip the straight lines. Hunt for arcs, bends, and coils instead.',
     concepts: ['golden', 'leading-lines'],
     challenges: [
       'Find a staircase, ramp, or road that curves through the frame',
       'Let one arc carry the eye from a corner to your subject',
-      'Shoot a spiral — a shell, a hose, a stairwell from above or below'
+      'Shoot a spiral: a shell, a hose, or a stairwell from above or below'
     ]
   },
   {
     id: 'symmetry-hunt',
     title: 'Symmetry Hunt',
-    brief: 'Find scenes that mirror themselves — then decide whether to break them.',
+    brief: 'Find scenes that mirror themselves, then decide whether to break them.',
     concepts: ['reflection', 'framing'],
     challenges: [
       'Center a perfectly symmetrical scene, dead-on',
@@ -408,18 +408,18 @@ export const THEMES = [
   {
     id: 'wear-and-decay',
     title: 'Wear & Decay',
-    brief: 'Rust, cracks, and fading paint — photograph what time is doing.',
+    brief: 'Rust, cracks, and fading paint. Photograph what time leaves behind.',
     concepts: ['texture-pattern', 'layers-depth'],
     challenges: [
       'Find something old beside something new in one frame',
       'Get close enough that rust or peeling paint becomes a landscape',
-      'Shoot a repair — tape, patch, or weld — as the subject'
+      'Make a repair the subject: tape, a patch, or a weld'
     ]
   },
   {
     id: 'transit-waiting',
     title: 'Transit & Waiting',
-    brief: 'Stations, stops, and platforms — the in-between places people pass through.',
+    brief: 'Stations, stops, and platforms: the in-between places people pass through.',
     concepts: ['leading-lines', 'motion-blur'],
     challenges: [
       'Use tracks, platform edges, or queue lines to lead the eye',
@@ -430,7 +430,7 @@ export const THEMES = [
   {
     id: 'hands-at-work',
     title: 'Hands at Work',
-    brief: 'Vendors, makers, gardeners — tell a story through hands, not faces.',
+    brief: 'Vendors, makers, gardeners. Tell a story through hands, not faces.',
     concepts: ['shallow-dof', 'motion-blur'],
     challenges: [
       'Photograph hands mid-task, respectfully, in public',
@@ -520,9 +520,9 @@ export function suggestTheme(excludeId, counts = {}, now = new Date()) {
 
   let reason;
   if (bucket === 'golden' && LOW_SUN_THEMES.includes(theme.id)) {
-    reason = 'The sun is getting low — this is the window for it.';
+    reason = 'The sun is getting low, perfect timing for this one.';
   } else if (NIGHT_THEMES.includes(theme.id)) {
-    reason = "It's dark out — the right window for this one.";
+    reason = "It's dark out, perfect timing for this one.";
   } else {
     reason = (counts[theme.id] || 0) === 0
       ? "You haven't walked this theme yet."

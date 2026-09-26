@@ -118,8 +118,8 @@ function renderSharedNotice() {
   // The notice sits outside the room card so it's still visible (and explains
   // what to do next) when the share sheet hands us photos before there's a room.
   els.sharedNotice.textContent = state.currentRoom
-    ? `${count} ready from your share sheet — press Upload to post them.`
-    : `${count} ready from your share sheet — create or join a room from the Field HUD tab to post them.`;
+    ? `${count} ready to share. Press Upload to post them.`
+    : `${count} ready to share. Create or join a room from the Field HUD tab to post them.`;
 }
 
 /** Called on boot when the OS share sheet handed PhotoWalk some images. */
@@ -143,7 +143,7 @@ function createRoom() {
   state.currentRoom = code;
   broadcast('room-created', { code });
   renderShare();
-  showToast(`Room ${code} created — share the code or QR with your walk partners.`);
+  showToast(`Room ${code} created. Share the code or QR code with your walk partners.`);
 }
 
 function openJoinRoomModal() {
@@ -169,8 +169,8 @@ export function joinRoom(rawCode, { quiet = false } = {}) {
     return false;
   }
   if (!state.rooms[code]) {
-    const message = 'Room not found on this device. This demo simulates sharing across tabs of the '
-      + 'same browser — connect a backend for real multi-device rooms.';
+    const message = 'Room not found. In this demo, rooms only work between tabs '
+      + 'in the same browser, not across devices.';
     if (quiet) showToast(message, 6000);
     else if (errorEl) errorEl.textContent = message;
     return false;
@@ -258,7 +258,7 @@ async function uploadPhotos() {
     warnIfStorageTight();
   } catch (err) {
     console.warn('PhotoWalk: upload failed.', err);
-    showToast('Could not share that photo — your device may be out of storage.');
+    showToast("Couldn't share that photo. Your device may be out of storage.");
   } finally {
     els.uploadBtn.disabled = false;
   }

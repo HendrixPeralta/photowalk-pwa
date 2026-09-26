@@ -91,9 +91,9 @@ export function renderDebrief() {
   if (!els.duration || !room) return;
 
   const photos = room.photos || [];
-  els.archive.textContent = `Debrief Vault · Archive #${room.code}`;
+  els.archive.textContent = `Group Review · Room ${room.code}`;
   els.exposures.textContent = photos.length
-    ? `${photos.length} shutter trip${photos.length === 1 ? '' : 's'}`
+    ? `${photos.length} photo${photos.length === 1 ? '' : 's'}`
     : 'none yet';
 
   if (photos.length >= 2) {
@@ -133,7 +133,7 @@ function renderPrompt(room) {
   els.promptTitle.textContent = themed;
   const walk = state.lastWalk;
   els.promptText.textContent = walk && walk.challengeCount
-    ? `${walk.challengesDone} of ${walk.challengeCount} mini-challenges cleared on the walk this debrief follows.`
+    ? `${walk.challengesDone} of ${walk.challengeCount} mini-challenges done on this walk.`
     : 'Compare what each of you did with the same brief.';
 }
 
@@ -171,8 +171,8 @@ function pickPair(photos) {
 
 function exposureOf(photo) {
   const e = photo.exif;
-  if (!e) return 'no EXIF';
-  return [e.focalLength, e.aperture && e.aperture.replace('f/', 'ƒ/')].filter(Boolean).join(' · ') || 'no EXIF';
+  if (!e) return 'no camera data';
+  return [e.focalLength, e.aperture && e.aperture.replace('f/', 'ƒ/')].filter(Boolean).join(' · ') || 'no camera data';
 }
 
 function detailOf(photo) {
@@ -293,7 +293,7 @@ function renderMomentum(room) {
   yesterday.setDate(yesterday.getDate() - 1);
   const alive = lastWalkDate === new Date().toDateString() || lastWalkDate === yesterday.toDateString();
   const live = alive ? streak : 0;
-  els.momentum.textContent = `${live}-Day Cadence Streak`;
+  els.momentum.textContent = `${live}-day streak`;
 
   const notes = (room.critique || []).length;
   els.momentumBadge.innerHTML = notes ? `+${notes}<br>NOTES` : '+0<br>NOTES';

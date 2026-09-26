@@ -84,10 +84,10 @@ export function renderHud() {
   const theme = hooks.themeOf ? hooks.themeOf() : null;
   const guided = w.mode === 'guided';
 
-  els.missionNo.textContent = `Mission #${String(state.profile.walksCompleted + 1).padStart(2, '0')} · Directive`;
-  els.missionMode.textContent = guided ? `${w.durationMin}m Sprint` : 'Casual';
+  els.missionNo.textContent = `Walk #${state.profile.walksCompleted + 1} · Your Theme`;
+  els.missionMode.textContent = guided ? `${w.durationMin} min` : 'Casual';
   els.missionTitle.textContent = theme ? theme.title : 'Walk in progress';
-  els.missionHint.textContent = theme ? theme.brief : 'Pick a subject and work it until it gives.';
+  els.missionHint.textContent = theme ? theme.brief : 'Pick a subject and keep shooting it from new angles.';
 
   renderChallenges(theme);
   renderCaptureStrip();
@@ -142,12 +142,12 @@ function tickHud() {
   els.pips.classList.toggle('hidden', !total);
   els.pips.innerHTML = Array.from({ length: total }, (_, i) =>
     `<span class="mission-pip${i < done ? ' done' : ''}"></span>`).join('');
-  els.synced.textContent = `${frames.length} capture${frames.length === 1 ? '' : 's'}`;
-  els.logLabel.textContent = `Log Frame #${frames.length + 1}`;
+  els.synced.textContent = `${frames.length} photo${frames.length === 1 ? '' : 's'}`;
+  els.logLabel.textContent = `Log Photo #${frames.length + 1}`;
   const last = frames[frames.length - 1];
   els.logLast.textContent = last
     ? `Last: #${frames.length} at ${new Date(last.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-    : 'No frames yet';
+    : 'No photos yet';
 }
 
 function renderChallenges(theme) {
@@ -174,7 +174,7 @@ function renderCaptureStrip() {
       <img data-frame-img="${f.imageId}" alt="">
       <span class="capture-chip-meta">
         <strong>#${f.index} ${escapeHtml(f.label || '')}</strong>
-        <span>${escapeHtml(f.exposure || 'no EXIF')}</span>
+        <span>${escapeHtml(f.exposure || 'no camera data')}</span>
       </span>
     </button>`).join('');
 
@@ -251,12 +251,12 @@ async function onFramePicked(e) {
 
   if (logged === files.length) {
     showToast(logged > 1
-      ? `${logged} frames logged.`
-      : `Frame #${lastFrame.index} logged${lastFrame.exposure ? ' · ' + lastFrame.exposure : ''}.`);
+      ? `${logged} photos logged.`
+      : `Photo #${lastFrame.index} logged${lastFrame.exposure ? ' · ' + lastFrame.exposure : ''}.`);
   } else if (logged > 0) {
-    showToast(`${logged} of ${files.length} frames logged — the rest couldn't be read.`);
+    showToast(`${logged} of ${files.length} photos logged. The rest couldn't be read.`);
   } else {
-    showToast('Could not read those photos — try again.');
+    showToast("Couldn't read those photos. Please try again.");
   }
 }
 
@@ -335,7 +335,7 @@ async function openInMaps() {
   // ask here even though the app never asks on load.
   let fix = cachedFix();
   if (!fixIsFresh(fix)) {
-    showToast('Getting a location fix…');
+    showToast('Finding your location…');
     try {
       fix = await requestFix({ highAccuracy: true });
     } catch (err) {

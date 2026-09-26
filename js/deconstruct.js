@@ -10,7 +10,7 @@
  */
 
 import { rgbToHex, escapeHtml } from './util.js';
-import { paletteRelationship, SHADOW_END, HIGHLIGHT_START } from './interpret.js';
+import { paletteRelationship } from './interpret.js';
 import { showToast } from './toast.js';
 
 let els = {};
@@ -23,7 +23,6 @@ export function initDeconstruct() {
     tonalTitle: document.getElementById('tonalKeyTitle'),
     tonalTag: document.getElementById('tonalKeyTag'),
     tonalText: document.getElementById('tonalKeyText'),
-    gamutCount: document.getElementById('gamutCount'),
     gamutBar: document.getElementById('gamutBar'),
     gamutSpecs: document.getElementById('gamutSpecs'),
     harmonyRow: document.getElementById('harmonyRow'),
@@ -44,18 +43,15 @@ export function initDeconstruct() {
 
 /* ---------- Tonal key ---------- */
 
-// Level ranges the histogram bins actually cover, so the copy can quote them.
-const SHADOW_TOP = Math.round((SHADOW_END / 64) * 255);
-const HIGHLIGHT_FLOOR = Math.round((HIGHLIGHT_START / 64) * 255);
 
 /** Names the tonal key from the histogram's shadow/mid/highlight split. */
 export function tonalKey(summary) {
   const { shadows, highs } = summary;
-  if (shadows > 0.5) return { title: 'Low-key / Chiaroscuro', tag: 'Decisive' };
-  if (highs > 0.5) return { title: 'High-key / Airy', tag: 'Open' };
-  if (shadows > 0.28 && highs > 0.28) return { title: 'High contrast / Graphic', tag: 'Hard' };
-  if (shadows < 0.08 && highs < 0.08) return { title: 'Flat, low contrast', tag: 'Soft' };
-  return { title: 'Balanced key', tag: 'Neutral' };
+  if (shadows > 0.5) return { title: 'Low-key (mostly dark)', tag: 'Moody' };
+  if (highs > 0.5) return { title: 'High-key (mostly bright)', tag: 'Airy' };
+  if (shadows > 0.28 && highs > 0.28) return { title: 'High contrast', tag: 'Punchy' };
+  if (shadows < 0.08 && highs < 0.08) return { title: 'Low contrast', tag: 'Soft' };
+  return { title: 'Balanced', tag: 'Even' };
 }
 
 /** Share of the frame sitting in the very first and very last histogram bin. */
@@ -73,10 +69,10 @@ export function renderTonalKey(bins, summary) {
   els.tonalTag.textContent = key.tag;
 
   const dominant = summary.shadows >= summary.highs
-    ? `${Math.round(summary.shadows * 100)}% of the frame sits in the shadows (levels 0–${SHADOW_TOP})`
-    : `${Math.round(summary.highs * 100)}% of the frame sits in the highlights (levels ${HIGHLIGHT_FLOOR}–255)`;
+    ? `${Math.round(summary.shadows * 100)}% of the photo is in the darker tones`
+    : `${Math.round(summary.highs * 100)}% of the photo is in the brighter tones`;
 
-  const clipLine = `Clipped shadow ${(clip.black * 100).toFixed(1)}% · clipped highlight ${(clip.white * 100).toFixed(1)}%.`;
+  const clipLine = `Pure black: ${(clip.black * 100).toFixed(1)}% · pure white: ${(clip.white * 100).toFixed(1)}%.`;
   els.tonalText.textContent = `${dominant}. ${clipLine} ${summary.caption}`;
   els.tonalNote.classList.remove('hidden');
 }
@@ -116,9 +112,8 @@ export function renderGamut(palette) {
   if (!els.gamutBar) return;
   const clusters = gamutClusters(palette);
 
-  els.gamutCount.textContent = `${clusters.length} cluster${clusters.length === 1 ? '' : 's'}`;
   els.gamutBar.innerHTML = clusters
-    .map((c) => `<span style="background:${c.hex};width:${(c.share * 100).toFixed(2)}%" title="${c.hex} — ${Math.round(c.share * 100)}%"></span>`)
+    .map((c) => `<span style="background:${c.hex};width:${(c.share * 100).toFixed(2)}%" title="${c.hex}: ${Math.round(c.share * 100)}%"></span>`)
     .join('');
 
   els.gamutSpecs.innerHTML = clusters.map((c) => `
@@ -152,29 +147,29 @@ export function takeawayText(palette, summary, exif) {
 
   if (exif && exif.aperture && exif.shutter) {
     const at = [exif.shutter, exif.aperture.replace('f/', 'ƒ/'), exif.iso].filter(Boolean).join(' · ');
-    parts.push(`Shot at ${at}, the frame lands as ${key.title.toLowerCase()}.`);
+    parts.push(`Shot at ${at}, the photo comes out ${key.title.toLowerCase()}.`);
   } else {
-    parts.push(`The frame reads as ${key.title.toLowerCase()}.`);
+    parts.push(`The photo comes out ${key.title.toLowerCase()}.`);
   }
 
   if (summary.shadows > 0.5) {
-    parts.push('Ambient detail is crushed into the blacks, so whatever is still lit carries the whole composition.');
+    parts.push('Most of the scene falls into darkness, so whatever is lit becomes the focus.');
   } else if (summary.highs > 0.5) {
-    parts.push('Tones sit high and open, which flattens texture but keeps the subject legible against a bright ground.');
+    parts.push('Tones are bright and airy. That softens texture but keeps the subject easy to see against a light background.');
   } else if (summary.shadows > 0.28 && summary.highs > 0.28) {
-    parts.push('Darks and brights both hold weight with little between them — the frame is carried by edges, not gradients.');
+    parts.push('Strong darks and brights with little in between make shapes and edges stand out.');
   }
 
-  if (summary.clippedWhite) parts.push('Highlights are clipped: those areas will not recover in post.');
-  if (summary.clippedBlack) parts.push('Shadows are crushed: there is no detail left to lift.');
+  if (summary.clippedWhite) parts.push("Some bright areas are pure white, and editing can't bring that detail back.");
+  if (summary.clippedBlack) parts.push('Some dark areas are pure black, with no detail left to brighten.');
 
-  if (rel) parts.push(`Colour reads as ${rel.label.toLowerCase()} — ${rel.caption.charAt(0).toLowerCase()}${rel.caption.slice(1)}`);
+  if (rel) parts.push(`Color: ${rel.label.toLowerCase()}. ${rel.caption}`);
 
   if (exif && exif.focalMm) {
     const wide = exif.focalMm < 35;
     parts.push(wide
-      ? `At ${exif.focalLength} you were close enough for the foreground to do the work.`
-      : `At ${exif.focalLength} the background compresses, which is what stacks the layers together.`);
+      ? `At ${exif.focalLength} (wide), you were close enough for the foreground to play a big part.`
+      : `At ${exif.focalLength} (zoomed in), the background looks pulled closer, stacking the layers together.`);
   }
 
   return parts.join(' ');
@@ -184,7 +179,7 @@ export function takeawayText(palette, summary, exif) {
 
 export function setFrameLabel(index) {
   if (!els.frameNo) return;
-  els.frameNo.textContent = index === null ? 'NO FRAME' : `FRAME #${String(index).padStart(3, '0')}`;
+  els.frameNo.textContent = index === null ? 'No photo' : `Photo #${index}`;
 }
 
 export function clearDeconstruct() {
@@ -194,6 +189,5 @@ export function clearDeconstruct() {
   els.harmonyRow.hidden = true;
   els.gamutBar.innerHTML = '';
   els.gamutSpecs.innerHTML = '';
-  els.gamutCount.textContent = '0 clusters';
   setFrameLabel(null);
 }

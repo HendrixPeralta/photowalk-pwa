@@ -97,7 +97,7 @@ function addThemeGoal() {
   if (!themeId) { showToast('Pick a theme to set a goal for.'); return; }
   if (!Number.isFinite(hours) || hours <= 0) { showToast('Set how many hours the goal targets.'); return; }
   if (state.profile.themeGoals.some((g) => g.themeId === themeId && g.period === period)) {
-    showToast('That theme already has a goal for this period — remove it first to replace it.');
+    showToast('That theme already has a goal for this period. Remove it first to set a new one.');
     return;
   }
 
@@ -129,7 +129,7 @@ function renderWeeklyGoal() {
   `).join('');
   els.goalBar.style.width = pct + '%';
   els.goalText.textContent = done >= goal
-    ? `Goal met — ${formatHours(done)} this ${PERIOD_LABEL[period]}`
+    ? `Goal met: ${formatHours(done)} this ${PERIOD_LABEL[period]}`
     : `${formatHours(done)} of ${formatHours(goal)} this ${PERIOD_LABEL[period]}`;
 }
 

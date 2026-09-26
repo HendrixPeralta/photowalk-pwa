@@ -115,19 +115,19 @@ function setMode(next) {
 
 const MODE_INFO = {
   casual: {
-    title: 'Casual Walk Mode',
-    desc: 'Broad, relaxed inspiration. Just a theme to shoot, finished whenever you’re done.'
+    title: 'Casual Walk',
+    desc: 'A relaxed walk with a theme to shoot. No timer, so finish whenever you like.'
   },
   guided: {
-    title: 'Guided Sprint Mode',
-    desc: 'The same themes, plus mini-challenges, a countdown and mid-walk nudges.'
+    title: 'Guided Walk',
+    desc: 'The same themes, plus mini-challenges, a timer, and tips along the way.'
   }
 };
 
 function openModeInfoModal() {
   openModal(`
-    <h3>Field Objective Setting</h3>
-    <p class="muted card-text">Choose how a walk plays out: a relaxed theme to shoot, or the same theme sharpened into a timed sprint.</p>
+    <h3>Walk Modes</h3>
+    <p class="muted card-text">Pick how you want to walk: relaxed with no timer, or timed with challenges to keep you going.</p>
     <h4 class="subsection-title">${MODE_INFO.casual.title}</h4>
     <p class="card-text">${MODE_INFO.casual.desc}</p>
     <h4 class="subsection-title">${MODE_INFO.guided.title}</h4>
@@ -389,8 +389,8 @@ function openWalkBrief() {
   const w = state.activeWalk;
   const preShooting = Boolean(w && !w.startedAt);
   const modeLine = w && w.mode === 'guided'
-    ? `Guided walk &middot; ${w.durationMin} min on the clock`
-    : 'Casual walk &middot; no timer, stop it whenever you are done';
+    ? `Guided walk &middot; ${w.durationMin}-minute timer`
+    : "Casual walk &middot; no timer, stop whenever you're done";
 
   const briefChallenges = challengesFor();
   const challenges = briefChallenges.length
@@ -504,15 +504,15 @@ function openThemePickerModal() {
 }
 
 function nudgeMessage(id) {
-  if (id === 'half') return 'Halfway there — try: ' + pickUncheckedChallenge();
-  if (id === 'wrap') return 'Almost time to wrap up — one more frame before you go.';
-  return "Time's up — nice work! Head to Share to post your shots.";
+  if (id === 'half') return 'Halfway there! Try: ' + pickUncheckedChallenge();
+  if (id === 'wrap') return 'Almost time to wrap up. Grab one more shot before you go.';
+  return "Time's up, nice work! Now share your best shots with your walk partners.";
 }
 
 /** Trigger-scheduled copies are written before the walk starts, so they can't
  *  know which challenges are still open. */
 function staticNudgeMessage(id, t) {
-  if (id === 'half') return 'Halfway there — try: ' + (t.challenges[0] || 'a new angle on your theme');
+  if (id === 'half') return 'Halfway there! Try: ' + (t.challenges[0] || 'a new angle on your theme');
   return nudgeMessage(id);
 }
 
@@ -730,7 +730,7 @@ export function pauseWalk() {
   timerHandle = null;
   cancelScheduledNudges();
   save();
-  showToast('Walk paused — the clock is stopped.');
+  showToast('Walk paused. The timer is stopped.');
   window.dispatchEvent(new CustomEvent('photowalk:walk-changed'));
 }
 
@@ -744,7 +744,7 @@ export function resumeWalk() {
   save();
   if (w.mode === 'guided') scheduleTriggeredNudges();
   runTimer();
-  showToast('Back on the clock.');
+  showToast('Walk resumed.');
   window.dispatchEvent(new CustomEvent('photowalk:walk-changed'));
 }
 
@@ -831,7 +831,7 @@ function confirmCompleteWalk(onConfirm) {
 
   openModal(`
     <h3>Complete this walk?</h3>
-    <p class="muted">This ends the walk and logs your time — there's no undo from here.</p>
+    <p class="muted">This ends the walk and saves your time. You can't undo this.</p>
     <div class="theme-actions">
       <button type="button" id="confirmCompleteBtn" class="btn btn-danger btn-block">Complete Walk</button>
       <button type="button" id="cancelCompleteBtn" class="btn btn-ghost btn-block">Keep Shooting</button>
@@ -870,7 +870,7 @@ function confirmLoggedHours(measured, onConfirm) {
     </div>
   `, {
     onClose: () => {
-      if (!settled) showToast('Still on your walk — finish it whenever you are ready.');
+      if (!settled) showToast("Still on your walk. Finish whenever you're ready.");
     }
   });
 
@@ -936,7 +936,7 @@ function openWalkSummary(t, record, hours, walkFrames, auto, unlockedRewards, mi
   const unlockedHtml = unlockedRewards.map((r) => `
     <li class="summary-win summary-win-reward">
       <strong>Reward earned: ${escapeHtml(r.title)}</strong>
-      <span class="muted">You put in the ${formatHours(r.targetHours)} — claim it on the Home tab.</span>
+      <span class="muted">You put in the ${formatHours(r.targetHours)}. Claim it on the Walks tab.</span>
     </li>`).join('');
 
   const milestoneHtml = milestones.map((m) => `
@@ -964,7 +964,7 @@ function openWalkSummary(t, record, hours, walkFrames, auto, unlockedRewards, mi
     : '';
 
   openModal(`
-    <h3>${auto ? "Time's up — nice work!" : 'Walk complete!'}</h3>
+    <h3>${auto ? "Time's up, nice work!" : 'Walk complete!'}</h3>
     <div class="summary-stats-row">
       <div class="summary-stat">
         <span class="summary-stat-value">${formatHours(totalHours)}</span>
@@ -985,7 +985,7 @@ function openWalkSummary(t, record, hours, walkFrames, auto, unlockedRewards, mi
     ${winsHtml}
     ${towardHtml}
 
-    <p class="muted card-text" style="margin-top:14px">Study your shots while the walk is fresh — pick your best three and check them against the theme.</p>
+    <p class="muted card-text" style="margin-top:14px">Look over your shots while the walk is fresh. Pick your best three and see how well they fit the theme.</p>
     <div class="theme-btn-row" style="margin-top:10px">
       <button type="button" id="walkAnalyzeBtn" class="btn btn-accent">Analyze your best shots</button>
       <button type="button" id="walkShareBtn" class="btn btn-primary btn-icon-only" aria-label="Share your shots">

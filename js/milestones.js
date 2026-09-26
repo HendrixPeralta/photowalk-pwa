@@ -29,7 +29,7 @@ function earnedMilestones(walk) {
       earned.push({
         id: `walks-${mark}`,
         title: `${mark} walk${mark === 1 ? '' : 's'} completed`,
-        detail: 'The habit is the point — the photos are the receipt.'
+        detail: 'The habit is the point. The photos are the proof.'
       });
     }
   }

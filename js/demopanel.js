@@ -56,7 +56,7 @@ async function fillThreeMonths() {
     showToast('Three months of practice loaded.');
   } catch (err) {
     console.warn('PhotoWalk: could not load the three-month history.', err);
-    showToast('Could not load the demo history — see the console.');
+    showToast("Couldn't load the demo history. Please try again.");
   }
 }
 
@@ -65,10 +65,10 @@ async function fillYear() {
     const demo = await import('./demo.js');
     demo.installDemoHooks();
     demo.seedDemoData();
-    showToast('A full year of practice loaded — it stays until you restore.');
+    showToast('A full year of practice loaded. It stays until you tap Restore mine.');
   } catch (err) {
     console.warn('PhotoWalk: could not load the year of demo data.', err);
-    showToast('Could not load the demo history — see the console.');
+    showToast("Couldn't load the demo history. Please try again.");
   }
 }
 
@@ -87,10 +87,10 @@ async function restoreProfile() {
     }
     const backstory = await import('./backstory.js');
     if (!backstory.undoStarterHistory()) {
-      showToast('Nothing parked to restore — this profile is already your own.');
+      showToast('Nothing to restore. This is already your own history.');
     }
   } catch (err) {
     console.warn('PhotoWalk: could not restore the profile.', err);
-    showToast('Could not restore the profile — see the console.');
+    showToast("Couldn't restore your history. Please try again.");
   }
 }

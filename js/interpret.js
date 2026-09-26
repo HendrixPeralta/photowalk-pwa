@@ -26,15 +26,15 @@ export function histogramSummary(bins) {
   const clippedWhite = bins[63].lum / total > CLIP_SHARE;
 
   let base;
-  if (shadows > 0.5) base = 'Low-key image — most tones sit in the shadows.';
-  else if (highs > 0.5) base = 'High-key image — most tones sit in the highlights.';
-  else if (shadows > 0.28 && highs > 0.28) base = 'High contrast — strong darks and brights with few midtones.';
-  else if (shadows < 0.08 && highs < 0.08) base = 'Flat, low-contrast light — tones cluster in the midtones.';
-  else base = 'Balanced exposure across the tonal range.';
+  if (shadows > 0.5) base = 'Low-key: most of the photo is dark.';
+  else if (highs > 0.5) base = 'High-key: most of the photo is bright.';
+  else if (shadows > 0.28 && highs > 0.28) base = 'High contrast: strong darks and brights, with little in between.';
+  else if (shadows < 0.08 && highs < 0.08) base = 'Low contrast: most tones sit in the middle, so the photo looks soft and flat.';
+  else base = 'Balanced: a good spread from dark to bright.';
 
   const parts = [base];
-  if (clippedWhite) parts.push('Highlights are clipped: pure-white areas have lost detail.');
-  if (clippedBlack) parts.push('Shadows are crushed: pure-black areas have lost detail.');
+  if (clippedWhite) parts.push('Some bright areas are pure white, so their detail is lost.');
+  if (clippedBlack) parts.push('Some dark areas are pure black, so their detail is lost.');
 
   return { shadows, mids, highs, clippedBlack, clippedWhite, caption: parts.join(' ') };
 }
@@ -70,7 +70,7 @@ export function paletteRelationship(palette) {
   if (chromatic.length === 0) {
     return {
       label: 'Monochrome',
-      caption: 'No strong color — the image reads in neutrals, so light and shape have to carry it.'
+      caption: 'No strong colors. The photo is mostly grays and neutrals, so light and shape do the work.'
     };
   }
 
@@ -79,7 +79,7 @@ export function paletteRelationship(palette) {
   if (chromatic.length === 1) {
     return {
       label: 'Monochrome',
-      caption: `Essentially one color (${name(chromatic[0])}) against neutrals — a quiet, unified palette.`
+      caption: `Mostly one color (${name(chromatic[0])}) plus neutrals. Calm and unified.`
     };
   }
 
@@ -93,7 +93,7 @@ export function paletteRelationship(palette) {
     const names = [...new Set(chromatic.map(name))];
     return {
       label: 'Analogous',
-      caption: `Neighboring hues (${names.join(', ')}) — an analogous palette that feels harmonious and calm.`
+      caption: `Colors that sit next to each other on the color wheel (${names.join(', ')}). This is called analogous, and it feels calm and harmonious.`
     };
   }
 
@@ -110,14 +110,14 @@ export function paletteRelationship(palette) {
     if (gap >= 150) {
       return {
         label: 'Complementary',
-        caption: `${name(seedA)} against ${name(seedB)} — opposites on the color wheel, a classic complementary pair with built-in tension.`
+        caption: `${capitalize(name(seedA))} and ${name(seedB)} sit opposite each other on the color wheel. This is called complementary, and it makes both colors pop.`
       };
     }
   }
 
   return {
     label: 'Mixed',
-    caption: 'Several unrelated hues share the frame — no single color relationship dominates.'
+    caption: 'Several unrelated colors share the photo, with no clear color scheme.'
   };
 }
 
@@ -165,27 +165,27 @@ export function waveformSummary(stats) {
   let base;
   if (range >= 85) {
     label = 'Full range';
-    base = `The trace spans roughly ${low}% to ${high}% — this frame uses the whole scale.`;
+    base = `Brightness runs from about ${low}% to ${high}%, so the photo uses the full range from dark to bright.`;
   } else if (range >= 60) {
     label = 'Healthy range';
-    base = `The trace spans roughly ${low}% to ${high}% — a solid tonal spread with a little headroom left at one end.`;
+    base = `Brightness runs from about ${low}% to ${high}%: a good spread, with a little room left at one end.`;
   } else {
-    label = 'Compressed range';
-    base = `The trace only spans ${low}% to ${high}% — a narrow band, so the image reads soft and flat.`;
+    label = 'Narrow range';
+    base = `Brightness only runs from ${low}% to ${high}%, so the photo looks soft and flat.`;
   }
 
   const parts = [base];
   if (luma.clipWhite > 0.01) {
-    parts.push(`${shareText(luma.clipWhite)} of the frame is pinned to the top rail: those highlights are pure white with no detail left to recover.`);
+    parts.push(`${shareText(luma.clipWhite)} of the photo hits the very top of the chart. Those areas are pure white, and their detail can't be recovered.`);
   } else if (high < 80) {
-    parts.push('Nothing reaches the top rail, so there is room to lift the highlights.');
+    parts.push("Nothing hits the top of the chart, so there's room to brighten the highlights if you like.");
   }
   if (luma.clipBlack > 0.01) {
-    parts.push(`${shareText(luma.clipBlack)} sits on the bottom rail — crushed blacks.`);
+    parts.push(`${shareText(luma.clipBlack)} sits at the very bottom: pure black with no detail.`);
   } else if (low > 12) {
-    parts.push('The trace never touches the floor, so the blacks are lifted — that reads as haze, or as a deliberate matte finish.');
+    parts.push('Nothing reaches the bottom, so the darkest parts are dark gray, not black. That can look hazy, or like a deliberate faded style.');
   }
-  parts.push('Read left to right: a bump under a part of the trace is that part of the frame, so you can see which side of the picture is carrying the light.');
+  parts.push('Read it left to right, like the photo itself: a high spot on the chart means that part of the photo is bright.');
   return { label, caption: parts.join(' ') };
 }
 
@@ -204,28 +204,28 @@ export function paradeSummary(stats) {
   if (!shadowCast && !highCast) {
     return {
       label: 'Neutral',
-      caption: `All three panels start and finish within ${Math.round(Math.max(shadows.spread, highs.spread))} levels of each other — the image is already color balanced, with no cast to correct.`
+      caption: `The red, green and blue panels start and finish within ${Math.round(Math.max(shadows.spread, highs.spread))} levels of each other, so the colors are balanced with no tint to fix.`
     };
   }
 
   const parts = [];
   if (shadowCast) {
-    parts.push(`The ${shadows.cast} panel sits ${Math.round(shadows.spread)} levels off the others at the floor, so the shadows carry a ${shadows.cast} cast.`);
+    parts.push(`The ${shadows.cast} panel sits ${Math.round(shadows.spread)} levels away from the others at the bottom, so the shadows have a ${shadows.cast} tint.`);
   }
   if (highCast) {
-    parts.push(`At the ceiling the spread is ${Math.round(highs.spread)} levels toward ${highs.cast}, tinting the highlights.`);
+    parts.push(`At the top, it leans ${Math.round(highs.spread)} levels toward ${highs.cast}, tinting the bright areas.`);
   }
 
   let label;
   if (shadowCast && highCast && COMPLEMENTS[shadows.cast] === highs.cast) {
-    label = 'Split-toned';
-    parts.push(`${capitalize(shadows.cast)} shadows against ${highs.cast} highlights is a split tone — usually a look worth keeping rather than a fault worth fixing.`);
+    label = 'Split tone';
+    parts.push(`${capitalize(shadows.cast)} shadows against ${highs.cast} highlights is called split toning. It's usually a style choice, not a mistake.`);
   } else if (Math.max(shadows.spread, highs.spread) >= CAST_STRONG) {
-    label = 'Strong cast';
-    parts.push('To neutralize it, raise or lower that channel until all three panels share a floor and a ceiling.');
+    label = 'Strong tint';
+    parts.push('To fix it, adjust white balance (or temperature and tint) in your editing app until the three panels line up.');
   } else {
-    label = 'Slight cast';
-    parts.push('Mild enough to read as warmth or coolness rather than an error.');
+    label = 'Slight tint';
+    parts.push('Mild enough to look like a warm or cool mood rather than a mistake.');
   }
   return { label, caption: parts.join(' ') };
 }
@@ -236,36 +236,36 @@ export function vectorscopeSummary(stats) {
   const chroma = v.meanChroma;
   // A pure primary lands at a chroma of roughly 128, so that is 100% out.
   const outPct = Math.round((chroma / 128) * 100);
-  const reach = `The average pixel sits about ${outPct < 1 ? '<1' : outPct}% of the way out to a fully saturated primary.`;
+  const reach = `On average, colors are about ${outPct < 1 ? '<1' : outPct}% of the way to fully vivid.`;
 
   let label;
   let base;
   if (chroma < 5) {
-    label = 'Near-neutral';
-    base = `${reach} The trace barely leaves the center — there is almost no color here, so the frame has to work on light and shape alone.`;
+    label = 'Almost no color';
+    base = `${reach} The dots barely leave the center, so there's almost no color. Light and shape have to do the work.`;
   } else if (chroma < 12) {
     label = 'Muted';
-    base = `${reach} A tight cluster near the center: restrained, desaturated color.`;
+    base = `${reach} The dots stay close to the center: soft, muted color.`;
   } else if (chroma < 22) {
     label = 'Natural';
-    base = `${reach} That is the range that reads as real rather than processed.`;
+    base = `${reach} That's a natural-looking amount of color.`;
   } else if (chroma < 35) {
     label = 'Saturated';
-    base = `${reach} Strong color — the trace has clear reach in one or two directions.`;
+    base = `${reach} Strong color: the dots reach well out in one or two directions.`;
   } else {
     label = 'Very saturated';
-    base = `${reach} The trace runs a long way toward the graticule targets, which is about as saturated as color gets before it stops looking photographic.`;
+    base = `${reach} The dots reach close to the outer edge. Any stronger and the colors would start to look unnatural.`;
   }
 
   const parts = [base];
   if (v.hueRgb) {
     const hue = nearestColorName(v.hueRgb.r, v.hueRgb.g, v.hueRgb.b).toLowerCase();
-    parts.push(`Its center of mass points toward ${hue}, so that is the hue the frame leans on.`);
+    parts.push(`Most of the color leans toward ${hue}.`);
   }
   if (v.skinShare > 0.4 && v.chromaticShare > 0.15) {
-    parts.push(`About ${shareText(v.skinShare)} of the colored pixels fall along the skin-tone line — if this frame has a face in it, the skin is landing where it should.`);
+    parts.push(`About ${shareText(v.skinShare)} of the colored pixels sit on the skin-tone line. If there's a person in the photo, their skin color looks natural.`);
   } else {
-    parts.push('The dashed line is the skin-tone axis: skin of every complexion sits close to that angle, because complexion changes brightness, which a vectorscope deliberately discards.');
+    parts.push('The dashed line is the skin-tone line. Skin of every shade falls near it, because this chart ignores brightness, and skin tones differ mostly in brightness, not hue.');
   }
   return { label, caption: parts.join(' ') };
 }
@@ -282,11 +282,11 @@ export function chromaticitySummary(stats) {
   const drift = Math.sqrt(dx * dx + dy * dy);
 
   let label;
-  if (coverage >= 30) label = 'Wide gamut';
-  else if (coverage >= 12) label = 'Moderate gamut';
-  else label = 'Narrow gamut';
+  if (coverage >= 30) label = 'Wide color range';
+  else if (coverage >= 12) label = 'Medium color range';
+  else label = 'Narrow color range';
 
-  const parts = [`The cloud covers about ${coverage}% of the sRGB triangle${coverage < 12 ? ' — a tight, unified palette' : coverage >= 30 ? ' — this frame ranges across most of the hues the display can show' : ''}.`];
+  const parts = [`The colors cover about ${coverage}% of the triangle${coverage < 12 ? ', a tight, unified palette' : coverage >= 30 ? ', so the photo uses most of the colors a screen can show' : ''}.`];
 
   if (drift < 0.06) {
     // McCamy's approximation. Only meaningful near the daylight locus, which
@@ -294,10 +294,10 @@ export function chromaticitySummary(stats) {
     const n = (c.x - 0.3320) / (0.1858 - c.y);
     const cct = Math.round((449 * n * n * n + 3525 * n * n + 6823.3 * n + 5520.33) / 50) * 50;
     const feel = cct < 5200 ? 'warmer than daylight' : cct > 7200 ? 'cooler than daylight' : 'close to daylight';
-    parts.push(`Its average chromaticity works out to roughly ${cct} K — ${feel} (D65, the white cross, is 6500 K).`);
+    parts.push(`Overall the light is about ${cct} K, ${feel} (the white cross marks normal daylight, 6500 K).`);
   } else {
-    parts.push('Its average sits well away from the D65 white cross, so the frame is dominated by one color rather than balanced around neutral.');
+    parts.push('Its average sits far from the white cross (daylight), so one color dominates the photo.');
   }
-  parts.push('The horseshoe is every color a person can see; the triangle is the much smaller set a screen can actually show.');
+  parts.push('The horseshoe shape is every color people can see. The triangle is the smaller set a screen can show.');
   return { label, caption: parts.join(' ') };
 }

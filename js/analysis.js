@@ -216,7 +216,7 @@ export function initAnalysis() {
   els.exportBreakdownBtn.addEventListener('click', exportBreakdown);
   els.shareToDebriefBtn.addEventListener('click', () => {
     navigateTo('share');
-    showToast('Upload this shot to the room to put it in the debrief.');
+    showToast('Upload this photo to share it with your room.');
   });
   els.anotherBtn.addEventListener('click', resetWorkspace);
 
@@ -246,7 +246,7 @@ async function handleFile(file) {
     // Safari is the only browser that decodes HEIC, and it's the default
     // format on iPhones — so say which problem this is.
     showToast(await isHeif(file)
-      ? "This browser can't open HEIC photos — export the shot as JPEG and try again."
+      ? "This browser can't open HEIC photos. Save the photo as a JPEG and try again."
       : 'That file could not be opened as an image.');
     els.shotStrip.classList.add('hidden');
     els.input.value = '';
@@ -739,7 +739,7 @@ function refreshToneCurve() {
   els.curveResetBtn.classList.toggle('hidden', !adjusting);
   els.curveHint.textContent = adjusting
     ? 'Tap to add a point · double-tap one to remove it'
-    : 'Measured from the frame — switch to Adjust to try a change.';
+    : 'This is measured from your photo. Switch to Adjust to try changes.';
 
   if (!entry.cell.classList.contains('hidden') && els.scopesDetails.open) {
     drawToneCurve(entry.canvas);
@@ -1015,7 +1015,7 @@ function exitCompare() {
 
 function updateSaveButtonLabel() {
   const slot = els.saveBtn.querySelector('[data-label]');
-  const label = albumItemId ? 'Update Reference' : 'Save to Smart Reference Library';
+  const label = albumItemId ? 'Update Reference' : 'Save to Reference Album';
   if (slot) slot.textContent = label; else els.saveBtn.textContent = label;
 }
 
@@ -1113,7 +1113,7 @@ async function saveToAlbum() {
     warnIfStorageTight();
   } catch (err) {
     console.warn('PhotoWalk: could not save reference.', err);
-    showToast('Could not save this reference — your device may be out of storage.');
+    showToast("Couldn't save this reference. Your device may be out of storage.");
   } finally {
     els.saveBtn.disabled = false;
   }

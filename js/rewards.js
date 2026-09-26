@@ -54,7 +54,7 @@ function addReward(titleInput, hoursInput) {
 
   titleInput.value = '';
   hoursInput.value = '';
-  showToast('Reward set — hours you shoot from now on count toward it.');
+  showToast('Reward set! Hours you shoot from now on count toward it.');
   return true;
 }
 
@@ -64,7 +64,7 @@ function claimReward(id) {
   if (earnedHours(reward) < reward.targetHours) return;
   reward.claimedAt = Date.now();
   save();
-  showToast(`Enjoy it — you earned "${reward.title}" with ${formatHours(reward.targetHours)} of shooting.`, 6000);
+  showToast(`Enjoy it! You earned "${reward.title}" with ${formatHours(reward.targetHours)} of shooting.`, 6000);
 }
 
 function removeReward(id) {
@@ -166,7 +166,7 @@ export function rewardTimeline() {
       id: last.id,
       pct: pctOf(targetTotalHours(last)),
       ready: !last.claimedAt,
-      note: last.claimedAt ? `Claimed ${formatDate(last.claimedAt)}` : 'Earned — ready to claim'
+      note: last.claimedAt ? `Claimed ${formatDate(last.claimedAt)}` : 'Earned: ready to claim'
     });
   }
   upcoming.forEach((r, i) => {
@@ -230,7 +230,7 @@ function renderRewardBar() {
       <span class="reward-bar-now">${formatHours(now)} shot</span>
       <span class="muted">${next
         ? `${escapeHtml(next.title)} in ${next.note.replace(' of shooting to go', '')}`
-        : 'Every reward earned — set another one'}</span>
+        : 'Every reward earned. Set a new one!'}</span>
     </div>
     <div class="reward-bar-track">
       <div class="reward-bar-fill" style="width:${fillPct}%"></div>
@@ -261,7 +261,7 @@ function rewardsListHtml() {
         </div>
         <div class="timer-track reward-track"><div class="timer-fill reward-fill" style="width:${pct}%"></div></div>
         <div class="reward-row reward-foot">
-          <span class="muted">${done ? 'Earned — claim it from the Reward progress card above.' : formatHours(r.targetHours - earned) + ' of shooting to go'}</span>
+          <span class="muted">${done ? 'Earned! Claim it from the Reward progress card above.' : formatHours(r.targetHours - earned) + ' of shooting to go'}</span>
           <span class="reward-actions">
             <button type="button" class="btn btn-ghost btn-sm" data-action="remove" data-id="${r.id}">Remove</button>
           </span>

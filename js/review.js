@@ -50,7 +50,7 @@ const STRINGS = {
     toggleLabel: 'EN',
     feedback: 'Feedback',
     title: 'Leave a review',
-    subtitle: "Tried PhotoEYE? A few taps tells us more than you'd think.",
+    subtitle: "Tried PhotoEYE? A few taps tell us more than you'd think.",
     ratingAria: 'Rating out of five',
     levelLabel: 'Your photography level',
     levels: { beginner: 'Beginner', hobbyist: 'Hobbyist', pro: 'Pro' },
@@ -70,11 +70,11 @@ const STRINGS = {
     problemPlaceholder: 'What is it?',
     namePlaceholder: 'Name (optional)',
     send: 'Send review',
-    privacy: "Held on this device and sent when you are online. Only what's above is sent — never your photos or your practice history.",
+    privacy: "Held on this device and sent when you are online. Only what's above is sent, never your photos or your practice history.",
     blank: 'Add a rating or an answer first.',
     pendingOne: '1 review is waiting to send.',
     pendingMany: (n) => `${n} reviews are waiting to send.`,
-    thanks: 'Thanks — your review has been recorded.'
+    thanks: 'Thanks! Your review has been saved.'
   },
   ja: {
     toggleLabel: 'JA',

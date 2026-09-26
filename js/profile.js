@@ -25,7 +25,7 @@ export function initProfile() {
   });
 
   document.getElementById('drawerUserBtn').addEventListener('click', () => {
-    showToast('Google sign-in is coming soon — PhotoEYE works fully without an account.', 4000);
+    showToast('Google sign-in is coming soon. PhotoEYE works fully without an account.', 4000);
   });
 }
 

@@ -70,13 +70,13 @@ function toggleDay(day) {
 
 function requestPermissionThenSchedule() {
   if (!('Notification' in window)) {
-    showToast('This browser has no notifications — PhotoEYE will remind you in-app instead.', 5000);
+    showToast("This browser can't show notifications, so PhotoEYE will remind you inside the app instead.", 5000);
     return;
   }
   if (Notification.permission === 'granted') { refreshSchedule(); return; }
   Notification.requestPermission().then((perm) => {
     if (perm === 'granted') refreshSchedule();
-    else showToast('Reminders stayed off at the system level — PhotoEYE will still nudge you in-app.', 5000);
+    else showToast('Notifications are blocked on this device, but PhotoEYE will still remind you inside the app.', 5000);
     renderReminders();
   });
 }
@@ -112,9 +112,9 @@ function reminderBody() {
   if (pending) {
     const earned = Math.max(0, totalActivityHours() - pending.baselineHours);
     const left = Math.round((pending.targetHours - earned) * 10) / 10;
-    if (left > 0) return `Time for a walk — ${left}h of shooting left to earn "${pending.title}".`;
+    if (left > 0) return `Time for a walk! ${left}h of shooting left to earn "${pending.title}".`;
   }
-  return 'Time for a walk — grab a theme and go shoot for a bit.';
+  return 'Time for a walk! Grab a theme and go shoot for a bit.';
 }
 
 async function refreshSchedule() {
@@ -169,7 +169,7 @@ export function maybeNudgeOnOpen() {
   due.setHours(hh || 0, mm || 0, 0, 0);
   if (Date.now() < due.getTime()) return;
 
-  showToast("You planned a walk today — there's still time to get out.", 7000);
+  showToast("You planned a walk today. There's still time to get out!", 7000);
 }
 
 /* ---------- Render ---------- */
@@ -197,9 +197,9 @@ function statusText() {
 
   const names = state.reminder.days.map((d) => DAY_NAMES[d].slice(0, 3)).join(', ');
   if (!('Notification' in window) || Notification.permission !== 'granted') {
-    return `${escapeHtml(names)} — PhotoEYE will remind you in-app when you next open it.`;
+    return `${escapeHtml(names)}. PhotoEYE will remind you the next time you open the app.`;
   }
   return triggersSupported()
-    ? `${escapeHtml(names)} — you'll get a notification even with PhotoEYE closed.`
-    : `${escapeHtml(names)} — this browser only delivers reminders while PhotoEYE is open.`;
+    ? `${escapeHtml(names)}. You'll get a notification even when PhotoEYE is closed.`
+    : `${escapeHtml(names)}. This browser only shows reminders while PhotoEYE is open.`;
 }

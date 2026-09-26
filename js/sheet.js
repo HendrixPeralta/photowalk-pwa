@@ -109,11 +109,11 @@ export async function exportBreakdownSheet(spec) {
   ctx.textBaseline = 'alphabetic';
   ctx.font = display(20, 700);
   ctx.fillStyle = AMBER;
-  ctx.fillText('P H O T O W A L K', PAD, y);
+  ctx.fillText('P H O T O E Y E', PAD, y);
   ctx.font = display(40, 600);
   ctx.fillStyle = INK;
   y += 48;
-  ctx.fillText('Frame breakdown', PAD, y);
+  ctx.fillText('Photo breakdown', PAD, y);
   ctx.font = mono(18, 400);
   ctx.fillStyle = DIM;
   ctx.textAlign = 'right';
@@ -134,7 +134,7 @@ export async function exportBreakdownSheet(spec) {
   const colW = (inner - 40) / 2;
   const colTop = y;
 
-  y = capsLabel(ctx, 'Luminance spectrum', PAD, y);
+  y = capsLabel(ctx, 'Brightness chart', PAD, y);
   if (spec.histogramCanvas) {
     const hh = 150;
     ctx.fillStyle = PANEL;
@@ -156,7 +156,7 @@ export async function exportBreakdownSheet(spec) {
 
   // Right column.
   const rx = PAD + colW + 40;
-  let ry = capsLabel(ctx, 'Optical payload', rx, colTop);
+  let ry = capsLabel(ctx, 'Camera settings', rx, colTop);
   ctx.font = mono(19, 500);
   for (const [label, value] of spec.exifRows || []) {
     ctx.fillStyle = DIM;
@@ -168,11 +168,11 @@ export async function exportBreakdownSheet(spec) {
   if (!spec.exifRows || !spec.exifRows.length) {
     ctx.fillStyle = DIM;
     ctx.font = body(19);
-    ry = wrapText(ctx, 'No EXIF metadata in this file.', rx, ry, colW, 27);
+    ry = wrapText(ctx, 'No camera settings saved in this file.', rx, ry, colW, 27);
   }
 
   ry += 20;
-  ry = capsLabel(ctx, 'Colour gamut', rx, ry);
+  ry = capsLabel(ctx, 'Main colors', rx, ry);
   if (spec.harmony) {
     ctx.font = display(22, 600);
     ctx.fillStyle = AMBER;
@@ -208,7 +208,7 @@ export async function exportBreakdownSheet(spec) {
   if (spec.takeaway) {
     hairline(ctx, y, inner);
     y += 34;
-    y = capsLabel(ctx, 'Analysis takeaway', PAD, y);
+    y = capsLabel(ctx, 'Takeaway', PAD, y);
     ctx.font = body(21);
     ctx.fillStyle = INK;
     y = wrapText(ctx, spec.takeaway, PAD, y, inner, 30);
@@ -237,7 +237,7 @@ export async function exportStudySheet(spec) {
   let y = PAD + 34;
   ctx.font = display(20, 700);
   ctx.fillStyle = AMBER;
-  ctx.fillText('P H O T O W A L K   ·   D E B R I E F', PAD, y);
+  ctx.fillText('P H O T O E Y E   ·   G R O U P   R E V I E W', PAD, y);
   y += 50;
   ctx.font = display(40, 600);
   ctx.fillStyle = INK;
@@ -280,7 +280,7 @@ export async function exportStudySheet(spec) {
 
     ctx.font = mono(18, 500);
     ctx.fillStyle = INK;
-    ctx.fillText(pane.exposure || 'no EXIF', px + 14, y + paneH + 30);
+    ctx.fillText(pane.exposure || 'no camera data', px + 14, y + paneH + 30);
     ctx.fillStyle = DIM;
     ctx.fillText(pane.detail || '', px + 14, y + paneH + 56);
   });
@@ -288,7 +288,7 @@ export async function exportStudySheet(spec) {
   y += paneH + 90;
   hairline(ctx, y, inner);
   y += 34;
-  y = capsLabel(ctx, 'Technical critique', PAD, y);
+  y = capsLabel(ctx, 'Feedback notes', PAD, y);
 
   for (const note of spec.notes || []) {
     ctx.font = mono(17, 600);
@@ -302,7 +302,7 @@ export async function exportStudySheet(spec) {
   if (!spec.notes || !spec.notes.length) {
     ctx.font = body(20);
     ctx.fillStyle = DIM;
-    y = wrapText(ctx, 'No critique notes on this debrief yet.', PAD, y, inner, 28);
+    y = wrapText(ctx, 'No feedback notes yet.', PAD, y, inner, 28);
   }
 
   await finish(canvas, y, 'photowalk-study-sheet');

@@ -2170,21 +2170,10 @@ input[type="file"].text-input { padding: 8px; }
 .gamut-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
   margin: 18px 0 8px;
 }
 .gamut-head .subsection-title { margin: 0; }
-.gamut-count {
-  padding: 3px 7px;
-  background: var(--surface-3);
-  border: 1px solid var(--cyan-deep);
-  border-radius: var(--radius-sm);
-  color: var(--cyan);
-  font-family: var(--font-data);
-  font-size: 10px;
-  white-space: nowrap;
-}
 
 .harmony-row {
   display: flex;

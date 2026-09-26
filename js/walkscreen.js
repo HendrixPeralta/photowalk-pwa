@@ -37,7 +37,7 @@ export function initWalkScreen() {
   els.golden.addEventListener('click', async () => {
     if (fixIsFresh()) return;
     if (!geolocationSupported()) { showToast('This browser has no location support.'); return; }
-    els.goldenText.textContent = 'Getting a fix…';
+    els.goldenText.textContent = 'Finding your location…';
     try {
       await requestFix();
       renderGolden();
@@ -79,7 +79,7 @@ function goldenReading(now, fix) {
   const t = light.times;
 
   if (light.phase === 'golden') {
-    return { text: `${light.minutesTo}m of golden left`, state: 'now', title: light.label };
+    return { text: `${light.minutesTo} min of golden hour left`, state: 'now', title: light.label };
   }
   if (light.phase === 'blue' && t.sunrise) {
     return { text: `Golden ${hhmm(t.sunrise)}`, state: 'next', title: 'Morning golden hour starts at sunrise' };
@@ -151,7 +151,7 @@ function renderFilmStrip() {
     const value = frames ? String(frames) : (hours > 0 ? `${hours.toFixed(1)}h` : '–');
     cells.push(`
       <div class="film-cell${today ? ' film-cell-today' : ''}" data-shot="${shot ? 1 : 0}"
-           title="${key}: ${hours.toFixed(2)}h, ${frames} frame${frames === 1 ? '' : 's'}">
+           title="${key}: ${hours.toFixed(2)}h, ${frames} photo${frames === 1 ? '' : 's'}">
         <span class="film-cell-day">${today ? 'Today' : DAY_INITIALS[d.getDay()]}</span>
         <span class="film-cell-can">
           <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#${shot ? 'i-film' : 'i-camera'}"/></svg>
@@ -176,7 +176,7 @@ function renderCadence() {
   const lastWeek = framesBetween(13, 7);
   els.frames.textContent = String(thisWeek);
   if (!lastWeek && !thisWeek) {
-    els.framesNote.textContent = 'Log frames from the Field HUD';
+    els.framesNote.textContent = 'Log photos from the Field HUD';
   } else if (!lastWeek) {
     els.framesNote.textContent = 'First week on record';
   } else {
@@ -191,7 +191,7 @@ export function renderLaunchMeta(mode = null) {
   if (!els.launchMode) return;
   const active = mode || (document.getElementById('modeGuidedBtn').classList.contains('active') ? 'guided' : 'casual');
   const minutes = Number(state.profile.guidedDurationMin) || 30;
-  els.launchMode.textContent = active === 'guided' ? `Guided · ${minutes}m Sprint` : 'Casual Mode';
+  els.launchMode.textContent = active === 'guided' ? `Guided · ${minutes} min` : 'Casual Mode';
 
   const fix = cachedFix();
   if (fix && fixIsFresh(fix)) {

@@ -94,7 +94,7 @@ export function isWatching() {
 
 function describe(err) {
   if (err && err.code === 1) return 'Location permission denied.';
-  if (err && err.code === 2) return 'Could not get a location fix.';
+  if (err && err.code === 2) return "Couldn't find your location.";
   if (err && err.code === 3) return 'Location request timed out.';
   return 'Location is unavailable.';
 }

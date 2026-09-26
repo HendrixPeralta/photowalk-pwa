@@ -360,7 +360,7 @@ export function drawToneCurve(canvas) {
 
   if (mode === 'measured') {
     drawMeasuredCurve(ctx, x, y, size);
-    drawAxisLabels(ctx, x, y, size, 'share of frame');
+    drawAxisLabels(ctx, x, y, size, 'share of photo');
     return;
   }
 
@@ -430,7 +430,7 @@ function drawMeasuredCurve(ctx, x, y, size) {
     ctx.save();
     ctx.fillStyle = LABEL;
     ctx.textAlign = 'center';
-    ctx.fillText('No frame loaded', x + size / 2, y + size / 2);
+    ctx.fillText('No photo loaded', x + size / 2, y + size / 2);
     ctx.restore();
     return;
   }
@@ -528,8 +528,8 @@ export function toneCurveSummary() {
 
   if (isToneCurveIdentity()) {
     return {
-      label: 'Linear',
-      caption: 'Untouched — output matches input. Drag the line to see what a grade would cost.'
+      label: 'No change',
+      caption: 'No changes yet. Drag the line to see how an edit would change the photo.'
     };
   }
 
@@ -540,18 +540,18 @@ export function toneCurveSummary() {
 
   let label;
   if (slope > 1.12 && shadow < 0 && high > 0) label = 'S-curve';
-  else if (slope < 0.9) label = 'Flattened';
-  else if (mid > 6) label = 'Lifted';
-  else if (mid < -6) label = 'Deepened';
+  else if (slope < 0.9) label = 'Less contrast';
+  else if (mid > 6) label = 'Brighter';
+  else if (mid < -6) label = 'Darker';
   else if (shadow > 6) label = 'Shadow lift';
   else if (high < -6) label = 'Highlight pull';
-  else label = 'Shaped';
+  else label = 'Custom';
 
   const parts = [`Midtone contrast ${slope >= 1 ? 'up' : 'down'} ${Math.round(Math.abs(slope - 1) * 100)}%.`];
-  if (lut[0] > 4) parts.push('Blacks are lifted off zero — the frame will look milky.');
-  if (lut[255] < 251) parts.push('Whites are pulled down — no clean white left.');
-  if (shadow < -12) parts.push('Shadows pushed down; watch the darks for lost separation.');
-  if (high > 12) parts.push('Highlights pushed up; the brightest tones are near clipping.');
+  if (lut[0] > 4) parts.push('Blacks are lifted, so the photo will look faded.');
+  if (lut[255] < 251) parts.push('Whites are pulled down, so nothing is pure white anymore.');
+  if (shadow < -12) parts.push('Shadows pushed darker. Watch for dark areas merging together.');
+  if (high > 12) parts.push('Highlights pushed brighter. The brightest areas are close to pure white.');
 
   return { label, caption: parts.join(' ') };
 }
@@ -563,7 +563,7 @@ export function toneCurveSummary() {
  */
 function measuredSummary() {
   if (!cdf) {
-    return { label: 'No frame', caption: 'Load a photo to plot how its tones are actually distributed.' };
+    return { label: 'No photo', caption: 'Load a photo to see how its light and dark tones are spread.' };
   }
 
   const p5 = levelAtShare(0.05);
@@ -577,24 +577,24 @@ function measuredSummary() {
   const inMids = Math.max(0, 1 - inShadows - inHighs);
 
   let label;
-  if (inShadows > 0.5) label = 'Weighted to shadows';
-  else if (inHighs > 0.5) label = 'Weighted to highlights';
-  else if (inMids > 0.7) label = 'Midtone-heavy';
-  else if (inShadows > 0.28 && inHighs > 0.28) label = 'Split tonality';
+  if (inShadows > 0.5) label = 'Mostly dark';
+  else if (inHighs > 0.5) label = 'Mostly bright';
+  else if (inMids > 0.7) label = 'Mostly midtones';
+  else if (inShadows > 0.28 && inHighs > 0.28) label = 'Mostly darks and brights';
   else label = 'Evenly spread';
 
   const parts = [
-    `Median tone at ${pct(p50)}%, with 90% of the frame between ${pct(p5)}% and ${pct(p95)}%.`
+    `The middle tone is at ${pct(p50)}%, and 90% of the photo falls between ${pct(p5)}% and ${pct(p95)}%.`
   ];
 
   const steepest = steepestBand();
-  if (steepest) parts.push(`Climbs fastest through the ${steepest} — that is where this frame spends its separation.`);
+  if (steepest) parts.push(`The curve climbs fastest through the ${steepest}, so that's where the photo shows the most detail.`);
 
   // A curve that leaves the floor already high, or hits the ceiling early,
   // has pixels stacked at an extreme with nothing beyond them.
-  if (cdf[4] > 0.02) parts.push(`${Math.round(cdf[4] * 100)}% is crushed at black.`);
-  if (1 - cdf[251] > 0.02) parts.push(`${Math.round((1 - cdf[251]) * 100)}% is clipped at white.`);
-  if (p95 - p5 < 100) parts.push('The whole frame occupies a narrow slice of the scale — low contrast by construction.');
+  if (cdf[4] > 0.02) parts.push(`${Math.round(cdf[4] * 100)}% is pure black.`);
+  if (1 - cdf[251] > 0.02) parts.push(`${Math.round((1 - cdf[251]) * 100)}% is pure white.`);
+  if (p95 - p5 < 100) parts.push("The whole photo sits in a narrow slice of tones, so it's low contrast.");
 
   return { label, caption: parts.join(' ') };
 }
