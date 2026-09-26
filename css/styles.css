@@ -1730,6 +1730,10 @@ input[type="file"].text-input { padding: 8px; }
 /* --- Mode selector cards ------------------------------------------------- */
 .mode-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
+/* Keeps a title and its "?" button grouped together on the left when the
+   parent .log-head has nothing to push to the right with space-between. */
+.label-caps-row { display: inline-flex; align-items: center; }
+
 /* Small inline "?" next to a section title, opening a modal with more detail. */
 .section-help-btn {
   display: inline-flex;
