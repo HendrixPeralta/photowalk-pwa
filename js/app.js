@@ -10,6 +10,7 @@ import { initWalkScreen, renderWalkScreen } from './walkscreen.js';
 import { initHud, renderHud, pauseHudRendering } from './hud.js';
 import { initDebrief } from './debrief.js';
 import { initAnalysis, loadDefaultPhoto } from './analysis.js';
+import { initToolHelp } from './toolhelp.js';
 import { initAlbum, renderAlbum } from './album.js';
 import { initShare, renderShare, joinRoom, attachSharedFiles } from './share.js';
 import { initHeatmap, renderHeatmap } from './heatmap.js';
@@ -237,6 +238,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   initDebrief();
   initAnalysis();
+  initToolHelp();
   initAlbum();
   initShare();
   initHeatmap();

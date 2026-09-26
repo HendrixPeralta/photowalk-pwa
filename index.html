@@ -533,6 +533,7 @@
 
         <div class="gamut-head">
           <h4 class="subsection-title">Colour Gamut Extraction</h4>
+          <button type="button" class="tool-help-btn" data-tool-help="gamut" aria-label="About Colour Gamut Extraction">?</button>
           <span class="gamut-count" id="gamutCount">0 clusters</span>
         </div>
         <div class="harmony-row" id="harmonyRow" hidden>
@@ -547,7 +548,7 @@
         <div id="paletteRow" class="palette-row hidden"></div>
         <p id="paletteCaption" class="hint"></p>
 
-        <h4 class="subsection-title">Luminance Spectrum</h4>
+        <h4 class="subsection-title">Luminance Spectrum <button type="button" class="tool-help-btn" data-tool-help="histogram" aria-label="About Luminance Spectrum">?</button></h4>
         <div id="histGrid" class="hist-grid">
           <div>
             <p class="compare-label">Yours</p>
@@ -567,6 +568,7 @@
             <svg class="diag-note-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-contrast"/></svg>
             <div class="diag-note-head">
               <strong id="tonalKeyTitle"></strong>
+              <button type="button" class="tool-help-btn" data-tool-help="tonalkey" aria-label="About Tonal Key">?</button>
               <span class="diag-note-tag" id="tonalKeyTag"></span>
             </div>
             <svg class="collapse-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -595,27 +597,27 @@
             </div>
             <div id="scopeGrid" class="scope-grid">
               <figure class="scope-cell" data-scope="waveform">
-                <figcaption class="scope-name">Waveform <span>luma against position across the frame</span></figcaption>
+                <figcaption class="scope-name">Waveform <button type="button" class="tool-help-btn" data-tool-help="waveform" aria-label="About Waveform">?</button> <span>luma against position across the frame</span></figcaption>
                 <canvas id="waveformCanvas" class="scope-canvas"></canvas>
                 <p id="waveformCaption" class="hint scope-caption"></p>
               </figure>
               <figure class="scope-cell" data-scope="parade">
-                <figcaption class="scope-name">RGB Parade <span>the waveform split into red, green and blue</span></figcaption>
+                <figcaption class="scope-name">RGB Parade <button type="button" class="tool-help-btn" data-tool-help="parade" aria-label="About RGB Parade">?</button> <span>the waveform split into red, green and blue</span></figcaption>
                 <canvas id="paradeCanvas" class="scope-canvas"></canvas>
                 <p id="paradeCaption" class="hint scope-caption"></p>
               </figure>
               <figure class="scope-cell" data-scope="vectorscope">
-                <figcaption class="scope-name">Vectorscope <span>hue as angle, saturation as distance</span></figcaption>
+                <figcaption class="scope-name">Vectorscope <button type="button" class="tool-help-btn" data-tool-help="vectorscope" aria-label="About Vectorscope">?</button> <span>hue as angle, saturation as distance</span></figcaption>
                 <canvas id="vectorscopeCanvas" class="scope-canvas"></canvas>
                 <p id="vectorscopeCaption" class="hint scope-caption"></p>
               </figure>
               <figure class="scope-cell" data-scope="cie">
-                <figcaption class="scope-name">CIE Chromaticity <span>which colours the frame occupies</span></figcaption>
+                <figcaption class="scope-name">CIE Chromaticity <button type="button" class="tool-help-btn" data-tool-help="cie" aria-label="About CIE Chromaticity">?</button> <span>which colours the frame occupies</span></figcaption>
                 <canvas id="cieCanvas" class="scope-canvas"></canvas>
                 <p id="cieCaption" class="hint scope-caption"></p>
               </figure>
               <figure class="scope-cell" data-scope="tonecurve">
-                <figcaption class="scope-name">Tone Curve <span>how this frame's tones are actually spread</span></figcaption>
+                <figcaption class="scope-name">Tone Curve <button type="button" class="tool-help-btn" data-tool-help="tonecurve" aria-label="About Tone Curve">?</button> <span>how this frame's tones are actually spread</span></figcaption>
                 <div class="overlay-controls curve-modes" id="curveModes">
                   <button type="button" class="chip-btn active" data-curve-mode="measured">Measured</button>
                   <button type="button" class="chip-btn" data-curve-mode="adjust">Adjust</button>

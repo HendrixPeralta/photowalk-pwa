@@ -1756,6 +1756,37 @@ input[type="file"].text-input { padding: 8px; }
 }
 .mode-card-info:hover { color: var(--accent-strong); border-color: var(--accent); }
 
+/* Inline variant, sat next to an Analysis tool's title instead of floating
+   over a card corner. */
+.tool-help-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  margin-left: 4px;
+  vertical-align: middle;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface-4);
+  color: var(--text-dim);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.tool-help-btn:hover { color: var(--accent-strong); border-color: var(--accent); }
+
+.tool-help-refs {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+.tool-help-refs li { margin-bottom: 4px; }
+.tool-help-refs a { color: var(--accent); }
+
 .mode-card {
   position: relative;
   display: block;
