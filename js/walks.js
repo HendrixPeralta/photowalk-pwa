@@ -544,7 +544,7 @@ async function scheduleTriggeredNudges() {
   if (!w || !notifyGranted || !triggersSupported()) return;
   try {
     const reg = await navigator.serviceWorker.ready;
-    await Promise.all(w.nudges.map((n) => reg.showNotification('PhotoWalk', {
+    await Promise.all(w.nudges.map((n) => reg.showNotification('PhotoEYE', {
       body: staticNudgeMessage(n.id, theme),
       tag: 'walk-' + n.id,
       icon: './icons/icon.svg',
@@ -575,12 +575,12 @@ async function deliverNudge(message, id) {
     if (reg && reg.showNotification) {
       // Constructing a Notification directly throws on Android Chrome; the
       // service worker registration is the only route that works there.
-      await reg.showNotification('PhotoWalk', { body: message, tag: 'walk-' + id, icon: './icons/icon.svg' });
+      await reg.showNotification('PhotoEYE', { body: message, tag: 'walk-' + id, icon: './icons/icon.svg' });
       return;
     }
   } catch (err) { /* fall through to the page-level API */ }
   try {
-    new Notification('PhotoWalk', { body: message, icon: './icons/icon.svg' });
+    new Notification('PhotoEYE', { body: message, icon: './icons/icon.svg' });
   } catch (err) { /* the in-app toast already covered it */ }
 }
 

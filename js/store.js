@@ -114,7 +114,7 @@ export function save() {
     console.warn('PhotoWalk: could not persist state.', err);
     if (Date.now() - lastQuotaWarning > 60000) {
       lastQuotaWarning = Date.now();
-      showToast('Storage is full — delete a few references so PhotoWalk can keep saving.', 6000);
+      showToast('Storage is full — delete a few references so PhotoEYE can keep saving.', 6000);
     }
     return false;
   }

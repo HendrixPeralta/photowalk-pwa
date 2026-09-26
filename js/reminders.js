@@ -70,13 +70,13 @@ function toggleDay(day) {
 
 function requestPermissionThenSchedule() {
   if (!('Notification' in window)) {
-    showToast('This browser has no notifications — PhotoWalk will remind you in-app instead.', 5000);
+    showToast('This browser has no notifications — PhotoEYE will remind you in-app instead.', 5000);
     return;
   }
   if (Notification.permission === 'granted') { refreshSchedule(); return; }
   Notification.requestPermission().then((perm) => {
     if (perm === 'granted') refreshSchedule();
-    else showToast('Reminders stayed off at the system level — PhotoWalk will still nudge you in-app.', 5000);
+    else showToast('Reminders stayed off at the system level — PhotoEYE will still nudge you in-app.', 5000);
     renderReminders();
   });
 }
@@ -125,7 +125,7 @@ async function refreshSchedule() {
   try {
     const reg = await navigator.serviceWorker.ready;
     const body = reminderBody();
-    await Promise.all(upcomingTimes().map((at) => reg.showNotification('PhotoWalk', {
+    await Promise.all(upcomingTimes().map((at) => reg.showNotification('PhotoEYE', {
       body,
       tag: TAG_PREFIX + at,
       icon: './icons/icon.svg',
@@ -197,9 +197,9 @@ function statusText() {
 
   const names = state.reminder.days.map((d) => DAY_NAMES[d].slice(0, 3)).join(', ');
   if (!('Notification' in window) || Notification.permission !== 'granted') {
-    return `${escapeHtml(names)} — PhotoWalk will remind you in-app when you next open it.`;
+    return `${escapeHtml(names)} — PhotoEYE will remind you in-app when you next open it.`;
   }
   return triggersSupported()
-    ? `${escapeHtml(names)} — you'll get a notification even with PhotoWalk closed.`
-    : `${escapeHtml(names)} — this browser only delivers reminders while PhotoWalk is open.`;
+    ? `${escapeHtml(names)} — you'll get a notification even with PhotoEYE closed.`
+    : `${escapeHtml(names)} — this browser only delivers reminders while PhotoEYE is open.`;
 }
