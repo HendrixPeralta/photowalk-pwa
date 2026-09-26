@@ -1,3 +1,4 @@
+import { t, lang } from './i18n.js';
 import { state, save, totalActivityHours } from './store.js';
 import { showToast } from './toast.js';
 import { escapeHtml, localDateKey } from './util.js';
@@ -7,8 +8,13 @@ import { escapeHtml, localDateKey } from './util.js';
 // Notification Triggers where the browser supports them, and fall back to an
 // in-app prompt on next open where it doesn't.
 
-const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+// Single letters repeat (S, T), so the chip labels can't be t() keys; Japanese gets its own set.
+const DAY_LABELS = lang === 'ja'
+  ? ['日', '月', '火', '水', '木', '金', '土']
+  : ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const DAY_NAMES = [t('Sunday'), t('Monday'), t('Tuesday'), t('Wednesday'), t('Thursday'), t('Friday'), t('Saturday')];
+const DAY_SHORT = [t('Sun'), t('Mon'), t('Tue'), t('Wed'), t('Thu'), t('Fri'), t('Sat')];
+const DAY_SEP = lang === 'ja' ? '・' : ', ';
 const SCHEDULE_AHEAD_DAYS = 14;
 const TAG_PREFIX = 'remind-';
 
@@ -70,13 +76,13 @@ function toggleDay(day) {
 
 function requestPermissionThenSchedule() {
   if (!('Notification' in window)) {
-    showToast('This browser has no notifications — PhotoEYE will remind you in-app instead.', 5000);
+    showToast(t("This browser can't show notifications, so PhotoEYE will remind you inside the app instead."), 5000);
     return;
   }
   if (Notification.permission === 'granted') { refreshSchedule(); return; }
   Notification.requestPermission().then((perm) => {
     if (perm === 'granted') refreshSchedule();
-    else showToast('Reminders stayed off at the system level — PhotoEYE will still nudge you in-app.', 5000);
+    else showToast(t('Notifications are blocked on this device, but PhotoEYE will still remind you inside the app.'), 5000);
     renderReminders();
   });
 }
@@ -112,9 +118,9 @@ function reminderBody() {
   if (pending) {
     const earned = Math.max(0, totalActivityHours() - pending.baselineHours);
     const left = Math.round((pending.targetHours - earned) * 10) / 10;
-    if (left > 0) return `Time for a walk — ${left}h of shooting left to earn "${pending.title}".`;
+    if (left > 0) return t('Time for a walk! {hours} of shooting left to earn "{title}".', { hours: t('{n}h', { n: left }), title: pending.title });
   }
-  return 'Time for a walk — grab a theme and go shoot for a bit.';
+  return t('Time for a walk! Grab a theme and go shoot for a bit.');
 }
 
 async function refreshSchedule() {
@@ -169,7 +175,7 @@ export function maybeNudgeOnOpen() {
   due.setHours(hh || 0, mm || 0, 0, 0);
   if (Date.now() < due.getTime()) return;
 
-  showToast("You planned a walk today — there's still time to get out.", 7000);
+  showToast(t("You planned a walk today. There's still time to get out!"), 7000);
 }
 
 /* ---------- Render ---------- */
@@ -193,13 +199,13 @@ export function renderReminders() {
 
 function statusText() {
   if (!state.reminder.enabled) return '';
-  if (!state.reminder.days.length) return 'Pick at least one day.';
+  if (!state.reminder.days.length) return t('Pick at least one day.');
 
-  const names = state.reminder.days.map((d) => DAY_NAMES[d].slice(0, 3)).join(', ');
+  const names = state.reminder.days.map((d) => DAY_SHORT[d]).join(DAY_SEP);
   if (!('Notification' in window) || Notification.permission !== 'granted') {
-    return `${escapeHtml(names)} — PhotoEYE will remind you in-app when you next open it.`;
+    return t('{days}. PhotoEYE will remind you the next time you open the app.', { days: escapeHtml(names) });
   }
   return triggersSupported()
-    ? `${escapeHtml(names)} — you'll get a notification even with PhotoEYE closed.`
-    : `${escapeHtml(names)} — this browser only delivers reminders while PhotoEYE is open.`;
+    ? t("{days}. You'll get a notification even when PhotoEYE is closed.", { days: escapeHtml(names) })
+    : t('{days}. This browser only shows reminders while PhotoEYE is open.', { days: escapeHtml(names) });
 }

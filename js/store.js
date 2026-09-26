@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import { localDateKey, dataUrlToBlob } from './util.js';
 import { putImage, requestPersistence, storageEstimate } from './db.js';
 import { showToast } from './toast.js';
@@ -114,7 +115,7 @@ export function save() {
     console.warn('PhotoWalk: could not persist state.', err);
     if (Date.now() - lastQuotaWarning > 60000) {
       lastQuotaWarning = Date.now();
-      showToast('Storage is full — delete a few references so PhotoEYE can keep saving.', 6000);
+      showToast(t('Storage is full. Delete a few references so PhotoEYE can keep saving.'), 6000);
     }
     return false;
   }
@@ -136,7 +137,7 @@ export async function initStorage() {
       if (save()) localStorage.removeItem(LEGACY_KEY);
     } catch (err) {
       console.warn('PhotoWalk: photo migration failed, keeping the old data to retry.', err);
-      showToast('Could not upgrade your saved photos — they are still safe, retrying next launch.', 6000);
+      showToast(t("Couldn't update your saved photos. They're still safe, and PhotoEYE will try again next time."), 6000);
     }
   }
   requestPersistence();
@@ -148,7 +149,7 @@ export async function warnIfStorageTight() {
   if (!info || info.ratio < 0.8) return;
   if (Date.now() - lastQuotaWarning < 60000) return;
   lastQuotaWarning = Date.now();
-  showToast(`Storage is ${Math.round(info.ratio * 100)}% full — consider clearing older references.`, 6000);
+  showToast(t('Storage is {pct}% full. Try deleting some older references.', { pct: Math.round(info.ratio * 100) }), 6000);
 }
 
 export function setDisplayName(name) {

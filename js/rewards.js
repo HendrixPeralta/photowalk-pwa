@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import { state, save, totalActivityHours } from './store.js';
 import { showToast } from './toast.js';
 import { openModal } from './modal.js';
@@ -35,9 +36,9 @@ function addReward(titleInput, hoursInput) {
   const title = titleInput.value.trim();
   const targetHours = Number(hoursInput.value);
 
-  if (!title) { showToast('Name the reward you are walking toward.'); return false; }
+  if (!title) { showToast(t('Name the reward you are walking toward.')); return false; }
   if (!Number.isFinite(targetHours) || targetHours <= 0) {
-    showToast('Set how many hours of shooting the reward costs.');
+    showToast(t('Set how many hours of shooting the reward costs.'));
     return false;
   }
 
@@ -54,7 +55,7 @@ function addReward(titleInput, hoursInput) {
 
   titleInput.value = '';
   hoursInput.value = '';
-  showToast('Reward set — hours you shoot from now on count toward it.');
+  showToast(t('Reward set! Hours you shoot from now on count toward it.'));
   return true;
 }
 
@@ -64,7 +65,7 @@ function claimReward(id) {
   if (earnedHours(reward) < reward.targetHours) return;
   reward.claimedAt = Date.now();
   save();
-  showToast(`Enjoy it — you earned "${reward.title}" with ${formatHours(reward.targetHours)} of shooting.`, 6000);
+  showToast(t('Enjoy it! You earned "{title}" with {hours} of shooting.', { title: reward.title, hours: formatHours(reward.targetHours) }), 6000);
 }
 
 function removeReward(id) {
@@ -161,22 +162,23 @@ export function rewardTimeline() {
   if (last) {
     stops.push({
       kind: 'earned',
-      label: 'Last',
+      label: t('Last'),
       title: last.title,
       id: last.id,
       pct: pctOf(targetTotalHours(last)),
       ready: !last.claimedAt,
-      note: last.claimedAt ? `Claimed ${formatDate(last.claimedAt)}` : 'Earned — ready to claim'
+      note: last.claimedAt ? t('Claimed {date}', { date: formatDate(last.claimedAt) }) : t('Earned: ready to claim')
     });
   }
   upcoming.forEach((r, i) => {
     stops.push({
       kind: 'next',
-      label: i === 0 ? 'Next' : 'Then',
+      label: i === 0 ? t('Next') : t('Then'),
       title: r.title,
       pct: pctOf(targetTotalHours(r)),
       ready: false,
-      note: `${formatHours(targetTotalHours(r) - now)} of shooting to go`
+      remaining: formatHours(targetTotalHours(r) - now),
+      note: t('{hours} of shooting to go', { hours: formatHours(targetTotalHours(r) - now) })
     });
   });
 
@@ -190,8 +192,8 @@ function renderRewardBar() {
 
   if (!stops.length) {
     els.bar.innerHTML = `
-      <p class="empty-state-sm">No rewards yet — price a treat in shooting hours to give your next walks a target.</p>
-      <button type="button" class="btn btn-ghost btn-sm" data-action="manage">Set a reward</button>`;
+      <p class="empty-state-sm">${t('No rewards yet. Pick a treat and set how many hours of shooting it costs, to give your next walks a target.')}</p>
+      <button type="button" class="btn btn-ghost btn-sm" data-action="manage">${t('Set a reward')}</button>`;
     return;
   }
 
@@ -211,7 +213,7 @@ function renderRewardBar() {
       <span class="reward-leg-label">${s.label}</span>
       <span class="reward-leg-title">${escapeHtml(s.title)}</span>
       <span class="reward-leg-note">${escapeHtml(s.note)}</span>
-      ${s.ready ? `<button type="button" class="btn btn-accent btn-sm" data-action="claim" data-id="${s.id}">Claim</button>` : ''}
+      ${s.ready ? `<button type="button" class="btn btn-accent btn-sm" data-action="claim" data-id="${s.id}">${t('Claim')}</button>` : ''}
     </li>`).join('');
 
   // Any progress at all should read as a visible nub rather than a hairline the
@@ -222,15 +224,15 @@ function renderRewardBar() {
   // same point and animate as one. With nothing banked there is no head to the
   // fill, so there is no handle either.
   const handleHtml = fillPct > 0
-    ? `<span class="reward-bar-handle" style="left:${fillPct}%" title="${formatHours(now)} shot"></span>`
+    ? `<span class="reward-bar-handle" style="left:${fillPct}%" title="${t('{hours} shot', { hours: formatHours(now) })}"></span>`
     : '';
 
   els.bar.innerHTML = `
     <div class="reward-bar-head">
-      <span class="reward-bar-now">${formatHours(now)} shot</span>
+      <span class="reward-bar-now">${t('{hours} shot', { hours: formatHours(now) })}</span>
       <span class="muted">${next
-        ? `${escapeHtml(next.title)} in ${next.note.replace(' of shooting to go', '')}`
-        : 'Every reward earned — set another one'}</span>
+        ? t('{title} in {hours}', { title: escapeHtml(next.title), hours: next.remaining })
+        : t('Every reward earned. Set a new one!')}</span>
     </div>
     <div class="reward-bar-track">
       <div class="reward-bar-fill" style="width:${fillPct}%"></div>
@@ -238,7 +240,7 @@ function renderRewardBar() {
       ${handleHtml}
     </div>
     <ul class="reward-bar-legend">${legendHtml}</ul>
-    <button type="button" class="btn btn-ghost btn-sm" data-action="manage">Manage rewards</button>`;
+    <button type="button" class="btn btn-ghost btn-sm" data-action="manage">${t('Manage rewards')}</button>`;
 }
 
 export function renderRewards() {
@@ -261,9 +263,9 @@ function rewardsListHtml() {
         </div>
         <div class="timer-track reward-track"><div class="timer-fill reward-fill" style="width:${pct}%"></div></div>
         <div class="reward-row reward-foot">
-          <span class="muted">${done ? 'Earned — claim it from the Reward progress card above.' : formatHours(r.targetHours - earned) + ' of shooting to go'}</span>
+          <span class="muted">${done ? t('Earned! Claim it from the Reward progress card above.') : t('{hours} of shooting to go', { hours: formatHours(r.targetHours - earned) })}</span>
           <span class="reward-actions">
-            <button type="button" class="btn btn-ghost btn-sm" data-action="remove" data-id="${r.id}">Remove</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-action="remove" data-id="${r.id}">${t('Remove')}</button>
           </span>
         </div>
       </li>`;
@@ -275,7 +277,7 @@ function rewardsListHtml() {
         <span class="reward-title">&check; ${escapeHtml(r.title)}</span>
         <span class="reward-actions">
           <span class="reward-hours">${formatHours(r.targetHours)} &middot; ${formatDate(r.claimedAt)}</span>
-          <button type="button" class="btn btn-ghost btn-sm" data-action="remove" data-id="${r.id}">Remove</button>
+          <button type="button" class="btn btn-ghost btn-sm" data-action="remove" data-id="${r.id}">${t('Remove')}</button>
         </span>
       </div>
     </li>`).join('');
@@ -291,14 +293,14 @@ function rewardsListHtml() {
  */
 function openManageRewardsModal() {
   openModal(`
-    <h3>Hour rewards</h3>
-    <p class="muted card-text">Pick a treat and price it in shooting hours &mdash; every hour on the heatmap counts toward it.</p>
+    <h3>${t('Hour rewards')}</h3>
+    <p class="muted card-text">${t('Pick a treat and set how many hours of shooting it costs. Every hour you shoot counts toward it.')}</p>
     <div class="reward-form">
-      <input type="text" id="rewardTitleInput" class="text-input" placeholder="Reward (e.g. new camera strap)" maxlength="60">
-      <input type="number" id="rewardHoursInput" class="text-input reward-hours-input" placeholder="Hours" min="0.5" step="0.5" inputmode="decimal">
-      <button type="button" id="addRewardBtn" class="btn btn-primary">Set Reward</button>
+      <input type="text" id="rewardTitleInput" class="text-input" placeholder="${t('Reward (e.g. new camera strap)')}" maxlength="60">
+      <input type="number" id="rewardHoursInput" class="text-input reward-hours-input" placeholder="${t('Hours')}" min="0.5" step="0.5" inputmode="decimal">
+      <button type="button" id="addRewardBtn" class="btn btn-primary">${t('Set Reward')}</button>
     </div>
-    <p id="rewardsEmpty" class="empty-state-sm ${state.rewards.length ? 'hidden' : ''}">No rewards yet &mdash; try &ldquo;New 35mm lens&rdquo; for 20 hours.</p>
+    <p id="rewardsEmpty" class="empty-state-sm ${state.rewards.length ? 'hidden' : ''}">${t('No rewards yet. Try &ldquo;New 35mm lens&rdquo; for 20 hours.')}</p>
     <ul id="rewardsList" class="rewards-list">${rewardsListHtml()}</ul>
   `);
 

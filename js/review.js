@@ -19,6 +19,7 @@
 
 import { showToast } from './toast.js';
 import { openModal, closeModal } from './modal.js';
+import { lang as appLang } from './i18n.js';
 
 // The Apps Script web app from tools/review-endpoint.gs. Public on purpose:
 // it is append-only, so the worst it can leak is the ability to add a row.
@@ -33,7 +34,6 @@ import { openModal, closeModal } from './modal.js';
 const ENDPOINT = 'https://script.google.com/macros/s/AKfycbwPZC5YSPUaSVIuMKn6FZCd0dbHcwmqv2ksedbLDC2fnxo0CAYMd_faEAHaHGNgO63QVw/exec';
 
 const QUEUE_KEY = 'photowalk:review-queue';
-const LANG_KEY = 'photowalk:review-lang';
 const MAX_QUEUED = 25; // a queue longer than this is a bug, not a busy room
 const MAX_TEXT = 2000;
 const MAX_NAME = 80;
@@ -45,12 +45,18 @@ const FEATURE_KEYS = ['walk-guide', 'progress-track', 'rewards', 'analysis-tools
 // Chip-based answers (level, features) are stored and submitted by key, so
 // they read the same in the sheet no matter which language filled the form
 // out. Only the free-text fields and the on-screen labels change with `lang`.
+//
+// This table predates the app-wide i18n.js and is kept because the form has
+// its own EN/JA toggle: the form opens in the app language, and the toggle
+// lets someone answer in the other one without switching the whole app.
 const STRINGS = {
   en: {
     toggleLabel: 'EN',
+    langAria: 'Language',
+    star: (n) => (n === 1 ? '1 star' : `${n} stars`),
     feedback: 'Feedback',
     title: 'Leave a review',
-    subtitle: "Tried PhotoEYE? A few taps tells us more than you'd think.",
+    subtitle: "Tried PhotoEYE? A few taps tell us more than you'd think.",
     ratingAria: 'Rating out of five',
     levelLabel: 'Your photography level',
     levels: { beginner: 'Beginner', hobbyist: 'Hobbyist', pro: 'Pro' },
@@ -70,41 +76,43 @@ const STRINGS = {
     problemPlaceholder: 'What is it?',
     namePlaceholder: 'Name (optional)',
     send: 'Send review',
-    privacy: "Held on this device and sent when you are online. Only what's above is sent — never your photos or your practice history.",
+    privacy: "Held on this device and sent when you are online. Only what's above is sent, never your photos or your practice history.",
     blank: 'Add a rating or an answer first.',
     pendingOne: '1 review is waiting to send.',
     pendingMany: (n) => `${n} reviews are waiting to send.`,
-    thanks: 'Thanks — your review has been recorded.'
+    thanks: 'Thanks! Your review has been saved.'
   },
   ja: {
     toggleLabel: 'JA',
+    langAria: '言語',
+    star: (n) => `星${n}つ`,
     feedback: 'フィードバック',
     title: 'レビューを書く',
-    subtitle: 'PhotoEYEを試しましたか?少しの回答でとても参考になります。',
+    subtitle: 'PhotoEYEを使ってみましたか？数タップの回答でもとても参考になります。',
     ratingAria: '5段階評価',
     levelLabel: '写真のレベル',
-    levels: { beginner: '初心者', hobbyist: '趣味', pro: 'プロ' },
-    featuresLabel: 'どの機能が役に立ちましたか?',
-    featuresHint: '(複数選択可)',
+    levels: { beginner: '初心者', hobbyist: '趣味で撮影', pro: 'プロ' },
+    featuresLabel: '特に役に立った機能はどれですか？',
+    featuresHint: '（複数選択できます）',
     features: {
-      'walk-guide': '散歩ガイド',
-      'progress-track': '進捗トラッキング',
-      rewards: '報酬',
+      'walk-guide': 'ウォークガイド',
+      'progress-track': '上達の記録',
+      rewards: 'ごほうび',
       'analysis-tools': '分析ツール',
       'photo-sharing': '友達と写真を共有'
     },
-    improveLabel: '改善してほしい点はありますか?',
-    optionalHint: '(任意)',
+    improveLabel: '改善してほしい点はありますか？',
+    optionalHint: '（任意）',
     improvePlaceholder: '改善してほしい点を教えてください',
-    problemLabel: '解決してほしい他の問題はありますか?',
+    problemLabel: 'ほかに、このアプリで解決できそうな困りごとはありますか？',
     problemPlaceholder: '内容を教えてください',
-    namePlaceholder: 'お名前(任意)',
+    namePlaceholder: 'お名前（任意）',
     send: 'レビューを送信',
     privacy: 'この内容は端末に保存され、オンライン時に送信されます。送信されるのは上記の内容のみで、写真や利用履歴が送信されることはありません。',
     blank: '評価または回答を入力してください。',
     pendingOne: '1件のレビューが送信待ちです。',
     pendingMany: (n) => `${n}件のレビューが送信待ちです。`,
-    thanks: 'ありがとうございました — レビューを受け付けました。'
+    thanks: 'ありがとうございます。レビューを保存しました。'
   }
 };
 
@@ -121,7 +129,7 @@ export function initReview() {
   [document.getElementById('reviewTopBtn'), document.getElementById('reviewOpenBtn')]
     .forEach((btn) => btn && btn.addEventListener('click', openReviewModal));
 
-  lang = localStorage.getItem(LANG_KEY) === 'ja' ? 'ja' : 'en';
+  lang = appLang === 'ja' ? 'ja' : 'en';
 
   // A review written on venue wifi that drops mid-tap is the whole reason the
   // queue exists; retry as soon as the browser says it has a connection again.
@@ -151,7 +159,7 @@ function renderForm() {
   openModal(`
     <div class="review-modal-head">
       <span class="label-caps" style="color:var(--accent-strong)">${t.feedback}</span>
-      <div id="reviewLangToggle" class="review-lang-toggle" role="group" aria-label="Language"></div>
+      <div id="reviewLangToggle" class="review-lang-toggle" role="group" aria-label="${t.langAria}"></div>
     </div>
     <h3 class="subsection-title" style="margin-top:6px">${t.title}</h3>
     <p class="muted card-text">${t.subtitle}</p>
@@ -237,7 +245,6 @@ function buildLangToggle() {
 function setLang(code) {
   if (lang === code) return;
   lang = code;
-  localStorage.setItem(LANG_KEY, lang);
   renderForm();
 }
 
@@ -261,7 +268,7 @@ function buildStars() {
     btn.dataset.value = String(n);
     btn.setAttribute('role', 'radio');
     btn.setAttribute('aria-checked', 'false');
-    btn.setAttribute('aria-label', n === 1 ? '1 star' : `${n} stars`);
+    btn.setAttribute('aria-label', STRINGS[lang].star(n));
     btn.addEventListener('click', () => setRating(n));
     els.stars.appendChild(btn);
   }

@@ -4,31 +4,34 @@ import { formatHours } from './util.js';
 import { initModal } from './modal.js';
 import { initToast, showToast } from './toast.js';
 import {
-  initWalks, renderHomeWalkState, pauseWalk, resumeWalk, activeTheme, finishActiveWalk, renderSavedThemes
+  initWalks, renderHomeWalkState, pauseWalk, resumeWalk, activeTheme, finishActiveWalk, renderSavedThemes, launchWalk
 } from './walks.js';
 import { initWalkScreen, renderWalkScreen } from './walkscreen.js';
-import { initHud, renderHud, pauseHudRendering } from './hud.js';
+import { initHud, enterHud, pauseHudRendering } from './hud.js';
 import { initDebrief } from './debrief.js';
 import { initAnalysis, loadDefaultPhoto } from './analysis.js';
+import { initToolHelp } from './toolhelp.js';
 import { initAlbum, renderAlbum } from './album.js';
 import { initShare, renderShare, joinRoom, attachSharedFiles } from './share.js';
 import { initHeatmap, renderHeatmap } from './heatmap.js';
 import { initRewards, renderRewards } from './rewards.js';
 import { initReminders, syncReminderSchedule, maybeNudgeOnOpen } from './reminders.js';
 import { initProfile } from './profile.js';
+import { langChoice, setLang, translateDom } from './i18n.js';
 import { initDemoPanel } from './demopanel.js';
 import { initReview } from './review.js';
 import { backfillMilestones } from './milestones.js';
+import { t } from './i18n.js';
 
 // The header shows which instrument you are looking at, under the wordmark.
 const SCREEN_TITLES = {
-  walks: 'Walks',
-  hud: 'Field HUD',
-  analyze: 'Analysis',
-  album: 'Album',
-  share: 'Partners',
-  settings: 'Settings',
-  themes: 'My Themes'
+  walks: t('Walks'),
+  hud: t('Live Walk'),
+  analyze: t('Analysis'),
+  album: t('Album'),
+  share: t('Partners'),
+  settings: t('Settings'),
+  themes: t('My Themes')
 };
 
 function showView(name) {
@@ -40,7 +43,7 @@ function showView(name) {
   if (name !== 'hud') pauseHudRendering();
 
   if (name === 'walks') renderWalks();
-  if (name === 'hud') renderHud();
+  if (name === 'hud') enterHud();
   if (name === 'album') renderAlbum();
   if (name === 'share') renderShare();
   if (name === 'themes') renderSavedThemes();
@@ -92,7 +95,7 @@ async function handleLaunchIntent() {
     joinRoom(roomParam, { quiet: true });
   } else if (shared.length) {
     showView('hud');
-    showToast('Create or join a room, then press Upload to post the photos you shared.', 6000);
+    showToast(t('Create or join a room, then press Upload to post the photos you shared.'), 6000);
   }
 
   if (roomParam || params.has('shared')) {
@@ -123,7 +126,7 @@ function initInstallPrompt() {
 
   window.addEventListener('appinstalled', () => {
     installBtn.classList.add('hidden');
-    showToast('PhotoEYE installed to your device.');
+    showToast(t('PhotoEYE installed to your device.'));
   });
 }
 
@@ -209,7 +212,18 @@ function initServiceWorker() {
   });
 }
 
+function initLanguagePicker() {
+  document.querySelectorAll('#langRow [data-lang]').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.lang === langChoice);
+    btn.addEventListener('click', () => setLang(btn.dataset.lang));
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
+  // First, so every init below that reads or overwrites static text starts
+  // from the translated markup.
+  translateDom();
+  initLanguagePicker();
   initModal(document.getElementById('modalRoot'));
   initToast(document.getElementById('toastRoot'));
 
@@ -233,10 +247,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     pause: pauseWalk,
     resume: resumeWalk,
     finish: finishActiveWalk,
-    themeOf: activeTheme
+    themeOf: activeTheme,
+    start: launchWalk
   });
   initDebrief();
   initAnalysis();
+  initToolHelp();
   initAlbum();
   initShare();
   initHeatmap();

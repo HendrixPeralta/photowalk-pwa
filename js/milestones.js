@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import { state, save, totalActivityHours, currentStreak } from './store.js';
 
 // Milestones are pure derived facts: each rule reads the stats that already
@@ -18,8 +19,8 @@ function earnedMilestones(walk) {
     if (hours >= mark) {
       earned.push({
         id: `hours-${mark}`,
-        title: `${mark} hour${mark === 1 ? '' : 's'} shot`,
-        detail: 'Time behind the camera is the only thing that compounds.'
+        title: t(mark === 1 ? '{n} hour shot' : '{n} hours shot', { n: mark }),
+        detail: t('Time behind the camera is the only thing that compounds.')
       });
     }
   }
@@ -28,8 +29,8 @@ function earnedMilestones(walk) {
     if (state.profile.walksCompleted >= mark) {
       earned.push({
         id: `walks-${mark}`,
-        title: `${mark} walk${mark === 1 ? '' : 's'} completed`,
-        detail: 'The habit is the point — the photos are the receipt.'
+        title: t(mark === 1 ? '{n} walk completed' : '{n} walks completed', { n: mark }),
+        detail: t('The habit is the point. The photos are the proof.')
       });
     }
   }
@@ -38,8 +39,8 @@ function earnedMilestones(walk) {
     if (streak >= mark) {
       earned.push({
         id: `streak-${mark}`,
-        title: `${mark}-day streak`,
-        detail: 'Showing up on the dull days is what makes the good ones happen.'
+        title: t('{n}-day streak', { n: mark }),
+        detail: t('Showing up on the dull days is what makes the good ones happen.')
       });
     }
   }
@@ -47,8 +48,8 @@ function earnedMilestones(walk) {
   if (walk && walk.challengeCount > 0 && walk.challengesDone === walk.challengeCount) {
     earned.push({
       id: 'clean-sweep',
-      title: 'Clean sweep',
-      detail: 'Every mini-challenge on a single walk.'
+      title: t('Clean sweep'),
+      detail: t('Every mini-challenge on a single walk.')
     });
   }
 

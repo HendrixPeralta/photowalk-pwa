@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import { state, totalActivityHours, currentStreak } from './store.js';
 import { showToast } from './toast.js';
 import { formatHours } from './util.js';
@@ -35,15 +36,21 @@ export function initDemoPanel() {
 export function renderDemoStatus() {
   if (!els.status) return;
   const activeDays = Object.keys(state.activityLog).length;
-  const facts = `${activeDays} day${activeDays === 1 ? '' : 's'} logged · ${formatHours(totalActivityHours())}`
-    + ` · ${state.profile.walksCompleted} walk${state.profile.walksCompleted === 1 ? '' : 's'}`
-    + ` · ${currentStreak()}-day streak · ${state.rewards.length} reward${state.rewards.length === 1 ? '' : 's'}`;
+  const walks = state.profile.walksCompleted;
+  const rewards = state.rewards.length;
+  const facts = [
+    t(activeDays === 1 ? '{n} day logged' : '{n} days logged', { n: activeDays }),
+    formatHours(totalActivityHours()),
+    t(walks === 1 ? '{n} walk' : '{n} walks', { n: walks }),
+    t('{n}-day streak', { n: currentStreak() }),
+    t(rewards === 1 ? '{n} reward' : '{n} rewards', { n: rewards })
+  ].join(' · ');
 
-  const source = state.demoMode ? 'A full year of demo history is loaded.'
-    : state.seededHistory && !state.seededHistory.skipped ? 'Three months of starting history is loaded.'
-    : 'This is your own history.';
+  const source = state.demoMode ? t('A full year of demo history is loaded.')
+    : state.seededHistory && !state.seededHistory.skipped ? t('Three months of starting history is loaded.')
+    : t('This is your own history.');
 
-  els.status.textContent = `${source} ${facts}.`;
+  els.status.textContent = t('{source} {facts}.', { source, facts });
 }
 
 async function fillThreeMonths() {
@@ -53,10 +60,10 @@ async function fillThreeMonths() {
     // it has to be stood down or it would overwrite this on the next refresh.
     if (state.demoMode) state.demoMode = null;
     backstory.seedStarterHistory();
-    showToast('Three months of practice loaded.');
+    showToast(t('Three months of practice loaded.'));
   } catch (err) {
     console.warn('PhotoWalk: could not load the three-month history.', err);
-    showToast('Could not load the demo history — see the console.');
+    showToast(t("Couldn't load the demo history. Please try again."));
   }
 }
 
@@ -65,10 +72,10 @@ async function fillYear() {
     const demo = await import('./demo.js');
     demo.installDemoHooks();
     demo.seedDemoData();
-    showToast('A full year of practice loaded — it stays until you restore.');
+    showToast(t('A full year of practice loaded. It stays until you tap Restore mine.'));
   } catch (err) {
     console.warn('PhotoWalk: could not load the year of demo data.', err);
-    showToast('Could not load the demo history — see the console.');
+    showToast(t("Couldn't load the demo history. Please try again."));
   }
 }
 
@@ -82,15 +89,15 @@ async function restoreProfile() {
       const demo = await import('./demo.js');
       demo.clearDemoData();
       renderDemoStatus(); // only reached when nothing was parked, so no reload happened
-      showToast('Demo history cleared.');
+      showToast(t('Demo history cleared.'));
       return;
     }
     const backstory = await import('./backstory.js');
     if (!backstory.undoStarterHistory()) {
-      showToast('Nothing parked to restore — this profile is already your own.');
+      showToast(t('Nothing to restore. This is already your own history.'));
     }
   } catch (err) {
     console.warn('PhotoWalk: could not restore the profile.', err);
-    showToast('Could not restore the profile — see the console.');
+    showToast(t("Couldn't restore your history. Please try again."));
   }
 }

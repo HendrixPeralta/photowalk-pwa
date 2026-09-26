@@ -6,6 +6,8 @@
 // strictly additive — offline, rate-limited, or blocked, the built-in vector
 // diagrams are still the whole feature.
 
+import { t } from './i18n.js';
+
 const ENDPOINT = 'https://api.openverse.org/v1/images/';
 const PAGE_SIZE = 3;
 const TIMEOUT_MS = 6000;
@@ -37,8 +39,8 @@ export function fetchConceptPhotos(conceptKey, query) {
   const pending = withTimeout(`${ENDPOINT}?${params}`)
     .then((json) => (json.results || []).map((r) => ({
       thumbnail: r.thumbnail || r.url,
-      title: r.title || 'Untitled',
-      creator: r.creator || 'Unknown',
+      title: r.title || t('Untitled'),
+      creator: r.creator || t('Unknown'),
       license: String(r.license || '').toUpperCase(),
       source: r.foreign_landing_url || r.url
     })).filter((p) => p.thumbnail))

@@ -36,9 +36,12 @@
   --radius-md: 4px;
   --radius-sm: 2px;
 
-  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-body: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-data: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, var(--font-ja), sans-serif;
+  --font-body: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, var(--font-ja), sans-serif;
+  --font-data: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, var(--font-ja), monospace;
+  /* Japanese system fonts, so kana and kanji get a real UI face rather than
+     whatever the browser falls back to. */
+  --font-ja: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic UI', Meiryo;
 
   /* The heatmap's column pitch. The month labels and the day squares are two
      separate flex rows that have to stay in register across 53 columns, so
@@ -806,6 +809,7 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
   padding: 12px;
   margin-bottom: 12px;
 }
+#walkPartnersCard { margin-top: 16px; }
 .theme-card h3 { margin: 0 0 4px; font-family: var(--font-display); font-size: 18px; font-weight: 600; }
 .theme-card > .btn { margin-top: 10px; }
 
@@ -1498,13 +1502,32 @@ input[type="file"].text-input { padding: 8px; }
   border: 1px solid var(--border);
   border-left: 2px solid var(--accent);
   border-radius: var(--radius-md);
-  padding: 10px 14px;
+  padding: 4px 4px 4px 14px;
   font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   opacity: 0;
   transform: translateY(8px);
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
-.toast.show { opacity: 1; transform: translateY(0); }
+/* Only a visible toast takes taps; the root stays click-through so a fading
+   one never blocks what is underneath it. */
+.toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.toast-text { flex: 1; padding: 6px 0; }
+.toast-close {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 20px;
+  line-height: 1;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.toast-close:hover { color: var(--accent-strong); }
 
 /* Analyze: zoomable canvas, comparison mode, interpretation */
 .canvas-inner {
@@ -1514,10 +1537,6 @@ input[type="file"].text-input { padding: 8px; }
   will-change: transform;
 }
 
-.analyze-tip { flex-direction: column; align-items: stretch; }
-.analyze-tip .pinned-tip-head { margin: 0 0 6px; font-size: 0.88rem; }
-.analyze-tip .pinned-tip-line { margin: 0 0 6px; font-size: 0.82rem; color: var(--text-dim); }
-.analyze-tip .btn { align-self: flex-end; }
 
 
 
@@ -1730,31 +1749,63 @@ input[type="file"].text-input { padding: 8px; }
 /* --- Mode selector cards ------------------------------------------------- */
 .mode-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
-.mode-card-wrap { position: relative; }
+/* Keeps a title and its "?" button grouped together on the left when the
+   parent .log-head has nothing to push to the right with space-between. */
+.label-caps-row { display: inline-flex; align-items: center; }
 
-/* Sits outside the mode-card button (siblings, not nested) so tapping it opens
-   the mode's blurb without also selecting the mode underneath. */
-.mode-card-info {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 1;
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  display: flex;
+/* Small inline "?" next to a section title, opening a modal with more detail. */
+.section-help-btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  margin-left: 4px;
+  vertical-align: middle;
   border: 1px solid var(--border);
   border-radius: 50%;
   background: var(--surface-4);
   color: var(--text-dim);
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   cursor: pointer;
 }
-.mode-card-info:hover { color: var(--accent-strong); border-color: var(--accent); }
+.section-help-btn:hover { color: var(--accent-strong); border-color: var(--accent); }
+
+/* Inline variant, sat next to an Analysis tool's title instead of floating
+   over a card corner. */
+.tool-help-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  margin-left: 4px;
+  vertical-align: middle;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface-4);
+  color: var(--text-dim);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.tool-help-btn:hover { color: var(--accent-strong); border-color: var(--accent); }
+.tool-help-list { margin: 6px 0 0; padding-left: 18px; font-size: 13px; }
+.tool-help-list li { margin-bottom: 6px; }
+
+.tool-help-refs {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+.tool-help-refs li { margin-bottom: 4px; }
+.tool-help-refs a { color: var(--accent); }
 
 .mode-card {
   position: relative;
@@ -1990,6 +2041,15 @@ input[type="file"].text-input { padding: 8px; }
 .mission-hint svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--accent); }
 .mission-hint p { margin: 0; }
 
+.hud-theme-tips {
+  margin-top: 10px;
+  padding: 10px;
+  background: var(--surface-0);
+  border-radius: var(--radius-md);
+}
+.hud-theme-tip { margin: 0 0 6px; font-size: 0.82rem; color: var(--text-dim); }
+.hud-theme-tip:last-child { margin-bottom: 0; }
+
 .mission-progress {
   display: flex;
   align-items: center;
@@ -2093,13 +2153,6 @@ input[type="file"].text-input { padding: 8px; }
    paired with Pause Walk in this grid row, that would misalign the two tops. */
 .hud-footer-row .btn-danger-solid { margin-top: 0; }
 
-.hud-idle {
-  text-align: center;
-  padding: 40px 16px;
-}
-.hud-idle svg { width: 40px; height: 40px; color: var(--text-dim); margin-bottom: 12px; }
-.hud-idle p { margin: 0 0 16px; color: var(--text-dim); font-size: 13px; }
-
 /* --- Analysis: diagnostic notes ------------------------------------------ */
 .diag-note {
   padding: 12px;
@@ -2140,21 +2193,10 @@ input[type="file"].text-input { padding: 8px; }
 .gamut-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
   margin: 18px 0 8px;
 }
 .gamut-head .subsection-title { margin: 0; }
-.gamut-count {
-  padding: 3px 7px;
-  background: var(--surface-3);
-  border: 1px solid var(--cyan-deep);
-  border-radius: var(--radius-sm);
-  color: var(--cyan);
-  font-family: var(--font-data);
-  font-size: 10px;
-  white-space: nowrap;
-}
 
 .harmony-row {
   display: flex;
@@ -2179,46 +2221,34 @@ input[type="file"].text-input { padding: 8px; }
 /* Segmented dominance tape: each swatch is as wide as its share of the frame. */
 .gamut-bar {
   display: flex;
-  height: 26px;
+  height: 44px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   overflow: hidden;
   margin-bottom: 8px;
 }
-.gamut-bar span { display: block; height: 100%; }
-
-.gamut-specs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-}
-.gamut-spec {
+.gamut-bar-swatch {
+  display: block;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  border: none;
+  padding: 0;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 6px 8px;
-  background: var(--surface-2);
-  border-radius: var(--radius-sm);
-  min-width: 0;
 }
-.gamut-spec-chip {
-  width: 14px; height: 14px;
-  flex-shrink: 0;
-  border: 1px solid var(--border);
-  border-radius: 2px;
-}
-.gamut-spec-hex {
+.gamut-bar-hex {
+  position: absolute;
+  left: 4px;
+  bottom: 3px;
+  padding: 1px 3px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
   font-family: var(--font-data);
-  font-size: 11px;
-  text-transform: uppercase;
-}
-.gamut-spec-pct {
-  margin-left: auto;
-  font-family: var(--font-data);
-  font-size: 10px;
-  color: var(--text-dim);
+  font-size: 9px;
+  line-height: 1.2;
   white-space: nowrap;
+  pointer-events: none;
 }
 
 /* --- Partners: debrief header -------------------------------------------- */

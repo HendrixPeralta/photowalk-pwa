@@ -16,12 +16,15 @@ import { imageUrl } from './db.js';
 import { showToast } from './toast.js';
 import { escapeHtml, formatTime, navigateTo } from './util.js';
 import { THEMES } from './concepts.js';
+import { t } from './i18n.js';
 import { exportStudySheet } from './sheet.js';
 
 // The vocabulary of a technical critique: process, not praise.
+// Tags are only ever stored as display text on a note's spec line (nothing
+// parses them back), so they are translated like any other label.
 const CRITIQUE_TAGS = [
-  '#RuleOfThirds', '#LeadingLines', '#LowAngle', '#RimLight',
-  '#AvailableLight', '#Backlit', '#NegativeSpace', '#Geometry'
+  t('#RuleOfThirds'), t('#LeadingLines'), t('#LowAngle'), t('#RimLight'),
+  t('#AvailableLight'), t('#Backlit'), t('#NegativeSpace'), t('#Geometry')
 ];
 
 let els = {};
@@ -66,11 +69,11 @@ export function initDebrief() {
   els.exportBtn.addEventListener('click', exportSheet);
   els.scheduleBtn.addEventListener('click', () => {
     navigateTo('settings');
-    showToast('Set a reminder here and your next walk is on the calendar.');
+    showToast(t('Set a reminder here and your next walk is on the calendar.'));
   });
 
   els.tags.innerHTML = CRITIQUE_TAGS
-    .map((t) => `<button type="button" class="critique-tag" data-tag="${t}">${t}</button>`).join('');
+    .map((tag) => `<button type="button" class="critique-tag" data-tag="${escapeHtml(tag)}">${escapeHtml(tag)}</button>`).join('');
   els.tags.addEventListener('click', (e) => {
     const btn = e.target.closest('.critique-tag');
     if (!btn) return;
@@ -91,15 +94,15 @@ export function renderDebrief() {
   if (!els.duration || !room) return;
 
   const photos = room.photos || [];
-  els.archive.textContent = `Debrief Vault · Archive #${room.code}`;
+  els.archive.textContent = t('Group Review · Room {code}', { code: room.code });
   els.exposures.textContent = photos.length
-    ? `${photos.length} shutter trip${photos.length === 1 ? '' : 's'}`
-    : 'none yet';
+    ? t(photos.length === 1 ? '{n} photo' : '{n} photos', { n: photos.length })
+    : t('none yet');
 
   if (photos.length >= 2) {
     const span = photos[photos.length - 1].ts - photos[0].ts;
     els.duration.textContent = formatSpan(span);
-    els.duration.title = 'Span between the first and last shot shared here';
+    els.duration.title = t('Span between the first and last shot shared here');
   } else {
     els.duration.textContent = '—';
     els.duration.title = '';
@@ -117,7 +120,7 @@ export function renderDebrief() {
 function formatSpan(ms) {
   const mins = Math.max(0, Math.round(ms / 60000));
   const h = Math.floor(mins / 60);
-  return h ? `${h}h ${mins % 60}m` : `${mins}m`;
+  return h ? t('{h}h {m}m', { h, m: mins % 60 }) : t('{m}m', { m: mins });
 }
 
 /* ---------- Challenge prompt ---------- */
@@ -133,13 +136,13 @@ function renderPrompt(room) {
   els.promptTitle.textContent = themed;
   const walk = state.lastWalk;
   els.promptText.textContent = walk && walk.challengeCount
-    ? `${walk.challengesDone} of ${walk.challengeCount} mini-challenges cleared on the walk this debrief follows.`
-    : 'Compare what each of you did with the same brief.';
+    ? t('{done} of {total} mini-challenges done on this walk.', { done: walk.challengesDone, total: walk.challengeCount })
+    : t('Compare what each of you did with the same brief.');
 }
 
 function themeTitle(themeId) {
-  const found = THEMES.find((t) => t.id === themeId)
-    || state.customThemes.find((t) => t.id === themeId);
+  const found = THEMES.find((th) => th.id === themeId)
+    || state.customThemes.find((th) => th.id === themeId);
   return found ? found.title : '';
 }
 
@@ -171,8 +174,8 @@ function pickPair(photos) {
 
 function exposureOf(photo) {
   const e = photo.exif;
-  if (!e) return 'no EXIF';
-  return [e.focalLength, e.aperture && e.aperture.replace('f/', 'ƒ/')].filter(Boolean).join(' · ') || 'no EXIF';
+  if (!e) return t('no camera data');
+  return [e.focalLength, e.aperture && e.aperture.replace('f/', 'ƒ/')].filter(Boolean).join(' · ') || t('no camera data');
 }
 
 function detailOf(photo) {
@@ -195,7 +198,7 @@ function renderSplit(room) {
     els.splitDual.innerHTML = pair.map((p) => `
       <div class="split-pane">
         <div class="split-pane-photo">
-          <img data-pane-img="${escapeHtml(p.imageId)}" alt="Shared by ${escapeHtml(p.name)}">
+          <img data-pane-img="${escapeHtml(p.imageId)}" alt="${escapeHtml(t('Shared by {name}', { name: p.name }))}">
           <span class="split-pane-who">@${escapeHtml(p.name)}</span>
         </div>
         <div class="split-pane-exif">
@@ -256,7 +259,7 @@ function renderNotes(room) {
     return `
       <div class="critique-note${mine ? ' critique-note-mine' : ''}">
         <div class="critique-note-head">
-          <span class="critique-note-who">${escapeHtml(n.name)} · note at ${escapeHtml(formatTime(n.ts))}</span>
+          <span class="critique-note-who">${escapeHtml(t('{name} · note at {time}', { name: n.name, time: formatTime(n.ts) }))}</span>
           ${n.spec ? `<span class="critique-note-spec">${escapeHtml(n.spec)}</span>` : ''}
         </div>
         <p>${escapeHtml(n.text)}</p>
@@ -272,7 +275,7 @@ function postNote() {
 
   room.critique = room.critique || [];
   room.critique.push({
-    name: state.profile.displayName || 'Anonymous',
+    name: state.profile.displayName || t('Anonymous'),
     text,
     // The chips the note was filed under double as its spec line.
     spec: [...selectedTags].join(' '),
@@ -293,10 +296,10 @@ function renderMomentum(room) {
   yesterday.setDate(yesterday.getDate() - 1);
   const alive = lastWalkDate === new Date().toDateString() || lastWalkDate === yesterday.toDateString();
   const live = alive ? streak : 0;
-  els.momentum.textContent = `${live}-Day Cadence Streak`;
+  els.momentum.textContent = t('{n}-day streak', { n: live });
 
   const notes = (room.critique || []).length;
-  els.momentumBadge.innerHTML = notes ? `+${notes}<br>NOTES` : '+0<br>NOTES';
+  els.momentumBadge.innerHTML = `+${notes}<br>${t('NOTES')}`;
 }
 
 /* ---------- Export ---------- */
@@ -305,7 +308,7 @@ async function exportSheet() {
   const room = currentRoom();
   if (!room) return;
   const pair = pickPair(room.photos || []);
-  if (pair.length < 2) { showToast('Share at least two shots before exporting a study sheet.'); return; }
+  if (pair.length < 2) { showToast(t('Share at least two shots before exporting a study sheet.')); return; }
 
   els.exportBtn.disabled = true;
   try {
@@ -317,8 +320,8 @@ async function exportSheet() {
     })));
 
     await exportStudySheet({
-      title: room.theme || `Room ${room.code}`,
-      subtitle: `${(room.photos || []).length} shots shared · ${els.partners.textContent}`,
+      title: room.theme || t('Room {code}', { code: room.code }),
+      subtitle: t('{n} shots shared · {partners}', { n: (room.photos || []).length, partners: els.partners.textContent }),
       panes,
       notes: (room.critique || []).map((n) => ({
         author: n.name,

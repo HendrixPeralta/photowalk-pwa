@@ -6,6 +6,7 @@ import { showToast } from './toast.js';
 import { analyzeStoredImage } from './analysis.js';
 import { readExif } from './exif.js';
 import { renderDebrief } from './debrief.js';
+import { t } from './i18n.js';
 import { escapeHtml, uid, roomCode, formatTime, loadImage, readFileAsDataUrl, drawToCanvas, canvasToBlob, navigateTo } from './util.js';
 
 const ROOM_MAX_DIM = 900;
@@ -82,7 +83,7 @@ export function renderShare() {
   if (!room) return;
 
   els.codeDisplay.textContent = room.code;
-  els.roomTheme.textContent = room.theme ? `Theme: ${room.theme}` : 'No theme set';
+  els.roomTheme.textContent = room.theme ? t('Theme: {theme}', { theme: room.theme }) : t('No theme set');
 
   const link = inviteUrl(room.code);
   els.inviteLink.textContent = link;
@@ -114,12 +115,12 @@ function renderSharedNotice() {
   els.sharedNotice.classList.toggle('hidden', sharedFiles.length === 0);
   if (!sharedFiles.length) return;
 
-  const count = sharedFiles.length === 1 ? '1 photo' : `${sharedFiles.length} photos`;
+  const n = sharedFiles.length;
   // The notice sits outside the room card so it's still visible (and explains
   // what to do next) when the share sheet hands us photos before there's a room.
   els.sharedNotice.textContent = state.currentRoom
-    ? `${count} ready from your share sheet — press Upload to post them.`
-    : `${count} ready from your share sheet — create or join a room from the Field HUD tab to post them.`;
+    ? t(n === 1 ? '1 photo ready to share. Press Upload to post them.' : '{n} photos ready to share. Press Upload to post them.', { n })
+    : t(n === 1 ? '1 photo ready to share. Create or join a room from the Live Walk tab to post them.' : '{n} photos ready to share. Create or join a room from the Live Walk tab to post them.', { n });
 }
 
 /** Called on boot when the OS share sheet handed PhotoWalk some images. */
@@ -143,14 +144,14 @@ function createRoom() {
   state.currentRoom = code;
   broadcast('room-created', { code });
   renderShare();
-  showToast(`Room ${code} created — share the code or QR with your walk partners.`);
+  showToast(t('Room {code} created. Share the code or QR code with your walk partners.', { code }));
 }
 
 function openJoinRoomModal() {
   openModal(`
-    <h3>Join a Room</h3>
-    <input type="text" id="modalJoinCode" class="text-input" placeholder="Room code">
-    <button type="button" id="modalJoinBtn" class="btn btn-primary btn-block">Join</button>
+    <h3>${t('Join a Room')}</h3>
+    <input type="text" id="modalJoinCode" class="text-input" placeholder="${t('Room code')}">
+    <button type="button" id="modalJoinBtn" class="btn btn-primary btn-block">${t('Join')}</button>
     <p id="modalJoinError" class="error-text"></p>
   `);
   const input = document.getElementById('modalJoinCode');
@@ -165,12 +166,11 @@ export function joinRoom(rawCode, { quiet = false } = {}) {
   const errorEl = document.getElementById('modalJoinError');
   if (errorEl) errorEl.textContent = '';
   if (!code) {
-    if (!quiet && errorEl) errorEl.textContent = 'Enter a room code.';
+    if (!quiet && errorEl) errorEl.textContent = t('Enter a room code.');
     return false;
   }
   if (!state.rooms[code]) {
-    const message = 'Room not found on this device. This demo simulates sharing across tabs of the '
-      + 'same browser — connect a backend for real multi-device rooms.';
+    const message = t('Room not found. In this demo, rooms only work between tabs in the same browser, not across devices.');
     if (quiet) showToast(message, 6000);
     else if (errorEl) errorEl.textContent = message;
     return false;
@@ -193,10 +193,10 @@ function copyInvite() {
   const text = inviteUrl(room.code);
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text)
-      .then(() => showToast('Invite link copied to clipboard.'))
-      .catch(() => showToast(`Code: ${room.code}`));
+      .then(() => showToast(t('Invite link copied to clipboard.')))
+      .catch(() => showToast(t('Code: {code}', { code: room.code })));
   } else {
-    showToast(`Code: ${room.code}`);
+    showToast(t('Code: {code}', { code: room.code }));
   }
 }
 
@@ -204,15 +204,15 @@ async function uploadPhotos() {
   const room = state.rooms[state.currentRoom];
   const files = sharedFiles.length ? sharedFiles : Array.from(els.photoInput.files || []);
   if (!room) {
-    showToast('Create or join a room first, then upload.');
+    showToast(t('Create or join a room first, then upload.'));
     return;
   }
   if (!files.length) {
-    showToast('Choose at least one photo to upload first.');
+    showToast(t('Choose at least one photo to upload first.'));
     return;
   }
 
-  const name = els.nameInput.value.trim() || 'Anonymous';
+  const name = els.nameInput.value.trim() || t('Anonymous');
   setDisplayName(name);
   const note = els.noteInput.value.trim();
 
@@ -245,7 +245,7 @@ async function uploadPhotos() {
     }
 
     if (!saved) {
-      showToast('None of those files could be read as images.');
+      showToast(t('None of those files could be read as images.'));
       return;
     }
 
@@ -254,11 +254,11 @@ async function uploadPhotos() {
     sharedFiles = [];
     broadcast('photo-uploaded', { code: room.code });
     renderShare();
-    showToast(saved === 1 ? 'Shared with the room.' : `Shared ${saved} shots with the room.`);
+    showToast(saved === 1 ? t('Shared with the room.') : t('Shared {n} shots with the room.', { n: saved }));
     warnIfStorageTight();
   } catch (err) {
     console.warn('PhotoWalk: upload failed.', err);
-    showToast('Could not share that photo — your device may be out of storage.');
+    showToast(t("Couldn't share that photo. Your device may be out of storage."));
   } finally {
     els.uploadBtn.disabled = false;
   }
@@ -271,18 +271,18 @@ async function openPhotoDetail(code, photoId) {
   const url = await imageUrl(photo.imageId);
 
   openModal(`
-    ${url ? `<img class="detail-image" src="${url}" alt="Shared by ${escapeHtml(photo.name)}">` : ''}
+    ${url ? `<img class="detail-image" src="${url}" alt="${escapeHtml(t('Shared by {name}', { name: photo.name }))}">` : ''}
     <div class="detail-meta">
       <span class="chip">${escapeHtml(photo.name)}</span>
       <span class="chip chip-muted">${escapeHtml(formatTime(photo.ts))}</span>
     </div>
     ${photo.note ? `<p class="muted">${escapeHtml(photo.note)}</p>` : ''}
-    ${url ? '<button type="button" class="btn btn-primary btn-block" id="analyzeRoomPhotoBtn">Analyze this shot</button>' : ''}
+    ${url ? `<button type="button" class="btn btn-primary btn-block" id="analyzeRoomPhotoBtn">${t('Analyze this shot')}</button>` : ''}
     <div class="comment-list" id="commentList"></div>
     <form id="commentForm" class="comment-form">
-      <input type="text" id="commentName" placeholder="Your name" maxlength="30" value="${escapeHtml(state.profile.displayName)}">
-      <input type="text" id="commentText" placeholder="Add a comment" maxlength="200">
-      <button type="submit" class="btn btn-accent">Post</button>
+      <input type="text" id="commentName" placeholder="${t('Your name')}" maxlength="30" value="${escapeHtml(state.profile.displayName)}">
+      <input type="text" id="commentText" placeholder="${t('Add a comment')}" maxlength="200">
+      <button type="submit" class="btn btn-accent">${t('Post')}</button>
     </form>
   `);
 
@@ -299,7 +299,7 @@ async function openPhotoDetail(code, photoId) {
 
   document.getElementById('commentForm').addEventListener('submit', (e) => {
     e.preventDefault();
-    const name = document.getElementById('commentName').value.trim() || 'Anonymous';
+    const name = document.getElementById('commentName').value.trim() || t('Anonymous');
     const text = document.getElementById('commentText').value.trim();
     if (!text) return;
     setDisplayName(name);
@@ -316,5 +316,5 @@ function renderComments(photo) {
   if (!list) return;
   list.innerHTML = (photo.comments || []).map((c) => `
     <p class="comment"><strong>${escapeHtml(c.name)}</strong> ${escapeHtml(c.text)}</p>
-  `).join('') || '<p class="muted">No comments yet — be the first.</p>';
+  `).join('') || `<p class="muted">${t('No comments yet. Be the first!')}</p>`;
 }

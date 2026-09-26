@@ -10,7 +10,8 @@
  */
 
 import { rgbToHex, escapeHtml } from './util.js';
-import { paletteRelationship, SHADOW_END, HIGHLIGHT_START } from './interpret.js';
+import { paletteRelationship, joinSentences } from './interpret.js';
+import { t } from './i18n.js';
 import { showToast } from './toast.js';
 
 let els = {};
@@ -18,24 +19,21 @@ let els = {};
 export function initDeconstruct() {
   els = {
     frameLabel: document.getElementById('analyzeFrameLabel'),
-    frameNo: document.getElementById('analyzeFrameNo'),
     tonalNote: document.getElementById('tonalKeyNote'),
     tonalTitle: document.getElementById('tonalKeyTitle'),
     tonalTag: document.getElementById('tonalKeyTag'),
     tonalText: document.getElementById('tonalKeyText'),
-    gamutCount: document.getElementById('gamutCount'),
     gamutBar: document.getElementById('gamutBar'),
-    gamutSpecs: document.getElementById('gamutSpecs'),
     harmonyRow: document.getElementById('harmonyRow'),
     harmonyName: document.getElementById('harmonyName')
   };
 
-  els.gamutSpecs.addEventListener('click', (e) => {
-    const spec = e.target.closest('.gamut-spec');
-    if (!spec) return;
-    const hex = spec.dataset.hex;
+  els.gamutBar.addEventListener('click', (e) => {
+    const swatch = e.target.closest('.gamut-bar-swatch');
+    if (!swatch) return;
+    const hex = swatch.dataset.hex;
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(hex).then(() => showToast(`Copied ${hex}`)).catch(() => showToast(hex));
+      navigator.clipboard.writeText(hex).then(() => showToast(t('Copied {hex}', { hex }))).catch(() => showToast(hex));
     } else {
       showToast(hex);
     }
@@ -44,18 +42,19 @@ export function initDeconstruct() {
 
 /* ---------- Tonal key ---------- */
 
-// Level ranges the histogram bins actually cover, so the copy can quote them.
-const SHADOW_TOP = Math.round((SHADOW_END / 64) * 255);
-const HIGHLIGHT_FLOOR = Math.round((HIGHLIGHT_START / 64) * 255);
 
-/** Names the tonal key from the histogram's shadow/mid/highlight split. */
+/**
+ * Names the tonal key from the histogram's shadow/mid/highlight split.
+ * `phrase` is the title as it reads mid-sentence (lowercased in English), so
+ * the takeaway never has to lowercase a translated string.
+ */
 export function tonalKey(summary) {
   const { shadows, highs } = summary;
-  if (shadows > 0.5) return { title: 'Low-key / Chiaroscuro', tag: 'Decisive' };
-  if (highs > 0.5) return { title: 'High-key / Airy', tag: 'Open' };
-  if (shadows > 0.28 && highs > 0.28) return { title: 'High contrast / Graphic', tag: 'Hard' };
-  if (shadows < 0.08 && highs < 0.08) return { title: 'Flat, low contrast', tag: 'Soft' };
-  return { title: 'Balanced key', tag: 'Neutral' };
+  if (shadows > 0.5) return { title: t('Low-key (mostly dark)'), phrase: t('low-key (mostly dark)'), tag: t('Moody') };
+  if (highs > 0.5) return { title: t('High-key (mostly bright)'), phrase: t('high-key (mostly bright)'), tag: t('Airy') };
+  if (shadows > 0.28 && highs > 0.28) return { title: t('High contrast'), phrase: t('high contrast'), tag: t('Punchy') };
+  if (shadows < 0.08 && highs < 0.08) return { title: t('Low contrast'), phrase: t('low contrast'), tag: t('Soft') };
+  return { title: t('Balanced'), phrase: t('balanced'), tag: t('Even') };
 }
 
 /** Share of the frame sitting in the very first and very last histogram bin. */
@@ -69,15 +68,18 @@ export function renderTonalKey(bins, summary) {
   const key = tonalKey(summary);
   const clip = clipShares(bins);
 
-  els.tonalTitle.textContent = `Tonal key: ${key.title}`;
+  els.tonalTitle.textContent = t('Tonal key: {title}', { title: key.title });
   els.tonalTag.textContent = key.tag;
 
   const dominant = summary.shadows >= summary.highs
-    ? `${Math.round(summary.shadows * 100)}% of the frame sits in the shadows (levels 0–${SHADOW_TOP})`
-    : `${Math.round(summary.highs * 100)}% of the frame sits in the highlights (levels ${HIGHLIGHT_FLOOR}–255)`;
+    ? t('{pct}% of the photo is in the darker tones.', { pct: Math.round(summary.shadows * 100) })
+    : t('{pct}% of the photo is in the brighter tones.', { pct: Math.round(summary.highs * 100) });
 
-  const clipLine = `Clipped shadow ${(clip.black * 100).toFixed(1)}% · clipped highlight ${(clip.white * 100).toFixed(1)}%.`;
-  els.tonalText.textContent = `${dominant}. ${clipLine} ${summary.caption}`;
+  const clipLine = t('Pure black: {black}% · pure white: {white}%.', {
+    black: (clip.black * 100).toFixed(1),
+    white: (clip.white * 100).toFixed(1)
+  });
+  els.tonalText.textContent = joinSentences([dominant, clipLine, summary.caption]);
   els.tonalNote.classList.remove('hidden');
 }
 
@@ -116,17 +118,10 @@ export function renderGamut(palette) {
   if (!els.gamutBar) return;
   const clusters = gamutClusters(palette);
 
-  els.gamutCount.textContent = `${clusters.length} cluster${clusters.length === 1 ? '' : 's'}`;
-  els.gamutBar.innerHTML = clusters
-    .map((c) => `<span style="background:${c.hex};width:${(c.share * 100).toFixed(2)}%" title="${c.hex} — ${Math.round(c.share * 100)}%"></span>`)
-    .join('');
-
-  els.gamutSpecs.innerHTML = clusters.map((c) => `
-    <div class="gamut-spec" data-hex="${c.hex}" title="Copy ${c.hex}">
-      <span class="gamut-spec-chip" style="background:${c.hex}"></span>
-      <span class="gamut-spec-hex">${escapeHtml(c.hex)}</span>
-      <span class="gamut-spec-pct">${Math.round(c.share * 100)}% ${c.role}</span>
-    </div>`).join('');
+  els.gamutBar.innerHTML = clusters.map((c) => `
+    <button type="button" class="gamut-bar-swatch" style="background:${c.hex};width:${(c.share * 100).toFixed(2)}%" data-hex="${c.hex}" title="${t('{hex}, {pct}%. Click to copy.', { hex: c.hex, pct: Math.round(c.share * 100) })}">
+      <span class="gamut-bar-hex">${escapeHtml(c.hex)}</span>
+    </button>`).join('');
 
   if (palette.length) {
     const rel = paletteRelationship(palette);
@@ -152,40 +147,36 @@ export function takeawayText(palette, summary, exif) {
 
   if (exif && exif.aperture && exif.shutter) {
     const at = [exif.shutter, exif.aperture.replace('f/', 'ƒ/'), exif.iso].filter(Boolean).join(' · ');
-    parts.push(`Shot at ${at}, the frame lands as ${key.title.toLowerCase()}.`);
+    parts.push(t('Shot at {at}, the photo comes out {key}.', { at, key: key.phrase }));
   } else {
-    parts.push(`The frame reads as ${key.title.toLowerCase()}.`);
+    parts.push(t('The photo comes out {key}.', { key: key.phrase }));
   }
 
   if (summary.shadows > 0.5) {
-    parts.push('Ambient detail is crushed into the blacks, so whatever is still lit carries the whole composition.');
+    parts.push(t('Most of the scene falls into darkness, so whatever is lit becomes the focus.'));
   } else if (summary.highs > 0.5) {
-    parts.push('Tones sit high and open, which flattens texture but keeps the subject legible against a bright ground.');
+    parts.push(t('Tones are bright and airy. That softens texture but keeps the subject easy to see against a light background.'));
   } else if (summary.shadows > 0.28 && summary.highs > 0.28) {
-    parts.push('Darks and brights both hold weight with little between them — the frame is carried by edges, not gradients.');
+    parts.push(t('Strong darks and brights with little in between make shapes and edges stand out.'));
   }
 
-  if (summary.clippedWhite) parts.push('Highlights are clipped: those areas will not recover in post.');
-  if (summary.clippedBlack) parts.push('Shadows are crushed: there is no detail left to lift.');
+  if (summary.clippedWhite) parts.push(t("Some bright areas are pure white, and editing can't bring that detail back."));
+  if (summary.clippedBlack) parts.push(t('Some dark areas are pure black, with no detail left to brighten.'));
 
-  if (rel) parts.push(`Colour reads as ${rel.label.toLowerCase()} — ${rel.caption.charAt(0).toLowerCase()}${rel.caption.slice(1)}`);
+  // The label is already translated; lowercasing only affects English.
+  if (rel) parts.push(t('Color: {harmony}.', { harmony: rel.label.toLowerCase() }), rel.caption);
 
   if (exif && exif.focalMm) {
     const wide = exif.focalMm < 35;
     parts.push(wide
-      ? `At ${exif.focalLength} you were close enough for the foreground to do the work.`
-      : `At ${exif.focalLength} the background compresses, which is what stacks the layers together.`);
+      ? t('At {focal} (wide), you were close enough for the foreground to play a big part.', { focal: exif.focalLength })
+      : t('At {focal} (zoomed in), the background looks pulled closer, stacking the layers together.', { focal: exif.focalLength }));
   }
 
-  return parts.join(' ');
+  return joinSentences(parts);
 }
 
-/* ---------- Header + reset ---------- */
-
-export function setFrameLabel(index) {
-  if (!els.frameNo) return;
-  els.frameNo.textContent = index === null ? 'NO FRAME' : `FRAME #${String(index).padStart(3, '0')}`;
-}
+/* ---------- Reset ---------- */
 
 export function clearDeconstruct() {
   if (!els.tonalNote) return;
@@ -193,7 +184,4 @@ export function clearDeconstruct() {
   els.tonalNote.open = false;
   els.harmonyRow.hidden = true;
   els.gamutBar.innerHTML = '';
-  els.gamutSpecs.innerHTML = '';
-  els.gamutCount.textContent = '0 clusters';
-  setFrameLabel(null);
 }

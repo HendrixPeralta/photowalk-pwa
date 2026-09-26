@@ -1,3 +1,5 @@
+import { t, dateLocale } from './i18n.js';
+
 export function escapeHtml(str) {
   return String(str ?? '').replace(/[&<>"']/g, (ch) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -31,12 +33,12 @@ export function clamp(value, min, max) {
 
 export function formatDate(isoOrMs) {
   const d = new Date(isoOrMs);
-  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  return d.toLocaleDateString(dateLocale, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 export function formatTime(isoOrMs) {
   const d = new Date(isoOrMs);
-  return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  return d.toLocaleTimeString(dateLocale, { hour: 'numeric', minute: '2-digit' });
 }
 
 /** Hours are the app's unit of progress, so they read the same everywhere: 2h, 2.5h, 45m. */
@@ -45,10 +47,10 @@ export function formatHours(hours) {
   if (h > 0 && h < 1) {
     // Guard the boundary: 0.999h rounds to 60 minutes, which should read "1h".
     const mins = Math.round(h * 60);
-    if (mins < 60) return Math.max(1, mins) + 'm';
+    if (mins < 60) return t('{n}m', { n: Math.max(1, mins) });
   }
   const rounded = Math.round(h * 10) / 10;
-  return (Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1)) + 'h';
+  return t('{n}h', { n: Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1) });
 }
 
 /** Local (not UTC) YYYY-MM-DD key, so a day boundary matches the user's own clock. */

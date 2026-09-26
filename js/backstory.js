@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import { state, save, totalActivityHours, STATE_KEY } from './store.js';
 import { THEMES } from './concepts.js';
 import { localDateKey, uid, formatHours } from './util.js';
@@ -21,9 +22,9 @@ function rng(seed) {
   let a = seed >>> 0;
   return () => {
     a = (a + 0x6d2b79f5) >>> 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    let x = Math.imul(a ^ (a >>> 15), 1 | a);
+    x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x;
+    return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
   };
 }
 
@@ -127,7 +128,7 @@ function longestRun(log, cfg) {
  */
 function buildWalkHistory(log, rand, cfg) {
   const favourites = ['golden-hour', 'street-candid', 'leading-lines', 'night-lights', 'reflections'];
-  const ids = THEMES.map((t) => t.id);
+  const ids = THEMES.map((th) => th.id);
   const pickTheme = () => (rand() < 0.55
     ? favourites[Math.floor(rand() * favourites.length)]
     : ids[Math.floor(rand() * ids.length)]);
@@ -179,7 +180,7 @@ function buildRewards(total, now, cfg) {
   return [
     {
       id: uid(),
-      title: 'Coffee and a contact sheet',
+      title: t('Coffee and a contact sheet'),
       targetHours: 5,
       baselineHours: round(Math.max(0, total - 48)),
       createdAt: now - oldest * day,
@@ -188,7 +189,7 @@ function buildRewards(total, now, cfg) {
     },
     {
       id: uid(),
-      title: 'Roll of Portra 400',
+      title: t('Roll of Portra 400'),
       targetHours: 12,
       // Earned 8 hours back, so the timeline has room behind the marker as well
       // as ahead of it — the fill sits along the bar instead of pinned left.
@@ -199,7 +200,7 @@ function buildRewards(total, now, cfg) {
     },
     {
       id: uid(),
-      title: 'New 35mm lens',
+      title: t('New 35mm lens'),
       targetHours: 20,
       baselineHours: round(Math.max(0, total - 16)), // 80% of the way there
       createdAt: now - nextAge * day,
@@ -208,7 +209,7 @@ function buildRewards(total, now, cfg) {
     },
     {
       id: uid(),
-      title: 'Weekend trip to shoot the coast',
+      title: t('Weekend trip to shoot the coast'),
       targetHours: 30,
       baselineHours: round(Math.max(0, total - 14)),
       createdAt: now - laterAge * day,

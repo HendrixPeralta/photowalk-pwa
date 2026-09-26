@@ -12,27 +12,27 @@
  * you're holding next to the real thing would be theatre.
  */
 
+import { t, dateLocale } from './i18n.js';
 import { state, save } from './store.js';
 import { putImage, imageUrl } from './db.js';
 import { readExif } from './exif.js';
 import { showToast } from './toast.js';
 import { openModal, closeModal } from './modal.js';
-import { escapeHtml, uid, navigateTo, drawToCanvas, canvasToBlob, localDateKey } from './util.js';
+import { escapeHtml, uid, drawToCanvas, canvasToBlob, localDateKey } from './util.js';
 import { cachedFix, fixIsFresh, requestFix } from './geo.js';
 import { logFrame } from './walkscreen.js';
+import { CONCEPTS } from './concepts.js';
 
 let els = {};
 let tickHandle = null;
-let hooks = { pause: null, resume: null, finish: null, themeOf: null };
+let hooks = { pause: null, resume: null, finish: null, themeOf: null, start: null };
 
 /** Wires the HUD. `api` hands over the walk-clock controls that live in walks.js. */
 export function initHud(api = {}) {
   hooks = Object.assign(hooks, api);
 
   els = {
-    idle: document.getElementById('hudIdle'),
     active: document.getElementById('hudActive'),
-    goToWalks: document.getElementById('hudGoToWalksBtn'),
     elapsed: document.getElementById('hudElapsed'),
     target: document.getElementById('hudTarget'),
     frames: document.getElementById('hudFrames'),
@@ -40,6 +40,7 @@ export function initHud(api = {}) {
     missionMode: document.getElementById('hudMissionMode'),
     missionTitle: document.getElementById('hudMissionTitle'),
     missionHint: document.getElementById('hudMissionHint'),
+    themeTips: document.getElementById('hudThemeTips'),
     pips: document.getElementById('hudMissionPips'),
     progress: document.getElementById('hudMissionProgress'),
     synced: document.getElementById('hudMissionSynced'),
@@ -55,7 +56,6 @@ export function initHud(api = {}) {
     liveDot: document.getElementById('hudLiveDot')
   };
 
-  els.goToWalks.addEventListener('click', () => navigateTo('walks'));
   els.logBtn.addEventListener('click', () => els.frameInput.click());
   els.frameInput.addEventListener('change', onFramePicked);
   els.pinBtn.addEventListener('click', openInMaps);
@@ -72,11 +72,21 @@ export function initHud(api = {}) {
 
 /* ---------- Rendering ---------- */
 
+/**
+ * Only called when the user actually switches to this tab. Kicking off the
+ * walk-setup popup from renderHud() itself would also fire it from the
+ * photowalk:walk-changed refresh that runs right after a walk is finished,
+ * stomping the walk-complete summary the instant it opens.
+ */
+export function enterHud() {
+  if (!state.activeWalk && hooks.start) hooks.start();
+  renderHud();
+}
+
 export function renderHud() {
   if (!els.active) return;
   const w = state.activeWalk;
 
-  els.idle.classList.toggle('hidden', Boolean(w));
   els.active.classList.toggle('hidden', !w);
   stopTicking();
   if (!w) return;
@@ -84,14 +94,15 @@ export function renderHud() {
   const theme = hooks.themeOf ? hooks.themeOf() : null;
   const guided = w.mode === 'guided';
 
-  els.missionNo.textContent = `Mission #${String(state.profile.walksCompleted + 1).padStart(2, '0')} · Directive`;
-  els.missionMode.textContent = guided ? `${w.durationMin}m Sprint` : 'Casual';
-  els.missionTitle.textContent = theme ? theme.title : 'Walk in progress';
-  els.missionHint.textContent = theme ? theme.brief : 'Pick a subject and work it until it gives.';
+  els.missionNo.textContent = t('Walk #{n} · Your Theme', { n: state.profile.walksCompleted + 1 });
+  els.missionMode.textContent = guided ? t('{n} min', { n: w.durationMin }) : t('Casual');
+  els.missionTitle.textContent = theme ? theme.title : t('Walk in progress');
+  els.missionHint.textContent = theme ? theme.brief : t('Pick a subject and keep shooting it from new angles.');
+  renderThemeTips(theme);
 
   renderChallenges(theme);
   renderCaptureStrip();
-  els.pauseBtn.querySelector('[data-label]').textContent = w.pausedAt ? 'Resume Walk' : 'Pause Walk';
+  els.pauseBtn.querySelector('[data-label]').textContent = w.pausedAt ? t('Resume Walk') : t('Pause Walk');
 
   tickHud();
   tickHandle = setInterval(tickHud, 1000);
@@ -127,7 +138,7 @@ function tickHud() {
   if (w.mode === 'guided') {
     els.target.textContent = clockText(Math.max(0, w.durationMin * 60000 - elapsed));
   } else {
-    els.target.textContent = 'Open';
+    els.target.textContent = t('Open');
   }
 
   const frames = w.frames || [];
@@ -137,17 +148,28 @@ function tickHud() {
 
   // A casual walk carries no checklist, so there is no percentage to report —
   // captures are the only progress it has.
-  els.progress.textContent = total ? `Progress: ${Math.round((done / total) * 100)}%` : '';
+  els.progress.textContent = total ? t('Progress: {pct}%', { pct: Math.round((done / total) * 100) }) : '';
   els.progress.classList.toggle('hidden', !total);
   els.pips.classList.toggle('hidden', !total);
   els.pips.innerHTML = Array.from({ length: total }, (_, i) =>
     `<span class="mission-pip${i < done ? ' done' : ''}"></span>`).join('');
-  els.synced.textContent = `${frames.length} capture${frames.length === 1 ? '' : 's'}`;
-  els.logLabel.textContent = `Log Frame #${frames.length + 1}`;
+  els.synced.textContent = t(frames.length === 1 ? '{n} photo' : '{n} photos', { n: frames.length });
+  els.logLabel.textContent = t('Log Photo #{n}', { n: frames.length + 1 });
   const last = frames[frames.length - 1];
   els.logLast.textContent = last
-    ? `Last: #${frames.length} at ${new Date(last.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-    : 'No frames yet';
+    ? t('Last: #{n} at {time}', { n: frames.length, time: new Date(last.at).toLocaleTimeString(dateLocale, { hour: '2-digit', minute: '2-digit' }) })
+    : t('No photos yet');
+}
+
+/** The concepts behind today's theme, spelled out while the walk is still going. */
+function renderThemeTips(theme) {
+  const tips = theme
+    ? theme.concepts.map((key) => CONCEPTS[key]).filter(Boolean)
+    : [];
+  els.themeTips.classList.toggle('hidden', !tips.length);
+  els.themeTips.innerHTML = tips
+    .map((c) => `<p class="hud-theme-tip"><strong>${escapeHtml(c.title)}:</strong> ${escapeHtml(c.tip)}</p>`)
+    .join('');
 }
 
 function renderChallenges(theme) {
@@ -174,7 +196,7 @@ function renderCaptureStrip() {
       <img data-frame-img="${f.imageId}" alt="">
       <span class="capture-chip-meta">
         <strong>#${f.index} ${escapeHtml(f.label || '')}</strong>
-        <span>${escapeHtml(f.exposure || 'no EXIF')}</span>
+        <span>${escapeHtml(f.exposure || t('no camera data'))}</span>
       </span>
     </button>`).join('');
 
@@ -251,12 +273,14 @@ async function onFramePicked(e) {
 
   if (logged === files.length) {
     showToast(logged > 1
-      ? `${logged} frames logged.`
-      : `Frame #${lastFrame.index} logged${lastFrame.exposure ? ' · ' + lastFrame.exposure : ''}.`);
+      ? t('{n} photos logged.', { n: logged })
+      : (lastFrame.exposure
+        ? t('Photo #{n} logged · {exposure}.', { n: lastFrame.index, exposure: lastFrame.exposure })
+        : t('Photo #{n} logged.', { n: lastFrame.index })));
   } else if (logged > 0) {
-    showToast(`${logged} of ${files.length} frames logged — the rest couldn't be read.`);
+    showToast(t("{n} of {total} photos logged. The rest couldn't be read.", { n: logged, total: files.length }));
   } else {
-    showToast('Could not read those photos — try again.');
+    showToast(t("Couldn't read those photos. Please try again."));
   }
 }
 
@@ -266,27 +290,27 @@ function openFrameSheet(frameId) {
   if (!frame) return;
 
   const rows = frame.exif
-    ? Object.entries({
-        Camera: [frame.exif.make, frame.exif.model].filter(Boolean).join(' '),
-        Focal: frame.exif.focalLength,
-        Aperture: frame.exif.aperture,
-        Shutter: frame.exif.shutter,
-        ISO: frame.exif.iso
-      }).filter(([, v]) => v).map(([k, v]) => `<dt>${k}</dt><dd>${escapeHtml(String(v))}</dd>`).join('')
+    ? [
+        [t('Camera'), [frame.exif.make, frame.exif.model].filter(Boolean).join(' ')],
+        [t('Focal'), frame.exif.focalLength],
+        [t('Aperture'), frame.exif.aperture],
+        [t('Shutter'), frame.exif.shutter],
+        [t('ISO'), frame.exif.iso]
+      ].filter(([, v]) => v).map(([k, v]) => `<dt>${k}</dt><dd>${escapeHtml(String(v))}</dd>`).join('')
     : '';
 
   openModal(`
-    <h3>Frame #${frame.index}</h3>
+    <h3>${t('Frame #{n}', { n: frame.index })}</h3>
     <img id="frameSheetImg" class="detail-image" alt="">
     <div class="field-row">
-      <label for="frameLabelInput">Label</label>
+      <label for="frameLabelInput">${t('Label')}</label>
       <input type="text" id="frameLabelInput" class="text-input" maxlength="24"
-        value="${escapeHtml(frame.label || '')}" placeholder="Rim, Portal, Vector…">
+        value="${escapeHtml(frame.label || '')}" placeholder="${t('Rim, Portal, Vector…')}">
     </div>
-    ${rows ? `<dl class="exif-list">${rows}</dl>` : '<p class="muted">No EXIF in this file.</p>'}
+    ${rows ? `<dl class="exif-list">${rows}</dl>` : `<p class="muted">${t('No EXIF in this file.')}</p>`}
     <div class="theme-actions">
-      <button type="button" id="frameSaveBtn" class="btn btn-accent btn-block">Save label</button>
-      <button type="button" id="frameDeleteBtn" class="btn btn-danger">Remove frame</button>
+      <button type="button" id="frameSaveBtn" class="btn btn-accent btn-block">${t('Save label')}</button>
+      <button type="button" id="frameDeleteBtn" class="btn btn-danger">${t('Remove frame')}</button>
     </div>
   `);
 
@@ -325,7 +349,7 @@ function openFrameSheet(frameId) {
 function mapsUrl(lat, lon) {
   const ua = navigator.userAgent;
   const coords = `${lat},${lon}`;
-  if (/iPhone|iPad|iPod/.test(ua)) return `maps://?ll=${coords}&q=${encodeURIComponent('You are here')}`;
+  if (/iPhone|iPad|iPod/.test(ua)) return `maps://?ll=${coords}&q=${encodeURIComponent(t('You are here'))}`;
   if (/Android/.test(ua)) return `geo:${coords}?q=${coords}`;
   return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=17/${lat}/${lon}`;
 }
@@ -335,7 +359,7 @@ async function openInMaps() {
   // ask here even though the app never asks on load.
   let fix = cachedFix();
   if (!fixIsFresh(fix)) {
-    showToast('Getting a location fix…');
+    showToast(t('Finding your location…'));
     try {
       fix = await requestFix({ highAccuracy: true });
     } catch (err) {

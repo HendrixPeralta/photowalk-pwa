@@ -12,6 +12,8 @@
  * coordinates -> hour angle.
  */
 
+import { t } from './i18n.js';
+
 const RAD = Math.PI / 180;
 const DAY_MS = 86400000;
 const J1970 = 2440588;
@@ -153,7 +155,7 @@ export function lightWindow(date, lat, lon) {
   const times = solarTimes(date, lat, lon);
   const pos = sunPosition(date, lat, lon);
   const now = date.getTime();
-  const at = (t) => (t ? t.getTime() : null);
+  const at = (d) => (d ? d.getTime() : null);
 
   const sunrise = at(times.sunrise);
   const sunset = at(times.sunset);
@@ -165,7 +167,7 @@ export function lightWindow(date, lat, lon) {
     const up = pos.altitude > 0;
     return {
       phase: up ? 'day' : 'night',
-      label: up ? 'Sun up all day' : 'Sun down all day',
+      label: up ? t('Sun up all day') : t('Sun down all day'),
       nextAt: null, minutesTo: null,
       altitude: pos.altitude, azimuth: pos.azimuth, times
     };
@@ -174,22 +176,22 @@ export function lightWindow(date, lat, lon) {
   const mins = (t) => Math.max(0, Math.round((t - now) / 60000));
 
   if (gmEnd !== null && now >= sunrise && now < gmEnd) {
-    return { phase: 'golden', label: 'Morning golden hour', nextAt: times.goldenMorningEnd, minutesTo: mins(gmEnd), altitude: pos.altitude, azimuth: pos.azimuth, times };
+    return { phase: 'golden', label: t('Morning golden hour'), nextAt: times.goldenMorningEnd, minutesTo: mins(gmEnd), altitude: pos.altitude, azimuth: pos.azimuth, times };
   }
   if (geStart !== null && now >= geStart && now < sunset) {
-    return { phase: 'golden', label: 'Evening golden hour', nextAt: times.sunset, minutesTo: mins(sunset), altitude: pos.altitude, azimuth: pos.azimuth, times };
+    return { phase: 'golden', label: t('Evening golden hour'), nextAt: times.sunset, minutesTo: mins(sunset), altitude: pos.altitude, azimuth: pos.azimuth, times };
   }
   if (now < sunrise) {
-    return { phase: 'blue', label: 'Blue hour before sunrise', nextAt: times.sunrise, minutesTo: mins(sunrise), altitude: pos.altitude, azimuth: pos.azimuth, times };
+    return { phase: 'blue', label: t('Blue hour before sunrise'), nextAt: times.sunrise, minutesTo: mins(sunrise), altitude: pos.altitude, azimuth: pos.azimuth, times };
   }
   if (now >= sunset) {
-    return { phase: 'night', label: 'After sunset', nextAt: null, minutesTo: null, altitude: pos.altitude, azimuth: pos.azimuth, times };
+    return { phase: 'night', label: t('After sunset'), nextAt: null, minutesTo: null, altitude: pos.altitude, azimuth: pos.azimuth, times };
   }
   // Broad daylight: the next thing worth waiting for is evening golden hour.
   const target = geStart !== null ? geStart : sunset;
   return {
     phase: 'day',
-    label: 'Golden hour approaching',
+    label: t('Golden hour approaching'),
     nextAt: geStart !== null ? times.goldenEveningStart : times.sunset,
     minutesTo: mins(target),
     altitude: pos.altitude, azimuth: pos.azimuth, times

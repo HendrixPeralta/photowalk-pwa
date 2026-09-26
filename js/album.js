@@ -5,6 +5,7 @@ import { THEMES } from './concepts.js';
 import { openModal, closeModal } from './modal.js';
 import { showToast } from './toast.js';
 import { escapeHtml, formatDate, navigateTo } from './util.js';
+import { t } from './i18n.js';
 
 let els = {};
 let filters = {
@@ -49,7 +50,10 @@ function matches(item) {
       ...(item.tags || []),
       ...(item.notes || []).map((n) => n.a),
       item.exif?.make, item.exif?.model, item.exif?.focalLength, item.exif?.aperture,
-      item.colorName, item.aspectLabel, item.brightnessLabel, item.focalLabel, item.apertureLabel
+      // Labels are stored in English (the filters match on them), so search
+      // both the stored word and what the chip actually shows.
+      ...[item.colorName, item.aspectLabel, item.brightnessLabel, item.focalLabel, item.apertureLabel]
+        .filter(Boolean).flatMap((label) => [label, t(label)])
     ].filter(Boolean).join(' ').toLowerCase();
     if (!haystack.includes(filters.search)) return false;
   }
@@ -62,12 +66,12 @@ export function renderAlbum() {
 
   els.empty.classList.toggle('hidden', items.length > 0);
   els.empty.textContent = state.album.length
-    ? 'No references match these filters.'
-    : 'No references yet — save one from the Analysis tab.';
+    ? t('No references match these filters.')
+    : t('No references yet. Save one from the Analysis tab.');
 
   els.grid.innerHTML = items.map((item) => `
     <button type="button" class="album-thumb" data-id="${item.id}" data-image="${escapeHtml(item.imageId || '')}">
-      <span class="album-thumb-tag">${escapeHtml(item.aspectLabel)}</span>
+      <span class="album-thumb-tag">${escapeHtml(t(item.aspectLabel))}</span>
     </button>
   `).join('');
 
@@ -84,34 +88,34 @@ async function openDetail(id) {
   const rows = exifRows(item.exif);
 
   const walkTheme = item.themeId
-    ? THEMES.find((t) => t.id === item.themeId) || state.customThemes.find((t) => t.id === item.themeId)
+    ? THEMES.find((th) => th.id === item.themeId) || state.customThemes.find((th) => th.id === item.themeId)
     : null;
   const chips = [item.aspectLabel, item.brightnessLabel, item.colorName, item.focalLabel, item.apertureLabel]
     .filter(Boolean)
-    .map((label) => `<span class="chip">${escapeHtml(label)}</span>`)
+    .map((label) => `<span class="chip">${escapeHtml(t(label))}</span>`)
     .join('');
 
   const notes = (item.notes || []).filter((n) => n && n.a);
 
   openModal(`
-    ${url ? `<img class="detail-image" src="${url}" alt="Saved reference">` : '<p class="muted">This photo is missing from storage.</p>'}
+    ${url ? `<img class="detail-image" src="${url}" alt="${t('Saved reference')}">` : `<p class="muted">${t('This photo is missing from storage.')}</p>`}
     <div class="detail-meta">
       ${chips}
-      ${walkTheme ? `<span class="chip">Walk: ${escapeHtml(walkTheme.title)}</span>` : ''}
-      <span class="chip chip-muted">Saved ${escapeHtml(formatDate(item.savedAt))}</span>
+      ${walkTheme ? `<span class="chip">${escapeHtml(t('Walk: {theme}', { theme: walkTheme.title }))}</span>` : ''}
+      <span class="chip chip-muted">${escapeHtml(t('Saved {date}', { date: formatDate(item.savedAt) }))}</span>
     </div>
     <div class="swatch-row">
       ${(item.colors || []).map((hex) => `<span class="swatch-sm" style="background:${escapeHtml(hex)}" title="${escapeHtml(hex)}"></span>`).join('')}
     </div>
-    ${item.tags && item.tags.length ? `<p class="tag-list">${item.tags.map((t) => `<span class="tag">${escapeHtml(t)}</span>`).join('')}</p>` : ''}
+    ${item.tags && item.tags.length ? `<p class="tag-list">${item.tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</p>` : ''}
     ${notes.length ? `
-      <h4 class="subsection-title">Your notes</h4>
+      <h4 class="subsection-title">${t('Your notes')}</h4>
       <dl class="exif-list notes-list">${notes.map((n) => `<dt>${escapeHtml(n.q)}</dt><dd>${escapeHtml(n.a)}</dd>`).join('')}</dl>` : ''}
     ${rows.length
       ? `<dl class="exif-list">${rows.join('')}</dl>`
-      : '<p class="muted">No EXIF metadata found for this image.</p>'}
-    ${url ? '<button type="button" class="btn btn-accent btn-block" id="analyzeRefBtn">Analyze this shot</button>' : ''}
-    <button type="button" class="btn btn-danger" id="deleteRefBtn">Delete from Album</button>
+      : `<p class="muted">${t('No EXIF metadata found for this image.')}</p>`}
+    ${url ? `<button type="button" class="btn btn-accent btn-block" id="analyzeRefBtn">${t('Analyze this shot')}</button>` : ''}
+    <button type="button" class="btn btn-danger" id="deleteRefBtn">${t('Delete from Album')}</button>
   `);
 
   const analyzeBtn = document.getElementById('analyzeRefBtn');
@@ -136,7 +140,7 @@ async function openDetail(id) {
     save();
     closeModal();
     renderAlbum();
-    showToast('Removed from Reference Album.');
+    showToast(t('Removed from Reference Album.'));
     window.dispatchEvent(new CustomEvent('photowalk:stats-changed'));
     if (item.imageId) await deleteImage(item.imageId).catch(() => {});
   });

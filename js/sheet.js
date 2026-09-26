@@ -9,6 +9,7 @@
 
 import { showToast } from './toast.js';
 import { canvasToBlob, loadImage } from './util.js';
+import { t, dateLocale } from './i18n.js';
 
 const W = 1400;
 const PAD = 56;
@@ -23,17 +24,26 @@ const mono = (size, weight = 500) => `${weight} ${size}px "JetBrains Mono", ui-m
 const display = (size, weight = 600) => `${weight} ${size}px "Space Grotesk", system-ui, sans-serif`;
 const body = (size, weight = 400) => `${weight} ${size}px "Hanken Grotesk", system-ui, sans-serif`;
 
+// Japanese has no spaces between words, so every CJK character is its own
+// break point. Closing punctuation is kept off the start of a line.
+const CJK = '\u3000-\u30ff\u3400-\u9fff\uff00-\uffef';
+const TOKEN = new RegExp(`\\s+|[${CJK}]|[^\\s${CJK}]+`, 'g');
+const NO_LINE_START = /^[、。，．）」』！？：・ー]$/;
+
 /** Draws wrapped text and returns the y coordinate just below it. */
 function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
-  const words = String(text || '').split(/\s+/).filter(Boolean);
+  const tokens = String(text || '').match(TOKEN) || [];
   let line = '';
+  let pendingSpace = false;
   let cursor = y;
-  for (const word of words) {
-    const test = line ? `${line} ${word}` : word;
-    if (ctx.measureText(test).width > maxWidth && line) {
+  for (const token of tokens) {
+    if (/^\s+$/.test(token)) { pendingSpace = !!line; continue; }
+    const test = line + (pendingSpace ? ' ' : '') + token;
+    pendingSpace = false;
+    if (ctx.measureText(test).width > maxWidth && line && !NO_LINE_START.test(token)) {
       ctx.fillText(line, x, cursor);
       cursor += lineHeight;
-      line = word;
+      line = token;
     } else {
       line = test;
     }
@@ -109,15 +119,15 @@ export async function exportBreakdownSheet(spec) {
   ctx.textBaseline = 'alphabetic';
   ctx.font = display(20, 700);
   ctx.fillStyle = AMBER;
-  ctx.fillText('P H O T O W A L K', PAD, y);
+  ctx.fillText('P H O T O E Y E', PAD, y);
   ctx.font = display(40, 600);
   ctx.fillStyle = INK;
   y += 48;
-  ctx.fillText('Frame breakdown', PAD, y);
+  ctx.fillText(t('Photo breakdown'), PAD, y);
   ctx.font = mono(18, 400);
   ctx.fillStyle = DIM;
   ctx.textAlign = 'right';
-  ctx.fillText(new Date().toLocaleString(), W - PAD, y);
+  ctx.fillText(new Date().toLocaleString(dateLocale), W - PAD, y);
   ctx.textAlign = 'left';
   y += 24;
   hairline(ctx, y, inner);
@@ -134,7 +144,7 @@ export async function exportBreakdownSheet(spec) {
   const colW = (inner - 40) / 2;
   const colTop = y;
 
-  y = capsLabel(ctx, 'Luminance spectrum', PAD, y);
+  y = capsLabel(ctx, t('Brightness chart'), PAD, y);
   if (spec.histogramCanvas) {
     const hh = 150;
     ctx.fillStyle = PANEL;
@@ -156,7 +166,7 @@ export async function exportBreakdownSheet(spec) {
 
   // Right column.
   const rx = PAD + colW + 40;
-  let ry = capsLabel(ctx, 'Optical payload', rx, colTop);
+  let ry = capsLabel(ctx, t('Camera settings'), rx, colTop);
   ctx.font = mono(19, 500);
   for (const [label, value] of spec.exifRows || []) {
     ctx.fillStyle = DIM;
@@ -168,11 +178,11 @@ export async function exportBreakdownSheet(spec) {
   if (!spec.exifRows || !spec.exifRows.length) {
     ctx.fillStyle = DIM;
     ctx.font = body(19);
-    ry = wrapText(ctx, 'No EXIF metadata in this file.', rx, ry, colW, 27);
+    ry = wrapText(ctx, t('No camera settings saved in this file.'), rx, ry, colW, 27);
   }
 
   ry += 20;
-  ry = capsLabel(ctx, 'Colour gamut', rx, ry);
+  ry = capsLabel(ctx, t('Main colors'), rx, ry);
   if (spec.harmony) {
     ctx.font = display(22, 600);
     ctx.fillStyle = AMBER;
@@ -199,7 +209,7 @@ export async function exportBreakdownSheet(spec) {
       ctx.fillStyle = INK;
       ctx.fillText(c.hex.toUpperCase(), rx + 26, ry);
       ctx.fillStyle = DIM;
-      ctx.fillText(`${Math.round(c.share * 100)}% ${c.role}`, rx + 160, ry);
+      ctx.fillText(`${Math.round(c.share * 100)}% ${t(c.role)}`, rx + 160, ry);
       ry += 26;
     }
   }
@@ -208,7 +218,7 @@ export async function exportBreakdownSheet(spec) {
   if (spec.takeaway) {
     hairline(ctx, y, inner);
     y += 34;
-    y = capsLabel(ctx, 'Analysis takeaway', PAD, y);
+    y = capsLabel(ctx, t('Takeaway'), PAD, y);
     ctx.font = body(21);
     ctx.fillStyle = INK;
     y = wrapText(ctx, spec.takeaway, PAD, y, inner, 30);
@@ -237,11 +247,11 @@ export async function exportStudySheet(spec) {
   let y = PAD + 34;
   ctx.font = display(20, 700);
   ctx.fillStyle = AMBER;
-  ctx.fillText('P H O T O W A L K   ·   D E B R I E F', PAD, y);
+  ctx.fillText(`P H O T O E Y E   ·   ${t('G R O U P   R E V I E W')}`, PAD, y);
   y += 50;
   ctx.font = display(40, 600);
   ctx.fillStyle = INK;
-  ctx.fillText(spec.title || 'Side-by-side study', PAD, y);
+  ctx.fillText(spec.title || t('Side-by-side study'), PAD, y);
   y += 30;
   ctx.font = body(20);
   ctx.fillStyle = DIM;
@@ -280,7 +290,7 @@ export async function exportStudySheet(spec) {
 
     ctx.font = mono(18, 500);
     ctx.fillStyle = INK;
-    ctx.fillText(pane.exposure || 'no EXIF', px + 14, y + paneH + 30);
+    ctx.fillText(pane.exposure || t('no camera data'), px + 14, y + paneH + 30);
     ctx.fillStyle = DIM;
     ctx.fillText(pane.detail || '', px + 14, y + paneH + 56);
   });
@@ -288,12 +298,12 @@ export async function exportStudySheet(spec) {
   y += paneH + 90;
   hairline(ctx, y, inner);
   y += 34;
-  y = capsLabel(ctx, 'Technical critique', PAD, y);
+  y = capsLabel(ctx, t('Feedback notes'), PAD, y);
 
   for (const note of spec.notes || []) {
     ctx.font = mono(17, 600);
     ctx.fillStyle = AMBER;
-    ctx.fillText(`${(note.author || 'partner').toUpperCase()} · ${note.when || ''}`, PAD, y);
+    ctx.fillText(`${(note.author || t('partner')).toUpperCase()} · ${note.when || ''}`, PAD, y);
     y += 28;
     ctx.font = body(20);
     ctx.fillStyle = INK;
@@ -302,7 +312,7 @@ export async function exportStudySheet(spec) {
   if (!spec.notes || !spec.notes.length) {
     ctx.font = body(20);
     ctx.fillStyle = DIM;
-    y = wrapText(ctx, 'No critique notes on this debrief yet.', PAD, y, inner, 28);
+    y = wrapText(ctx, t('No feedback notes yet.'), PAD, y, inner, 28);
   }
 
   await finish(canvas, y, 'photowalk-study-sheet');
@@ -322,9 +332,9 @@ async function finish(canvas, contentBottom, name) {
   try {
     const blob = await canvasToBlob(out, 'image/jpeg', 0.92);
     download(blob, `${name}-${new Date().toISOString().slice(0, 10)}.jpg`);
-    showToast('Study sheet downloaded.');
+    showToast(t('Study sheet downloaded.'));
   } catch (err) {
     console.warn('PhotoWalk: could not build the sheet.', err);
-    showToast('Could not build the sheet on this device.');
+    showToast(t('Could not build the sheet on this device.'));
   }
 }

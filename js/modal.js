@@ -1,3 +1,5 @@
+import { t } from './i18n.js';
+
 let root = null;
 let onCloseCb = null;
 
@@ -14,7 +16,7 @@ export function initModal(rootEl) {
 export function openModal(innerHtml, { onClose } = {}) {
   onCloseCb = onClose || null;
   root.innerHTML = `<div class="modal-card">
-    <button type="button" class="modal-close" data-close-modal aria-label="Close">&times;</button>
+    <button type="button" class="modal-close" data-close-modal aria-label="${t('Close')}">&times;</button>
     ${innerHtml}
   </div>`;
   root.classList.remove('hidden');

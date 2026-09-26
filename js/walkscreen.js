@@ -9,6 +9,7 @@
  * sunset for a city the user isn't in.
  */
 
+import { t, dateLocale, lang } from './i18n.js';
 import { state, save, hoursInPeriod } from './store.js';
 import { localDateKey } from './util.js';
 import { cachedFix, fixIsFresh, requestFix, geolocationSupported, formatLat } from './geo.js';
@@ -36,8 +37,8 @@ export function initWalkScreen() {
   // there is no fix.
   els.golden.addEventListener('click', async () => {
     if (fixIsFresh()) return;
-    if (!geolocationSupported()) { showToast('This browser has no location support.'); return; }
-    els.goldenText.textContent = 'Getting a fix…';
+    if (!geolocationSupported()) { showToast(t('This browser has no location support.')); return; }
+    els.goldenText.textContent = t('Finding your location…');
     try {
       await requestFix();
       renderGolden();
@@ -66,7 +67,7 @@ export function renderWalkScreen() {
 /* ---------- Golden-hour badge ---------- */
 
 function hhmm(date) {
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+  return date.toLocaleTimeString(dateLocale, { hour: '2-digit', minute: '2-digit', hour12: false });
 }
 
 /**
@@ -76,23 +77,23 @@ function hhmm(date) {
  */
 function goldenReading(now, fix) {
   const light = lightWindow(now, fix.lat, fix.lon);
-  const t = light.times;
+  const times = light.times;
 
   if (light.phase === 'golden') {
-    return { text: `${light.minutesTo}m of golden left`, state: 'now', title: light.label };
+    return { text: t('{n} min of golden hour left', { n: light.minutesTo }), state: 'now', title: light.label };
   }
-  if (light.phase === 'blue' && t.sunrise) {
-    return { text: `Golden ${hhmm(t.sunrise)}`, state: 'next', title: 'Morning golden hour starts at sunrise' };
+  if (light.phase === 'blue' && times.sunrise) {
+    return { text: t('Golden {time}', { time: hhmm(times.sunrise) }), state: 'next', title: t('Morning golden hour starts at sunrise') };
   }
   if (light.phase === 'day') {
-    const target = t.goldenEveningStart || t.sunset;
-    if (target) return { text: `Golden ${hhmm(target)}`, state: 'next', title: light.label };
+    const target = times.goldenEveningStart || times.sunset;
+    if (target) return { text: t('Golden {time}', { time: hhmm(target) }), state: 'next', title: light.label };
   }
   const tomorrow = new Date(now);
   tomorrow.setDate(tomorrow.getDate() + 1);
   const next = solarTimes(tomorrow, fix.lat, fix.lon);
   if (next.sunrise) {
-    return { text: `Golden ${hhmm(next.sunrise)}`, state: 'next', title: 'Tomorrow morning golden hour' };
+    return { text: t('Golden {time}', { time: hhmm(next.sunrise) }), state: 'next', title: t('Tomorrow morning golden hour') };
   }
   return { text: light.label, state: 'next', title: light.label };
 }
@@ -103,11 +104,11 @@ function renderGolden() {
   const fix = cachedFix();
   if (!fixIsFresh(fix)) {
     const supported = geolocationSupported();
-    els.goldenText.textContent = supported ? 'Add location' : 'No location support';
+    els.goldenText.textContent = supported ? t('Add location') : t('No location support');
     els.golden.dataset.state = 'nofix';
     els.golden.title = supported
-      ? 'Tap to add your location for golden-hour timings.'
-      : 'Golden-hour timings need location support.';
+      ? t('Tap to add your location for golden-hour timings.')
+      : t('Golden-hour timings need location support.');
     return;
   }
 
@@ -120,6 +121,8 @@ function renderGolden() {
 /* ---------- Seven-day film strip ---------- */
 
 const DAY_INITIALS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+// Japanese reads the locale's own one-character weekday (日 月 火…).
+const dayInitial = (d) => (lang === 'ja' ? d.toLocaleDateString(dateLocale, { weekday: 'narrow' }) : DAY_INITIALS[d.getDay()]);
 
 /** Frames logged on a given day: HUD captures plus references saved. */
 export function framesOnDay(key) {
@@ -148,15 +151,18 @@ function renderFilmStrip() {
     const shot = hours > 0 || frames > 0;
     const today = i === 0;
 
-    const value = frames ? String(frames) : (hours > 0 ? `${hours.toFixed(1)}h` : '–');
+    // Always a photo count: a walked day with no photos logged reads 0, and the
+    // hours stay in the tooltip. (Falling back to hours here showed "0.0h" for
+    // short walks, in a row that otherwise counts photos.)
+    const value = shot ? String(frames) : '–';
     cells.push(`
       <div class="film-cell${today ? ' film-cell-today' : ''}" data-shot="${shot ? 1 : 0}"
-           title="${key}: ${hours.toFixed(2)}h, ${frames} frame${frames === 1 ? '' : 's'}">
-        <span class="film-cell-day">${today ? 'Today' : DAY_INITIALS[d.getDay()]}</span>
+           title="${t(frames === 1 ? '{date}: {hours}h, {n} photo' : '{date}: {hours}h, {n} photos', { date: key, hours: hours.toFixed(2), n: frames })}">
+        <span class="film-cell-day">${today ? t('Today') : dayInitial(d)}</span>
         <span class="film-cell-can">
           <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#${shot ? 'i-film' : 'i-camera'}"/></svg>
         </span>
-        <span class="film-cell-val">${today && !shot ? 'Ready' : value}</span>
+        <span class="film-cell-val">${today && !shot ? t('Ready') : value}</span>
       </div>`);
   }
   els.strip.innerHTML = cells.join('');
@@ -169,19 +175,19 @@ function renderCadence() {
 
   const goal = Number(state.profile.goals.week) || 3;
   const done = hoursInPeriod('week');
-  els.walks.textContent = `${done.toFixed(1)} of ${goal}`;
+  els.walks.textContent = t('{done} of {goal}', { done: done.toFixed(1), goal });
   els.walksBar.style.width = `${Math.min(100, (done / goal) * 100)}%`;
 
   const thisWeek = framesBetween(6, 0);
   const lastWeek = framesBetween(13, 7);
   els.frames.textContent = String(thisWeek);
   if (!lastWeek && !thisWeek) {
-    els.framesNote.textContent = 'Log frames from the Field HUD';
+    els.framesNote.textContent = t('Log photos from the Live Walk tab');
   } else if (!lastWeek) {
-    els.framesNote.textContent = 'First week on record';
+    els.framesNote.textContent = t('First week on record');
   } else {
     const delta = Math.round(((thisWeek - lastWeek) / lastWeek) * 100);
-    els.framesNote.textContent = `${delta >= 0 ? '+' : ''}${delta}% vs last week`;
+    els.framesNote.textContent = t('{delta}% vs last week', { delta: `${delta >= 0 ? '+' : ''}${delta}` });
   }
 }
 
@@ -191,7 +197,7 @@ export function renderLaunchMeta(mode = null) {
   if (!els.launchMode) return;
   const active = mode || (document.getElementById('modeGuidedBtn').classList.contains('active') ? 'guided' : 'casual');
   const minutes = Number(state.profile.guidedDurationMin) || 30;
-  els.launchMode.textContent = active === 'guided' ? `Guided · ${minutes}m Sprint` : 'Casual Mode';
+  els.launchMode.textContent = active === 'guided' ? t('Guided · {n} min', { n: minutes }) : t('Casual Mode');
 
   const fix = cachedFix();
   if (fix && fixIsFresh(fix)) {
