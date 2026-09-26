@@ -22,7 +22,7 @@ import { exportBreakdownSheet } from './sheet.js';
 import { logFrame } from './walkscreen.js';
 import {
   escapeHtml, uid, clamp, loadImage, readFileAsDataUrl, rgbToHex, nearestColorName,
-  drawToCanvas, canvasToBlob, focalBucket, apertureBucket, formatCoords
+  drawToCanvas, canvasToBlob, focalBucket, apertureBucket, formatCoords, rgbToLab, deltaE
 } from './util.js';
 
 // Histogram and palette always read a fixed 640px sample, so their numbers are
@@ -45,6 +45,10 @@ const FLIPPABLE_OVERLAYS = ['golden-triangles'];
 const ROTATABLE_OVERLAYS = ['spiral-section', 'golden-spiral'];
 const PHI = (1 + Math.sqrt(5)) / 2;
 const ZOOM_MAX = 3;
+// Minimum CIE76 deltaE between palette swatches, so near-identical shades of the
+// same color (e.g. two similar sky blues) collapse into one instead of padding
+// the palette with lookalikes. ~20 is roughly "different colors at a glance".
+const MIN_PALETTE_DELTA_E = 20;
 
 // Each scope pairs a renderer with the rule that puts its trace into words.
 const SCOPES = [
@@ -582,6 +586,9 @@ function setViewTransform(zoom, panX, panY) {
   view.panX = view.zoom === 1 ? 0 : clamp(panX, rect.width * (1 - view.zoom), 0);
   view.panY = view.zoom === 1 ? 0 : clamp(panY, rect.height * (1 - view.zoom), 0);
   els.inner.style.transform = `translate(${view.panX}px, ${view.panY}px) scale(${view.zoom})`;
+  // At 1x, leave touch-action alone so a one-finger drag on the picture scrolls the page;
+  // once zoomed, switch it off so the same drag pans the image instead.
+  els.stack.classList.toggle('zoomed', view.zoom > 1);
   drawOverlay(); // keep guide-line screen width constant across zoom levels
 }
 
@@ -776,16 +783,19 @@ function computePalette(imageData, maxSwatches = 6) {
   }
 
   const sorted = Array.from(buckets.values())
-    .map((b) => ({ r: Math.round(b.r / b.count), g: Math.round(b.g / b.count), b: Math.round(b.b / b.count), count: b.count }))
+    .map((b) => {
+      const r = Math.round(b.r / b.count), g = Math.round(b.g / b.count), bl = Math.round(b.b / b.count);
+      return { r, g, b: bl, count: b.count, lab: rgbToLab(r, g, bl) };
+    })
     .sort((a, b) => b.count - a.count);
 
   const picked = [];
   for (const c of sorted) {
     if (picked.length >= maxSwatches) break;
-    const tooClose = picked.some((p) => Math.abs(p.r - c.r) + Math.abs(p.g - c.g) + Math.abs(p.b - c.b) < 40);
+    const tooClose = picked.some((p) => deltaE(p.lab, c.lab) < MIN_PALETTE_DELTA_E);
     if (!tooClose) picked.push(c);
   }
-  return picked;
+  return picked.map(({ r, g, b }) => ({ r, g, b }));
 }
 
 function renderPalette(palette) {

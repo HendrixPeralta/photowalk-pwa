@@ -544,16 +544,19 @@
         </div>
 
         <!-- Rule-based tonal verdict, computed from the histogram in interpret.js. -->
-        <div id="tonalKeyNote" class="diag-note hidden">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-contrast"/></svg>
-          <div class="diag-note-body">
+        <details id="tonalKeyNote" class="diag-note hidden">
+          <summary class="collapse-summary diag-note-summary">
+            <svg class="diag-note-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-contrast"/></svg>
             <div class="diag-note-head">
               <strong id="tonalKeyTitle"></strong>
               <span class="diag-note-tag" id="tonalKeyTag"></span>
             </div>
-            <p id="tonalKeyText"></p>
-          </div>
-        </div>
+            <svg class="collapse-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </summary>
+          <p id="tonalKeyText"></p>
+        </details>
 
         <details id="scopesDetails" class="theme-card collapse-card scopes-details">
           <summary class="collapse-summary">
