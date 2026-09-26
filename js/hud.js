@@ -21,6 +21,7 @@ import { openModal, closeModal } from './modal.js';
 import { escapeHtml, uid, navigateTo, drawToCanvas, canvasToBlob, localDateKey } from './util.js';
 import { cachedFix, fixIsFresh, requestFix } from './geo.js';
 import { logFrame } from './walkscreen.js';
+import { CONCEPTS } from './concepts.js';
 
 let els = {};
 let tickHandle = null;
@@ -41,6 +42,7 @@ export function initHud(api = {}) {
     missionMode: document.getElementById('hudMissionMode'),
     missionTitle: document.getElementById('hudMissionTitle'),
     missionHint: document.getElementById('hudMissionHint'),
+    themeTips: document.getElementById('hudThemeTips'),
     pips: document.getElementById('hudMissionPips'),
     progress: document.getElementById('hudMissionProgress'),
     synced: document.getElementById('hudMissionSynced'),
@@ -89,6 +91,7 @@ export function renderHud() {
   els.missionMode.textContent = guided ? t('{n} min', { n: w.durationMin }) : t('Casual');
   els.missionTitle.textContent = theme ? theme.title : t('Walk in progress');
   els.missionHint.textContent = theme ? theme.brief : t('Pick a subject and keep shooting it from new angles.');
+  renderThemeTips(theme);
 
   renderChallenges(theme);
   renderCaptureStrip();
@@ -149,6 +152,17 @@ function tickHud() {
   els.logLast.textContent = last
     ? t('Last: #{n} at {time}', { n: frames.length, time: new Date(last.at).toLocaleTimeString(dateLocale, { hour: '2-digit', minute: '2-digit' }) })
     : t('No photos yet');
+}
+
+/** The concepts behind today's theme, spelled out while the walk is still going. */
+function renderThemeTips(theme) {
+  const tips = theme
+    ? theme.concepts.map((key) => CONCEPTS[key]).filter(Boolean)
+    : [];
+  els.themeTips.classList.toggle('hidden', !tips.length);
+  els.themeTips.innerHTML = tips
+    .map((c) => `<p class="hud-theme-tip"><strong>${escapeHtml(c.title)}:</strong> ${escapeHtml(c.tip)}</p>`)
+    .join('');
 }
 
 function renderChallenges(theme) {

@@ -3,7 +3,6 @@ import { readExif, isHeif } from './exif.js';
 import { putImage, imageUrl, hydrateImages } from './db.js';
 import { showToast } from './toast.js';
 import { openModal, closeModal } from './modal.js';
-import { CONCEPTS, THEMES } from './concepts.js';
 import {
   histogramSummary, paletteRelationship, waveformSummary, paradeSummary,
   vectorscopeSummary, chromaticitySummary, SHADOW_END, HIGHLIGHT_START
@@ -98,7 +97,6 @@ export function initAnalysis() {
     chooseBtn: document.getElementById('choosePhotoBtn'),
     empty: document.getElementById('analyzeEmpty'),
     workspace: document.getElementById('analyzeWorkspace'),
-    pinnedTip: document.getElementById('analyzePinnedTip'),
     stack: document.getElementById('canvasStack'),
     inner: document.getElementById('canvasInner'),
     imageCanvas: document.getElementById('imageCanvas'),
@@ -228,9 +226,6 @@ export function initAnalysis() {
   els.anotherBtn.addEventListener('click', resetWorkspace);
 
   setScopeView(scopeView); // hides the cells the default tab does not show
-
-  renderPinnedTip();
-  window.addEventListener('photowalk:stats-changed', renderPinnedTip);
 
   setOverlay('thirds');
 }
@@ -904,36 +899,6 @@ export function exifRows(exif, { skip = [] } = {}) {
       + `target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a></dd>`);
   }
   return rows;
-}
-
-/* ---------- Pinned walk-theme tip ---------- */
-
-/** After a walk, pin its theme tips here so analysis becomes the post-walk ritual. */
-function renderPinnedTip() {
-  const lastWalk = state.lastWalk;
-  const fresh = lastWalk && !lastWalk.tipDismissed && Date.now() - lastWalk.endedAt < 24 * 3600000;
-  const theme = fresh
-    ? THEMES.find((th) => th.id === lastWalk.themeId) || state.customThemes.find((th) => th.id === lastWalk.themeId)
-    : null;
-  els.pinnedTip.classList.toggle('hidden', !theme);
-  if (!theme) return;
-
-  const tips = theme.concepts
-    .map((key) => CONCEPTS[key])
-    .filter(Boolean)
-    .map((c) => `<p class="pinned-tip-line"><strong>${escapeHtml(c.title)}:</strong> ${escapeHtml(c.tip)}</p>`)
-    .join('');
-
-  els.pinnedTip.innerHTML = `
-    <p class="pinned-tip-head">${t("Today's walk theme: <strong>{theme}</strong>. Check your shots against it.", { theme: escapeHtml(theme.title) })}</p>
-    ${tips}
-    <button type="button" id="dismissPinnedTipBtn" class="btn btn-ghost btn-sm">${t('Dismiss')}</button>`;
-
-  document.getElementById('dismissPinnedTipBtn').addEventListener('click', () => {
-    state.lastWalk.tipDismissed = true;
-    save();
-    els.pinnedTip.classList.add('hidden');
-  });
 }
 
 /* ---------- Comparison mode ---------- */

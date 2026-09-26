@@ -1537,10 +1537,6 @@ input[type="file"].text-input { padding: 8px; }
   will-change: transform;
 }
 
-.analyze-tip { flex-direction: column; align-items: stretch; }
-.analyze-tip .pinned-tip-head { margin: 0 0 6px; font-size: 0.88rem; }
-.analyze-tip .pinned-tip-line { margin: 0 0 6px; font-size: 0.82rem; color: var(--text-dim); }
-.analyze-tip .btn { align-self: flex-end; }
 
 
 
@@ -2044,6 +2040,15 @@ input[type="file"].text-input { padding: 8px; }
 }
 .mission-hint svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--accent); }
 .mission-hint p { margin: 0; }
+
+.hud-theme-tips {
+  margin-top: 10px;
+  padding: 10px;
+  background: var(--surface-0);
+  border-radius: var(--radius-md);
+}
+.hud-theme-tip { margin: 0 0 6px; font-size: 0.82rem; color: var(--text-dim); }
+.hud-theme-tip:last-child { margin-bottom: 0; }
 
 .mission-progress {
   display: flex;

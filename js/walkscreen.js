@@ -151,7 +151,10 @@ function renderFilmStrip() {
     const shot = hours > 0 || frames > 0;
     const today = i === 0;
 
-    const value = frames ? String(frames) : (hours > 0 ? t('{n}h', { n: hours.toFixed(1) }) : '–');
+    // Always a photo count: a walked day with no photos logged reads 0, and the
+    // hours stay in the tooltip. (Falling back to hours here showed "0.0h" for
+    // short walks, in a row that otherwise counts photos.)
+    const value = shot ? String(frames) : '–';
     cells.push(`
       <div class="film-cell${today ? ' film-cell-today' : ''}" data-shot="${shot ? 1 : 0}"
            title="${t(frames === 1 ? '{date}: {hours}h, {n} photo' : '{date}: {hours}h, {n} photos', { date: key, hours: hours.toFixed(2), n: frames })}">
