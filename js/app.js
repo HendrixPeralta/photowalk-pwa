@@ -34,7 +34,7 @@ const SCREEN_TITLES = {
 function showView(name) {
   document.querySelectorAll('.view').forEach((v) => v.classList.toggle('hidden', v.dataset.view !== name));
   document.querySelectorAll('.nav-btn').forEach((b) => b.classList.toggle('active', b.dataset.view === name));
-  document.getElementById('screenTitle').textContent = SCREEN_TITLES[name] || 'PhotoWalk';
+  document.getElementById('screenTitle').textContent = SCREEN_TITLES[name] || 'PhotoEYE';
 
   // The HUD runs a one-second clock; don't leave it ticking behind other tabs.
   if (name !== 'hud') pauseHudRendering();
@@ -123,7 +123,7 @@ function initInstallPrompt() {
 
   window.addEventListener('appinstalled', () => {
     installBtn.classList.add('hidden');
-    showToast('PhotoWalk installed to your device.');
+    showToast('PhotoEYE installed to your device.');
   });
 }
 

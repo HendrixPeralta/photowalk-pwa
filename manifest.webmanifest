@@ -1,6 +1,6 @@
 {
-  "name": "PhotoWalk",
-  "short_name": "PhotoWalk",
+  "name": "PhotoEYE",
+  "short_name": "PhotoEYE",
   "description": "Plan photo walks, learn composition, and organize your reference library.",
   "start_url": "./index.html",
   "scope": "./",
