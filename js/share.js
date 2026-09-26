@@ -16,13 +16,15 @@ let sharedFiles = [];
 
 export function initShare() {
   els = {
-    joinSection: document.getElementById('shareJoinSection'),
+    partnersJoin: document.getElementById('walkPartnersJoin'),
+    partnersActive: document.getElementById('walkPartnersActive'),
+    walkRoomCode: document.getElementById('walkRoomCode'),
+    manageRoomBtn: document.getElementById('manageRoomBtn'),
+    noRoomState: document.getElementById('shareNoRoomState'),
+    goHudBtn: document.getElementById('shareGoHudBtn'),
     roomSection: document.getElementById('shareRoomSection'),
-    themeInput: document.getElementById('roomThemeInput'),
     createBtn: document.getElementById('createRoomBtn'),
-    joinCodeInput: document.getElementById('joinCodeInput'),
-    joinBtn: document.getElementById('joinRoomBtn'),
-    error: document.getElementById('shareError'),
+    joinOpenBtn: document.getElementById('joinRoomOpenBtn'),
     codeDisplay: document.getElementById('roomCodeDisplay'),
     roomTheme: document.getElementById('roomThemeDisplay'),
     copyBtn: document.getElementById('copyInviteBtn'),
@@ -42,8 +44,9 @@ export function initShare() {
   els.nameInput.addEventListener('change', () => setDisplayName(els.nameInput.value));
 
   els.createBtn.addEventListener('click', createRoom);
-  els.joinBtn.addEventListener('click', () => joinRoom(els.joinCodeInput.value));
-  els.joinCodeInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') joinRoom(els.joinCodeInput.value); });
+  els.joinOpenBtn.addEventListener('click', openJoinRoomModal);
+  els.manageRoomBtn.addEventListener('click', () => navigateTo('share'));
+  els.goHudBtn.addEventListener('click', () => navigateTo('hud'));
   els.copyBtn.addEventListener('click', copyInvite);
   els.leaveBtn.addEventListener('click', leaveRoom);
   els.uploadBtn.addEventListener('click', uploadPhotos);
@@ -68,9 +71,12 @@ function inviteUrl(code) {
 }
 
 export function renderShare() {
-  if (!els.joinSection) return;
+  if (!els.partnersJoin) return;
   const room = state.currentRoom ? state.rooms[state.currentRoom] : null;
-  els.joinSection.classList.toggle('hidden', !!room);
+  els.partnersJoin.classList.toggle('hidden', !!room);
+  els.partnersActive.classList.toggle('hidden', !room);
+  if (room) els.walkRoomCode.textContent = room.code;
+  els.noRoomState.classList.toggle('hidden', !!room);
   els.roomSection.classList.toggle('hidden', !room);
   renderSharedNotice();
   if (!room) return;
@@ -113,7 +119,7 @@ function renderSharedNotice() {
   // what to do next) when the share sheet hands us photos before there's a room.
   els.sharedNotice.textContent = state.currentRoom
     ? `${count} ready from your share sheet — press Upload to post them.`
-    : `${count} ready from your share sheet — create or join a room to post them.`;
+    : `${count} ready from your share sheet — create or join a room from the Field HUD tab to post them.`;
 }
 
 /** Called on boot when the OS share sheet handed PhotoWalk some images. */
@@ -130,33 +136,46 @@ function createRoom() {
   const code = roomCode();
   state.rooms[code] = {
     code,
-    theme: els.themeInput.value.trim(),
+    theme: '',
     createdAt: Date.now(),
     photos: []
   };
   state.currentRoom = code;
-  els.themeInput.value = '';
   broadcast('room-created', { code });
   renderShare();
   showToast(`Room ${code} created — share the code or QR with your walk partners.`);
 }
 
+function openJoinRoomModal() {
+  openModal(`
+    <h3>Join a Room</h3>
+    <input type="text" id="modalJoinCode" class="text-input" placeholder="Room code">
+    <button type="button" id="modalJoinBtn" class="btn btn-primary btn-block">Join</button>
+    <p id="modalJoinError" class="error-text"></p>
+  `);
+  const input = document.getElementById('modalJoinCode');
+  const attempt = () => { if (joinRoom(input.value)) closeModal(); };
+  document.getElementById('modalJoinBtn').addEventListener('click', attempt);
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') attempt(); });
+  input.focus();
+}
+
 export function joinRoom(rawCode, { quiet = false } = {}) {
   const code = String(rawCode || '').trim().toUpperCase();
-  if (els.error) els.error.textContent = '';
+  const errorEl = document.getElementById('modalJoinError');
+  if (errorEl) errorEl.textContent = '';
   if (!code) {
-    if (!quiet && els.error) els.error.textContent = 'Enter a room code.';
+    if (!quiet && errorEl) errorEl.textContent = 'Enter a room code.';
     return false;
   }
   if (!state.rooms[code]) {
     const message = 'Room not found on this device. This demo simulates sharing across tabs of the '
       + 'same browser — connect a backend for real multi-device rooms.';
     if (quiet) showToast(message, 6000);
-    else if (els.error) els.error.textContent = message;
+    else if (errorEl) errorEl.textContent = message;
     return false;
   }
   state.currentRoom = code;
-  if (els.joinCodeInput) els.joinCodeInput.value = '';
   broadcast('room-joined', { code });
   renderShare();
   return true;

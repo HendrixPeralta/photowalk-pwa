@@ -91,8 +91,8 @@ async function handleLaunchIntent() {
     showView('share');
     joinRoom(roomParam, { quiet: true });
   } else if (shared.length) {
-    showView('share');
-    showToast('Pick a room, then press Upload to post the photos you shared.', 6000);
+    showView('hud');
+    showToast('Create or join a room, then press Upload to post the photos you shared.', 6000);
   }
 
   if (roomParam || params.has('shared')) {
