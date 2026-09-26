@@ -2153,13 +2153,6 @@ input[type="file"].text-input { padding: 8px; }
    paired with Pause Walk in this grid row, that would misalign the two tops. */
 .hud-footer-row .btn-danger-solid { margin-top: 0; }
 
-.hud-idle {
-  text-align: center;
-  padding: 40px 16px;
-}
-.hud-idle svg { width: 40px; height: 40px; color: var(--text-dim); margin-bottom: 12px; }
-.hud-idle p { margin: 0 0 16px; color: var(--text-dim); font-size: 13px; }
-
 /* --- Analysis: diagnostic notes ------------------------------------------ */
 .diag-note {
   padding: 12px;

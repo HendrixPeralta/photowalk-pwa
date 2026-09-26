@@ -18,23 +18,21 @@ import { putImage, imageUrl } from './db.js';
 import { readExif } from './exif.js';
 import { showToast } from './toast.js';
 import { openModal, closeModal } from './modal.js';
-import { escapeHtml, uid, navigateTo, drawToCanvas, canvasToBlob, localDateKey } from './util.js';
+import { escapeHtml, uid, drawToCanvas, canvasToBlob, localDateKey } from './util.js';
 import { cachedFix, fixIsFresh, requestFix } from './geo.js';
 import { logFrame } from './walkscreen.js';
 import { CONCEPTS } from './concepts.js';
 
 let els = {};
 let tickHandle = null;
-let hooks = { pause: null, resume: null, finish: null, themeOf: null };
+let hooks = { pause: null, resume: null, finish: null, themeOf: null, start: null };
 
 /** Wires the HUD. `api` hands over the walk-clock controls that live in walks.js. */
 export function initHud(api = {}) {
   hooks = Object.assign(hooks, api);
 
   els = {
-    idle: document.getElementById('hudIdle'),
     active: document.getElementById('hudActive'),
-    goToWalks: document.getElementById('hudGoToWalksBtn'),
     elapsed: document.getElementById('hudElapsed'),
     target: document.getElementById('hudTarget'),
     frames: document.getElementById('hudFrames'),
@@ -58,7 +56,6 @@ export function initHud(api = {}) {
     liveDot: document.getElementById('hudLiveDot')
   };
 
-  els.goToWalks.addEventListener('click', () => navigateTo('walks'));
   els.logBtn.addEventListener('click', () => els.frameInput.click());
   els.frameInput.addEventListener('change', onFramePicked);
   els.pinBtn.addEventListener('click', openInMaps);
@@ -75,11 +72,21 @@ export function initHud(api = {}) {
 
 /* ---------- Rendering ---------- */
 
+/**
+ * Only called when the user actually switches to this tab. Kicking off the
+ * walk-setup popup from renderHud() itself would also fire it from the
+ * photowalk:walk-changed refresh that runs right after a walk is finished,
+ * stomping the walk-complete summary the instant it opens.
+ */
+export function enterHud() {
+  if (!state.activeWalk && hooks.start) hooks.start();
+  renderHud();
+}
+
 export function renderHud() {
   if (!els.active) return;
   const w = state.activeWalk;
 
-  els.idle.classList.toggle('hidden', Boolean(w));
   els.active.classList.toggle('hidden', !w);
   stopTicking();
   if (!w) return;

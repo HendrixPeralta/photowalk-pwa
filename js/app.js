@@ -4,10 +4,10 @@ import { formatHours } from './util.js';
 import { initModal } from './modal.js';
 import { initToast, showToast } from './toast.js';
 import {
-  initWalks, renderHomeWalkState, pauseWalk, resumeWalk, activeTheme, finishActiveWalk, renderSavedThemes
+  initWalks, renderHomeWalkState, pauseWalk, resumeWalk, activeTheme, finishActiveWalk, renderSavedThemes, launchWalk
 } from './walks.js';
 import { initWalkScreen, renderWalkScreen } from './walkscreen.js';
-import { initHud, renderHud, pauseHudRendering } from './hud.js';
+import { initHud, enterHud, pauseHudRendering } from './hud.js';
 import { initDebrief } from './debrief.js';
 import { initAnalysis, loadDefaultPhoto } from './analysis.js';
 import { initToolHelp } from './toolhelp.js';
@@ -43,7 +43,7 @@ function showView(name) {
   if (name !== 'hud') pauseHudRendering();
 
   if (name === 'walks') renderWalks();
-  if (name === 'hud') renderHud();
+  if (name === 'hud') enterHud();
   if (name === 'album') renderAlbum();
   if (name === 'share') renderShare();
   if (name === 'themes') renderSavedThemes();
@@ -247,7 +247,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     pause: pauseWalk,
     resume: resumeWalk,
     finish: finishActiveWalk,
-    themeOf: activeTheme
+    themeOf: activeTheme,
+    start: launchWalk
   });
   initDebrief();
   initAnalysis();
