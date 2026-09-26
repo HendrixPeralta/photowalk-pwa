@@ -18,7 +18,6 @@ let els = {};
 export function initDeconstruct() {
   els = {
     frameLabel: document.getElementById('analyzeFrameLabel'),
-    frameNo: document.getElementById('analyzeFrameNo'),
     tonalNote: document.getElementById('tonalKeyNote'),
     tonalTitle: document.getElementById('tonalKeyTitle'),
     tonalTag: document.getElementById('tonalKeyTag'),
@@ -168,12 +167,7 @@ export function takeawayText(palette, summary, exif) {
   return parts.join(' ');
 }
 
-/* ---------- Header + reset ---------- */
-
-export function setFrameLabel(index) {
-  if (!els.frameNo) return;
-  els.frameNo.textContent = index === null ? 'No photo' : `Photo #${index}`;
-}
+/* ---------- Reset ---------- */
 
 export function clearDeconstruct() {
   if (!els.tonalNote) return;
@@ -181,5 +175,4 @@ export function clearDeconstruct() {
   els.tonalNote.open = false;
   els.harmonyRow.hidden = true;
   els.gamutBar.innerHTML = '';
-  setFrameLabel(null);
 }

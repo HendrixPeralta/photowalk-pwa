@@ -116,22 +116,27 @@ function setMode(next) {
 const MODE_INFO = {
   casual: {
     title: 'Casual Walk',
-    desc: 'A relaxed walk with a theme to shoot. No timer, so finish whenever you like.'
+    desc: "You get a theme to look for, like Reflections or Look Up, and that's it. There's no timer and no checklist, so wander at your own pace and stop whenever you like.",
+    best: 'Best for: easing in, walks with friends, or when you just want an excuse to get out with your camera.'
   },
   guided: {
     title: 'Guided Walk',
-    desc: 'The same themes, plus mini-challenges, a timer, and tips along the way.'
+    desc: "The same themes, with more structure. You pick a length (15 to 60 minutes), get a few mini-challenges to tick off, and receive a nudge halfway through and another near the end.",
+    best: 'Best for: building skills, or when you tend to run out of ideas once you are out.'
   }
 };
 
 function openModeInfoModal() {
   openModal(`
     <h3>Walk Modes</h3>
-    <p class="muted card-text">Pick how you want to walk: relaxed with no timer, or timed with challenges to keep you going.</p>
+    <p class="muted card-text">A photo walk is simply going for a walk to take pictures, with a theme to keep you looking. Pick how much guidance you want.</p>
     <h4 class="subsection-title">${MODE_INFO.casual.title}</h4>
     <p class="card-text">${MODE_INFO.casual.desc}</p>
+    <p class="card-text muted">${MODE_INFO.casual.best}</p>
     <h4 class="subsection-title">${MODE_INFO.guided.title}</h4>
     <p class="card-text">${MODE_INFO.guided.desc}</p>
+    <p class="card-text muted">${MODE_INFO.guided.best}</p>
+    <p class="card-text">Either way, you can pause at any time, every walk keeps your streak going, and the time you spend shooting counts toward your rewards. You can switch modes before you start a walk.</p>
   `);
 }
 
@@ -160,7 +165,7 @@ function applyMode(next) {
   mode = next;
   els.modeCasual.classList.toggle('active', mode === 'casual');
   els.modeGuided.classList.toggle('active', mode === 'guided');
-  setBtnLabel(els.startWalkBtn, 'Start Photowalk');
+  setBtnLabel(els.startWalkBtn, 'Start Photo Walk');
   setBtnLabel(els.finishWalkBtn, 'Stop Walk');
   renderLaunchMeta(mode);
 }
@@ -664,7 +669,7 @@ function applyActiveWalkUi() {
 }
 
 function resetThemeUi() {
-  setBtnLabel(els.startWalkBtn, 'Start Photowalk');
+  setBtnLabel(els.startWalkBtn, 'Start Photo Walk');
   // The launcher stays put. It needed a theme back when it only started a
   // themed walk; it quick-starts one now, so hiding it on the way back to idle
   // left the screen with no way to start a walk until the next reload.

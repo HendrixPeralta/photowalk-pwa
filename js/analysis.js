@@ -16,7 +16,7 @@ import {
 } from './tonecurve.js';
 import {
   initDeconstruct, renderTonalKey, renderGamut, takeawayText,
-  setFrameLabel, clearDeconstruct, tonalKey, gamutClusters
+  clearDeconstruct, tonalKey, gamutClusters
 } from './deconstruct.js';
 import { exportBreakdownSheet } from './sheet.js';
 import { logFrame } from './walkscreen.js';
@@ -323,7 +323,6 @@ export async function analyzeImage(img, { exif = null, countStat = false, albumI
   const summary = histogramSummary(currentHist.bins);
   renderTonalKey(currentHist.bins, summary);
   renderGamut(currentPalette);
-  setFrameLabel(state.profile.photosAnalyzed + (countStat ? 1 : 0));
 
   els.tagsInput.value = restore && restore.tags ? restore.tags.join(', ') : '';
   updateSaveButtonLabel();

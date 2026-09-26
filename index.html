@@ -468,8 +468,8 @@
         <span class="debrief-head-left">
           <span class="solar-dot"></span>
           <span class="label-caps" id="analyzeFrameLabel">Photo Breakdown</span>
+          <button type="button" class="tool-help-btn" data-tool-help="composition" aria-label="About composition guides">?</button>
         </span>
-        <span class="debrief-privacy" id="analyzeFrameNo">No photo</span>
       </div>
 
       <div id="analyzePinnedTip" class="banner analyze-tip hidden"></div>
@@ -531,6 +531,7 @@
           <h4 class="subsection-title">Main Colors</h4>
           <button type="button" class="tool-help-btn" data-tool-help="gamut" aria-label="About Main Colors">?</button>
         </div>
+        <div class="gamut-bar" id="gamutBar"></div>
         <div class="harmony-row" id="harmonyRow" hidden>
           <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-compare"/></svg>
           <div>
@@ -538,7 +539,6 @@
             <strong id="harmonyName"></strong>
           </div>
         </div>
-        <div class="gamut-bar" id="gamutBar"></div>
         <div id="paletteRow" class="palette-row hidden"></div>
         <p id="paletteCaption" class="hint"></p>
 
@@ -712,8 +712,8 @@
       <p id="sharedFilesNotice" class="banner shared-notice hidden"></p>
 
       <div id="shareNoRoomState" class="empty-state">
-        <p>No active room yet. Create or join one with your walk partners from the Field HUD tab.</p>
-        <button type="button" id="shareGoHudBtn" class="btn btn-accent">Go to Field HUD</button>
+        <p>No active room yet. Create or join one with your walk partners from the Live Walk tab.</p>
+        <button type="button" id="shareGoHudBtn" class="btn btn-accent">Go to Live Walk</button>
       </div>
 
       <div id="shareRoomSection" class="hidden">
@@ -899,7 +899,7 @@
     <button type="button" class="nav-btn" data-view="hud">
       <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-camera"/></svg>
       <span id="hudLiveDot" class="nav-live hidden"></span>
-      <span>Field HUD</span>
+      <span>Live Walk</span>
     </button>
     <button type="button" class="nav-btn" data-view="analyze">
       <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-grid"/></svg>

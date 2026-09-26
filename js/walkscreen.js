@@ -176,7 +176,7 @@ function renderCadence() {
   const lastWeek = framesBetween(13, 7);
   els.frames.textContent = String(thisWeek);
   if (!lastWeek && !thisWeek) {
-    els.framesNote.textContent = 'Log photos from the Field HUD';
+    els.framesNote.textContent = 'Log photos from the Live Walk tab';
   } else if (!lastWeek) {
     els.framesNote.textContent = 'First week on record';
   } else {

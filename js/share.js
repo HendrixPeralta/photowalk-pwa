@@ -119,7 +119,7 @@ function renderSharedNotice() {
   // what to do next) when the share sheet hands us photos before there's a room.
   els.sharedNotice.textContent = state.currentRoom
     ? `${count} ready to share. Press Upload to post them.`
-    : `${count} ready to share. Create or join a room from the Field HUD tab to post them.`;
+    : `${count} ready to share. Create or join a room from the Live Walk tab to post them.`;
 }
 
 /** Called on boot when the OS share sheet handed PhotoWalk some images. */

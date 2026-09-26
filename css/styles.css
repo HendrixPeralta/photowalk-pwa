@@ -1498,13 +1498,32 @@ input[type="file"].text-input { padding: 8px; }
   border: 1px solid var(--border);
   border-left: 2px solid var(--accent);
   border-radius: var(--radius-md);
-  padding: 10px 14px;
+  padding: 4px 4px 4px 14px;
   font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   opacity: 0;
   transform: translateY(8px);
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
-.toast.show { opacity: 1; transform: translateY(0); }
+/* Only a visible toast takes taps; the root stays click-through so a fading
+   one never blocks what is underneath it. */
+.toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.toast-text { flex: 1; padding: 6px 0; }
+.toast-close {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 20px;
+  line-height: 1;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.toast-close:hover { color: var(--accent-strong); }
 
 /* Analyze: zoomable canvas, comparison mode, interpretation */
 .canvas-inner {
@@ -1776,6 +1795,8 @@ input[type="file"].text-input { padding: 8px; }
   cursor: pointer;
 }
 .tool-help-btn:hover { color: var(--accent-strong); border-color: var(--accent); }
+.tool-help-list { margin: 6px 0 0; padding-left: 18px; font-size: 13px; }
+.tool-help-list li { margin-bottom: 6px; }
 
 .tool-help-refs {
   margin: 10px 0 0;

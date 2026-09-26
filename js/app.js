@@ -24,7 +24,7 @@ import { backfillMilestones } from './milestones.js';
 // The header shows which instrument you are looking at, under the wordmark.
 const SCREEN_TITLES = {
   walks: 'Walks',
-  hud: 'Field HUD',
+  hud: 'Live Walk',
   analyze: 'Analysis',
   album: 'Album',
   share: 'Partners',

@@ -1,46 +1,71 @@
 // Reference material for the "?" buttons next to each Analysis tool: what the
-// tool actually measures, a good and a bad example to calibrate against, and
-// somewhere to read more. Written for someone who has never used any of this
-// before, not for someone who already knows the vocabulary. Content only;
-// rendering reuses js/modal.js.
+// tool actually measures, how to read it, a good and a bad example to
+// calibrate against, and somewhere to read more. Written for someone who has
+// never used any of this before, not for someone who already knows the
+// vocabulary. Content only; rendering reuses js/modal.js.
 import { openModal } from './modal.js';
 
 export const TOOL_HELP = {
+  composition: {
+    title: 'Composition Guides',
+    what: "Lines drawn over your photo to show where the main subject sits. They're based on layouts that painters and photographers have used for centuries because they tend to feel balanced and lead the eye.",
+    read: "Pick a guide from the menu and see whether the important parts of your photo (a face, the horizon, a tree, the brightest spot) land on or near the lines, especially where lines cross. Close is good enough. These are ways of looking, not rules to obey.",
+    list: [
+      ['Rule of Thirds', 'two lines each way, splitting the photo into nine equal boxes. Put your subject on a line or where two cross, and the horizon along the top or bottom line. The easiest one to start with.'],
+      ['Golden Ratio', 'like the rule of thirds, but the lines sit a little closer to the middle. It often feels a bit more natural.'],
+      ['Golden Triangles', 'one diagonal corner to corner, plus two shorter lines meeting it at right angles. Good for photos with slanted lines, like a road, a slope or a leaning shadow. Flip mirrors it for diagonals that run the other way.'],
+      ['Spiral Section', 'the photo divided into ever-smaller squares, the frame the golden spiral is built on. Put your subject in the smallest box.'],
+      ['Golden Spiral', 'a curve that winds in toward one point. Place your subject where the spiral tightens, and let curved lines in the scene follow it. Rotate turns it to start from another corner.']
+    ],
+    good: "A portrait where the person's eyes sit on the top third line and their face sits just off center, with space in front of them in the direction they are looking.",
+    bad: "Everything lined up dead center with the horizon cutting the photo exactly in half, when nothing about the scene is symmetrical. It isn't wrong, but it often feels static. Centered works best for scenes that really are symmetrical, like a reflection or a doorway.",
+    extra: "Reset puts Flip and Rotate back to how they started. Compare opens a photo from your Reference Album side by side with yours, with the same guide on both.",
+    refs: [
+      { text: 'Michael Freeman, "The Photographer\'s Eye"', note: 'the go-to book on composition, full of clear examples' },
+      { text: 'Wikipedia: Rule of thirds', url: 'https://en.wikipedia.org/wiki/Rule_of_thirds', note: 'examples of the simplest guide in use' },
+      { text: 'Wikipedia: Golden ratio', url: 'https://en.wikipedia.org/wiki/Golden_ratio', note: 'where the spiral and golden lines come from' }
+    ]
+  },
   gamut: {
     title: 'Main Colors',
-    what: "Picks out the main colors in your photo and checks whether they naturally go well together: colors sitting opposite each other on a color wheel (called complementary), colors sitting close together (analogous), or the photo just being shades of one color (monochrome).",
-    good: "A sunset photo with a warm orange sky and cool blue water. Those two colors sit on opposite sides of the color wheel, so together they look bold and pleasing rather than clashing.",
-    bad: "A photo taken under mixed indoor lighting comes back showing four or five colors that all look like slightly different shades of murky green. That's not a color choice. It's just the lighting confusing the camera.",
+    what: "Finds the handful of colors that fill most of your photo, shows how much space each one takes up, and tells you whether they work together as a color scheme.",
+    read: "The bar is your photo's colors lined up by size: a wider block means more of the photo is that color. Tap a block to copy its color code. Above the bar, Color Harmony names the scheme. Complementary means colors from opposite sides of the color wheel, like orange and blue. Analogous means neighbors, like yellow, orange and red. Monochrome means one color plus grays.",
+    good: "A sunset with a warm orange sky over cool blue water comes back as Complementary. Opposite colors make each other stand out, which is why this pairing is so common in photos and film posters.",
+    bad: "A photo taken under mixed indoor lights comes back with four or five murky, slightly different greens and yellows, labeled Mixed. That isn't a color choice. The camera was confused by the lighting. Setting white balance, or shooting near a window, usually fixes it.",
     refs: [
       { text: 'Johannes Itten, "The Art of Color"', note: 'a gentle, classic introduction to how colors relate to each other' },
       { text: 'Josef Albers, "Interaction of Color"', note: "short and visual, showing how colors change depending on what's next to them" },
-      { text: 'Wikipedia: Color scheme', url: 'https://en.wikipedia.org/wiki/Color_scheme', note: 'a quick reference for the harmony names (complementary, analogous, etc.)' }
+      { text: 'Wikipedia: Color scheme', url: 'https://en.wikipedia.org/wiki/Color_scheme', note: 'a quick guide to the scheme names (complementary, analogous and so on)' }
     ]
   },
   histogram: {
     title: 'Brightness Chart',
-    what: "A simple chart of how bright or dark your photo is. It sorts every pixel from pure black to pure white and counts how many land at each brightness, like a bar chart of light.",
-    good: "The chart fills the width smoothly with no tall spike jammed against either edge, meaning you can still see detail in both the darkest shadows and the brightest highlights.",
-    bad: "A tall spike pressed flat against the right edge (parts of the photo are pure white with nothing left to see) or the left edge (parts are pure black, same problem). Once it hits the wall like that, the detail is gone for good.",
+    what: "Shows how much of your photo is dark, how much is bright, and how much sits in between. Photographers call this a histogram, and most cameras and editing apps can show one.",
+    read: "Left is black, right is white, and the middle is everything in between. The taller the chart at a spot, the more of the photo has that brightness. There's no single right shape: a snowy scene should lean right and a night scene should lean left. What matters is the two edges.",
+    good: "The chart fades down to almost nothing before it reaches either edge. That means even the darkest shadows and brightest highlights still have detail you can see and edit.",
+    bad: "A tall spike pressed against the right edge means part of the photo is pure white, often a sky or window, with nothing left to recover. A spike against the left edge means the same for pure black. On your next shot, tap the bright or dark area on your phone screen before shooting so the camera exposes for it.",
     refs: [
-      { text: 'Ansel Adams, "The Negative"', note: 'the classic book on understanding how light and dark map onto a photo' },
+      { text: 'Ansel Adams, "The Negative"', note: 'the classic book on how light and dark map onto a photo' },
       { text: 'Wikipedia: Image histogram', url: 'https://en.wikipedia.org/wiki/Image_histogram', note: 'a short explainer with example charts' }
     ]
   },
   tonalkey: {
     title: 'Tonal Key',
-    what: "Looks at that brightness chart and gives your photo a plain-language label: mostly bright (\"high-key\"), mostly dark (\"low-key\"), or a balanced mix, plus a note if a chunk of detail got lost in solid black or white.",
-    good: "A bright, airy portrait that's meant to be mostly light tones, with just a touch of dark for contrast. It gets labelled high-key, and a low \"lost detail\" number confirms nothing important got crushed away.",
-    bad: "A photo that's just accidentally too dark gets the same \"low-key\" label as a photo that's moodily dark on purpose. The label alone can't tell you which one you've got, so check the brightness chart alongside it to be sure.",
+    what: "Reads the brightness chart for you and sums up the overall mood of your photo in a few words: mostly bright (high-key), mostly dark (low-key), high contrast, low contrast, or balanced.",
+    read: "The title is the verdict and the tag beside it is the mood it usually gives (Airy, Moody, Punchy, Soft or Even). Open it to see how much of the photo is dark or bright, and how much is pure black or pure white. Anything above about 1% pure white or pure black is detail you've lost.",
+    good: "A bright, airy portrait you meant to keep light comes back as High-key with almost 0% pure white. The label matches your plan and no detail was lost.",
+    bad: "A photo that is just too dark by accident gets the same Low-key label as one that is dark on purpose. The tool can't read your mind, so treat the label as a description, not a grade. If it doesn't match what you were going for, that's your cue to adjust exposure next time.",
     refs: [
-      { text: 'Wikipedia: Zone system', url: 'https://en.wikipedia.org/wiki/Zone_system', note: 'the classic system this idea of "keys" and tone ranges comes from' }
+      { text: 'Wikipedia: High-key lighting', url: 'https://en.wikipedia.org/wiki/High-key_lighting', note: 'examples of bright, low-shadow photos' },
+      { text: 'Wikipedia: Low-key lighting', url: 'https://en.wikipedia.org/wiki/Low-key_lighting', note: 'examples of dark, dramatic photos' }
     ]
   },
   waveform: {
     title: 'Waveform',
-    what: "Similar to the brightness chart above, but instead of just counting pixels, it shows you where in the photo, left to right, the bright and dark areas actually are.",
-    good: "The line rises and falls where you'd expect it to. For example, a bump where a lit face sits, without flattening out along the very top of the chart.",
-    bad: "A flat line stuck at the very top across a big stretch of the photo. That's usually a sign that a sky or window has turned into solid, featureless white with nothing hiding underneath it.",
+    what: "A brightness chart that keeps its place in the photo. Instead of piling every pixel into one heap, it shows how bright each part of the photo is from left to right. Film and video crews use it to check exposure.",
+    read: "Left to right on the chart matches left to right in your photo. Higher up means brighter: the top line is pure white and the bottom line is pure black. So a bright window on the right side of your photo shows up as a high patch on the right side of the chart.",
+    good: "The shape rises where you expect light, like a bump where a sunlit face is, but stays just under the top line. The brightest parts are bright and still have detail.",
+    bad: "A flat, solid band pressed against the top line across a wide stretch. That's usually a sky or window that has turned into plain white with nothing left in it. Try tapping that part of the screen before you shoot so your camera exposes for it.",
     refs: [
       { text: 'Blain Brown, "Cinematography: Theory and Practice"', note: 'covers this tool the way film crews actually use it' },
       { text: 'Wikipedia: Waveform monitor', url: 'https://en.wikipedia.org/wiki/Waveform_monitor', note: 'background on where this tool comes from (video production)' }
@@ -48,38 +73,46 @@ export const TOOL_HELP = {
   },
   parade: {
     title: 'RGB Parade',
-    what: "The same left-to-right brightness view as the Waveform, but split into three separate lines: one for red, one for green, one for blue, so you can spot when one color is out of balance with the others.",
-    good: "The three colored lines rise and fall together in roughly the same shape, just shifted a little to match the photo's real colors, like warm skin showing a touch more red than blue.",
-    bad: "One line, often blue under warm indoor lighting, sits much higher or lower than the other two across the whole photo. That's an unwanted color tint, not a brightness problem, and usually means the white balance needs fixing.",
+    what: "Three waveforms side by side: one for red, one for green, one for blue. Every color on a screen is a mix of those three, so comparing them shows whether your photo has an unwanted color tint.",
+    read: "Compare the bottoms of the three panels, then the tops. Something white or gray in real life should have red, green and blue at the same height. If one panel sits clearly higher than the others, that color is tinting the photo.",
+    good: "The three panels have roughly the same shape and line up at the top and bottom, with small differences where the scene really is colorful, like a little extra red over a warm face.",
+    bad: "The blue panel sits well below the other two across the whole photo, which happens a lot under warm indoor bulbs. The whole photo looks orange. That's a white balance problem, and the temperature or white balance slider in most editing apps fixes it.",
     refs: [
-      { text: 'Wikipedia: RGB color model', url: 'https://en.wikipedia.org/wiki/RGB_color_model', note: 'the basics of how red, green and blue combine to make every color on screen' }
+      { text: 'Wikipedia: Color balance', url: 'https://en.wikipedia.org/wiki/Color_balance', note: 'what a color tint is and how people correct it' },
+      { text: 'Wikipedia: RGB color model', url: 'https://en.wikipedia.org/wiki/RGB_color_model', note: 'how red, green and blue combine to make every color on screen' }
     ]
   },
   vectorscope: {
     title: 'Vectorscope',
-    what: "A circular chart of every color in your photo. Which direction a dot sits tells you which color (hue) it is; how far it sits from the center tells you how strong or vivid (saturated) that color is.",
-    good: "The dots cluster in a way that matches what you were going for, without pushing hard against the outer edge of the circle.",
-    bad: "Color pushed all the way out to the edge of the circle in one direction. That's a sign of oversaturated, clipped color, common with the punchy processing some phone cameras apply automatically.",
+    what: "A round chart that shows which colors are in your photo and how strong they are, ignoring brightness completely.",
+    read: "Think of it as a color wheel. The direction a dot sits in tells you its color (reds one way, blues the opposite way). The distance from the center tells you how vivid it is: the center is gray, and the farther out, the stronger the color. The dashed line is where skin tones fall, for every skin color.",
+    good: "Most dots stay in the inner part of the circle, leaning toward the colors you actually saw. If there's a person in the photo, their skin sits on or near the dashed line.",
+    bad: "A streak shooting out to the edge of the circle means that color is overdone, which often happens with heavy filters or a saturation slider pushed too far. Skin that lands well away from the dashed line usually looks too orange, too pink or slightly green.",
     refs: [
-      { text: 'Wikipedia: Vectorscope', url: 'https://en.wikipedia.org/wiki/Vectorscope', note: 'a short explainer with example charts' }
+      { text: 'Wikipedia: Vectorscope', url: 'https://en.wikipedia.org/wiki/Vectorscope', note: 'a short explainer with example charts' },
+      { text: 'Wikipedia: Colorfulness', url: 'https://en.wikipedia.org/wiki/Colorfulness', note: 'what saturation means, in plain terms' }
     ]
   },
   cie: {
     title: 'CIE Chromaticity',
-    what: "A map of every color your photo actually contains, laid out so you can see the full range of color used, separate from how bright or how strong those colors are.",
-    good: "The colors form a clear, tight group in one part of the map. For instance, a photo that feels almost black-and-white clustering near the middle, or a colorful photo grouping into a few clear color families.",
-    bad: "Colors scattered evenly all over the map with no real grouping. That's usually a sign of noise or a compression glitch scrambling the colors, not an actual rich, varied photo.",
+    what: "A map of every color your photo uses, drawn over a map of all the colors people can see. It shows the range of colors in the photo and whether the overall light leans warm or cool.",
+    read: "The horseshoe is every color the human eye can see. The triangle inside it is the smaller set of colors a normal screen can show. Your photo's colors appear as a cloud. The white cross (D65) marks normal daylight: if the cloud's average sits near it, the light looks natural. Toward orange means warmer, toward blue means cooler.",
+    good: "A colorful street scene spreads its cloud across a good part of the triangle. A foggy morning stays in a small cloud near the white cross. Both are right for their scene.",
+    bad: "The whole cloud has slid off toward orange or blue when the scene didn't look that way to you. The camera's white balance got it wrong. Correcting white balance in an editing app moves the cloud back toward the cross.",
     refs: [
-      { text: 'Wikipedia: CIE 1931 color space', url: 'https://en.wikipedia.org/wiki/CIE_1931_color_space', note: 'more than you need, but the diagram itself is worth a look' }
+      { text: 'Wikipedia: CIE 1931 color space', url: 'https://en.wikipedia.org/wiki/CIE_1931_color_space', note: 'more than you need, but the horseshoe diagram is worth a look' },
+      { text: 'Wikipedia: Color temperature', url: 'https://en.wikipedia.org/wiki/Color_temperature', note: 'why candlelight looks orange and shade looks blue' }
     ]
   },
   tonecurve: {
     title: 'Tone Curve',
-    what: "A line you can bend to control brightness and contrast. \"Measured\" shows how your photo's tones are actually spread out right now; \"Adjust\" lets you reshape that line yourself, the same way most photo-editing apps let you tweak contrast.",
-    good: "A gentle S-shaped curve: darks pulled down a little, lights pushed up a little, and the middle barely touched. It adds a bit of punch without losing detail.",
-    bad: "A curve bent into an extreme S, or one with a flat, level section in the middle. A flat section squashes a whole range of different tones into looking identical, quietly destroying detail there even though nothing looks obviously \"blown out.\"",
+    what: "The tool most editing apps use to fine-tune brightness and contrast. Here you can see how your photo's tones are spread, then try bending the curve to preview a change.",
+    read: "Measured shows your photo as it is: the line climbs from dark on the left to bright on the right, and a steep stretch means lots of the photo sits in that range of tones. Switch to Adjust to edit. The straight line means no change. Tap to add a point, drag it up to brighten those tones or down to darken them, and double-tap a point to remove it.",
+    good: "A gentle S-shape: the dark end pulled down a little and the bright end pushed up a little. It adds punch and makes the photo feel crisper without losing detail.",
+    bad: "A steep, extreme S, or a section of the line pushed flat and level. A flat section turns a whole range of different tones into the same shade, so detail quietly disappears there, even if nothing looks obviously overexposed.",
     refs: [
-      { text: 'Michael Freeman, "The Photographer\'s Eye"', note: 'explains this kind of contrast control in plain, visual terms' }
+      { text: 'Michael Freeman, "The Photographer\'s Eye"', note: 'explains contrast and tone in plain, visual terms' },
+      { text: 'Wikipedia: Curve (tonality)', url: 'https://en.wikipedia.org/wiki/Curve_(tonality)', note: 'a short explainer with examples' }
     ]
   }
 };
@@ -97,8 +130,15 @@ function openToolHelp(key) {
   openModal(`
     <h3>${info.title}</h3>
     <p class="muted card-text">${info.what}</p>
-    <p class="card-text"><strong>Good:</strong> ${info.good}</p>
-    <p class="card-text"><strong>Bad:</strong> ${info.bad}</p>
+    <h4 class="subsection-title">How to read it</h4>
+    <p class="card-text">${info.read}</p>
+    ${info.list ? `<ul class="tool-help-list">${info.list.map(([name, text]) => `<li><strong>${name}:</strong> ${text}</li>`).join('')}</ul>` : ''}
+    <h4 class="subsection-title">What good looks like</h4>
+    <p class="card-text">${info.good}</p>
+    <h4 class="subsection-title">What to watch out for</h4>
+    <p class="card-text">${info.bad}</p>
+    ${info.extra ? `<p class="card-text muted">${info.extra}</p>` : ''}
+    <h4 class="subsection-title">Learn more</h4>
     <ul class="tool-help-refs">${info.refs.map(refHtml).join('')}</ul>
   `);
 }
