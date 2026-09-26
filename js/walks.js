@@ -57,9 +57,8 @@ export function initWalks() {
 
   els.modeCasual.addEventListener('click', () => setMode('casual'));
   els.modeGuided.addEventListener('click', () => setMode('guided'));
-  document.querySelectorAll('.mode-card-info').forEach((btn) => {
-    btn.addEventListener('click', () => openModeInfoModal(btn.dataset.modeInfo));
-  });
+  const modeInfoBtn = document.getElementById('modeInfoBtn');
+  if (modeInfoBtn) modeInfoBtn.addEventListener('click', openModeInfoModal);
   els.savedThemesList.addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-action]');
     if (!btn) return;
@@ -125,12 +124,14 @@ const MODE_INFO = {
   }
 };
 
-function openModeInfoModal(key) {
-  const info = MODE_INFO[key];
-  if (!info) return;
+function openModeInfoModal() {
   openModal(`
-    <h3>${info.title}</h3>
-    <p class="muted card-text">${info.desc}</p>
+    <h3>Field Objective Setting</h3>
+    <p class="muted card-text">Choose how a walk plays out: a relaxed theme to shoot, or the same theme sharpened into a timed sprint.</p>
+    <h4 class="subsection-title">${MODE_INFO.casual.title}</h4>
+    <p class="card-text">${MODE_INFO.casual.desc}</p>
+    <h4 class="subsection-title">${MODE_INFO.guided.title}</h4>
+    <p class="card-text">${MODE_INFO.guided.desc}</p>
   `);
 }
 
