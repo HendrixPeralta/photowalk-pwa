@@ -3,11 +3,15 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { IconSprite } from "@/components/icons/IconSprite";
-import { maybeSeedStarterAlbum } from "@/features/album/references";
+import { starterAlbumOnStart } from "@/features/album/references";
+import { installConsoleHooks } from "@/features/devtools/consoleHooks";
 import { handleLaunchIntentOnce } from "@/features/partners/launchIntent";
+import { startReviewSync } from "@/features/review/queue";
+import { maybeNudgeOnOpen } from "@/features/settings/reminders";
 import { WalkEngine } from "@/features/walks/WalkEngine";
 import { setNavigator } from "@/lib/nav";
 import { bootOnce } from "@/state/boot";
+import { takeDevParams } from "@/state/devParams";
 import { BottomNav } from "./BottomNav";
 import { Drawer } from "./Drawer";
 import { ModalHost } from "./ModalHost";
@@ -46,8 +50,13 @@ function Shell({ children }: { children: ReactNode }) {
   // Not awaited by anything: fetching and decoding the starter photos has no
   // business holding up the first screen.
   useEffect(() => {
-    void maybeSeedStarterAlbum();
+    void starterAlbumOnStart(takeDevParams().photos);
+    installConsoleHooks();
+    maybeNudgeOnOpen();
   }, []);
+
+  // Reviews written offline go out now, and whenever the connection is back.
+  useEffect(() => startReviewSync(), []);
 
   // An invite link or photos from the share sheet: both open Partners.
   useEffect(() => {
