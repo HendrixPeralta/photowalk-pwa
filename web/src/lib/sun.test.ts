@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { legacy } from "@/test/legacy";
+import { digest } from "@/test/digest";
 import { lightWindow, solarTimes, sunPosition } from "./sun";
 
 const TOKYO = { lat: 35.6762, lon: 139.6503 };
@@ -22,14 +22,15 @@ describe("sun", () => {
     expect(lightWindow(new Date("2026-06-21T12:00:00Z"), 78.22, 15.65).phase).toBe("day");
   });
 
-  it("matches the old app across a year of hours", async () => {
-    const old = await legacy("sun.js");
+  // Matched the old app when ported; the snapshot keeps every reading as it was.
+  it("readings across a year of hours are unchanged", () => {
+    const readings = [];
     for (let day = 0; day < 365; day += 7) {
       for (let hour = 0; hour < 24; hour += 5) {
         const date = new Date(Date.UTC(2026, 0, 1 + day, hour, 17));
-        expect(sunPosition(date, TOKYO.lat, TOKYO.lon)).toEqual(old.sunPosition(date, TOKYO.lat, TOKYO.lon));
-        expect(lightWindow(date, TOKYO.lat, TOKYO.lon)).toEqual(old.lightWindow(date, TOKYO.lat, TOKYO.lon));
+        readings.push([sunPosition(date, TOKYO.lat, TOKYO.lon), lightWindow(date, TOKYO.lat, TOKYO.lon)]);
       }
     }
+    expect(digest(readings)).toMatchSnapshot();
   });
 });

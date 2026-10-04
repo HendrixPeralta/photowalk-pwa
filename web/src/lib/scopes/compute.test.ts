@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { legacy } from "@/test/legacy";
+import { digest } from "@/test/digest";
 import { BUNDLED_PHOTOS, photoPixels } from "@/test/photos";
 import { computeScopes } from "./compute";
 
@@ -10,10 +10,11 @@ function solid(r: number, g: number, b: number, size = 32) {
 }
 
 describe("computeScopes", () => {
-  it.each(BUNDLED_PHOTOS)("matches the old app on %s", async (name) => {
-    const old = await legacy("scopes.js");
-    const px = photoPixels(name);
-    expect(computeScopes(px)).toEqual(old.computeScopes(px));
+  // The same traces and stats as the old app when ported; the snapshot keeps them so.
+  it.each(BUNDLED_PHOTOS)("is unchanged on %s", (name) => {
+    const { stats, ...traces } = computeScopes(photoPixels(name));
+    expect(stats).toMatchSnapshot();
+    expect(digest(traces)).toMatchSnapshot();
   });
 
   it("reads a neutral gray as colorless", () => {

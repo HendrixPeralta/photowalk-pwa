@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { legacy } from "@/test/legacy";
+import { digest } from "@/test/digest";
 import { defaultState } from "@/state/defaults";
 import { applyBackstory, buildBackstory, DEMO_YEAR, STARTER } from "./backstory";
 import { rewardTimeline } from "./rewards";
@@ -19,24 +19,22 @@ describe("backstory", () => {
       .not.toEqual(buildBackstory(STARTER, { now: NOW, uid: counter() }).activityLog);
   });
 
-  it.each([["starter", STARTER], ["demo year", DEMO_YEAR]])("generates the same %s as the old app", async (_name, cfg) => {
+  // The same history the old app generated when ported; the snapshot keeps it so.
+  it.each([["starter", STARTER], ["demo year", DEMO_YEAR]])("generates the same %s", (_name, cfg) => {
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(NOW);
-    const store = await legacy("store.js");
-    const old = await legacy("backstory.js");
-    Object.assign(store.state, structuredClone(defaultState()));
-    const oldSummary = old.applyBackstory(cfg);
-
     const data = defaultState();
     const story = buildBackstory(cfg, { now: NOW, uid: counter() });
     applyBackstory(data, story);
 
-    expect(story.summary).toEqual(oldSummary);
-    expect(data.activityLog).toEqual(store.state.activityLog);
-    expect(data.frameLog).toEqual(store.state.frameLog);
-    expect(stripIds(data.walkHistory)).toEqual(stripIds(store.state.walkHistory));
-    expect(stripIds(data.rewards)).toEqual(stripIds(store.state.rewards));
-    expect(stripIds(data.profile)).toEqual(stripIds(store.state.profile));
+    expect(story.summary).toMatchSnapshot();
+    expect(digest({
+      activityLog: data.activityLog,
+      frameLog: data.frameLog,
+      walkHistory: stripIds(data.walkHistory),
+      rewards: stripIds(data.rewards),
+      profile: stripIds(data.profile),
+    })).toMatchSnapshot();
   });
 
   it("tells one consistent story", () => {

@@ -1,0 +1,375 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`computeScopes > is unchanged on a.jpg 1`] = `
+{
+  "channels": {
+    "b": {
+      "clipBlack": 0.1538788056206089,
+      "clipWhite": 0.00032567330210772833,
+      "high": 240,
+      "low": 0,
+      "mean": 73.99124707259953,
+    },
+    "g": {
+      "clipBlack": 0.025618413348946135,
+      "clipWhite": 0.0007281908665105386,
+      "high": 247,
+      "low": 0,
+      "mean": 87.30646955503512,
+    },
+    "r": {
+      "clipBlack": 0.051430766978922716,
+      "clipWhite": 0.004650907494145199,
+      "high": 254,
+      "low": 0,
+      "mean": 85.66180108313817,
+    },
+  },
+  "cie": {
+    "gamutShare": 0.6479944674965422,
+    "x": 0.31603720481167424,
+    "y": 0.33671167800693025,
+  },
+  "luma": {
+    "clipBlack": 0.028293325526932086,
+    "clipWhite": 0,
+    "high": 246,
+    "low": 0,
+    "mean": 85.99545397467817,
+  },
+  "samples": 273280,
+  "vector": {
+    "chromaticShare": 0.5212456088992974,
+    "hueDeg": 183.44932221254146,
+    "hueRgb": {
+      "b": 0,
+      "g": 169,
+      "r": 141,
+    },
+    "meanChroma": 15.141582615489595,
+    "skinShare": 0.17044353649804136,
+  },
+}
+`;
+
+exports[`computeScopes > is unchanged on a.jpg 2`] = `"sha256:7003fa4cc618b308"`;
+
+exports[`computeScopes > is unchanged on a_1.jpg 1`] = `
+{
+  "channels": {
+    "b": {
+      "clipBlack": 0.020107581967213115,
+      "clipWhite": 0.0008306498829039813,
+      "high": 250,
+      "low": 0,
+      "mean": 111.08064622365339,
+    },
+    "g": {
+      "clipBlack": 0,
+      "clipWhite": 0.00016832552693208432,
+      "high": 241,
+      "low": 45,
+      "mean": 151.04887661007027,
+    },
+    "r": {
+      "clipBlack": 0.0000622072599531616,
+      "clipWhite": 0.000054888758782201405,
+      "high": 238,
+      "low": 18,
+      "mean": 125.29928278688524,
+    },
+  },
+  "cie": {
+    "gamutShare": 0.45801225054337086,
+    "x": 0.3030391444308825,
+    "y": 0.34622614219775005,
+  },
+  "luma": {
+    "clipBlack": 0,
+    "clipWhite": 0,
+    "high": 239,
+    "low": 37,
+    "mean": 142.6888067293741,
+  },
+  "samples": 273280,
+  "vector": {
+    "chromaticShare": 0.914702868852459,
+    "hueDeg": 212.42989157947574,
+    "hueRgb": {
+      "b": 9,
+      "g": 187,
+      "r": 74,
+    },
+    "meanChroma": 31.117653782451317,
+    "skinShare": 0.051474176901228144,
+  },
+}
+`;
+
+exports[`computeScopes > is unchanged on a_1.jpg 2`] = `"sha256:6c2641733a5fd611"`;
+
+exports[`computeScopes > is unchanged on a_25.jpg 1`] = `
+{
+  "channels": {
+    "b": {
+      "clipBlack": 0.5254683840749415,
+      "clipWhite": 0,
+      "high": 83,
+      "low": 0,
+      "mean": 7.426749121779859,
+    },
+    "g": {
+      "clipBlack": 0.4077502927400468,
+      "clipWhite": 0,
+      "high": 162,
+      "low": 0,
+      "mean": 19.16023492388759,
+    },
+    "r": {
+      "clipBlack": 0.19835333723653395,
+      "clipWhite": 0.004164227166276346,
+      "high": 253,
+      "low": 0,
+      "mean": 59.440409104215455,
+    },
+  },
+  "cie": {
+    "gamutShare": 0.36069946650859513,
+    "x": 0.542682927029408,
+    "y": 0.3779708148317061,
+  },
+  "luma": {
+    "clipBlack": 0.24880708430913348,
+    "clipWhite": 0,
+    "high": 173,
+    "low": 0,
+    "mean": 26.876642279714684,
+  },
+  "samples": 273280,
+  "vector": {
+    "chromaticShare": 0.4638026932084309,
+    "hueDeg": 117.42503599689174,
+    "hueRgb": {
+      "b": 73,
+      "g": 120,
+      "r": 255,
+    },
+    "meanChroma": 23.819002999126624,
+    "skinShare": 0.5592750970429514,
+  },
+}
+`;
+
+exports[`computeScopes > is unchanged on a_25.jpg 2`] = `"sha256:d4a4d87ef7d621c3"`;
+
+exports[`computeScopes > is unchanged on a_31.jpg 1`] = `
+{
+  "channels": {
+    "b": {
+      "clipBlack": 0.15633050351288055,
+      "clipWhite": 0.000014637002341920375,
+      "high": 230,
+      "low": 0,
+      "mean": 40.81701551522248,
+    },
+    "g": {
+      "clipBlack": 0.03817696135831382,
+      "clipWhite": 0.00026346604215456674,
+      "high": 230,
+      "low": 0,
+      "mean": 61.135813085480095,
+    },
+    "r": {
+      "clipBlack": 0.004936329039812646,
+      "clipWhite": 0.010062939110070258,
+      "high": 255,
+      "low": 1,
+      "mean": 89.82696135831382,
+    },
+  },
+  "cie": {
+    "gamutShare": 0.6121319897253508,
+    "x": 0.3980839435776935,
+    "y": 0.3675619256324796,
+  },
+  "luma": {
+    "clipBlack": 0.007779566744730679,
+    "clipWhite": 0,
+    "high": 230,
+    "low": 0,
+    "mean": 65.76853402369723,
+  },
+  "samples": 273280,
+  "vector": {
+    "chromaticShare": 0.6425351288056206,
+    "hueDeg": 131.1526088311992,
+    "hueRgb": {
+      "b": 40,
+      "g": 129,
+      "r": 255,
+    },
+    "meanChroma": 24.899321082839368,
+    "skinShare": 0.4025126429450089,
+  },
+}
+`;
+
+exports[`computeScopes > is unchanged on a_31.jpg 2`] = `"sha256:8659f87249c5ba14"`;
+
+exports[`computeScopes > is unchanged on a_33.jpg 1`] = `
+{
+  "channels": {
+    "b": {
+      "clipBlack": 0,
+      "clipWhite": 0.00006586651053864169,
+      "high": 243,
+      "low": 12,
+      "mean": 142.9521223653396,
+    },
+    "g": {
+      "clipBlack": 0,
+      "clipWhite": 0.00016832552693208432,
+      "high": 249,
+      "low": 14,
+      "mean": 134.16609338407494,
+    },
+    "r": {
+      "clipBlack": 0.000010977751756440281,
+      "clipWhite": 0.000274443793911007,
+      "high": 240,
+      "low": 14,
+      "mean": 105.44771662763466,
+    },
+  },
+  "cie": {
+    "gamutShare": 0.1828689982216953,
+    "x": 0.2850621573537594,
+    "y": 0.3194521532022944,
+  },
+  "luma": {
+    "clipBlack": 0,
+    "clipWhite": 0,
+    "high": 245,
+    "low": 14,
+    "mean": 128.69491777796875,
+  },
+  "samples": 273280,
+  "vector": {
+    "chromaticShare": 0.6911263173302108,
+    "hueDeg": 300.4426784533481,
+    "hueRgb": {
+      "b": 235,
+      "g": 178,
+      "r": 28,
+    },
+    "meanChroma": 17.667455235906125,
+    "skinShare": 0.006332364418041944,
+  },
+}
+`;
+
+exports[`computeScopes > is unchanged on a_33.jpg 2`] = `"sha256:c723f7a4044c07ef"`;
+
+exports[`computeScopes > is unchanged on a_49.jpg 1`] = `
+{
+  "channels": {
+    "b": {
+      "clipBlack": 0.000980679156908665,
+      "clipWhite": 0.0008891978922716628,
+      "high": 243,
+      "low": 25,
+      "mean": 189.9413824648712,
+    },
+    "g": {
+      "clipBlack": 0.00016832552693208432,
+      "clipWhite": 0.0007318501170960188,
+      "high": 241,
+      "low": 35,
+      "mean": 191.74444525761123,
+    },
+    "r": {
+      "clipBlack": 0.0005269320843091335,
+      "clipWhite": 0.0010392271662763466,
+      "high": 242,
+      "low": 17,
+      "mean": 170.44809718969555,
+    },
+  },
+  "cie": {
+    "gamutShare": 0.18612922347362182,
+    "x": 0.30479062076946434,
+    "y": 0.3333022241131997,
+  },
+  "luma": {
+    "clipBlack": 0.00021589578454332553,
+    "clipWhite": 0,
+    "high": 241,
+    "low": 33,
+    "mean": 187.0866605243189,
+  },
+  "samples": 273280,
+  "vector": {
+    "chromaticShare": 0.511036299765808,
+    "hueDeg": 288.1858615241907,
+    "hueRgb": {
+      "b": 202,
+      "g": 185,
+      "r": 15,
+    },
+    "meanChroma": 16.23543517376818,
+    "skinShare": 0.00922266139657444,
+  },
+}
+`;
+
+exports[`computeScopes > is unchanged on a_49.jpg 2`] = `"sha256:66a4afa4384f46fa"`;
+
+exports[`computeScopes > is unchanged on dr-3474.jpg 1`] = `
+{
+  "channels": {
+    "b": {
+      "clipBlack": 0.000010977751756440281,
+      "clipWhite": 0.08447745901639345,
+      "high": 255,
+      "low": 11,
+      "mean": 133.94287177985947,
+    },
+    "g": {
+      "clipBlack": 0.000010977751756440281,
+      "clipWhite": 0.08447745901639345,
+      "high": 255,
+      "low": 11,
+      "mean": 133.94287177985947,
+    },
+    "r": {
+      "clipBlack": 0.000010977751756440281,
+      "clipWhite": 0.08447745901639345,
+      "high": 255,
+      "low": 11,
+      "mean": 133.94287177985947,
+    },
+  },
+  "cie": {
+    "gamutShare": 0.00009879470460383324,
+    "x": 0.3127159072218411,
+    "y": 0.32900148050655464,
+  },
+  "luma": {
+    "clipBlack": 0.000010977751756440281,
+    "clipWhite": 0,
+    "high": 254,
+    "low": 11,
+    "mean": 133.94287177985947,
+  },
+  "samples": 273280,
+  "vector": {
+    "chromaticShare": 0,
+    "hueDeg": null,
+    "hueRgb": null,
+    "meanChroma": 5.161293190308624e-15,
+    "skinShare": 0,
+  },
+}
+`;
+
+exports[`computeScopes > is unchanged on dr-3474.jpg 2`] = `"sha256:8f9df91be8c41146"`;

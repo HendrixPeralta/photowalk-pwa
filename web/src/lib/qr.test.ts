@@ -1,6 +1,6 @@
 import jsQR from "jsqr";
 import { describe, expect, it } from "vitest";
-import { legacy } from "@/test/legacy";
+import { digest } from "@/test/digest";
 import { qrMatrix, qrPathData } from "./qr";
 
 /** Rasterizes a QR matrix to RGBA pixels with a quiet zone, for the decoder. */
@@ -30,11 +30,10 @@ describe("qr", () => {
     expect(jsQR(data, size, size)?.data).toBe(text);
   });
 
-  it("produces the same modules as the old app", async () => {
-    const old = await legacy("qr.js");
-    for (const text of ["https://example.com/?room=QWERTY", "hello", "x".repeat(150)]) {
-      expect(qrMatrix(text)).toEqual(old.qrMatrix(text));
-    }
+  // The same modules as the old app when ported (masks and all), kept by the snapshot.
+  it("produces unchanged modules", () => {
+    const matrices = ["https://example.com/?room=QWERTY", "hello", "x".repeat(150)].map((text) => qrMatrix(text));
+    expect(digest(matrices)).toMatchSnapshot();
   });
 
   it("rejects text that does not fit version 10", () => {

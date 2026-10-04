@@ -1,21 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { legacy, legacyFunction } from "@/test/legacy";
-import { BUNDLED_PHOTOS, photoBlob, photoPixels } from "@/test/photos";
+import { digest } from "@/test/digest";
 import { deltaE, rgbToLab } from "../color";
+import { BUNDLED_PHOTOS, photoBlob, photoPixels } from "@/test/photos";
 import { readExif } from "../exif";
 import { albumRecord, exifRows } from "./album";
 import { goldenSpiralGeometry, guidePaths, perpFoot } from "./guides";
 import { computeHistogram } from "./histogram";
 import { computePalette } from "./palette";
 
-const oldHistogram = () => legacyFunction("analysis.js", "computeHistogram");
-const oldPalette = () => legacyFunction("analysis.js", "computePalette", { rgbToLab, deltaE, MIN_PALETTE_DELTA_E: 20 });
-
 describe("histogram and palette", () => {
-  it.each(BUNDLED_PHOTOS)("match the old app on %s", (name) => {
+  // As the old app measured them when ported; the snapshot keeps them so.
+  it.each(BUNDLED_PHOTOS)("are unchanged on %s", (name) => {
     const px = photoPixels(name);
-    expect(computeHistogram(px)).toEqual(oldHistogram()(px));
-    expect(computePalette(px)).toEqual(oldPalette()(px));
+    expect(digest(computeHistogram(px))).toMatchSnapshot();
+    expect(computePalette(px)).toMatchSnapshot();
   });
 
   it("palette merges lookalike shades and caps the swatch count", () => {
@@ -42,11 +40,12 @@ describe("histogram and palette", () => {
 });
 
 describe("composition guides", () => {
-  it("spiral geometry and perpendiculars match the old app", () => {
-    const PHI = (1 + Math.sqrt(5)) / 2;
-    expect(goldenSpiralGeometry()).toEqual(legacyFunction("analysis.js", "goldenSpiralGeometry", { PHI })());
-    const oldFoot = legacyFunction("analysis.js", "perpFoot");
-    expect(perpFoot([300, 0], [0, 0], [300, 200])).toEqual(oldFoot([300, 0], [0, 0], [300, 200]));
+  it("spiral geometry is unchanged, and perpendiculars meet the diagonal at right angles", () => {
+    expect(digest(goldenSpiralGeometry())).toMatchSnapshot();
+    const [fx, fy] = perpFoot([300, 0], [0, 0], [300, 200]);
+    // The segment from the corner to its foot is perpendicular to the diagonal.
+    expect((fx - 300) * 300 + (fy - 0) * 200).toBeCloseTo(0, 9);
+    expect(fy / fx).toBeCloseTo(200 / 300, 9);
   });
 
   it("draws the expected lines for each overlay", () => {
@@ -68,18 +67,17 @@ describe("composition guides", () => {
 });
 
 describe("album records", () => {
-  it("builds the same item as the old app (apart from the random id)", async () => {
-    const old = await legacy("analysis.js");
+  // The same item as the old app built when ported; the snapshot keeps it so.
+  it("builds the same item (apart from the random id)", async () => {
     const exif = await readExif(photoBlob("a_1.jpg"));
     const input = {
       imageId: "img-1", width: 1600, height: 1067, avgLum: 140,
       palette: computePalette(photoPixels("a_1.jpg")), exif, tags: ["street"],
       overlay: { type: "thirds" as const, flip: false, rotation: 0 }, themeId: "light", savedAt: 1700000000000,
     };
-    const { id: newId, ...fresh } = albumRecord(input);
-    const { id: oldId, ...previous } = old.albumRecord(input);
-    expect(fresh).toEqual(previous);
-    expect(newId).not.toBe(oldId);
+    const { id, ...item } = albumRecord(input);
+    expect(item).toMatchSnapshot();
+    expect(id).not.toBe(albumRecord(input).id);
   });
 
   it.each([

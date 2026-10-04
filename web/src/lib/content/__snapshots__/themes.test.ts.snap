@@ -1,0 +1,76 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`suggestTheme > picks the same in the golden hour 1`] = `
+[
+  "shadows-silhouettes: The sun is getting low, perfect timing for this one.",
+  "urban-textures: You haven't walked this theme yet.",
+  "framing-doorways: You haven't walked this theme yet.",
+  "color-pop: You haven't walked this theme yet.",
+  "street-candid: You haven't walked this theme yet.",
+  "macro-details: You haven't walked this theme yet.",
+  "negative-space: You haven't walked this theme yet.",
+  "motion-rhythm: You haven't walked this theme yet.",
+  "look-up: You haven't walked this theme yet.",
+  "ground-level: You haven't walked this theme yet.",
+  "sense-of-scale: You haven't walked this theme yet.",
+  "weather-mood: You haven't walked this theme yet.",
+  "signs-letters: You haven't walked this theme yet.",
+  "nature-in-city: You haven't walked this theme yet.",
+  "curves-spirals: You haven't walked this theme yet.",
+  "symmetry-hunt: You haven't walked this theme yet.",
+  "minimal-geometry: You haven't walked this theme yet.",
+  "wear-and-decay: You haven't walked this theme yet.",
+  "transit-waiting: You haven't walked this theme yet.",
+  "hands-at-work: You haven't walked this theme yet.",
+]
+`;
+
+exports[`suggestTheme > picks the same in the morning 1`] = `
+[
+  "shadows-silhouettes: You haven't walked this theme yet.",
+  "urban-textures: You haven't walked this theme yet.",
+  "framing-doorways: You haven't walked this theme yet.",
+  "color-pop: You haven't walked this theme yet.",
+  "street-candid: You haven't walked this theme yet.",
+  "macro-details: You haven't walked this theme yet.",
+  "negative-space: You haven't walked this theme yet.",
+  "motion-rhythm: You haven't walked this theme yet.",
+  "look-up: You haven't walked this theme yet.",
+  "ground-level: You haven't walked this theme yet.",
+  "sense-of-scale: You haven't walked this theme yet.",
+  "weather-mood: You haven't walked this theme yet.",
+  "signs-letters: You haven't walked this theme yet.",
+  "nature-in-city: You haven't walked this theme yet.",
+  "curves-spirals: You haven't walked this theme yet.",
+  "symmetry-hunt: You haven't walked this theme yet.",
+  "minimal-geometry: You haven't walked this theme yet.",
+  "wear-and-decay: You haven't walked this theme yet.",
+  "transit-waiting: You haven't walked this theme yet.",
+  "hands-at-work: You haven't walked this theme yet.",
+]
+`;
+
+exports[`suggestTheme > picks the same in the night 1`] = `
+[
+  "urban-textures: You haven't walked this theme yet.",
+  "framing-doorways: You haven't walked this theme yet.",
+  "color-pop: You haven't walked this theme yet.",
+  "street-candid: You haven't walked this theme yet.",
+  "macro-details: You haven't walked this theme yet.",
+  "negative-space: You haven't walked this theme yet.",
+  "motion-rhythm: You haven't walked this theme yet.",
+  "look-up: You haven't walked this theme yet.",
+  "ground-level: You haven't walked this theme yet.",
+  "sense-of-scale: You haven't walked this theme yet.",
+  "night-lights: It's dark out, perfect timing for this one.",
+  "weather-mood: You haven't walked this theme yet.",
+  "signs-letters: You haven't walked this theme yet.",
+  "nature-in-city: You haven't walked this theme yet.",
+  "curves-spirals: You haven't walked this theme yet.",
+  "symmetry-hunt: You haven't walked this theme yet.",
+  "minimal-geometry: You haven't walked this theme yet.",
+  "wear-and-decay: You haven't walked this theme yet.",
+  "transit-waiting: You haven't walked this theme yet.",
+  "hands-at-work: You haven't walked this theme yet.",
+]
+`;

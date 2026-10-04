@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { legacy } from "@/test/legacy";
+import { digest } from "@/test/digest";
 import { apertureBucket, clamp, focalBucket, formatCoords, formatHours, localDateKey, roomCode } from "./util";
 
 describe("formatHours", () => {
@@ -10,9 +10,11 @@ describe("formatHours", () => {
     expect(formatHours(input as number | null)).toBe(expected);
   });
 
-  it("matches the old app for a sweep of values", async () => {
-    const old = await legacy("util.js");
-    for (let h = 0; h < 30; h += 0.137) expect(formatHours(h)).toBe(old.formatHours(h));
+  // Matched the old app across this sweep when ported; the snapshot keeps it so.
+  it("is unchanged across a sweep of values", () => {
+    const shown = [];
+    for (let h = 0; h < 30; h += 0.137) shown.push(formatHours(h));
+    expect(digest(shown)).toMatchSnapshot();
   });
 });
 
@@ -26,10 +28,9 @@ describe("small helpers", () => {
     expect(clamp(-1, 0, 3)).toBe(0);
   });
 
-  it("buckets focal lengths and apertures like the old app", async () => {
-    const old = await legacy("util.js");
-    for (const mm of [0, 12, 34.9, 35, 50, 70, 71, 200, NaN]) expect(focalBucket(mm)).toBe(old.focalBucket(mm));
-    for (const f of [0, 1.4, 2.8, 2.9, 8, 8.1, 16, NaN]) expect(apertureBucket(f)).toBe(old.apertureBucket(f));
+  it("buckets focal lengths and apertures", () => {
+    expect([0, 12, 34.9, 35, 50, 70, 71, 200, NaN].map(focalBucket)).toMatchSnapshot();
+    expect([0, 1.4, 2.8, 2.9, 8, 8.1, 16, NaN].map(apertureBucket)).toMatchSnapshot();
   });
 
   it("formats coordinates with hemispheres", () => {

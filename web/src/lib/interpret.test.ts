@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { legacy } from "@/test/legacy";
 import { BUNDLED_PHOTOS, photoPixels } from "@/test/photos";
 import { computeHistogram } from "./analysis/histogram";
 import { computePalette } from "./analysis/palette";
@@ -10,34 +9,32 @@ import {
 } from "./interpret";
 import { computeScopes } from "./scopes/compute";
 
-function readingsFor(name: string, mod: Record<string, (...a: never[]) => unknown>) {
+function readingsFor(name: string) {
   const px = photoPixels(name);
   const { stats } = computeScopes(px);
   return {
-    histogram: mod.histogramSummary(computeHistogram(px).bins as never),
-    palette: mod.paletteRelationship(computePalette(px) as never),
-    waveform: mod.waveformSummary(stats as never),
-    parade: mod.paradeSummary(stats as never),
-    vector: mod.vectorscopeSummary(stats as never),
-    cie: mod.chromaticitySummary(stats as never),
+    histogram: histogramSummary(computeHistogram(px).bins),
+    palette: paletteRelationship(computePalette(px)),
+    waveform: waveformSummary(stats),
+    parade: paradeSummary(stats),
+    vector: vectorscopeSummary(stats),
+    cie: chromaticitySummary(stats),
   };
 }
 
-const fresh = { histogramSummary, paletteRelationship, waveformSummary, paradeSummary, vectorscopeSummary, chromaticitySummary };
-
 describe("plain-language readings", () => {
-  it.each(BUNDLED_PHOTOS)("say exactly what the old app said about %s", async (name) => {
-    const old = await legacy("interpret.js");
-    expect(readingsFor(name, fresh as never)).toEqual(readingsFor(name, old));
+  // Word for word what the old app said when ported; the snapshot keeps it so.
+  it.each(BUNDLED_PHOTOS)("say the same about %s", (name) => {
+    expect(readingsFor(name)).toMatchSnapshot();
   });
 
   it("are written in Japanese when Japanese is on", () => {
-    const english = readingsFor("a_33.jpg", fresh as never);
+    const english = readingsFor("a_33.jpg");
     configureI18n("ja", ja);
-    const japanese = readingsFor("a_33.jpg", fresh as never) as typeof english;
+    const japanese = readingsFor("a_33.jpg");
     for (const key of ["waveform", "parade", "vector", "cie"] as const) {
-      const reading = japanese[key] as { label: string; caption: string };
-      expect(reading.caption).not.toBe((english[key] as { caption: string }).caption);
+      const reading = japanese[key];
+      expect(reading.caption).not.toBe(english[key].caption);
       // Japanese sentences run on without spaces between them.
       expect(reading.caption).not.toMatch(/。 /);
     }

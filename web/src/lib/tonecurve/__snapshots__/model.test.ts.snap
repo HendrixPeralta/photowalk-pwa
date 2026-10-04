@@ -1,0 +1,36 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ToneCurveModel > measured mode reads the same on every bundled photo 1`] = `
+[
+  {
+    "caption": "The middle tone is at 25%, and 90% of the photo falls between 1% and 89%. The curve climbs fastest through the shadows, so that's where the photo shows the most detail. 8% is pure black.",
+    "label": "Mostly dark",
+  },
+  {
+    "caption": "The middle tone is at 51%, and 90% of the photo falls between 24% and 90%. The curve climbs fastest through the midtones, so that's where the photo shows the most detail.",
+    "label": "Evenly spread",
+  },
+  {
+    "caption": "The middle tone is at 2%, and 90% of the photo falls between 0% and 48%. The curve climbs fastest through the shadows, so that's where the photo shows the most detail. 51% is pure black.",
+    "label": "Mostly dark",
+  },
+  {
+    "caption": "The middle tone is at 19%, and 90% of the photo falls between 1% and 77%. The curve climbs fastest through the shadows, so that's where the photo shows the most detail. 9% is pure black.",
+    "label": "Mostly dark",
+  },
+  {
+    "caption": "The middle tone is at 45%, and 90% of the photo falls between 14% and 95%. The curve climbs fastest through the midtones, so that's where the photo shows the most detail.",
+    "label": "Evenly spread",
+  },
+  {
+    "caption": "The middle tone is at 81%, and 90% of the photo falls between 37% and 89%. The curve climbs fastest through the highlights, so that's where the photo shows the most detail.",
+    "label": "Mostly bright",
+  },
+  {
+    "caption": "The middle tone is at 60%, and 90% of the photo falls between 5% and 100%. The curve climbs fastest through the highlights, so that's where the photo shows the most detail. 21% is pure white.",
+    "label": "Mostly darks and brights",
+  },
+]
+`;
+
+exports[`tone curve math > builds unchanged lookup tables for random curves 1`] = `"sha256:d941cb2ee37afe8c"`;

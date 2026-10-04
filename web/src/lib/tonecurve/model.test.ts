@@ -1,11 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { legacy, legacyFunction } from "@/test/legacy";
+import { digest } from "@/test/digest";
 import { BUNDLED_PHOTOS, photoPixels } from "@/test/photos";
 import { computeHistogram } from "../analysis/histogram";
-import { clamp } from "../util";
 import { buildLut, identityLut, ToneCurveModel, type CurvePoint } from "./model";
-
-const oldBuildLut = () => legacyFunction("tonecurve.js", "buildLut", { clamp, identityLut });
 
 function randomCurve(seed: number): CurvePoint[] {
   let s = seed;
@@ -15,12 +12,11 @@ function randomCurve(seed: number): CurvePoint[] {
 }
 
 describe("tone curve math", () => {
-  it("builds the same lookup table as the old app for random curves", () => {
-    const old = oldBuildLut();
-    for (let seed = 1; seed < 60; seed++) {
-      const pts = randomCurve(seed);
-      expect(buildLut(pts)).toEqual(old(pts));
-    }
+  // The same tables the old app built when ported; the snapshot keeps them so.
+  it("builds unchanged lookup tables for random curves", () => {
+    const tables = [];
+    for (let seed = 1; seed < 60; seed++) tables.push(buildLut(randomCurve(seed)));
+    expect(digest(tables)).toMatchSnapshot();
   });
 
   it("never inverts tones (monotone for increasing points)", () => {
@@ -37,17 +33,15 @@ describe("tone curve math", () => {
 });
 
 describe("ToneCurveModel", () => {
-  it("measured mode reads like the old app on every bundled photo", async () => {
-    const old = await legacy("tonecurve.js");
-    for (const name of BUNDLED_PHOTOS) {
-      const { bins } = computeHistogram(photoPixels(name));
+  // Word for word what the old app said when ported; the snapshot keeps it so.
+  it("measured mode reads the same on every bundled photo", () => {
+    const readings = BUNDLED_PHOTOS.map((name) => {
       const model = new ToneCurveModel();
-      model.setHistogram(bins);
-      old.setToneCurveHistogram(bins);
-      old.setToneCurveMode("measured");
-      expect(model.summary()).toEqual(old.toneCurveSummary());
+      model.setHistogram(computeHistogram(photoPixels(name)).bins);
       expect(model.isIdentity()).toBe(true);
-    }
+      return model.summary();
+    });
+    expect(readings).toMatchSnapshot();
   });
 
   it("an S-curve drag in adjust mode is named and changes the preview table", () => {

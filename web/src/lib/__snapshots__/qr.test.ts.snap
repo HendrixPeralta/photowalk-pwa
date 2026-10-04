@@ -1,0 +1,3 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`qr > produces unchanged modules 1`] = `"sha256:f49198bdb6aba29e"`;

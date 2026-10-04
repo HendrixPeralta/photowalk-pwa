@@ -1,0 +1,29 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`backstory > generates the same demo year 1`] = `
+{
+  "activeDays": 133,
+  "days": 364,
+  "seed": 20260908,
+  "streak": 9,
+  "thisWeek": "2.2h of 3h",
+  "totalHours": "204.2h",
+  "walks": 144,
+}
+`;
+
+exports[`backstory > generates the same demo year 2`] = `"sha256:e4f4959448c91b85"`;
+
+exports[`backstory > generates the same starter 1`] = `
+{
+  "activeDays": 33,
+  "days": 91,
+  "seed": 20260608,
+  "streak": 6,
+  "thisWeek": "2h of 3h",
+  "totalHours": "47.4h",
+  "walks": 33,
+}
+`;
+
+exports[`backstory > generates the same starter 2`] = `"sha256:19ab77903c1c5d01"`;

@@ -1,7 +1,5 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { REVIEW_STRINGS } from "./strings";
+import { FEATURE_KEYS, LEVEL_KEYS, REVIEW_STRINGS } from "./strings";
 
 const shape = (o: object): string[] =>
   Object.entries(o).flatMap(([k, v]) => (v && typeof v === "object" ? shape(v).map((s) => `${k}.${s}`) : [k])).sort();
@@ -18,10 +16,15 @@ describe("review form strings", () => {
     expect(REVIEW_STRINGS.ja.pendingMany(2)).toContain("2");
   });
 
-  it("keeps the answer keys the review sheet stores", () => {
-    const old = readFileSync(resolve(process.cwd(), "..", "js", "review.js"), "utf8");
-    const keys = (name: string) => JSON.parse(old.match(new RegExp(`const ${name} = (\\[[^\\]]*\\])`))![1].replace(/'/g, '"'));
-    expect(Object.keys(REVIEW_STRINGS.en.levels)).toEqual(keys("LEVEL_KEYS"));
-    expect(Object.keys(REVIEW_STRINGS.en.features)).toEqual(keys("FEATURE_KEYS"));
+  // The sheet already holds answers from the old app under these exact
+  // values, so changing them would split its columns' data in two.
+  it("keeps the answers the review sheet stores", () => {
+    expect(LEVEL_KEYS).toEqual(["beginner", "hobbyist", "pro"]);
+    expect(Object.keys(REVIEW_STRINGS.en.levels)).toEqual([...LEVEL_KEYS]);
+    expect(Object.keys(REVIEW_STRINGS.en.features)).toEqual([...FEATURE_KEYS]);
+    // Features are sent as their English names, whichever language filled the form.
+    expect(FEATURE_KEYS.map((key) => REVIEW_STRINGS.en.features[key])).toEqual([
+      "Walk guide", "Progress track", "Rewards", "Analysis tools", "Photo sharing with friends",
+    ]);
   });
 });

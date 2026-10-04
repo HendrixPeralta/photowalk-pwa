@@ -1,0 +1,87 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`readExif > reads a.jpg the same 1`] = `
+{
+  "aperture": "f/5.6",
+  "dateTaken": "2022:08:16 17:17:48",
+  "fNumber": 5.6,
+  "focalLength": "55mm",
+  "focalMm": 55,
+  "iso": "ISO 100",
+  "make": "NIKON CORPORATION",
+  "model": "NIKON D3400",
+  "shutter": "1/4000s",
+}
+`;
+
+exports[`readExif > reads a_1.jpg the same 1`] = `
+{
+  "aperture": "f/5.6",
+  "dateTaken": "2022:08:17 11:38:26",
+  "fNumber": 5.6,
+  "focalLength": "55mm",
+  "focalMm": 55,
+  "iso": "ISO 100",
+  "make": "NIKON CORPORATION",
+  "model": "NIKON D3400",
+  "shutter": "1/2000s",
+}
+`;
+
+exports[`readExif > reads a_25.jpg the same 1`] = `
+{
+  "aperture": "f/11",
+  "dateTaken": "2024:07:19 20:19:22",
+  "fNumber": 11,
+  "focalLength": "50mm",
+  "focalMm": 50,
+  "iso": "ISO 100",
+  "make": "NIKON CORPORATION",
+  "model": "NIKON D3400",
+  "shutter": "1/10s",
+}
+`;
+
+exports[`readExif > reads a_31.jpg the same 1`] = `
+{
+  "aperture": "f/5.6",
+  "dateTaken": "2022:08:16 18:46:22",
+  "fNumber": 5.6,
+  "focalLength": "55mm",
+  "focalMm": 55,
+  "iso": "ISO 400",
+  "make": "NIKON CORPORATION",
+  "model": "NIKON D3400",
+  "shutter": "1/1000s",
+}
+`;
+
+exports[`readExif > reads a_33.jpg the same 1`] = `
+{
+  "aperture": "f/8",
+  "dateTaken": "2025:03:07 07:15:31",
+  "fNumber": 8,
+  "focalLength": "55mm",
+  "focalMm": 55,
+  "iso": "ISO 250",
+  "make": "FUJIFILM",
+  "model": "X-T1",
+  "shutter": "1/250s",
+}
+`;
+
+exports[`readExif > reads a_49.jpg the same 1`] = `
+{
+  "aperture": "f/5.6",
+  "dateTaken": "2022:08:21 16:00:06",
+  "fNumber": 5.6,
+  "focalLength": "55mm",
+  "focalMm": 55,
+  "iso": "ISO 100",
+  "make": "NIKON CORPORATION",
+  "model": "NIKON D3400",
+  "shutter": "1/3200s",
+}
+`;
+
+exports[`readExif > reads dr-3474.jpg the same 1`] = `null`;
