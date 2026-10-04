@@ -43,11 +43,22 @@ for (const lang of ["en", "ja"] as const) {
       await page.keyboard.press("Escape");
     }
   } else {
+    // The app asks for sign-in first. A pretend person is signed in, as in
+    // the e2e tests, so every screen is the app; the sign-in screen comes last.
+    let signedIn = true;
+    await context.route("**/api/auth/**", (route) => route.fulfill({
+      json: signedIn ? { user: { id: "shots", name: "Aki Tanaka", email: "aki@example.com", image: null }, session: {} } : null,
+    }));
     for (const [view, route] of Object.entries(NEW_ROUTES)) {
       await page.goto(NEW_URL + route, { waitUntil: "networkidle" });
       await page.waitForTimeout(600);
       await page.screenshot({ path: join(outDir, `${view}-${lang}.png`), fullPage: true });
     }
+    signedIn = false;
+    await page.evaluate(() => localStorage.removeItem("photoeye:account"));
+    await page.goto(NEW_URL + "/", { waitUntil: "networkidle" });
+    await page.waitForTimeout(600);
+    await page.screenshot({ path: join(outDir, `sign-in-${lang}.png`), fullPage: true });
   }
   await context.close();
 }
