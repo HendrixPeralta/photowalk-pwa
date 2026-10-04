@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/ComingSoon";
+import { MyThemesScreen } from "@/features/themes/MyThemesScreen";
 
 export default function ThemesPage() {
-  return <ComingSoon view="themes" />;
+  return <MyThemesScreen />;
 }
