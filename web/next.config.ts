@@ -6,8 +6,15 @@ import type { NextConfig } from "next";
 // so nothing in the app may depend on server-only features.
 const isStaticExport = process.env.NEXT_OUTPUT === "export";
 
+// The server API lives in files named `route.api.ts`. Only the server build
+// counts "api.ts" as a page extension, so those files become routes there and
+// are invisible to the static export, which can't hold server code.
+const pageExtensions = ["tsx", "ts", "jsx", "js"];
+if (!isStaticExport) pageExtensions.push("api.ts");
+
 const nextConfig: NextConfig = {
   output: isStaticExport ? "export" : undefined,
+  pageExtensions,
   trailingSlash: true,
   images: { unoptimized: true },
   typedRoutes: true,

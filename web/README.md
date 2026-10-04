@@ -24,5 +24,9 @@ Run these inside `web/`.
 
 - No em dashes anywhere. `npm run check` fails the build if one appears.
 - Every piece of UI text goes through `t()` and needs a Japanese entry.
-- Every screen runs in the browser. No server actions or server-only features,
-  so the static export keeps working.
+- Every screen runs in the browser. No server actions or server-only features
+  in screens, so the static export keeps working.
+- Server code (database, auth, storage) lives in `src/server/` and is reached
+  only through API routes in files named `route.api.ts`. Those count as routes
+  in the server build only, so the static export never contains them. ESLint
+  stops the rest of `src/` from importing server-only modules.
