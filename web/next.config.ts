@@ -1,3 +1,4 @@
+import { withSerwist } from "@serwist/turbopack";
 import type { NextConfig } from "next";
 
 // `npm run build:static` sets NEXT_OUTPUT=export. That build has to keep
@@ -10,6 +11,8 @@ const nextConfig: NextConfig = {
   trailingSlash: true,
   images: { unoptimized: true },
   typedRoutes: true,
+  env: { NEXT_PUBLIC_STATIC_EXPORT: isStaticExport ? "1" : "" },
 };
 
-export default nextConfig;
+// Keeps esbuild out of the server bundle; it builds the service worker.
+export default withSerwist(nextConfig);

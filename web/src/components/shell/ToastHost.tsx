@@ -36,6 +36,18 @@ function ToastItem({ toast }: { toast: Toast }) {
   return (
     <div className={`toast${shown && !leaving ? " show" : ""}`} role="status">
       <span className="toast-text">{toast.message}</span>
+      {toast.action && (
+        <button
+          type="button"
+          className="btn btn-accent btn-sm"
+          onClick={() => {
+            setLeaving(true);
+            toast.action!.run();
+          }}
+        >
+          {toast.action.label}
+        </button>
+      )}
       {/* A toast can sit over the very control you want to tap next, so it can be closed right away. */}
       <button type="button" className="toast-close" aria-label={t("Dismiss")} onClick={() => setLeaving(true)}>×</button>
     </div>

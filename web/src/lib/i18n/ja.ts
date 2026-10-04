@@ -469,6 +469,8 @@ const ja: Record<string, string> = {
   "Dismiss": "閉じる",
   "Create or join a room, then press Upload to post the photos you shared.": "ルームを作成するか参加してから、「アップロード」を押して共有した写真を投稿してください。",
   "PhotoEYE installed to your device.": "PhotoEYEを端末にインストールしました。",
+  "A new version is ready.": "新しいバージョンの準備ができました。",
+  "Reload": "再読み込み",
   "Place key subjects along the grid lines or their intersections instead of dead center.": "主役を真ん中に置かず、グリッドの線や線が交わる点に合わせてみましょう。",
   "A softer take on the rule of thirds. The spiral leads the eye naturally toward the subject.": "三分割法をもう少しやわらかくした構図です。らせんの流れが、見る人の視線を自然に主役へ導きます。",
   "Leading Lines": "リーディングライン",

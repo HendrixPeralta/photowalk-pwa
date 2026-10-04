@@ -8,7 +8,7 @@
     "build:static": "NEXT_OUTPUT=export next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "next typegen && tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit && tsc --noEmit -p src/worker",
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "tsx scripts/check-copy.mts && tsx scripts/check-i18n.mts",
@@ -17,6 +17,7 @@
     "shots": "tsx scripts/shots.mts"
   },
   "dependencies": {
+    "@serwist/window": "^9.5.13",
     "immer": "^11.1.21",
     "next": "16.3.8",
     "react": "19.2.8",
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
+    "@serwist/turbopack": "^9.5.13",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.7",
@@ -32,12 +34,14 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.1.1",
+    "esbuild": "^0.28.2",
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
     "fake-indexeddb": "^6.2.5",
     "jpeg-js": "^0.4.4",
     "jsdom": "^30.1.1",
     "jsqr": "^1.4.0",
+    "serwist": "^9.5.13",
     "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^5.0.3"
