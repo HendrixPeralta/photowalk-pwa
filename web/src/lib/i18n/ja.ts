@@ -942,6 +942,18 @@ const ja: Record<string, string> = {
   "<strong>{hours}</strong> shot · <strong>{walks}</strong> walks": "撮影 <strong>{hours}</strong>・ウォーク <strong>{walks}</strong> 回",
   "Room <strong>{code}</strong> is open for your walk partners.": "ルーム <strong>{code}</strong> をウォーク仲間に公開中です。",
   "This screen is coming soon.": "この画面は準備中です。",
+  "Plan photo walks, learn composition, and keep a reference library.": "フォトウォークを計画し、構図を学び、参考写真のライブラリを作りましょう。",
+  "Continue with Google": "Googleで続ける",
+  "Opening Google…": "Googleを開いています…",
+  "Try again": "もう一度試す",
+  "Connect to the internet to sign in.": "ログインするにはインターネットに接続してください。",
+  "Couldn't reach PhotoEYE. Check your connection and try again.": "PhotoEYEに接続できませんでした。接続を確認して、もう一度お試しください。",
+  "Sign-in didn't finish. Try again.": "ログインが完了しませんでした。もう一度お試しください。",
+  "PhotoEYE uses your Google name, email address and profile photo for your account.": "PhotoEYEはアカウントに、Googleの名前、メールアドレス、プロフィール写真を使います。",
+  "Sign in": "ログイン",
+  "Your session ended. Sign in again.": "ログインの有効期限が切れました。もう一度ログインしてください。",
+  "Connect to the internet to sign out.": "ログアウトするにはインターネットに接続してください。",
+  "Couldn't sign out. Try again.": "ログアウトできませんでした。もう一度お試しください。",
 };
 
 export default ja;

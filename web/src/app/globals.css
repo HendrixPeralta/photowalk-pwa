@@ -1408,6 +1408,27 @@ input[type="file"].text-input { padding: 8px; }
   color: var(--text-dim);
   flex-shrink: 0;
 }
+/* Sign-in screen, in the app's place while nobody is signed in. */
+.signin-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 32px 28px calc(32px + env(safe-area-inset-bottom, 0px));
+  text-align: center;
+}
+.signin-mark { width: 56px; height: 56px; }
+.signin-mark .brand-icon { width: 30px; height: 30px; }
+.signin-title { margin: 6px 0 0; font-size: 1.6rem; letter-spacing: 0.02em; }
+.signin-tagline { margin: 0 0 18px; color: var(--text-dim); max-width: 30ch; }
+.signin-btn { min-width: 240px; justify-content: center; gap: 10px; }
+.signin-google { background: #fff; color: #1f1f1f; border-color: #dadce0; }
+.signin-google:hover { background: #f8f9fa; }
+.google-mark { width: 18px; height: 18px; flex-shrink: 0; }
+.signin-problem { min-height: 1.4em; margin: 2px 0 0; font-size: 0.85rem; color: var(--danger); }
+.signin-note { max-width: 32ch; margin-top: 8px; }
 
 /* Settings screen */
 #view-settings .reminder-card { margin-top: 4px; }

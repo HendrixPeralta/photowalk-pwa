@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { expect, test, type Locator, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "./fixtures";
 
 const PHOTOS = join(process.cwd(), "public/photos");
 const dialog = (page: Page) => page.getByRole("dialog");
