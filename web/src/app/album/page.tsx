@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/ComingSoon";
+import { AlbumScreen } from "@/features/album/AlbumScreen";
 
 export default function AlbumPage() {
-  return <ComingSoon view="album" />;
+  return <AlbumScreen />;
 }

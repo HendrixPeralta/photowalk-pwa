@@ -34,6 +34,8 @@ test("the sample photo opens with every readout filled in", async ({ page }) => 
   const errors: string[] = [];
   page.on("pageerror", (err) => errors.push(err.message));
   await page.goto("/");
+  // Saved data is written once the app has started.
+  await expect(page.locator(".film-strip")).toBeVisible();
   const before = (await saved(page)).profile.photosAnalyzed;
   await page.getByRole("link", { name: "Analysis", exact: true }).click();
   await expect(page.locator(".shot-exposure")).toContainText("1/250s");
@@ -109,8 +111,8 @@ test("bending the tone curve previews it on the photo", async ({ page }) => {
 
 test("a picked photo is analyzed, saved to the album and compared", async ({ page }) => {
   await openSample(page);
-  await page.getByRole("button", { name: "Compare…" }).click();
-  await expect(toast(page, "Save a reference to your album first")).toBeVisible();
+  // The starter photos land in the album in the background.
+  await expect.poll(async () => (await saved(page)).album.length).toBe(6);
 
   const before = (await saved(page)).profile.photosAnalyzed;
   await page.getByRole("button", { name: "Choose Another Photo" }).click();
@@ -127,8 +129,10 @@ test("a picked photo is analyzed, saved to the album and compared", async ({ pag
   expect(item.tags).toEqual(["sea", "people"]);
   expect(item.overlay).toEqual({ type: "thirds", flip: false, rotation: 0 });
 
+  // Only a reference opened from the album is left out, so all seven are offered.
   await page.getByRole("button", { name: "Compare…" }).click();
-  await dialog(page).locator(".album-thumb").first().click();
+  await expect(dialog(page).locator(".album-thumb")).toHaveCount(7);
+  await dialog(page).locator(".album-thumb").nth(1).click();
   await expect(page.locator(".compare-pane")).toHaveCount(2);
   await expect(page.locator(".histogram-canvas")).toHaveCount(2);
   await page.getByRole("button", { name: "Exit Compare" }).click();
