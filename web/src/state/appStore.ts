@@ -8,6 +8,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
+import { storageEstimate } from "@/lib/db";
 import { t } from "@/lib/i18n/core";
 import { defaultState, withDefaults } from "./defaults";
 import type { AppData } from "./types";
@@ -36,6 +37,18 @@ const quotaAwareStorage: StateStorage = {
     }
   },
 };
+
+/**
+ * After saving a photo: warns once the device's storage for PhotoEYE is over
+ * 80% used, sharing the once-a-minute limit with the "storage is full" note.
+ */
+export async function warnIfStorageTight(): Promise<void> {
+  const info = await storageEstimate();
+  if (!info || info.ratio < 0.8) return;
+  if (Date.now() - lastQuotaWarning < 60_000) return;
+  lastQuotaWarning = Date.now();
+  showToast(t("Storage is {pct}% full. Try deleting some older references.", { pct: Math.round(info.ratio * 100) }), 6000);
+}
 
 export const useAppStore = create<AppData>()(
   persist(immer(() => defaultState()), {
