@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { IconSprite } from "@/components/icons/IconSprite";
+import { maybeSeedStarterAlbum } from "@/features/album/references";
 import { WalkEngine } from "@/features/walks/WalkEngine";
 import { setNavigator } from "@/lib/nav";
 import { bootOnce } from "@/state/boot";
@@ -40,6 +41,12 @@ function Shell({ children }: { children: ReactNode }) {
     setNavigator((href) => router.push(href));
     return () => setNavigator(null);
   }, [router]);
+
+  // Not awaited by anything: fetching and decoding the starter photos has no
+  // business holding up the first screen.
+  useEffect(() => {
+    void maybeSeedStarterAlbum();
+  }, []);
 
   // The screens scroll inside .views, not the window, so reset it on each move.
   useEffect(() => {
