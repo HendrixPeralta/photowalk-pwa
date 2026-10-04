@@ -1,7 +1,7 @@
 # PhotoEYE (Next.js)
 
 The React, Next.js and TypeScript version of PhotoEYE. The old vanilla-JS app
-at the repo root is a separate site and keeps running on GitHub Pages.
+lives on the `master` branch and keeps running on GitHub Pages.
 
 - **Live:** https://photoeye-wine.vercel.app (Vercel deploys every push to `main`)
 - **Requires:** Node 24 or newer
