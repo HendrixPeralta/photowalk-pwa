@@ -7,6 +7,8 @@ export default defineConfig({
   resolve: {
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
   },
+  // Parity tests import the old app's modules from ../js, outside this folder.
+  server: { fs: { allow: [".."] } },
   test: {
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
