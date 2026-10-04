@@ -11,7 +11,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "tsx scripts/check-copy.mts",
+    "check": "tsx scripts/check-copy.mts && tsx scripts/check-i18n.mts",
     "verify": "npm run typecheck && npm run lint && npm run test && npm run check && npm run build && npm run build:static",
     "e2e": "playwright test",
     "shots": "tsx scripts/shots.mts"
