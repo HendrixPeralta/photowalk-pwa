@@ -72,6 +72,20 @@ test("photos from the share sheet land on Partners", async ({ page }) => {
   await expect(page.locator(".shared-notice")).toHaveCount(0);
 });
 
+test("the API always goes to the network, never to the service worker's caches", async ({ page, context }) => {
+  await installed(page);
+  let served = 0;
+  // page.route only sees requests the page makes itself: a request the
+  // service worker answered or re-sent would slip past it.
+  await page.route("**/api/probe/", (route) => route.fulfill({ json: { n: ++served } }));
+  const fetchProbe = () => page.evaluate(() => fetch("/api/probe/").then((r) => r.json()).catch(() => "offline"));
+  expect(await fetchProbe()).toEqual({ n: 1 });
+  expect(await fetchProbe()).toEqual({ n: 2 });
+  await page.unroute("**/api/probe/");
+  await context.setOffline(true);
+  expect(await fetchProbe()).toBe("offline");
+});
+
 test("the manifest describes an installable app with a share target", async ({ request }) => {
   const manifest = await (await request.get("/manifest.webmanifest")).json();
   expect(manifest).toMatchObject({ id: "/", start_url: "/", display: "standalone", share_target: { action: "/share-target", method: "POST" } });
