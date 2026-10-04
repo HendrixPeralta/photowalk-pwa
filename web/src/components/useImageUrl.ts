@@ -3,8 +3,11 @@
 import { useEffect, useState } from "react";
 import { imageUrl } from "@/lib/db";
 
-/** An object URL for a photo stored in IndexedDB, or null until it loads (or if it is gone). */
-export function useImageUrl(imageId: string | null | undefined): string | null {
+/**
+ * An object URL for a photo stored in IndexedDB: undefined while it loads,
+ * null if it isn't in storage.
+ */
+export function useImageUrl(imageId: string | null | undefined): string | null | undefined {
   const [loaded, setLoaded] = useState<{ id: string; url: string | null } | null>(null);
 
   useEffect(() => {
@@ -14,5 +17,6 @@ export function useImageUrl(imageId: string | null | undefined): string | null {
     return () => { live = false; };
   }, [imageId]);
 
-  return loaded && loaded.id === imageId ? loaded.url : null;
+  if (!imageId) return null;
+  return loaded && loaded.id === imageId ? loaded.url : undefined;
 }
