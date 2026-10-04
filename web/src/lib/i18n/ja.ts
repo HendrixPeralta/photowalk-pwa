@@ -936,6 +936,7 @@ const ja: Record<string, string> = {
   "COOL": "寒色",
   "<strong>{hours}</strong> shot · <strong>{walks}</strong> walks": "撮影 <strong>{hours}</strong>・ウォーク <strong>{walks}</strong> 回",
   "Room <strong>{code}</strong> is open for your walk partners.": "ルーム <strong>{code}</strong> をウォーク仲間に公開中です。",
+  "This screen is coming soon.": "この画面は準備中です。",
 };
 
 export default ja;
