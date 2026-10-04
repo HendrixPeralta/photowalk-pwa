@@ -77,10 +77,3 @@ test("the app is in Japanese when Japanese is chosen", async ({ page }) => {
   await expect(page.locator("#screenTitle")).toHaveText("アルバム");
   await expect(page.locator(".bottom-nav")).toContainText("ウォーク");
 });
-
-test("the menu's sign-in card explains itself", async ({ page }) => {
-  await page.goto("/");
-  await page.getByRole("button", { name: "Profile" }).click();
-  await page.getByRole("button", { name: /Guest/ }).click();
-  await expect(page.getByRole("status")).toContainText("Google sign-in is coming soon");
-});

@@ -1408,6 +1408,30 @@ input[type="file"].text-input { padding: 8px; }
   color: var(--text-dim);
   flex-shrink: 0;
 }
+.drawer-user { color: inherit; text-decoration: none; }
+.profile-avatar { overflow: hidden; }
+.profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.profile-initial { font-weight: 700; font-size: 1rem; }
+
+/* Account */
+.account-person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0 4px;
+}
+.account-names {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.3;
+}
+.account-names .muted {
+  font-size: 0.8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Sign-in screen, in the app's place while nobody is signed in. */
 .signin-body {
   flex: 1;

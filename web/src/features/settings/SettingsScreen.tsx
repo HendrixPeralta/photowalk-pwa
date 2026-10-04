@@ -1,6 +1,8 @@
 "use client";
 
+import { AccountCard } from "@/features/account/AccountCard";
 import { openReview } from "@/features/review/ReviewModal";
+import { accountsEnabled } from "@/lib/authApi";
 import { LANGS, getLangChoice, setLang, t, type LangChoice } from "@/lib/i18n/core";
 import { reloadPage } from "@/lib/page";
 import { dayLabels, dayName, reminderStatus } from "@/lib/reminders";
@@ -17,6 +19,7 @@ export function SettingsScreen() {
   return (
     <section className="view" data-view="settings">
       <h2 className="section-title">{t("Settings")}</h2>
+      {accountsEnabled() && <AccountCard />}
       <LanguageCard />
       <ReminderCard />
       <DemoDataCard />
