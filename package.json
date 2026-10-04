@@ -1,6 +1,0 @@
-{
-  "name": "photowalk-pwa",
-  "private": true,
-  "type": "module",
-  "description": "PhotoWalk PWA demo (static, no build step)"
-}
