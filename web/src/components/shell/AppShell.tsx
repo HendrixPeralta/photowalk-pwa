@@ -6,6 +6,7 @@ import { IconSprite } from "@/components/icons/IconSprite";
 import { starterAlbumOnStart } from "@/features/album/references";
 import { installConsoleHooks } from "@/features/devtools/consoleHooks";
 import { handleLaunchIntentOnce } from "@/features/partners/launchIntent";
+import { listenForInstall } from "@/features/pwa/install";
 import { registerServiceWorker } from "@/features/pwa/serviceWorker";
 import { startReviewSync } from "@/features/review/queue";
 import { maybeNudgeOnOpen } from "@/features/settings/reminders";
@@ -29,6 +30,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    // Before boot: the browser offers the install prompt once, early.
+    listenForInstall();
     registerServiceWorker();
     let live = true;
     bootOnce().then(() => { if (live) setReady(true); });
