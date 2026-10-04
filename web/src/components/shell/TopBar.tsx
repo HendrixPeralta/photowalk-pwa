@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { Icon } from "@/components/icons/Icon";
+import { openReview } from "@/features/review/ReviewModal";
 import { t } from "@/lib/i18n/core";
 import { currentStreak } from "@/lib/walk";
 import { screenTitle, viewForPath } from "@/routes";
@@ -24,7 +25,7 @@ export function TopBar() {
         </span>
       </div>
 
-      <button type="button" className="topbar-review" aria-label={t("Leave a review")}>
+      <button type="button" className="topbar-review" aria-label={t("Leave a review")} onClick={openReview}>
         <span className="topbar-review-star" aria-hidden="true">★</span>
         <span className="topbar-review-label">{t("Review")}</span>
       </button>

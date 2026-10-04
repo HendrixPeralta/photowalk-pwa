@@ -9,6 +9,9 @@ export type ReviewLang = "en" | "ja";
 export type LevelKey = "beginner" | "hobbyist" | "pro";
 export type FeatureKey = "walk-guide" | "progress-track" | "rewards" | "analysis-tools" | "photo-sharing";
 
+export const LEVEL_KEYS: readonly LevelKey[] = ["beginner", "hobbyist", "pro"];
+export const FEATURE_KEYS: readonly FeatureKey[] = ["walk-guide", "progress-track", "rewards", "analysis-tools", "photo-sharing"];
+
 export interface ReviewStrings {
   toggleLabel: string;
   langAria: string;

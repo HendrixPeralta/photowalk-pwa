@@ -4,6 +4,7 @@
 // once, and from then on it is ordinary history that real walks add to.
 
 import { applyBackstory, buildBackstory, STARTER, THIN_PROFILE_HOURS, type BackstoryConfig } from "@/lib/backstory";
+import { reloadPage } from "@/lib/page";
 import { totalActivityHours } from "@/lib/stats";
 import { uid } from "@/lib/util";
 import { getData, STATE_KEY, update } from "./appStore";
@@ -52,4 +53,26 @@ function parkCurrentState(): void {
   } catch (err) {
     console.warn("PhotoEYE: could not park the profile before seeding history.", err);
   }
+}
+
+/**
+ * Hands back the profile parked before the first seed, and reloads (the store
+ * was built from the seeded data). Returns false when nothing is parked.
+ */
+export function undoStarterHistory(): boolean {
+  const parked = localStorage.getItem(PRE_SEED_KEY);
+  if (parked === null) return false;
+  localStorage.removeItem(PRE_SEED_KEY);
+  // Whatever comes back is what the user asked for, empty or not, so the seed
+  // must not fire again on the reload and undo the undo.
+  try { localStorage.setItem(DECLINED_KEY, "1"); } catch { /* seeding again is the lesser evil */ }
+  restoreSavedState(parked);
+  return true;
+}
+
+/** Puts a parked copy of the saved data back and reloads onto it. */
+export function restoreSavedState(parked: string): void {
+  if (parked) localStorage.setItem(STATE_KEY, parked);
+  else localStorage.removeItem(STATE_KEY);
+  reloadPage();
 }
