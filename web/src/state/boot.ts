@@ -9,7 +9,9 @@ import { totalActivityHours } from "@/lib/stats";
 import { currentStreak } from "@/lib/walk";
 import { getData, loadSavedData, syncAcrossTabs, update } from "./appStore";
 import { loadFix } from "./geo";
-import { maybeSeedStarterHistory } from "./seed";
+import { clearDemoData, ensureDemoData } from "./demo";
+import { takeDevParams } from "./devParams";
+import { maybeSeedStarterHistory, seedStarterHistory, undoStarterHistory } from "./seed";
 
 let booting: Promise<void> | null = null;
 
@@ -37,5 +39,31 @@ async function boot(): Promise<void> {
   });
 
   // Before the first screen renders, so Walks paints the seeded stats.
-  if (!getData().demoMode) maybeSeedStarterHistory();
+  if (seedHistory() === "reloading") await new Promise<never>(() => {});
+}
+
+/**
+ * Demo data, then the starting history. Leaving demo mode or undoing the
+ * history brings back a parked profile with a reload, so nothing renders.
+ */
+function seedHistory(): "reloading" | void {
+  const { demo, history } = takeDevParams();
+  // While demo mode is on, it owns the stats.
+  let demoOwnsStats = false;
+  if (demo === "clear") {
+    if (clearDemoData()) return "reloading";
+    demoOwnsStats = true;
+  } else if (demo !== null || getData().demoMode) {
+    const seed = Number(demo);
+    ensureDemoData(seed > 1 ? seed : undefined);
+    demoOwnsStats = true;
+  }
+
+  if (history === "undo") {
+    if (undoStarterHistory()) return "reloading";
+  } else if (history === "seed") {
+    seedStarterHistory();
+  } else if (!demoOwnsStats) {
+    maybeSeedStarterHistory();
+  }
 }
