@@ -100,3 +100,14 @@ export async function clearStarterAlbum(): Promise<number> {
   await forget(seeded);
   return seeded.length;
 }
+
+/** At start-up: the ?photos switch if there was one, otherwise the one-time seed. */
+export async function starterAlbumOnStart(param: string | null): Promise<void> {
+  try {
+    if (param === "clear") await clearStarterAlbum();
+    else if (param === "seed") await seedStarterAlbum();
+    else await maybeSeedStarterAlbum();
+  } catch (err) {
+    console.warn("PhotoEYE: could not set up the starter album.", err);
+  }
+}
