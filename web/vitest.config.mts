@@ -13,5 +13,8 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
     include: ["src/**/*.test.{ts,tsx}"],
+    // Parity tests decode full-size bundled JPEGs in pure JS and compare large
+    // typed arrays, which can pass 5s when every test file runs in parallel.
+    testTimeout: 30_000,
   },
 });

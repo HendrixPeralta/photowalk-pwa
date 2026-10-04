@@ -78,6 +78,13 @@ function assertReady(): void {
   }
 }
 
+/**
+ * Marks a string as a translation key without translating it, for data that is
+ * defined once and translated later (theme catalogs, help text). The i18n
+ * checker collects N() strings the same way it collects t() strings.
+ */
+export const N = (text: string): string => text;
+
 /** Fills {name} placeholders from `params`. Unknown placeholders are left as is. */
 export function interpolate(text: string, params?: TParams): string {
   if (!params) return text;
