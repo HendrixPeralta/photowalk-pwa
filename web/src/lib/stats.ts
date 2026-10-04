@@ -61,6 +61,15 @@ export function addActivityHours(data: Pick<AppData, "activityLog">, hours: numb
   data.activityLog[dateKey] = (data.activityLog[dateKey] || 0) + hours;
 }
 
+/**
+ * Counts one photo against a day (mutates `data`). Logged from Live Walk and
+ * when a reference is saved to the album, so "photos" means the same thing
+ * everywhere it is shown.
+ */
+export function addFrame(data: Pick<AppData, "frameLog">, dateKey: string = localDateKey()): void {
+  data.frameLog[dateKey] = (data.frameLog[dateKey] || 0) + 1;
+}
+
 /** Files a finished walk at the front of the history, capped at WALK_HISTORY_LIMIT (mutates `data`). */
 export function recordWalk(data: Pick<AppData, "walkHistory">, entry: WalkRecord): void {
   data.walkHistory.unshift(entry);

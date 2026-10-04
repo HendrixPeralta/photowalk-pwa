@@ -59,6 +59,12 @@ export async function isHeif(file: Blob): Promise<boolean> {
   }
 }
 
+/** The exposure in the one line a capture chip has room for: "ƒ/2.8 · 1/250s · ISO 400". */
+export function exposureLine(exif: Exif | null | undefined): string {
+  if (!exif) return "";
+  return [exif.aperture?.replace("f/", "ƒ/"), exif.shutter, exif.iso].filter(Boolean).join(" · ");
+}
+
 export async function readExif(file: Blob | null | undefined): Promise<Exif | null> {
   try {
     if (!file || !file.type || !file.type.includes("jpeg")) return null;
