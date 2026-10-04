@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { legacy } from "@/test/legacy";
 import { BUNDLED_PHOTOS, photoBlob } from "@/test/photos";
-import { isHeif, readExif } from "./exif";
+import { exposureLine, isHeif, readExif } from "./exif";
 
 describe("readExif", () => {
   it.each(BUNDLED_PHOTOS)("reads %s exactly like the old app", async (name) => {
@@ -28,5 +28,13 @@ describe("isHeif", () => {
     const heic = new Uint8Array([0, 0, 0, 24, ...new TextEncoder().encode("ftypheic")]);
     expect(await isHeif(new Blob([heic]))).toBe(true);
     expect(await isHeif(photoBlob("a.jpg"))).toBe(false);
+  });
+});
+
+describe("exposureLine", () => {
+  it("joins whatever exposure settings the file carried", () => {
+    expect(exposureLine({ aperture: "f/2.8", shutter: "1/250s", iso: "ISO 400" })).toBe("ƒ/2.8 · 1/250s · ISO 400");
+    expect(exposureLine({ shutter: "1/60s" })).toBe("1/60s");
+    expect(exposureLine(null)).toBe("");
   });
 });

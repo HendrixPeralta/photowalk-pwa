@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { defaultState, WALK_HISTORY_LIMIT } from "@/state/defaults";
 import type { WalkRecord } from "@/state/types";
-import { addActivityHours, hoursForThemeInPeriod, hoursInPeriod, periodStart, recordWalk, themeWalkCounts, totalActivityHours } from "./stats";
+import { addActivityHours, addFrame, hoursForThemeInPeriod, hoursInPeriod, periodStart, recordWalk, themeWalkCounts, totalActivityHours } from "./stats";
 
 const walk = (themeId: string, endedAt: number, hours = 1): WalkRecord =>
   ({ id: themeId + endedAt, themeId, mode: "casual", durationMin: null, hours, challengesDone: 0, challengeCount: 0, endedAt });
@@ -40,5 +40,15 @@ describe("stats", () => {
     for (let i = 0; i < WALK_HISTORY_LIMIT + 5; i++) recordWalk(data, walk("x", i));
     expect(data.walkHistory).toHaveLength(WALK_HISTORY_LIMIT);
     expect(data.walkHistory[0].endedAt).toBe(WALK_HISTORY_LIMIT + 4);
+  });
+});
+
+describe("addFrame", () => {
+  it("counts photos per day", () => {
+    const data = defaultState();
+    addFrame(data, "2026-06-01");
+    addFrame(data, "2026-06-01");
+    addFrame(data, "2026-06-02");
+    expect(data.frameLog).toEqual({ "2026-06-01": 2, "2026-06-02": 1 });
   });
 });

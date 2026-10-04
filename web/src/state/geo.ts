@@ -13,8 +13,8 @@ export function loadFix(): void {
 }
 
 /** Asks the browser for a position. Only call from a tap. Rejects with a showable reason. */
-export async function locate(): Promise<Fix> {
-  const fix = await requestFix();
+export async function locate(options?: Parameters<typeof requestFix>[0]): Promise<Fix> {
+  const fix = await requestFix(options);
   useFix.setState({ fix });
   return fix;
 }
