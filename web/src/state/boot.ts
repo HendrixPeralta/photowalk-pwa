@@ -8,6 +8,7 @@ import { backfillMilestones } from "@/lib/milestones";
 import { totalActivityHours } from "@/lib/stats";
 import { currentStreak } from "@/lib/walk";
 import { getData, loadSavedData, syncAcrossTabs, update } from "./appStore";
+import { loadFix } from "./geo";
 import { maybeSeedStarterHistory } from "./seed";
 
 let booting: Promise<void> | null = null;
@@ -21,6 +22,7 @@ async function boot(): Promise<void> {
   // Language first: everything after it may produce text.
   await initI18n();
   await loadSavedData();
+  loadFix();
   syncAcrossTabs();
   void requestPersistence();
 
