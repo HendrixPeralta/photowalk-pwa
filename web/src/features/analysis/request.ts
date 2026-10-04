@@ -1,24 +1,10 @@
-// A photo handed to the Analysis screen from elsewhere (a walk's frame, an
-// album reference). The Analysis screen takes it when it opens.
+// Opening a stored photo on the Analysis screen from anywhere else (a walk's
+// frame, a room photo, an album reference).
 
-import type { Exif } from "@/lib/exif";
 import { navigate } from "@/lib/nav";
+import { analyzeStored, type StoredPhoto } from "./session";
 
-export interface AnalysisRequest {
-  imageId: string;
-  exif: Exif | null;
-}
-
-let pending: AnalysisRequest | null = null;
-
-export function openAnalysis(request: AnalysisRequest): void {
-  pending = request;
+export function openAnalysis(photo: StoredPhoto): void {
+  void analyzeStored(photo);
   navigate("analyze");
-}
-
-/** The photo waiting to be analyzed, once. */
-export function takeAnalysisRequest(): AnalysisRequest | null {
-  const request = pending;
-  pending = null;
-  return request;
 }
