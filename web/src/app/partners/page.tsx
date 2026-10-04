@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/ComingSoon";
+import { PartnersScreen } from "@/features/partners/PartnersScreen";
 
 export default function PartnersPage() {
-  return <ComingSoon view="share" />;
+  return <PartnersScreen />;
 }

@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { IconSprite } from "@/components/icons/IconSprite";
 import { maybeSeedStarterAlbum } from "@/features/album/references";
+import { handleLaunchIntentOnce } from "@/features/partners/launchIntent";
 import { WalkEngine } from "@/features/walks/WalkEngine";
 import { setNavigator } from "@/lib/nav";
 import { bootOnce } from "@/state/boot";
@@ -46,6 +47,11 @@ function Shell({ children }: { children: ReactNode }) {
   // business holding up the first screen.
   useEffect(() => {
     void maybeSeedStarterAlbum();
+  }, []);
+
+  // An invite link or photos from the share sheet: both open Partners.
+  useEffect(() => {
+    void handleLaunchIntentOnce();
   }, []);
 
   // The screens scroll inside .views, not the window, so reset it on each move.
