@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon } from "@/components/icons/Icon";
+import { goLive } from "@/features/walks/actions";
 import type { IconName } from "@/components/icons/sprite";
 import { t } from "@/lib/i18n/core";
 import { ROUTES, viewForPath, type View } from "@/routes";
@@ -27,6 +28,7 @@ export function BottomNav() {
           href={ROUTES[view]}
           className={`nav-btn${current === view ? " active" : ""}`}
           aria-current={current === view ? "page" : undefined}
+          onClick={view === "hud" ? () => goLive(current === "hud") : undefined}
         >
           <Icon name={icon} />
           {view === "hud" && walking && <span className="nav-live" aria-hidden="true" />}
