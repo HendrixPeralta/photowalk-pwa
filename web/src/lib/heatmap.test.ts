@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { legacyFunction } from "@/test/legacy";
 import { buildWeeks, goalStatusText, heatmapTotals, levelFor } from "./heatmap";
 import { localDateKey } from "./util";
 
@@ -13,9 +12,8 @@ describe("heatmap", () => {
     expect(localDateKey(today)).toBe("2026-06-10");
   });
 
-  it("shades like the old app", () => {
-    const old = legacyFunction("heatmap.js", "levelFor");
-    for (const h of [0, 0.1, 1, 1.01, 2, 3.5, 4, 4.01, 9]) expect(levelFor(h)).toBe(old(h));
+  it("shades by hours: none, up to 1h, 2h, 4h, more", () => {
+    expect([0, 0.1, 1, 1.01, 2, 3.5, 4, 4.01, 9].map(levelFor)).toEqual([0, 1, 1, 2, 2, 3, 3, 4, 4]);
   });
 
   it("totals only the days up to today", () => {

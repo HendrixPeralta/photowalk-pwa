@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { legacy } from "@/test/legacy";
+import { digest } from "@/test/digest";
 import { deltaE, nearestColorName, rgbToHex, rgbToHsl, rgbToLab } from "./color";
 
 describe("color math", () => {
@@ -20,16 +20,15 @@ describe("color math", () => {
     expect(deltaE(a, rgbToLab(50, 50, 200))).toBeGreaterThan(50);
   });
 
-  it("matches the old app on a grid of colors", async () => {
-    const old = await legacy("util.js");
+  // Checked against the old app when ported; the snapshot keeps it that way.
+  it("names, HSL and Lab across a grid of colors are unchanged", () => {
+    const grid = [];
     for (let r = 0; r <= 255; r += 51) {
       for (let g = 0; g <= 255; g += 51) {
-        for (let b = 0; b <= 255; b += 51) {
-          expect(nearestColorName(r, g, b)).toBe(old.nearestColorName(r, g, b));
-          expect(rgbToHsl(r, g, b)).toEqual(old.rgbToHsl(r, g, b));
-          expect(rgbToLab(r, g, b)).toEqual(old.rgbToLab(r, g, b));
-        }
+        for (let b = 0; b <= 255; b += 51) grid.push([nearestColorName(r, g, b), rgbToHsl(r, g, b), rgbToLab(r, g, b)]);
       }
     }
+    expect(digest(grid)).toMatchSnapshot();
+    expect(nearestColorName(204, 51, 51)).toBe("Red");
   });
 });

@@ -1,0 +1,294 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`album records > builds the same item (apart from the random id) 1`] = `
+{
+  "apertureLabel": "Mid",
+  "aspectLabel": "Landscape",
+  "brightnessLabel": "Balanced",
+  "colorName": "Blue",
+  "colors": [
+    "#c2ddf4",
+    "#497817",
+    "#8b5b4a",
+    "#335d2c",
+    "#74945f",
+  ],
+  "exif": {
+    "aperture": "f/5.6",
+    "dateTaken": "2022:08:17 11:38:26",
+    "fNumber": 5.6,
+    "focalLength": "55mm",
+    "focalMm": 55,
+    "iso": "ISO 100",
+    "make": "NIKON CORPORATION",
+    "model": "NIKON D3400",
+    "shutter": "1/2000s",
+  },
+  "focalLabel": "Normal",
+  "hasLocation": false,
+  "height": 1067,
+  "imageId": "img-1",
+  "overlay": {
+    "flip": false,
+    "rotation": 0,
+    "type": "thirds",
+  },
+  "savedAt": 1700000000000,
+  "tags": [
+    "street",
+  ],
+  "themeId": "light",
+  "width": 1600,
+}
+`;
+
+exports[`composition guides > spiral geometry is unchanged, and perpendiculars meet the diagonal at right angles 1`] = `"sha256:dffbc7753c5e43c2"`;
+
+exports[`histogram and palette > are unchanged on a.jpg 1`] = `"sha256:4b01f973423b3bfb"`;
+
+exports[`histogram and palette > are unchanged on a.jpg 2`] = `
+[
+  {
+    "b": 2,
+    "g": 4,
+    "r": 3,
+  },
+  {
+    "b": 24,
+    "g": 46,
+    "r": 46,
+  },
+  {
+    "b": 230,
+    "g": 190,
+    "r": 123,
+  },
+  {
+    "b": 221,
+    "g": 234,
+    "r": 240,
+  },
+  {
+    "b": 73,
+    "g": 92,
+    "r": 97,
+  },
+  {
+    "b": 145,
+    "g": 163,
+    "r": 169,
+  },
+]
+`;
+
+exports[`histogram and palette > are unchanged on a_1.jpg 1`] = `"sha256:afb5645cacdaa12e"`;
+
+exports[`histogram and palette > are unchanged on a_1.jpg 2`] = `
+[
+  {
+    "b": 244,
+    "g": 221,
+    "r": 194,
+  },
+  {
+    "b": 23,
+    "g": 120,
+    "r": 73,
+  },
+  {
+    "b": 74,
+    "g": 91,
+    "r": 139,
+  },
+  {
+    "b": 44,
+    "g": 93,
+    "r": 51,
+  },
+  {
+    "b": 95,
+    "g": 148,
+    "r": 116,
+  },
+  {
+    "b": 27,
+    "g": 160,
+    "r": 118,
+  },
+]
+`;
+
+exports[`histogram and palette > are unchanged on a_25.jpg 1`] = `"sha256:616ffbe38a67bfde"`;
+
+exports[`histogram and palette > are unchanged on a_25.jpg 2`] = `
+[
+  {
+    "b": 0,
+    "g": 0,
+    "r": 2,
+  },
+  {
+    "b": 1,
+    "g": 2,
+    "r": 47,
+  },
+  {
+    "b": 2,
+    "g": 20,
+    "r": 97,
+  },
+  {
+    "b": 3,
+    "g": 46,
+    "r": 143,
+  },
+  {
+    "b": 23,
+    "g": 30,
+    "r": 233,
+  },
+  {
+    "b": 46,
+    "g": 119,
+    "r": 217,
+  },
+]
+`;
+
+exports[`histogram and palette > are unchanged on a_31.jpg 1`] = `"sha256:9501c81bb0158256"`;
+
+exports[`histogram and palette > are unchanged on a_31.jpg 2`] = `
+[
+  {
+    "b": 2,
+    "g": 4,
+    "r": 6,
+  },
+  {
+    "b": 50,
+    "g": 72,
+    "r": 94,
+  },
+  {
+    "b": 48,
+    "g": 97,
+    "r": 142,
+  },
+  {
+    "b": 3,
+    "g": 5,
+    "r": 46,
+  },
+  {
+    "b": 30,
+    "g": 68,
+    "r": 194,
+  },
+  {
+    "b": 140,
+    "g": 119,
+    "r": 104,
+  },
+]
+`;
+
+exports[`histogram and palette > are unchanged on a_33.jpg 1`] = `"sha256:418cd7a2fa70f744"`;
+
+exports[`histogram and palette > are unchanged on a_33.jpg 2`] = `
+[
+  {
+    "b": 239,
+    "g": 244,
+    "r": 222,
+  },
+  {
+    "b": 74,
+    "g": 69,
+    "r": 50,
+  },
+  {
+    "b": 167,
+    "g": 144,
+    "r": 95,
+  },
+  {
+    "b": 23,
+    "g": 25,
+    "r": 24,
+  },
+  {
+    "b": 215,
+    "g": 199,
+    "r": 160,
+  },
+  {
+    "b": 147,
+    "g": 163,
+    "r": 167,
+  },
+]
+`;
+
+exports[`histogram and palette > are unchanged on a_49.jpg 1`] = `"sha256:95ca682698abeccd"`;
+
+exports[`histogram and palette > are unchanged on a_49.jpg 2`] = `
+[
+  {
+    "b": 209,
+    "g": 217,
+    "r": 219,
+  },
+  {
+    "b": 184,
+    "g": 173,
+    "r": 120,
+  },
+  {
+    "b": 139,
+    "g": 102,
+    "r": 46,
+  },
+  {
+    "b": 118,
+    "g": 117,
+    "r": 49,
+  },
+  {
+    "b": 2,
+    "g": 5,
+    "r": 4,
+  },
+  {
+    "b": 69,
+    "g": 70,
+    "r": 51,
+  },
+]
+`;
+
+exports[`histogram and palette > are unchanged on dr-3474.jpg 1`] = `"sha256:c4a1e6e5a156dd9f"`;
+
+exports[`histogram and palette > are unchanged on dr-3474.jpg 2`] = `
+[
+  {
+    "b": 17,
+    "g": 17,
+    "r": 17,
+  },
+  {
+    "b": 254,
+    "g": 254,
+    "r": 254,
+  },
+  {
+    "b": 191,
+    "g": 191,
+    "r": 191,
+  },
+  {
+    "b": 119,
+    "g": 119,
+    "r": 119,
+  },
+]
+`;

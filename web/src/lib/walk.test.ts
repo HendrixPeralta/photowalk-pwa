@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { legacyFunction } from "@/test/legacy";
 import { defaultState } from "@/state/defaults";
 import type { ActiveWalk } from "@/state/types";
 import {
@@ -14,14 +13,16 @@ const guided = (over: Partial<ActiveWalk> = {}): ActiveWalk => ({
 });
 
 describe("clock and nudges", () => {
-  it("clock text matches the old app", () => {
-    const old = legacyFunction("walks.js", "clockText");
-    for (const ms of [0, 999, 59_000, 61_000, 3_599_000, 3_600_000, 7_384_000, -5]) expect(clockText(ms)).toBe(old(ms));
+  it("clock text reads mm:ss, and h:mm:ss past the hour", () => {
+    const shown = [0, 999, 59_000, 61_000, 3_599_000, 3_600_000, 7_384_000, -5].map(clockText);
+    expect(shown).toEqual(["00:00", "00:01", "00:59", "01:01", "59:59", "1:00:00", "2:03:04", "00:00"]);
     expect(clockText(3_725_000)).toBe("1:02:05");
   });
 
-  it("nudge plan matches the old app", () => {
-    expect(nudgePlan(T0, 30)).toEqual(legacyFunction("walks.js", "nudgePlan")(T0, 30));
+  it("nudges at half time, 85% and the end", () => {
+    expect(nudgePlan(T0, 30).map((n) => [n.id, n.at - T0, n.fired])).toEqual([
+      ["half", 15 * 60_000, false], ["wrap", 25.5 * 60_000, false], ["end", 30 * 60_000, false],
+    ]);
   });
 
   it("the end nudge is due at the end (it never fired in the old app's page)", () => {
@@ -50,20 +51,18 @@ describe("clock and nudges", () => {
 });
 
 describe("banked hours", () => {
-  it("matches the old app, including caps and pauses", () => {
-    const old = legacyFunction("walks.js", "computeElapsedHours", { CASUAL_MAX_HOURS });
-    const cases: ActiveWalk[] = [
-      guided(), guided({ pausedAt: T0 + 10 * 60000 }),
-      guided({ mode: "casual", durationMin: null }),
-      guided({ mode: "casual", durationMin: null, startedAt: T0 - 20 * 3600000 }),
-    ];
+  it("caps at the guided length or 8 casual hours, and stops at a pause", () => {
     const now = T0 + 45 * 60000;
-    for (const walk of cases) {
-      const realNow = Date.now;
-      Date.now = () => now;
-      try { expect(computeElapsedHours(walk, now)).toBeCloseTo(old(walk), 10); } finally { Date.now = realNow; }
-    }
-    expect(computeElapsedHours(guided(), now)).toBe(0.5); // capped at the 30 minute length
+    const hours = [
+      guided(), // capped at the 30 minute length
+      guided({ pausedAt: T0 + 10 * 60000 }), // the time up to the pause
+      guided({ mode: "casual", durationMin: null }),
+      guided({ mode: "casual", durationMin: null, startedAt: T0 - 20 * 3600000 }), // left open overnight
+    ].map((walk) => computeElapsedHours(walk, now));
+    expect(hours[0]).toBe(0.5);
+    expect(hours[1]).toBeCloseTo(10 / 60, 10);
+    expect(hours[2]).toBe(0.75);
+    expect(hours[3]).toBe(CASUAL_MAX_HOURS);
   });
 
   it("resuming slides the start and the nudges by the pause length", () => {

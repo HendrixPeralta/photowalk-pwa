@@ -1,0 +1,320 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`deconstruct > writes the same notes for a.jpg 1`] = `
+{
+  "clip": {
+    "black": 0.07960333723653396,
+    "white": 0.0013868559718969555,
+  },
+  "clusters": [
+    {
+      "hex": "#030402",
+      "role": "DOM",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#2e2e18",
+      "role": "WARM",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#7bbee6",
+      "role": "COOL",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#f0eadd",
+      "role": "SPEC",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#615c49",
+      "role": "WARM",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#a9a391",
+      "role": "BASE",
+      "share": 0.16666666666666666,
+    },
+  ],
+  "takeaway": "Shot at 1/4000s · ƒ/5.6 · ISO 100, the photo comes out low-key (mostly dark). Most of the scene falls into darkness, so whatever is lit becomes the focus. Some dark areas are pure black, with no detail left to brighten. Color: complementary. Yellow and blue sit opposite each other on the color wheel. This is called complementary, and it makes both colors pop. At 55mm (zoomed in), the background looks pulled closer, stacking the layers together.",
+  "tonalKey": {
+    "phrase": "low-key (mostly dark)",
+    "tag": "Moody",
+    "title": "Low-key (mostly dark)",
+  },
+}
+`;
+
+exports[`deconstruct > writes the same notes for a_1.jpg 1`] = `
+{
+  "clip": {
+    "black": 0,
+    "white": 0.0000622072599531616,
+  },
+  "clusters": [
+    {
+      "hex": "#c2ddf4",
+      "role": "DOM",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#497817",
+      "role": "WARM",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#8b5b4a",
+      "role": "WARM",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#335d2c",
+      "role": "WARM",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#74945f",
+      "role": "RIM",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#76a01b",
+      "role": "RIM",
+      "share": 0.16666666666666666,
+    },
+  ],
+  "takeaway": "Shot at 1/2000s · ƒ/5.6 · ISO 100, the photo comes out balanced. Color: mixed. Several unrelated colors share the photo, with no clear color scheme. At 55mm (zoomed in), the background looks pulled closer, stacking the layers together.",
+  "tonalKey": {
+    "phrase": "balanced",
+    "tag": "Even",
+    "title": "Balanced",
+  },
+}
+`;
+
+exports[`deconstruct > writes the same notes for a_25.jpg 1`] = `
+{
+  "clip": {
+    "black": 0.5053681206088994,
+    "white": 0,
+  },
+  "clusters": [
+    {
+      "hex": "#020000",
+      "role": "DOM",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#2f0201",
+      "role": "BLACK",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#611402",
+      "role": "WARM",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#8f2e03",
+      "role": "WARM",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#e91e17",
+      "role": "WARM",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#d9772e",
+      "role": "RIM",
+      "share": 0.16666666666666666,
+    },
+  ],
+  "takeaway": "Shot at 1/10s · ƒ/11 · ISO 100, the photo comes out low-key (mostly dark). Most of the scene falls into darkness, so whatever is lit becomes the focus. Some dark areas are pure black, with no detail left to brighten. Color: analogous. Colors that sit next to each other on the color wheel (black, red, orange). This is called analogous, and it feels calm and harmonious. At 50mm (zoomed in), the background looks pulled closer, stacking the layers together.",
+  "tonalKey": {
+    "phrase": "low-key (mostly dark)",
+    "tag": "Moody",
+    "title": "Low-key (mostly dark)",
+  },
+}
+`;
+
+exports[`deconstruct > writes the same notes for a_31.jpg 1`] = `
+{
+  "clip": {
+    "black": 0.08747438524590163,
+    "white": 0,
+  },
+  "clusters": [
+    {
+      "hex": "#060402",
+      "role": "DOM",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#5e4832",
+      "role": "WARM",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#8e6130",
+      "role": "WARM",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#2e0503",
+      "role": "BLACK",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#c2441e",
+      "role": "WARM",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#68778c",
+      "role": "COOL",
+      "share": 0.16666666666666666,
+    },
+  ],
+  "takeaway": "Shot at 1/1000s · ƒ/5.6 · ISO 400, the photo comes out low-key (mostly dark). Most of the scene falls into darkness, so whatever is lit becomes the focus. Some dark areas are pure black, with no detail left to brighten. Color: analogous. Colors that sit next to each other on the color wheel (orange, black, red). This is called analogous, and it feels calm and harmonious. At 55mm (zoomed in), the background looks pulled closer, stacking the layers together.",
+  "tonalKey": {
+    "phrase": "low-key (mostly dark)",
+    "tag": "Moody",
+    "title": "Low-key (mostly dark)",
+  },
+}
+`;
+
+exports[`deconstruct > writes the same notes for a_33.jpg 1`] = `
+{
+  "clip": {
+    "black": 0,
+    "white": 0.0001207552693208431,
+  },
+  "clusters": [
+    {
+      "hex": "#def4ef",
+      "role": "DOM",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#32454a",
+      "role": "COOL",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#5f90a7",
+      "role": "COOL",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#181917",
+      "role": "BLACK",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#a0c7d7",
+      "role": "COOL",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#a7a393",
+      "role": "BASE",
+      "share": 0.16666666666666666,
+    },
+  ],
+  "takeaway": "Shot at 1/250s · ƒ/8 · ISO 250, the photo comes out balanced. Color: analogous. Colors that sit next to each other on the color wheel (green, teal). This is called analogous, and it feels calm and harmonious. At 55mm (zoomed in), the background looks pulled closer, stacking the layers together.",
+  "tonalKey": {
+    "phrase": "balanced",
+    "tag": "Even",
+    "title": "Balanced",
+  },
+}
+`;
+
+exports[`deconstruct > writes the same notes for a_49.jpg 1`] = `
+{
+  "clip": {
+    "black": 0.0008233313817330211,
+    "white": 0.001643003512880562,
+  },
+  "clusters": [
+    {
+      "hex": "#dbd9d1",
+      "role": "DOM",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#78adb8",
+      "role": "COOL",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#2e668b",
+      "role": "COOL",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#317576",
+      "role": "COOL",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#040502",
+      "role": "BLACK",
+      "share": 0.16666666666666666,
+    },
+    {
+      "hex": "#334645",
+      "role": "COOL",
+      "share": 0.16666666666666666,
+    },
+  ],
+  "takeaway": "Shot at 1/3200s · ƒ/5.6 · ISO 100, the photo comes out high-key (mostly bright). Tones are bright and airy. That softens texture but keeps the subject easy to see against a light background. Color: analogous. Colors that sit next to each other on the color wheel (teal, blue). This is called analogous, and it feels calm and harmonious. At 55mm (zoomed in), the background looks pulled closer, stacking the layers together.",
+  "tonalKey": {
+    "phrase": "high-key (mostly bright)",
+    "tag": "Airy",
+    "title": "High-key (mostly bright)",
+  },
+}
+`;
+
+exports[`deconstruct > writes the same notes for dr-3474.jpg 1`] = `
+{
+  "clip": {
+    "black": 0.000021955503512880562,
+    "white": 0.19930474238875878,
+  },
+  "clusters": [
+    {
+      "hex": "#111111",
+      "role": "DOM",
+      "share": 0.25,
+    },
+    {
+      "hex": "#fefefe",
+      "role": "SPEC",
+      "share": 0.25,
+    },
+    {
+      "hex": "#bfbfbf",
+      "role": "BASE",
+      "share": 0.25,
+    },
+    {
+      "hex": "#777777",
+      "role": "BASE",
+      "share": 0.25,
+    },
+  ],
+  "takeaway": "The photo comes out high contrast. Strong darks and brights with little in between make shapes and edges stand out. Some bright areas are pure white, and editing can't bring that detail back. Color: monochrome. No strong colors. The photo is mostly grays and neutrals, so light and shape do the work.",
+  "tonalKey": {
+    "phrase": "high contrast",
+    "tag": "Punchy",
+    "title": "High contrast",
+  },
+}
+`;

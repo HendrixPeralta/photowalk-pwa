@@ -1,13 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { legacy } from "@/test/legacy";
 import { BUNDLED_PHOTOS, photoBlob } from "@/test/photos";
 import { exposureLine, isHeif, readExif } from "./exif";
 
 describe("readExif", () => {
-  it.each(BUNDLED_PHOTOS)("reads %s exactly like the old app", async (name) => {
-    const old = await legacy("exif.js");
-    const blob = photoBlob(name);
-    expect(await readExif(blob)).toEqual(await old.readExif(blob));
+  // Exactly what the old app read when ported; the snapshot keeps it so.
+  it.each(BUNDLED_PHOTOS)("reads %s the same", async (name) => {
+    expect(await readExif(photoBlob(name))).toMatchSnapshot();
   });
 
   it("finds real camera data in the bundled photos", async () => {

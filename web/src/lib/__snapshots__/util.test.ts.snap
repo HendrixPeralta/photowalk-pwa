@@ -1,0 +1,30 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`formatHours > is unchanged across a sweep of values 1`] = `"sha256:a04b24f6bebe5d1d"`;
+
+exports[`small helpers > buckets focal lengths and apertures 1`] = `
+[
+  null,
+  "Wide",
+  "Wide",
+  "Normal",
+  "Normal",
+  "Normal",
+  "Tele",
+  "Tele",
+  null,
+]
+`;
+
+exports[`small helpers > buckets focal lengths and apertures 2`] = `
+[
+  null,
+  "Fast",
+  "Fast",
+  "Mid",
+  "Mid",
+  "Deep",
+  "Deep",
+  null,
+]
+`;

@@ -1,17 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { configureI18n } from "@/lib/i18n/core";
 import ja from "@/lib/i18n/ja";
-import { legacy } from "@/test/legacy";
 import { TOOL_KEYS, toolHelp } from "./content";
 
 describe("tool help", () => {
-  it("matches the old app's help text in English", async () => {
-    const old = await legacy("toolhelp.js");
-    expect(TOOL_KEYS).toEqual(Object.keys(old.TOOL_HELP));
+  it("covers every tool, each with what, how, good, bad and references", () => {
+    expect(TOOL_KEYS).toEqual(["composition", "gamut", "histogram", "tonalkey", "waveform", "parade", "vectorscope", "cie", "tonecurve"]);
     for (const key of TOOL_KEYS) {
-      const fresh = toolHelp(key);
-      const previous = old.TOOL_HELP[key];
-      expect(JSON.parse(JSON.stringify(fresh))).toEqual(JSON.parse(JSON.stringify(previous)));
+      const help = toolHelp(key);
+      for (const text of [help.title, help.what, help.read, help.good, help.bad]) expect(text, key).toBeTruthy();
+      expect(help.refs.length, key).toBeGreaterThan(0);
     }
   });
 

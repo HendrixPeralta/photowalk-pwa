@@ -7,14 +7,14 @@ export default defineConfig({
   resolve: {
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
   },
-  // Parity tests import the old app's modules from ../js, outside this folder.
-  server: { fs: { allow: [".."] } },
   test: {
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
     include: ["src/**/*.test.{ts,tsx}"],
-    // Parity tests decode full-size bundled JPEGs in pure JS and compare large
-    // typed arrays, which can pass 5s when every test file runs in parallel.
+    // Some tests decode full-size bundled JPEGs in pure JS, which can pass 5s
+    // when every test file runs in parallel.
     testTimeout: 30_000,
+    // Snapshots of dates and day boundaries hold on any machine.
+    env: { TZ: "Asia/Tokyo" },
   },
 });

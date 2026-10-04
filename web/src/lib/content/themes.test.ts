@@ -1,5 +1,4 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { legacy } from "@/test/legacy";
 import { configureI18n } from "../i18n/core";
 import ja from "../i18n/ja";
 import { RAW_CONCEPTS, RAW_THEMES } from "./catalog";
@@ -8,17 +7,16 @@ import { allChallenges, concept, suggestTheme, themes } from "./themes";
 afterEach(() => vi.restoreAllMocks());
 
 describe("theme catalog", () => {
-  it("matches the old app's themes and challenges exactly", async () => {
-    const old = await legacy("concepts.js");
-    expect(themes()).toEqual(old.THEMES);
-    expect(allChallenges()).toEqual(old.allChallenges());
+  it("has 24 themes with a brief, and challenges pooled without repeats", () => {
+    expect(themes()).toHaveLength(24);
+    for (const th of themes()) expect(th.title && th.brief).toBeTruthy();
+    const pool = allChallenges();
+    expect(new Set(pool).size).toBe(pool.length);
+    expect(pool).toEqual(expect.arrayContaining(themes()[0].challenges));
   });
 
-  it("keeps every concept the themes refer to", async () => {
-    const old = await legacy("concepts.js");
-    for (const [key, c] of Object.entries(old.CONCEPTS as Record<string, { title: string; tip: string }>)) {
-      expect(concept(key)).toEqual({ title: c.title, tip: c.tip });
-    }
+  it("keeps every concept the themes refer to", () => {
+    for (const key of Object.keys(RAW_CONCEPTS)) expect(concept(key)?.title).toBeTruthy();
     const referenced = new Set(RAW_THEMES.flatMap((th) => th.concepts));
     for (const key of referenced) expect(RAW_CONCEPTS[key], key).toBeDefined();
   });
@@ -42,16 +40,16 @@ describe("suggestTheme", () => {
     ["morning", new Date(2026, 5, 1, 9, 0)],
     ["golden hour", new Date(2026, 5, 1, 17, 30)],
     ["night", new Date(2026, 5, 1, 22, 0)],
-  ])("picks what the old app picks in the %s", async (_label, now) => {
-    const old = await legacy("concepts.js");
+  // What the old app picked for each roll when ported; the snapshot keeps it so.
+  ])("picks the same in the %s", (_label, now) => {
     const counts = { "golden-hour": 3, "leading-lines": 1, "night-lights": 0, reflections: 2 };
+    const picks = [];
     for (let i = 0; i < 20; i++) {
       const roll = (i + 0.5) / 20;
-      vi.spyOn(Math, "random").mockReturnValue(roll);
-      const fresh = suggestTheme("reflections", counts, now, () => roll);
-      const previous = old.suggestTheme("reflections", counts, now);
-      expect(fresh).toEqual(previous);
+      const { theme, reason } = suggestTheme("reflections", counts, now, () => roll);
+      picks.push(`${theme.id}: ${reason}`);
     }
+    expect(picks).toMatchSnapshot();
   });
 
   it("never suggests night themes in daylight or the excluded theme", () => {

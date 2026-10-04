@@ -1,0 +1,232 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`plain-language readings > say the same about a.jpg 1`] = `
+{
+  "cie": {
+    "caption": "The colors cover about 65% of the triangle, so the photo uses most of the colors a screen can show. Overall the light is about 6300 K, close to daylight (the white cross marks normal daylight, 6500 K). The horseshoe shape is every color people can see. The triangle is the smaller set a screen can show.",
+    "label": "Wide color range",
+  },
+  "histogram": {
+    "caption": "Low-key: most of the photo is dark. Some dark areas are pure black, so their detail is lost.",
+    "clippedBlack": true,
+    "clippedWhite": false,
+    "highs": 0.1115449355971897,
+    "mids": 0.3795704039812646,
+    "shadows": 0.5088846604215457,
+  },
+  "palette": {
+    "caption": "Yellow and blue sit opposite each other on the color wheel. This is called complementary, and it makes both colors pop.",
+    "label": "Complementary",
+  },
+  "parade": {
+    "caption": "At the top, it leans 14 levels toward red, tinting the bright areas. Mild enough to look like a warm or cool mood rather than a mistake.",
+    "label": "Slight tint",
+  },
+  "vector": {
+    "caption": "On average, colors are about 12% of the way to fully vivid. That's a natural-looking amount of color. Most of the color leans toward yellow. The dashed line is the skin-tone line. Skin of every shade falls near it, because this chart ignores brightness, and skin tones differ mostly in brightness, not hue.",
+    "label": "Natural",
+  },
+  "waveform": {
+    "caption": "Brightness runs from about 0% to 96%, so the photo uses the full range from dark to bright. 3% sits at the very bottom: pure black with no detail. Read it left to right, like the photo itself: a high spot on the chart means that part of the photo is bright.",
+    "label": "Full range",
+  },
+}
+`;
+
+exports[`plain-language readings > say the same about a_1.jpg 1`] = `
+{
+  "cie": {
+    "caption": "The colors cover about 46% of the triangle, so the photo uses most of the colors a screen can show. Overall the light is about 6850 K, close to daylight (the white cross marks normal daylight, 6500 K). The horseshoe shape is every color people can see. The triangle is the smaller set a screen can show.",
+    "label": "Wide color range",
+  },
+  "histogram": {
+    "caption": "Balanced: a good spread from dark to bright.",
+    "clippedBlack": false,
+    "clippedWhite": false,
+    "highs": 0.2836614461358314,
+    "mids": 0.6553168911007026,
+    "shadows": 0.061021662763466045,
+  },
+  "palette": {
+    "caption": "Several unrelated colors share the photo, with no clear color scheme.",
+    "label": "Mixed",
+  },
+  "parade": {
+    "caption": "The green panel sits 45 levels away from the others at the bottom, so the shadows have a green tint. At the top, it leans 12 levels toward blue, tinting the bright areas. To fix it, adjust white balance (or temperature and tint) in your editing app until the three panels line up.",
+    "label": "Strong tint",
+  },
+  "vector": {
+    "caption": "On average, colors are about 24% of the way to fully vivid. Strong color: the dots reach well out in one or two directions. Most of the color leans toward green. The dashed line is the skin-tone line. Skin of every shade falls near it, because this chart ignores brightness, and skin tones differ mostly in brightness, not hue.",
+    "label": "Saturated",
+  },
+  "waveform": {
+    "caption": "Brightness runs from about 15% to 94%: a good spread, with a little room left at one end. Nothing reaches the bottom, so the darkest parts are dark gray, not black. That can look hazy, or like a deliberate faded style. Read it left to right, like the photo itself: a high spot on the chart means that part of the photo is bright.",
+    "label": "Healthy range",
+  },
+}
+`;
+
+exports[`plain-language readings > say the same about a_25.jpg 1`] = `
+{
+  "cie": {
+    "caption": "The colors cover about 36% of the triangle, so the photo uses most of the colors a screen can show. Its average sits far from the white cross (daylight), so one color dominates the photo. The horseshoe shape is every color people can see. The triangle is the smaller set a screen can show.",
+    "label": "Wide color range",
+  },
+  "histogram": {
+    "caption": "Low-key: most of the photo is dark. Some dark areas are pure black, so their detail is lost.",
+    "clippedBlack": true,
+    "clippedWhite": false,
+    "highs": 0.001211211943793911,
+    "mids": 0.1769650175644028,
+    "shadows": 0.8218237704918033,
+  },
+  "palette": {
+    "caption": "Colors that sit next to each other on the color wheel (black, red, orange). This is called analogous, and it feels calm and harmonious.",
+    "label": "Analogous",
+  },
+  "parade": {
+    "caption": "At the top, it leans 170 levels toward red, tinting the bright areas. To fix it, adjust white balance (or temperature and tint) in your editing app until the three panels line up.",
+    "label": "Strong tint",
+  },
+  "vector": {
+    "caption": "On average, colors are about 19% of the way to fully vivid. Strong color: the dots reach well out in one or two directions. Most of the color leans toward orange. About 56% of the colored pixels sit on the skin-tone line. If there's a person in the photo, their skin color looks natural.",
+    "label": "Saturated",
+  },
+  "waveform": {
+    "caption": "Brightness runs from about 0% to 68%: a good spread, with a little room left at one end. Nothing hits the top of the chart, so there's room to brighten the highlights if you like. 25% sits at the very bottom: pure black with no detail. Read it left to right, like the photo itself: a high spot on the chart means that part of the photo is bright.",
+    "label": "Healthy range",
+  },
+}
+`;
+
+exports[`plain-language readings > say the same about a_31.jpg 1`] = `
+{
+  "cie": {
+    "caption": "The colors cover about 61% of the triangle, so the photo uses most of the colors a screen can show. Its average sits far from the white cross (daylight), so one color dominates the photo. The horseshoe shape is every color people can see. The triangle is the smaller set a screen can show.",
+    "label": "Wide color range",
+  },
+  "histogram": {
+    "caption": "Low-key: most of the photo is dark. Some dark areas are pure black, so their detail is lost.",
+    "clippedBlack": true,
+    "clippedWhite": false,
+    "highs": 0.05748316744730679,
+    "mids": 0.38161226580796254,
+    "shadows": 0.5609045667447307,
+  },
+  "palette": {
+    "caption": "Colors that sit next to each other on the color wheel (orange, black, red). This is called analogous, and it feels calm and harmonious.",
+    "label": "Analogous",
+  },
+  "parade": {
+    "caption": "At the top, it leans 25 levels toward red, tinting the bright areas. To fix it, adjust white balance (or temperature and tint) in your editing app until the three panels line up.",
+    "label": "Strong tint",
+  },
+  "vector": {
+    "caption": "On average, colors are about 19% of the way to fully vivid. Strong color: the dots reach well out in one or two directions. Most of the color leans toward orange. About 40% of the colored pixels sit on the skin-tone line. If there's a person in the photo, their skin color looks natural.",
+    "label": "Saturated",
+  },
+  "waveform": {
+    "caption": "Brightness runs from about 0% to 90%, so the photo uses the full range from dark to bright. Read it left to right, like the photo itself: a high spot on the chart means that part of the photo is bright.",
+    "label": "Full range",
+  },
+}
+`;
+
+exports[`plain-language readings > say the same about a_33.jpg 1`] = `
+{
+  "cie": {
+    "caption": "The colors cover about 18% of the triangle. Overall the light is about 8350 K, cooler than daylight (the white cross marks normal daylight, 6500 K). The horseshoe shape is every color people can see. The triangle is the smaller set a screen can show.",
+    "label": "Medium color range",
+  },
+  "histogram": {
+    "caption": "Balanced: a good spread from dark to bright.",
+    "clippedBlack": false,
+    "clippedWhite": false,
+    "highs": 0.2451441744730679,
+    "mids": 0.5327137002341921,
+    "shadows": 0.22214212529274005,
+  },
+  "palette": {
+    "caption": "Colors that sit next to each other on the color wheel (green, teal). This is called analogous, and it feels calm and harmonious.",
+    "label": "Analogous",
+  },
+  "parade": {
+    "caption": "At the top, it leans 9 levels toward green, tinting the bright areas. Mild enough to look like a warm or cool mood rather than a mistake.",
+    "label": "Slight tint",
+  },
+  "vector": {
+    "caption": "On average, colors are about 14% of the way to fully vivid. That's a natural-looking amount of color. Most of the color leans toward teal. The dashed line is the skin-tone line. Skin of every shade falls near it, because this chart ignores brightness, and skin tones differ mostly in brightness, not hue.",
+    "label": "Natural",
+  },
+  "waveform": {
+    "caption": "Brightness runs from about 5% to 96%, so the photo uses the full range from dark to bright. Read it left to right, like the photo itself: a high spot on the chart means that part of the photo is bright.",
+    "label": "Full range",
+  },
+}
+`;
+
+exports[`plain-language readings > say the same about a_49.jpg 1`] = `
+{
+  "cie": {
+    "caption": "The colors cover about 19% of the triangle. Overall the light is about 6900 K, close to daylight (the white cross marks normal daylight, 6500 K). The horseshoe shape is every color people can see. The triangle is the smaller set a screen can show.",
+    "label": "Medium color range",
+  },
+  "histogram": {
+    "caption": "High-key: most of the photo is bright.",
+    "clippedBlack": false,
+    "clippedWhite": false,
+    "highs": 0.6051119730679156,
+    "mids": 0.38469335480093675,
+    "shadows": 0.01019467213114754,
+  },
+  "palette": {
+    "caption": "Colors that sit next to each other on the color wheel (teal, blue). This is called analogous, and it feels calm and harmonious.",
+    "label": "Analogous",
+  },
+  "parade": {
+    "caption": "The green panel sits 18 levels away from the others at the bottom, so the shadows have a green tint. To fix it, adjust white balance (or temperature and tint) in your editing app until the three panels line up.",
+    "label": "Strong tint",
+  },
+  "vector": {
+    "caption": "On average, colors are about 13% of the way to fully vivid. That's a natural-looking amount of color. Most of the color leans toward teal. The dashed line is the skin-tone line. Skin of every shade falls near it, because this chart ignores brightness, and skin tones differ mostly in brightness, not hue.",
+    "label": "Natural",
+  },
+  "waveform": {
+    "caption": "Brightness runs from about 13% to 95%: a good spread, with a little room left at one end. Nothing reaches the bottom, so the darkest parts are dark gray, not black. That can look hazy, or like a deliberate faded style. Read it left to right, like the photo itself: a high spot on the chart means that part of the photo is bright.",
+    "label": "Healthy range",
+  },
+}
+`;
+
+exports[`plain-language readings > say the same about dr-3474.jpg 1`] = `
+{
+  "cie": {
+    "caption": "The colors cover about 0% of the triangle, a tight, unified palette. Overall the light is about 6500 K, close to daylight (the white cross marks normal daylight, 6500 K). The horseshoe shape is every color people can see. The triangle is the smaller set a screen can show.",
+    "label": "Narrow color range",
+  },
+  "histogram": {
+    "caption": "High contrast: strong darks and brights, with little in between. Some bright areas are pure white, so their detail is lost.",
+    "clippedBlack": false,
+    "clippedWhite": true,
+    "highs": 0.4144613583138173,
+    "mids": 0.18737924473067916,
+    "shadows": 0.3981593969555035,
+  },
+  "palette": {
+    "caption": "No strong colors. The photo is mostly grays and neutrals, so light and shape do the work.",
+    "label": "Monochrome",
+  },
+  "parade": {
+    "caption": "The red, green and blue panels start and finish within 0 levels of each other, so the colors are balanced with no tint to fix.",
+    "label": "Neutral",
+  },
+  "vector": {
+    "caption": "On average, colors are about <1% of the way to fully vivid. The dots barely leave the center, so there's almost no color. Light and shape have to do the work. The dashed line is the skin-tone line. Skin of every shade falls near it, because this chart ignores brightness, and skin tones differ mostly in brightness, not hue.",
+    "label": "Almost no color",
+  },
+  "waveform": {
+    "caption": "Brightness runs from about 4% to 100%, so the photo uses the full range from dark to bright. Read it left to right, like the photo itself: a high spot on the chart means that part of the photo is bright.",
+    "label": "Full range",
+  },
+}
+`;

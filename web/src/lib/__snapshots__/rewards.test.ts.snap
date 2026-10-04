@@ -1,0 +1,308 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`rewards > the timeline at 0h is unchanged 1`] = `
+{
+  "progress": [
+    {
+      "done": false,
+      "earned": 0,
+      "id": "b",
+      "remaining": 12,
+      "target": 12,
+      "title": "Reward b",
+    },
+    {
+      "done": false,
+      "earned": 0,
+      "id": "c",
+      "remaining": 20,
+      "target": 20,
+      "title": "Reward c",
+    },
+    {
+      "done": false,
+      "earned": 0,
+      "id": "d",
+      "remaining": 30,
+      "target": 30,
+      "title": "Reward d",
+    },
+  ],
+  "timeline": {
+    "now": 0,
+    "nowPct": 0,
+    "stops": [
+      {
+        "id": "a",
+        "kind": "earned",
+        "label": "Last",
+        "note": "Claimed Nov 15, 2023",
+        "pct": 0,
+        "ready": false,
+        "title": "Reward a",
+      },
+      {
+        "kind": "next",
+        "label": "Next",
+        "note": "22h of shooting to go",
+        "pct": 50,
+        "ready": false,
+        "remaining": "22h",
+        "title": "Reward b",
+      },
+      {
+        "kind": "next",
+        "label": "Then",
+        "note": "50h of shooting to go",
+        "pct": 100,
+        "ready": false,
+        "remaining": "50h",
+        "title": "Reward c",
+      },
+    ],
+    "upcoming": 2,
+  },
+}
+`;
+
+exports[`rewards > the timeline at 4h is unchanged 1`] = `
+{
+  "progress": [
+    {
+      "done": false,
+      "earned": 0,
+      "id": "b",
+      "remaining": 12,
+      "target": 12,
+      "title": "Reward b",
+    },
+    {
+      "done": false,
+      "earned": 0,
+      "id": "c",
+      "remaining": 20,
+      "target": 20,
+      "title": "Reward c",
+    },
+    {
+      "done": false,
+      "earned": 0,
+      "id": "d",
+      "remaining": 30,
+      "target": 30,
+      "title": "Reward d",
+    },
+  ],
+  "timeline": {
+    "now": 4,
+    "nowPct": 0,
+    "stops": [
+      {
+        "id": "a",
+        "kind": "earned",
+        "label": "Last",
+        "note": "Claimed Nov 15, 2023",
+        "pct": 0,
+        "ready": false,
+        "title": "Reward a",
+      },
+      {
+        "kind": "next",
+        "label": "Next",
+        "note": "18h of shooting to go",
+        "pct": 50,
+        "ready": false,
+        "remaining": "18h",
+        "title": "Reward b",
+      },
+      {
+        "kind": "next",
+        "label": "Then",
+        "note": "46h of shooting to go",
+        "pct": 100,
+        "ready": false,
+        "remaining": "46h",
+        "title": "Reward c",
+      },
+    ],
+    "upcoming": 2,
+  },
+}
+`;
+
+exports[`rewards > the timeline at 22h is unchanged 1`] = `
+{
+  "progress": [
+    {
+      "done": true,
+      "earned": 12,
+      "id": "b",
+      "remaining": 0,
+      "target": 12,
+      "title": "Reward b",
+    },
+    {
+      "done": false,
+      "earned": 0,
+      "id": "c",
+      "remaining": 20,
+      "target": 20,
+      "title": "Reward c",
+    },
+    {
+      "done": false,
+      "earned": 0,
+      "id": "d",
+      "remaining": 30,
+      "target": 30,
+      "title": "Reward d",
+    },
+  ],
+  "timeline": {
+    "now": 22,
+    "nowPct": 0,
+    "stops": [
+      {
+        "id": "b",
+        "kind": "earned",
+        "label": "Last",
+        "note": "Earned: ready to claim",
+        "pct": 0,
+        "ready": true,
+        "title": "Reward b",
+      },
+      {
+        "kind": "next",
+        "label": "Next",
+        "note": "28h of shooting to go",
+        "pct": 50,
+        "ready": false,
+        "remaining": "28h",
+        "title": "Reward c",
+      },
+      {
+        "kind": "next",
+        "label": "Then",
+        "note": "40h of shooting to go",
+        "pct": 100,
+        "ready": false,
+        "remaining": "40h",
+        "title": "Reward d",
+      },
+    ],
+    "upcoming": 2,
+  },
+}
+`;
+
+exports[`rewards > the timeline at 40h is unchanged 1`] = `
+{
+  "progress": [
+    {
+      "done": true,
+      "earned": 30,
+      "id": "b",
+      "remaining": 0,
+      "target": 12,
+      "title": "Reward b",
+    },
+    {
+      "done": false,
+      "earned": 10,
+      "id": "c",
+      "remaining": 10,
+      "target": 20,
+      "title": "Reward c",
+    },
+    {
+      "done": false,
+      "earned": 8,
+      "id": "d",
+      "remaining": 22,
+      "target": 30,
+      "title": "Reward d",
+    },
+  ],
+  "timeline": {
+    "now": 40,
+    "nowPct": 32.142857142857146,
+    "stops": [
+      {
+        "id": "b",
+        "kind": "earned",
+        "label": "Last",
+        "note": "Earned: ready to claim",
+        "pct": 0,
+        "ready": true,
+        "title": "Reward b",
+      },
+      {
+        "kind": "next",
+        "label": "Next",
+        "note": "10h of shooting to go",
+        "pct": 50,
+        "ready": false,
+        "remaining": "10h",
+        "title": "Reward c",
+      },
+      {
+        "kind": "next",
+        "label": "Then",
+        "note": "22h of shooting to go",
+        "pct": 100,
+        "ready": false,
+        "remaining": "22h",
+        "title": "Reward d",
+      },
+    ],
+    "upcoming": 2,
+  },
+}
+`;
+
+exports[`rewards > the timeline at 70h is unchanged 1`] = `
+{
+  "progress": [
+    {
+      "done": true,
+      "earned": 60,
+      "id": "b",
+      "remaining": 0,
+      "target": 12,
+      "title": "Reward b",
+    },
+    {
+      "done": true,
+      "earned": 40,
+      "id": "c",
+      "remaining": 0,
+      "target": 20,
+      "title": "Reward c",
+    },
+    {
+      "done": true,
+      "earned": 38,
+      "id": "d",
+      "remaining": 0,
+      "target": 30,
+      "title": "Reward d",
+    },
+  ],
+  "timeline": {
+    "now": 70,
+    "nowPct": 0,
+    "stops": [
+      {
+        "id": "d",
+        "kind": "earned",
+        "label": "Last",
+        "note": "Earned: ready to claim",
+        "pct": 0,
+        "ready": true,
+        "title": "Reward d",
+      },
+    ],
+    "upcoming": 0,
+  },
+}
+`;
