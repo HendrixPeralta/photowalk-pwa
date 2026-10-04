@@ -6,7 +6,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "PhotoEYE",
   description: "Plan photo walks, learn composition, and organize your reference library.",
-  icons: { icon: { url: "/icons/icon.svg", type: "image/svg+xml" } },
+  icons: {
+    icon: { url: "/icons/icon.svg", type: "image/svg+xml" },
+    apple: { url: "/icons/apple-touch-icon.png", sizes: "180x180" },
+  },
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "PhotoEYE" },
 };
 
