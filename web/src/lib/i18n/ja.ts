@@ -184,6 +184,8 @@ const ja: Record<string, string> = {
   "Your name": "あなたの名前",
   "Note (optional)": "メモ（任意）",
   "Upload": "アップロード",
+  "Choose photos": "写真を選ぶ",
+  "QR code for the room invite link": "ルーム招待リンクのQRコード",
   "No shots shared yet.": "共有された写真はまだありません。",
   "Invite your walk partners": "ウォーク仲間を招待",
   "Scan this, or send the link:": "これをスキャンするか、リンクを送ってください：",
