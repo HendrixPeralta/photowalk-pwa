@@ -245,6 +245,7 @@ const ja: Record<string, string> = {
   "{n} saved": "{n}件保存済み",
   "None yet": "まだありません",
   "Finish your current walk before switching themes.": "テーマを切り替える前に、今のウォークを終了してください。",
+  "Finish your current walk before removing its theme.": "テーマを削除する前に、そのテーマを使っている今のウォークを終了してください。",
   "Guided walk · {n}-minute timer": "ガイド付きウォーク · {n}分タイマー",
   "Casual walk · no timer, stop whenever you're done": "カジュアルウォーク · タイマーなし、好きなときに終了できます",
   "Mini-challenges": "ミニ課題",

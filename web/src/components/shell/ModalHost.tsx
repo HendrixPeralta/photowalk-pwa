@@ -54,9 +54,10 @@ export function ModalHost() {
     focusFirst(card, { skip: ".modal-close" });
   }, [current]);
 
-  // A screen change takes the pop-up with it.
+  // A screen change takes the pop-up with it. A layout effect, so it runs
+  // before the new screen's own effects, which may open a pop-up of their own.
   const shownOn = useRef(pathname);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (pathname !== shownOn.current) {
       shownOn.current = pathname;
       closeModal();

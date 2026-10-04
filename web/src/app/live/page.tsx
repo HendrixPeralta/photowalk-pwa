@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/ComingSoon";
+import { LiveScreen } from "@/features/live/LiveScreen";
 
 export default function LivePage() {
-  return <ComingSoon view="hud" />;
+  return <LiveScreen />;
 }

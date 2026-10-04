@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { IconSprite } from "@/components/icons/IconSprite";
+import { WalkEngine } from "@/features/walks/WalkEngine";
 import { setNavigator } from "@/lib/nav";
 import { bootOnce } from "@/state/boot";
 import { BottomNav } from "./BottomNav";
@@ -56,6 +57,7 @@ function Shell({ children }: { children: ReactNode }) {
       <Drawer />
       <ModalHost />
       <ToastHost />
+      <WalkEngine />
     </div>
   );
 }

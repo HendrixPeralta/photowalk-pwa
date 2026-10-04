@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/ComingSoon";
+import { WalksScreen } from "@/features/walks/WalksScreen";
 
 export default function WalksPage() {
-  return <ComingSoon view="walks" />;
+  return <WalksScreen />;
 }
