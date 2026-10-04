@@ -7,15 +7,19 @@ import { create } from "zustand";
 
 /* ---------- Toasts ---------- */
 
-export interface Toast { id: number; message: string; duration: number }
+export interface ToastAction { label: string; run: () => void }
+export interface Toast { id: number; message: string; duration: number; action?: ToastAction }
 
 export const useToasts = create<{ toasts: Toast[] }>(() => ({ toasts: [] }));
 let nextToastId = 1;
 
-/** Shows a short message at the bottom of the screen. Safe to call from anywhere in the browser. */
-export function showToast(message: string, duration = 4000): number {
+/**
+ * Shows a short message at the bottom of the screen, optionally with one
+ * button. Safe to call from anywhere in the browser.
+ */
+export function showToast(message: string, duration = 4000, action?: ToastAction): number {
   const id = nextToastId++;
-  useToasts.setState((s) => ({ toasts: [...s.toasts, { id, message, duration }] }));
+  useToasts.setState((s) => ({ toasts: [...s.toasts, { id, message, duration, action }] }));
   return id;
 }
 
