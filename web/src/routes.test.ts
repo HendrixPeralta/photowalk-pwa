@@ -23,4 +23,16 @@ describe("routes", () => {
     expect(push).toHaveBeenLastCalledWith("/settings");
     setNavigator(null);
   });
+
+  it("going to the screen already showing does nothing", () => {
+    window.history.replaceState(null, "", "/album/");
+    const push = vi.fn();
+    setNavigator(push);
+    navigate("album");
+    expect(push).not.toHaveBeenCalled();
+    navigate("walks");
+    expect(push).toHaveBeenCalledWith("/");
+    setNavigator(null);
+    window.history.replaceState(null, "", "/");
+  });
 });

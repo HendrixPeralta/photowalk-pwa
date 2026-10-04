@@ -29,7 +29,7 @@ beforeEach(() => {
 describe("opening PhotoEYE from outside", () => {
   it("an invite link joins the room, opens Partners and drops the code from the address", async () => {
     useAppStore.setState({ rooms: { ABC234: { code: "ABC234", theme: "", createdAt: 0, photos: [] } } });
-    await launch("/partners/?room=abc234");
+    await launch("/?room=abc234");
     expect(getData().currentRoom).toBe("ABC234");
     expect(push).toHaveBeenCalledWith("/partners");
     expect(window.location.search).toBe("");
@@ -45,7 +45,8 @@ describe("opening PhotoEYE from outside", () => {
     inbox.push(new File(["x"], "a.jpg"), new File(["x"], "b.jpg"));
     await launch("/partners/?shared=1");
     expect(useShareInbox.getState().files.map((f) => f.name)).toEqual(["a.jpg", "b.jpg"]);
-    expect(push).toHaveBeenCalledWith("/partners");
+    // Already on Partners: nowhere to go.
+    expect(push).not.toHaveBeenCalled();
     expect(useToasts.getState().toasts[0].message).toContain("Create or join a room");
     expect(window.location.search).toBe("");
   });
