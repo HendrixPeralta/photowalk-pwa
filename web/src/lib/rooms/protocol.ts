@@ -156,7 +156,7 @@ export interface PhotoMeta {
 export const ROOM_ERRORS = [
   "signed_out", "not_configured", "invalid", "invalid_code", "room_not_found", "not_member",
   "removed", "host_only", "host_cannot_leave", "room_full", "too_many_rooms", "too_many_photos",
-  "photo_too_large", "upload_budget", "busy", "not_found", "forbidden",
+  "too_many_posts", "photo_too_large", "upload_budget", "busy", "not_found", "forbidden",
 ] as const;
 export type RoomError = (typeof ROOM_ERRORS)[number];
 
