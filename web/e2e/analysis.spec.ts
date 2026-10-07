@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { expect, test, type Locator, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "./fixtures";
 
 const PHOTOS = join(process.cwd(), "public/photos");
 const dialog = (page: Page) => page.getByRole("dialog");
@@ -110,9 +110,10 @@ test("bending the tone curve previews it on the photo", async ({ page }) => {
 });
 
 test("a picked photo is analyzed, saved to the album and compared", async ({ page }) => {
+  // Six sample photos in the album to compare against.
+  await page.goto("/album/?photos=seed");
+  await expect(page.locator(".view .album-thumb")).toHaveCount(6);
   await openSample(page);
-  // The starter photos land in the album in the background.
-  await expect.poll(async () => (await saved(page)).album.length).toBe(6);
 
   const before = (await saved(page)).profile.photosAnalyzed;
   await page.getByRole("button", { name: "Choose Another Photo" }).click();

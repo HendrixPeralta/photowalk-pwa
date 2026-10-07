@@ -1,6 +1,10 @@
 "use client";
 
+import { useState } from "react";
+import { AccountCard } from "@/features/account/AccountCard";
+import { clearStarterAlbum, seedStarterAlbum } from "@/features/album/references";
 import { openReview } from "@/features/review/ReviewModal";
+import { accountsEnabled } from "@/lib/authApi";
 import { LANGS, getLangChoice, setLang, t, type LangChoice } from "@/lib/i18n/core";
 import { reloadPage } from "@/lib/page";
 import { dayLabels, dayName, reminderStatus } from "@/lib/reminders";
@@ -17,9 +21,9 @@ export function SettingsScreen() {
   return (
     <section className="view" data-view="settings">
       <h2 className="section-title">{t("Settings")}</h2>
+      {accountsEnabled() && <AccountCard />}
       <LanguageCard />
       <ReminderCard />
-      <DemoDataCard />
       <div className="theme-card">
         <span className="label-caps" style={{ color: "var(--accent-strong)" }}>{t("Feedback")}</span>
         <h3 className="subsection-title" style={{ marginTop: 6 }}>{t("Leave a review")}</h3>
@@ -30,6 +34,7 @@ export function SettingsScreen() {
           <button type="button" className="btn btn-accent btn-sm" onClick={openReview}>{t("Write a review")}</button>
         </div>
       </div>
+      <DemoDataCard />
     </section>
   );
 }
@@ -117,8 +122,41 @@ function ReminderCard() {
   );
 }
 
-/** Loads practice history on demand, so a demo doesn't depend on typing a URL on a phone. */
+/** Shown or hidden by the Demo data switch; remembered on this device. */
+const DEMO_TOOLS_KEY = "photoeye:demo-tools";
+
+/**
+ * Sample history and photos, for trying the app out or showing it. A new
+ * account starts empty, so these sit behind a switch that is off until
+ * someone turns it on.
+ */
 function DemoDataCard() {
+  const [open, setOpen] = useState(() => localStorage.getItem(DEMO_TOOLS_KEY) === "1");
+  const toggle = (on: boolean) => {
+    setOpen(on);
+    if (on) localStorage.setItem(DEMO_TOOLS_KEY, "1");
+    else localStorage.removeItem(DEMO_TOOLS_KEY);
+  };
+  return (
+    <div className="theme-card collapse-card demo-card">
+      <label className="collapse-summary reminder-header">
+        <span className="collapse-title">{t("Demo data")}</span>
+        <span className="slide-switch">
+          <input type="checkbox" aria-label={t("Demo data")} checked={open} onChange={(e) => toggle(e.target.checked)} />
+          <span className="slide-switch-track" aria-hidden="true" />
+        </span>
+      </label>
+      {open && (
+        <div className="collapse-body">
+          <PracticeHistory />
+          <SamplePhotos />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PracticeHistory() {
   const activeDays = useAppStore((s) => Object.keys(s.activityLog).length);
   const hours = useAppStore((s) => totalActivityHours(s.activityLog));
   const walks = useAppStore((s) => s.profile.walksCompleted);
@@ -158,9 +196,8 @@ function DemoDataCard() {
   };
 
   return (
-    <div className="theme-card">
-      <span className="label-caps" style={{ color: "var(--accent-strong)" }}>{t("Demo data")}</span>
-      <h3 className="subsection-title" style={{ marginTop: 6 }}>{t("Practice history")}</h3>
+    <div className="demo-section">
+      <h3 className="subsection-title" style={{ marginTop: 0 }}>{t("Practice history")}</h3>
       <p className="muted card-text">{t("{source} {facts}.", { source, facts })}</p>
       <div className="theme-btn-row">
         <button type="button" className="btn btn-accent btn-sm" onClick={fillThreeMonths}>{t("Fill 3 months")}</button>
@@ -170,6 +207,38 @@ function DemoDataCard() {
       <p className="hint">
         {t("Fills the weekly strip, activity calendar, streak and rewards with sample history. Your own data is set aside, and Restore mine brings it back.")}
       </p>
+    </div>
+  );
+}
+
+function SamplePhotos() {
+  const inAlbum = useAppStore((s) => s.album.filter((item) => item.seeded).length);
+  const [busy, setBusy] = useState(false);
+
+  const add = async () => {
+    setBusy(true);
+    const added = await seedStarterAlbum().finally(() => setBusy(false));
+    showToast(added ? t("Sample photos added to the Album.") : t("Couldn't add the sample photos. Try again."));
+  };
+  const remove = async () => {
+    setBusy(true);
+    await clearStarterAlbum().finally(() => setBusy(false));
+    showToast(t("Sample photos removed."));
+  };
+
+  return (
+    <div className="demo-section">
+      <h3 className="subsection-title">{t("Sample photos")}</h3>
+      <p className="muted card-text">
+        {inAlbum === 0
+          ? t("No sample photos in the Album.")
+          : inAlbum === 1 ? t("{n} sample photo in the Album.", { n: inAlbum }) : t("{n} sample photos in the Album.", { n: inAlbum })}
+      </p>
+      <div className="theme-btn-row">
+        <button type="button" className="btn btn-accent btn-sm" disabled={busy || inAlbum > 0} onClick={() => void add()}>{t("Add sample photos")}</button>
+        <button type="button" className="btn btn-ghost btn-sm" disabled={busy || inAlbum === 0} onClick={() => void remove()}>{t("Remove sample photos")}</button>
+      </div>
+      <p className="hint">{t("Six example photos, to try the Album's filters and the analysis tools with.")}</p>
     </div>
   );
 }

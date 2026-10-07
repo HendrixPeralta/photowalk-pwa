@@ -1,9 +1,9 @@
-// Album references: removing one, and the starter set a new profile is given.
+// Album references: removing one, and the sample set of bundled photos.
 //
-// An empty Album makes the tab look broken (six filters with nothing to
-// filter), so a new profile gets a small library of the bundled photos, once.
-// From then on they are ordinary references: they can be analyzed, tagged and
-// deleted, and a deleted one stays deleted.
+// A new account starts with an empty Album. The sample photos are added on
+// request, from the Demo data switch in Settings (or ?photos=seed), to try
+// the filters and analysis with. Once added they are ordinary references:
+// they can be analyzed, tagged and deleted, and a deleted one stays deleted.
 
 import { albumRecord, measureForAlbum } from "@/lib/analysis/album";
 import { deleteImage, putImage, revokeImageUrl } from "@/lib/db";
@@ -90,7 +90,7 @@ export function maybeSeedStarterAlbum(): Promise<number> {
   return seeding;
 }
 
-/** Takes the starter set back out, photos included, so the next start seeds it fresh. */
+/** Takes the sample photos back out, photos included, so they can be added fresh. */
 export async function clearStarterAlbum(): Promise<number> {
   const seeded = getData().album.filter((item) => item.seeded);
   update((d) => {
@@ -101,12 +101,11 @@ export async function clearStarterAlbum(): Promise<number> {
   return seeded.length;
 }
 
-/** At start-up: the ?photos switch if there was one, otherwise the one-time seed. */
+/** At start-up: the ?photos switch, if there was one. */
 export async function starterAlbumOnStart(param: string | null): Promise<void> {
   try {
     if (param === "clear") await clearStarterAlbum();
     else if (param === "seed") await seedStarterAlbum();
-    else await maybeSeedStarterAlbum();
   } catch (err) {
     console.warn("PhotoEYE: could not set up the starter album.", err);
   }

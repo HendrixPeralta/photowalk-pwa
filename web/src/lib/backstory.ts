@@ -82,9 +82,6 @@ export const DEMO_YEAR: BackstoryConfig = {
   rewardAgeDays: [300, 70, 40, 20],
 };
 
-/** Under this many lifetime hours, a profile is someone trying the app out, not practising. */
-export const THIN_PROFILE_HOURS = 5;
-
 /** Deterministic PRNG (mulberry32): the same seed always generates the same history. */
 export function rng(seed: number): () => number {
   let a = seed >>> 0;

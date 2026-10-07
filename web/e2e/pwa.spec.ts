@@ -1,6 +1,6 @@
 import { join } from "node:path";
 import { readFileSync } from "node:fs";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 
 const SCREENS = [
   { path: "/", title: "Walks" },
@@ -70,6 +70,20 @@ test("photos from the share sheet land on Partners", async ({ page }) => {
   await page.getByRole("button", { name: "Upload", exact: true }).click();
   await expect(page.locator(".room-thumb")).toHaveCount(1);
   await expect(page.locator(".shared-notice")).toHaveCount(0);
+});
+
+test("the API always goes to the network, never to the service worker's caches", async ({ page, context }) => {
+  await installed(page);
+  let served = 0;
+  // page.route only sees requests the page makes itself: a request the
+  // service worker answered or re-sent would slip past it.
+  await page.route("**/api/probe/", (route) => route.fulfill({ json: { n: ++served } }));
+  const fetchProbe = () => page.evaluate(() => fetch("/api/probe/").then((r) => r.json()).catch(() => "offline"));
+  expect(await fetchProbe()).toEqual({ n: 1 });
+  expect(await fetchProbe()).toEqual({ n: 2 });
+  await page.unroute("**/api/probe/");
+  await context.setOffline(true);
+  expect(await fetchProbe()).toBe("offline");
 });
 
 test("the manifest describes an installable app with a share target", async ({ request }) => {

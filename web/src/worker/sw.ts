@@ -54,6 +54,22 @@ self.addEventListener("fetch", (event) => {
   }
 });
 
+/* ---------- The server API ---------- */
+
+// Sign-in, sessions and (later) the account's data are per person and must
+// never be answered from a cache, and the Google sign-in callback is a page
+// navigation the offline fallback would otherwise swallow. Stopping the event
+// here, without respondWith, keeps Serwist's listener (added last, below) out
+// of it, so the browser goes to the network as if there were no worker. The
+// API is same-origin wherever the worker runs: the static export, the one
+// build that talks to a server elsewhere, has no service worker.
+self.addEventListener("fetch", (event) => {
+  const url = new URL(event.request.url);
+  if (url.origin === self.location.origin && url.pathname.startsWith("/api/")) {
+    event.stopImmediatePropagation();
+  }
+});
+
 /* ---------- Notifications ---------- */
 
 // A walk nudge opens Live Walk; anything else opens the app where it was.

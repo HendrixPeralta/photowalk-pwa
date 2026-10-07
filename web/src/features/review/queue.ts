@@ -1,7 +1,7 @@
 // Reviews wait on the device and go out when there's a network to send them
-// over. This is the one place PhotoEYE sends anything anywhere, and it stays
-// narrow: only what the person typed, one way, nothing read back. No
-// identifiers, no telemetry, no photo data.
+// over, to a sheet that is separate from PhotoEYE's own server and accounts.
+// It stays narrow: only what the person typed, one way, nothing read back.
+// No account, no identifiers, no telemetry, no photo data.
 //
 // The queue has its own localStorage key, outside the saved data, because
 // demo mode parks and restores that wholesale: a review written during a demo

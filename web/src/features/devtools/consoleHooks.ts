@@ -9,7 +9,7 @@ import { formatHours } from "@/lib/util";
 import { currentStreak } from "@/lib/walk";
 import { getData } from "@/state/appStore";
 import { clearDemoData, ensureDemoData, seedDemoData } from "@/state/demo";
-import { DECLINED_KEY, seedStarterHistory, undoStarterHistory } from "@/state/seed";
+import { seedStarterHistory, undoStarterHistory } from "@/state/seed";
 
 export function installConsoleHooks(): void {
   const stats = () => {
@@ -34,7 +34,7 @@ export function installConsoleHooks(): void {
     photowalkHistory: {
       seed: seedStarterHistory,
       undo: undoStarterHistory,
-      status: () => ({ ...(getData().seededHistory ?? { seed: null }), declined: Boolean(localStorage.getItem(DECLINED_KEY)), ...stats() }),
+      status: () => ({ ...(getData().seededHistory ?? { seed: null }), ...stats() }),
     },
     photowalkPhotos: {
       seed: seedStarterAlbum,

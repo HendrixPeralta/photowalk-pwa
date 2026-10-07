@@ -3,11 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
+import { Avatar } from "@/components/Avatar";
 import { Icon } from "@/components/icons/Icon";
 import type { IconName } from "@/components/icons/sprite";
+import { accountsEnabled } from "@/lib/authApi";
 import { t } from "@/lib/i18n/core";
 import { ROUTES, viewForPath, type View } from "@/routes";
-import { closeDrawer, showToast, useDrawer } from "@/state/ui";
+import { useAccount } from "@/state/account";
+import { closeDrawer, useDrawer } from "@/state/ui";
 import { focusFirst, inertAppChrome } from "./focus";
 
 // The side menu fronts the screens that have no tab of their own.
@@ -62,22 +65,26 @@ export function Drawer() {
             ))}
           </div>
 
-          <button
-            type="button"
-            className="drawer-user"
-            onClick={() => showToast(t("Google sign-in is coming soon. PhotoEYE works fully without an account."))}
-          >
-            <span className="profile-avatar" aria-hidden="true"><Icon name="user" /></span>
-            <span className="drawer-user-names">
-              <strong>{t("Guest")}</strong>
-              <span className="muted">{t("Not signed in")}</span>
-            </span>
-            <svg className="drawer-user-dots" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <circle cx="12" cy="5" r="1.6" /><circle cx="12" cy="12" r="1.6" /><circle cx="12" cy="19" r="1.6" />
-            </svg>
-          </button>
+          {accountsEnabled() && <AccountLink />}
         </aside>
       </div>
     </div>
+  );
+}
+
+/** The signed-in person, leading to Settings, where the account card is. */
+function AccountLink() {
+  const user = useAccount((s) => s.user);
+  return (
+    <Link href={ROUTES.settings} className="drawer-user" onClick={closeDrawer}>
+      <Avatar user={user} />
+      <span className="drawer-user-names">
+        <strong>{user?.name || t("Account")}</strong>
+        {user?.email && <span className="muted">{user.email}</span>}
+      </span>
+      <svg className="drawer-user-dots" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <circle cx="12" cy="5" r="1.6" /><circle cx="12" cy="12" r="1.6" /><circle cx="12" cy="19" r="1.6" />
+      </svg>
+    </Link>
   );
 }

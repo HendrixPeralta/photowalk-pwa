@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 
 const SCREENS = [
   { path: "/", title: "Walks", tab: "Walks" },
@@ -59,15 +59,15 @@ test("the menu opens, navigates, and closes", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Profile" })).toBeFocused();
 });
 
-test("a new visitor starts with a practice history", async ({ page }) => {
+test("a new account starts empty: no sample history, no sample photos", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator(".streak-badge")).toContainText(/[1-9]\d*-day streak/);
-  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("photoeye:state")!).state);
-  expect(saved.seededHistory.days).toBe(91);
-  // A reload keeps the same history instead of seeding again.
+  await expect(page.locator(".streak-badge")).toContainText("0-day streak");
   await page.reload();
-  const again = await page.evaluate(() => JSON.parse(localStorage.getItem("photoeye:state")!).state);
-  expect(again.walkHistory.length).toBe(saved.walkHistory.length);
+  await expect(page.locator(".streak-badge")).toContainText("0-day streak");
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("photoeye:state")!).state);
+  expect(saved.seededHistory).toBeNull();
+  expect(saved.walkHistory).toEqual([]);
+  expect(saved.album).toEqual([]);
 });
 
 test("the app is in Japanese when Japanese is chosen", async ({ page }) => {
@@ -76,11 +76,4 @@ test("the app is in Japanese when Japanese is chosen", async ({ page }) => {
   await expect(page.locator("html")).toHaveAttribute("lang", "ja");
   await expect(page.locator("#screenTitle")).toHaveText("アルバム");
   await expect(page.locator(".bottom-nav")).toContainText("ウォーク");
-});
-
-test("the menu's sign-in card explains itself", async ({ page }) => {
-  await page.goto("/");
-  await page.getByRole("button", { name: "Profile" }).click();
-  await page.getByRole("button", { name: /Guest/ }).click();
-  await expect(page.getByRole("status")).toContainText("Google sign-in is coming soon");
 });
