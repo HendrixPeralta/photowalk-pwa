@@ -55,6 +55,40 @@ against production before deploying a commit that adds a migration.
 Preview deployments can't sign in: Google only accepts the redirect URIs
 listed above.
 
+## Walk Partners rooms
+
+Rooms live on the server: rooms, members, comments and critique notes in
+Neon (`src/server/db/rooms-schema.ts`), and the photos posted to a room in
+a **private** Vercel Blob store, readable only through the API by members
+of that room. Album photos never leave the phone; only photos posted to a
+room are uploaded.
+
+- Anyone signed in joins with the room code, QR or invite link. The host
+  can remove someone (they can't come back) and closes the room instead of
+  leaving, which deletes it and its photos.
+- A room closes 30 days after its last photo, note or comment. Reads treat
+  it as gone at once; a daily Vercel Cron job (`web/vercel.json`, path
+  `/api/cron/expire-rooms/` with the slash, because cron doesn't follow
+  redirects) deletes it and its pictures.
+- The app polls only while Partners is on screen: every 5 s, slowing as the
+  room goes quiet, pausing after 15 quiet minutes. That keeps Neon's free
+  compute from being spent on a forgotten tab.
+- Vercel's Hobby plan **locks the Blob store for 30 days** if the month's
+  upload allowance (2,000) runs out, so uploads stop at 1,500 a month
+  (`blob_usage`). The code never lists the store, and browsing it in the
+  Vercel dashboard also spends that allowance, so avoid it.
+
+One-time setup:
+
+1. **Vercel**, project `photoeye`, Storage: Create, **Blob**, access
+   **Private**, connected to Production and Development.
+2. **Vercel**, Environment Variables: `CRON_SECRET` (from
+   `openssl rand -base64 32`), Production.
+3. `vercel env pull .env.local`, then `npm run db:migrate` (the rooms
+   tables), before deploying.
+4. After the first deploy: Settings, Cron Jobs, run `expire-rooms` once and
+   check its log shows 200, not 308.
+
 ## House rules
 
 - No em dashes anywhere. `npm run check` fails the build if one appears.
