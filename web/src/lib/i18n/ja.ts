@@ -966,6 +966,22 @@ const ja: Record<string, string> = {
   "{n} sample photo in the Album.": "アルバムにサンプル写真が{n}枚あります。",
   "{n} sample photos in the Album.": "アルバムにサンプル写真が{n}枚あります。",
   "Six example photos, to try the Album's filters and the analysis tools with.": "アルバムのフィルターや分析ツールを試すための、6枚のサンプル写真です。",
+  "That doesn't look like a room code.": "ルームコードの形式ではないようです。",
+  "Room not found. It may have closed.": "ルームが見つかりません。閉じられた可能性があります。",
+  "You were removed from this room.": "このルームから外されました。",
+  "You're not in this room anymore.": "このルームにはもう参加していません。",
+  "This room is full.": "このルームは満員です。",
+  "You already have 5 open rooms. Close one first.": "開いているルームがすでに5つあります。先にどれかを閉じてください。",
+  "This room has reached its photo limit.": "このルームは写真の上限に達しました。",
+  "This room has reached its limit for notes and comments.": "このルームはメモとコメントの上限に達しました。",
+  "That photo is too large.": "写真が大きすぎます。",
+  "Photo sharing is paused for this month. Try again later.": "今月は写真の共有を一時停止しています。しばらくしてからお試しください。",
+  "Only the host can do that.": "ホストだけが行えます。",
+  "As the host, close the room instead of leaving.": "ホストは退出ではなく、ルームを閉じてください。",
+  "Rooms aren't set up on this server yet.": "このサーバーではまだルームを使えません。",
+  "You're offline. Connect to use the room.": "オフラインです。ルームを使うにはインターネットに接続してください。",
+  "Couldn't reach the server. Try again.": "サーバーに接続できませんでした。もう一度お試しください。",
+  "Room {code} has closed.": "ルーム{code}は閉じられました。",
 };
 
 export default ja;
