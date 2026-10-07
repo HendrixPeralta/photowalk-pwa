@@ -66,7 +66,7 @@ test("someone else signing in on the device starts from a clean slate", async ({
   await expect(page.locator(".topbar")).toBeVisible();
   await page.evaluate(() => {
     const saved = JSON.parse(localStorage.getItem("photoeye:state")!);
-    saved.state.profile.displayName = "Aki's camera";
+    saved.state.profile.guidedDurationMin = 45;
     localStorage.setItem("photoeye:state", JSON.stringify(saved));
   });
   await page.goto("/settings/");
@@ -76,8 +76,8 @@ test("someone else signing in on the device starts from a clean slate", async ({
   auth.signedInAs = { id: "someone-else", name: "Ben", email: "ben@example.com", image: null };
   await page.reload();
   await expect(page.locator(".topbar")).toBeVisible();
-  const name = await page.evaluate(() => JSON.parse(localStorage.getItem("photoeye:state")!).state.profile.displayName);
-  expect(name).toBe("");
+  const minutes = await page.evaluate(() => JSON.parse(localStorage.getItem("photoeye:state")!).state.profile.guidedDurationMin);
+  expect(minutes).toBe(30);
   await page.goto("/settings/");
   await expect(page.locator(".account-card")).toContainText("ben@example.com");
 });

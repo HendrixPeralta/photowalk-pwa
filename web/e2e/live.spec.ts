@@ -88,7 +88,10 @@ test("a guided walk shows its countdown and checklist progress", async ({ page }
 test("walk partners can create a room or are told when a code doesn't work", async ({ page }) => {
   await page.goto("/live/");
   await page.getByRole("button", { name: "Join Room" }).click();
-  await dialog(page).getByPlaceholder("Room code").fill("NOPE22");
+  await dialog(page).getByPlaceholder("Room code").fill("nope");
+  await dialog(page).getByRole("button", { name: "Join" }).click();
+  await expect(dialog(page).getByRole("alert")).toHaveText("That doesn't look like a room code.");
+  await dialog(page).getByPlaceholder("Room code").fill("ZZZ999");
   await dialog(page).getByRole("button", { name: "Join" }).click();
   await expect(dialog(page).getByRole("alert")).toContainText("Room not found");
   await page.keyboard.press("Escape");
