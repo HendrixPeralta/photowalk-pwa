@@ -40,7 +40,6 @@ export interface Profile {
   themeGoals: ThemeGoal[];
   guidedDurationMin: number;
   milestonesSeen: string[];
-  displayName: string;
 }
 
 export type AspectLabel = "Landscape" | "Portrait" | "Square";
@@ -70,39 +69,6 @@ export interface AlbumItem {
   seedName?: string;
   /** Study-checklist answers. */
   notes?: { q: string; a: string }[] | null;
-}
-
-export interface RoomComment {
-  name: string;
-  text: string;
-  ts: number;
-}
-
-export interface RoomPhoto {
-  id: string;
-  imageId: string;
-  name: string;
-  note: string;
-  ts: number;
-  comments: RoomComment[];
-  exif: Exif | null;
-  themeId: string | null;
-}
-
-export interface CritiqueNote {
-  name: string;
-  text: string;
-  /** The critique chips the note was filed under, space separated. */
-  spec: string;
-  ts: number;
-}
-
-export interface Room {
-  code: string;
-  theme: string;
-  createdAt: number;
-  photos: RoomPhoto[];
-  critique?: CritiqueNote[];
 }
 
 /** A GPS reading. */
@@ -191,7 +157,7 @@ export interface Reminder {
 export interface AppData {
   profile: Profile;
   album: AlbumItem[];
-  rooms: Record<string, Room>;
+  /** The Walk Partners room this device is in. The room itself lives on the server. */
   currentRoom: string | null;
   activeWalk: ActiveWalk | null;
   /** The most recent finished walk; the Analysis tab pins its theme tips for a day. */

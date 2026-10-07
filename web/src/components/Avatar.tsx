@@ -2,10 +2,15 @@
 
 import { useState } from "react";
 import { Icon } from "@/components/icons/Icon";
-import type { AccountUser } from "@/lib/authApi";
+/** Anyone with a name and maybe a photo: the signed-in account, or a room member. */
+export interface AvatarPerson {
+  name: string;
+  image: string | null;
+  email?: string;
+}
 
 /** The person's Google photo, else the first letter of their name, else a plain figure. */
-export function Avatar({ user }: { user: AccountUser | null }) {
+export function Avatar({ user }: { user: AvatarPerson | null | undefined }) {
   const [broken, setBroken] = useState<string | null>(null);
   if (user?.image && broken !== user.image) {
     return (

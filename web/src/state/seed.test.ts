@@ -17,11 +17,11 @@ describe("sample history", () => {
   });
 
   it("loads three months of practice and parks the profile from before", () => {
-    update((d) => { d.profile.displayName = "Me"; });
+    update((d) => { d.profile.guidedDurationMin = 45; });
     seedStarterHistory({}, NOW);
     expect(getData().seededHistory?.days).toBe(91);
     expect(getData().walkHistory.length).toBeGreaterThan(10);
-    expect(getData().profile.displayName).toBe("Me");
-    expect(JSON.parse(localStorage.getItem(PRE_SEED_KEY)!).state.profile.displayName).toBe("Me");
+    expect(getData().profile.guidedDurationMin).toBe(45);
+    expect(JSON.parse(localStorage.getItem(PRE_SEED_KEY)!).state.profile.guidedDurationMin).toBe(45);
   });
 });
