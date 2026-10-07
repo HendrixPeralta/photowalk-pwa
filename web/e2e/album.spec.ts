@@ -4,21 +4,35 @@ const dialog = (page: Page) => page.getByRole("dialog");
 const thumbs = (page: Page) => page.locator(".view .album-grid .album-thumb");
 const saved = (page: Page) => page.evaluate(() => JSON.parse(localStorage.getItem("photoeye:state")!).state);
 
+/** The Album with the six sample photos in it (?photos=seed, as the Settings button does). */
 async function openAlbum(page: Page) {
-  await page.goto("/album/");
+  await page.goto("/album/?photos=seed");
   await expect(thumbs(page)).toHaveCount(6);
 }
 
-test("a new profile gets the starter photos once", async ({ page }) => {
+test("a new account starts with an empty Album, and Settings adds the sample photos", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (err) => errors.push(err.message));
-  await openAlbum(page);
-  await expect(thumbs(page).first()).toHaveAttribute("style", /background-image: url\("blob:/);
-  expect((await saved(page)).seededAlbum.count).toBe(6);
+  await page.goto("/album/");
+  await expect(page.getByText("No references yet. Save one from the Analysis tab.")).toBeVisible();
+  await expect(thumbs(page)).toHaveCount(0);
 
+  await page.goto("/settings/");
+  await page.getByRole("checkbox", { name: "Demo data" }).check({ force: true });
+  await page.getByRole("button", { name: "Add sample photos" }).click();
+  await expect(page.getByText("6 sample photos in the Album.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Add sample photos" })).toBeDisabled();
+
+  await page.getByRole("link", { name: "Album", exact: true }).click();
+  await expect(thumbs(page)).toHaveCount(6);
+  await expect(thumbs(page).first()).toHaveAttribute("style", /background-image: url\("blob:/);
   await page.reload();
   await expect(thumbs(page)).toHaveCount(6);
-  expect((await saved(page)).album).toHaveLength(6);
+
+  await page.goto("/settings/");
+  await page.getByRole("button", { name: "Remove sample photos" }).click();
+  await expect(page.getByText("No sample photos in the Album.")).toBeVisible();
+  expect((await saved(page)).album).toHaveLength(0);
   expect(errors).toEqual([]);
 });
 

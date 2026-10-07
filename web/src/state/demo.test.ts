@@ -3,7 +3,7 @@ import { localDateKey } from "@/lib/util";
 import { getData, STATE_KEY, update, useAppStore } from "./appStore";
 import { defaultState } from "./defaults";
 import { clearDemoData, ensureDemoData, PRE_DEMO_KEY, seedDemoData } from "./demo";
-import { DECLINED_KEY, PRE_SEED_KEY, seedStarterHistory, undoStarterHistory } from "./seed";
+import { PRE_SEED_KEY, seedStarterHistory, undoStarterHistory } from "./seed";
 
 const reloadPage = vi.fn();
 vi.mock("@/lib/page", () => ({ reloadPage: () => reloadPage() }));
@@ -58,13 +58,12 @@ describe("demo data", () => {
 });
 
 describe("starting history", () => {
-  it("undo hands back the profile from before the seed, and stops it seeding again", () => {
+  it("undo hands back the profile from before the seed", () => {
     const before = localStorage.getItem(STATE_KEY) ?? "";
     seedStarterHistory({}, NOW);
     expect(undoStarterHistory()).toBe(true);
     expect(localStorage.getItem(STATE_KEY) ?? "").toBe(before);
     expect(localStorage.getItem(PRE_SEED_KEY)).toBeNull();
-    expect(localStorage.getItem(DECLINED_KEY)).toBe("1");
     expect(reloadPage).toHaveBeenCalledOnce();
     expect(undoStarterHistory()).toBe(false);
   });

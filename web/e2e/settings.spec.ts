@@ -17,7 +17,7 @@ test("reminders pick days and a time, and say how they'll arrive", async ({ page
   await context.grantPermissions(["notifications"]);
   await page.goto("/settings/");
   await expect(page.getByRole("button", { name: "Monday" })).toHaveCount(0);
-  await page.locator(".slide-switch").click();
+  await page.locator(".reminder-card .slide-switch").click();
   await expect(page.getByRole("button", { name: "Monday" })).toBeVisible();
 
   const days = page.locator(".day-chip[aria-pressed=true]");
@@ -37,10 +37,26 @@ test("reminders pick days and a time, and say how they'll arrive", async ({ page
   expect(saved).toMatchObject({ enabled: true, time: "07:30" });
 });
 
+test("the demo tools hide behind a switch that stays where it was left", async ({ page }) => {
+  await page.goto("/settings/");
+  const toggle = page.getByRole("checkbox", { name: "Demo data" });
+  await expect(toggle).not.toBeChecked();
+  await expect(page.getByRole("button", { name: "Fill a year" })).toHaveCount(0);
+
+  await toggle.check({ force: true });
+  await expect(page.getByRole("button", { name: "Fill a year" })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Fill a year" })).toBeVisible();
+
+  await page.getByRole("checkbox", { name: "Demo data" }).uncheck({ force: true });
+  await expect(page.getByRole("button", { name: "Fill a year" })).toHaveCount(0);
+});
+
 test("a year of demo history loads, stays across reloads, and Restore brings back the start", async ({ page }) => {
   await page.goto("/settings/");
-  const status = page.locator(".theme-card").filter({ hasText: "Practice history" }).locator(".card-text");
-  await expect(status).toContainText("Three months of starting history is loaded.");
+  await page.getByRole("checkbox", { name: "Demo data" }).check({ force: true });
+  const status = page.locator(".demo-section").filter({ hasText: "Practice history" }).locator(".card-text");
+  await expect(status).toContainText("This is your own history.");
 
   await page.getByRole("button", { name: "Fill a year" }).click();
   await expect(status).toContainText("A full year of demo history is loaded.");
@@ -48,18 +64,21 @@ test("a year of demo history loads, stays across reloads, and Restore brings bac
   await expect(status).toContainText("A full year of demo history is loaded.");
 
   await page.getByRole("button", { name: "Restore mine" }).click();
-  await expect(status).toContainText("Three months of starting history is loaded.");
+  await expect(status).toContainText("This is your own history.");
 });
 
 test("URL switches run once and leave the address", async ({ page }) => {
-  await page.goto("/album/");
+  await page.goto("/album/?photos=seed");
+  await expect(page).toHaveURL(/\/album\/$/);
+  await expect(page.locator(".view .album-thumb")).toHaveCount(6);
+  // The switch is gone, so a reload is an ordinary start: no second set.
+  await page.reload();
   await expect(page.locator(".view .album-thumb")).toHaveCount(6);
   await page.goto("/album/?photos=clear");
   await expect(page).toHaveURL(/\/album\/$/);
   await expect(page.locator(".view .album-thumb")).toHaveCount(0);
-  // The switch is gone, so a reload is an ordinary start: the starter set comes back once.
   await page.reload();
-  await expect(page.locator(".view .album-thumb")).toHaveCount(6);
+  await expect(page.locator(".view .album-thumb")).toHaveCount(0);
 
   await page.goto("/?demo");
   await expect(page).toHaveURL(/localhost:\d+\/$/);

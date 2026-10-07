@@ -49,7 +49,7 @@ test("the menu shows who is signed in and leads to their account", async ({ page
 });
 
 test("signing out returns to the sign-in screen and leaves the device's data in place", async ({ page, auth }) => {
-  await page.goto("/settings/");
+  await page.goto("/settings/?history=seed");
   await expect(page.locator(".account-card")).toBeVisible();
   const walks = await page.evaluate(() => JSON.parse(localStorage.getItem("photoeye:state")!).state.walkHistory.length);
   expect(walks).toBeGreaterThan(0);

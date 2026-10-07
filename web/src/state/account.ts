@@ -21,7 +21,7 @@ import { reloadPage } from "@/lib/page";
 import { STATE_KEY, useAppStore } from "./appStore";
 import { defaultState } from "./defaults";
 import { PRE_DEMO_KEY } from "./demo";
-import { DECLINED_KEY, PRE_SEED_KEY } from "./seed";
+import { PRE_SEED_KEY } from "./seed";
 import { showToast } from "./ui";
 
 /** The signed-in person, remembered for launches with no signal. */
@@ -30,7 +30,7 @@ export const ACCOUNT_KEY = "photoeye:account";
 export const OWNER_KEY = "photoeye:owner";
 
 /** Everything personal kept on the device. The language and unsent anonymous reviews stay. */
-const PERSONAL_KEYS = [STATE_KEY, PRE_DEMO_KEY, PRE_SEED_KEY, DECLINED_KEY, FIX_KEY, ACCOUNT_KEY];
+const PERSONAL_KEYS = [STATE_KEY, PRE_DEMO_KEY, PRE_SEED_KEY, FIX_KEY, ACCOUNT_KEY];
 
 export interface AccountState {
   user: AccountUser | null;

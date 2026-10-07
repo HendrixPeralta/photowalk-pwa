@@ -956,6 +956,16 @@ const ja: Record<string, string> = {
   "Your session ended. Sign in again.": "ログインの有効期限が切れました。もう一度ログインしてください。",
   "Connect to the internet to sign out.": "ログアウトするにはインターネットに接続してください。",
   "Couldn't sign out. Try again.": "ログアウトできませんでした。もう一度お試しください。",
+  "Sample photos": "サンプル写真",
+  "Add sample photos": "サンプル写真を追加",
+  "Remove sample photos": "サンプル写真を削除",
+  "Sample photos added to the Album.": "サンプル写真をアルバムに追加しました。",
+  "Couldn't add the sample photos. Try again.": "サンプル写真を追加できませんでした。もう一度お試しください。",
+  "Sample photos removed.": "サンプル写真を削除しました。",
+  "No sample photos in the Album.": "アルバムにサンプル写真はありません。",
+  "{n} sample photo in the Album.": "アルバムにサンプル写真が{n}枚あります。",
+  "{n} sample photos in the Album.": "アルバムにサンプル写真が{n}枚あります。",
+  "Six example photos, to try the Album's filters and the analysis tools with.": "アルバムのフィルターや分析ツールを試すための、6枚のサンプル写真です。",
 };
 
 export default ja;
