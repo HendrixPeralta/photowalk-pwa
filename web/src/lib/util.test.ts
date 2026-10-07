@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { digest } from "@/test/digest";
-import { apertureBucket, clamp, focalBucket, formatCoords, formatHours, localDateKey, roomCode } from "./util";
+import { apertureBucket, clamp, focalBucket, formatCoords, formatHours, localDateKey } from "./util";
 
 describe("formatHours", () => {
   it.each([
@@ -35,9 +35,5 @@ describe("small helpers", () => {
 
   it("formats coordinates with hemispheres", () => {
     expect(formatCoords(35.6762, -139.6503)).toBe("35.67620° N, 139.65030° W");
-  });
-
-  it("room codes avoid look-alike characters", () => {
-    for (let i = 0; i < 200; i++) expect(roomCode()).toMatch(/^[A-HJ-NP-Z2-9]{6}$/);
   });
 });

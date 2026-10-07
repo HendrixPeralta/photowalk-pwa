@@ -6,7 +6,8 @@ import { putImage } from "@/lib/db";
 import { readExif } from "@/lib/exif";
 import { t } from "@/lib/i18n/core";
 import { canvasToBlob, drawToCanvas, loadImage, readFileAsDataUrl } from "@/lib/image";
-import { roomCode, uid } from "@/lib/util";
+import { newRoomCode } from "@/lib/rooms/protocol";
+import { uid } from "@/lib/util";
 import { getData, update, warnIfStorageTight } from "@/state/appStore";
 import type { Room, RoomPhoto } from "@/state/types";
 import { showToast } from "@/state/ui";
@@ -45,8 +46,8 @@ export function setDisplayName(name: string): void {
 /** Opens a new room and joins it. Returns its code. */
 export function createRoom(now = Date.now()): string {
   const rooms = getData().rooms;
-  let code = roomCode();
-  while (rooms[code]) code = roomCode();
+  let code = newRoomCode();
+  while (rooms[code]) code = newRoomCode();
   update((d) => {
     d.rooms[code] = { code, theme: "", createdAt: now, photos: [] };
     d.currentRoom = code;
