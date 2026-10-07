@@ -4,6 +4,7 @@ import type { PGlite } from "@electric-sql/pglite";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createAuth, withoutTrailingSlash, type Auth } from "./auth";
 import { createTestDb } from "./db/testDb";
+import { requireUser } from "./session";
 
 const BASE = "http://localhost:3000";
 
@@ -53,6 +54,10 @@ describe("auth", () => {
       body: JSON.stringify({ provider: "google", callbackURL: "https://evil.example/" }),
     });
     expect(res.status).toBe(403);
+  });
+
+  it("refuses API requests from someone who isn't signed in", async () => {
+    await expect(requireUser(new Request(`${BASE}/api/rooms/`), auth)).rejects.toMatchObject({ status: 401, code: "signed_out" });
   });
 
   it("leaves URLs without a slash alone", async () => {
