@@ -2,3 +2,4 @@
 // migrations, so a new table only exists once it is exported from here.
 
 export * from "./auth-schema";
+export * from "./rooms-schema";
