@@ -6,14 +6,14 @@ import { renderMarkup, Trans } from "./Trans";
 
 describe("Trans", () => {
   it("renders bold parts and inserts values as text", () => {
-    const { container } = render(<Trans k="<strong>{hours}</strong> shot · <strong>{walks}</strong> walks" values={{ hours: "12h", walks: 4 }} />);
-    expect(container.innerHTML).toBe("<strong>12h</strong> shot · <strong>4</strong> walks");
+    const { container } = render(<Trans k="<strong>{hours}</strong> shots · <strong>{walks}</strong> walks" values={{ hours: "12h", walks: 4 }} />);
+    expect(container.innerHTML).toBe("<strong>12h</strong> shots · <strong>4</strong> walks");
   });
 
   it("follows the Japanese word order", () => {
     configureI18n("ja", ja);
-    const { container } = render(<Trans k="<strong>{hours}</strong> shot · <strong>{walks}</strong> walks" values={{ hours: "12h", walks: 4 }} />);
-    expect(container.innerHTML).toBe("撮影 <strong>12h</strong>・ウォーク <strong>4</strong> 回");
+    const { container } = render(<Trans k="<strong>{hours}</strong> shots · <strong>{walks}</strong> walks · <strong>{streak}</strong>-day streak" values={{ hours: "12h", walks: 4, streak: 2 }} />);
+    expect(container.innerHTML).toBe("撮影 <strong>12h</strong>・ウォーク <strong>4</strong> 回・<strong>2</strong>日連続");
   });
 
   it("never turns a value into markup", () => {

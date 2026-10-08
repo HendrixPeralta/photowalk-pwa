@@ -61,9 +61,9 @@ test("the menu opens, navigates, and closes", async ({ page }) => {
 
 test("a new account starts empty: no sample history, no sample photos", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator(".streak-badge")).toContainText("0-day streak");
+  await expect(page.locator(".activity-lifetime")).toContainText("0-day streak");
   await page.reload();
-  await expect(page.locator(".streak-badge")).toContainText("0-day streak");
+  await expect(page.locator(".activity-lifetime")).toContainText("0-day streak");
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("photoeye:state")!).state);
   expect(saved.seededHistory).toBeNull();
   expect(saved.walkHistory).toEqual([]);

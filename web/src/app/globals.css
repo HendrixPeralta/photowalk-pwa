@@ -177,23 +177,6 @@ button, input, select {
   gap: 10px;
 }
 
-.streak-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 9px;
-  background: var(--surface-3);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  font-family: var(--font-data);
-  font-variant-numeric: tabular-nums;
-  font-weight: 500;
-  font-size: 11px;
-  white-space: nowrap;
-  color: var(--accent-strong);
-}
-.streak-badge svg { width: 16px; height: 16px; }
-
 .icon-btn {
   display: inline-flex;
   align-items: center;
@@ -2746,7 +2729,7 @@ input[type="file"].text-input { padding: 8px; }
 
 .topbar-review-star { font-size: 13px; line-height: 1; color: var(--accent-strong); }
 
-/* Under ~420px the bar is carrying a 34px badge, a streak pill and the brand
+/* Under ~420px the bar is carrying a 34px badge and the brand
    lockup already; drop to the star alone rather than let the title ellipsis
    eat itself. */
 @media (max-width: 420px) {
