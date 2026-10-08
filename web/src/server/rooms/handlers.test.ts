@@ -40,10 +40,13 @@ afterAll(() => client.close());
 
 describe("rooms API", () => {
   it("runs a room from creation to a posted photo and back", async () => {
-    const created = await call("ana", "/api/rooms/", json({ theme: "Reflections" }));
+    const created = await call("ana", "/api/rooms/", json({ theme: "Reflections", name: "Sunday crew" }));
     expect(created.status).toBe(201);
     const { room } = await created.json();
+    expect(room.name).toBe("Sunday crew");
     expect((await call("ken", "/api/rooms/join/", json({ code: room.code }))).status).toBe(200);
+    const renamed = await call("ana", "/api/rooms/rename/", json({ code: room.code, name: "Harbour walk" }));
+    expect((await renamed.json()).room.name).toBe("Harbour walk");
 
     const form = new FormData();
     form.append("photo", new Blob([JPEG], { type: "image/jpeg" }));

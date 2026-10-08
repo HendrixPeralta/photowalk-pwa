@@ -12,7 +12,7 @@ const inbox: File[] = [];
 vi.mock("@/lib/db", () => ({ takeSharedFiles: async () => inbox.splice(0) }));
 vi.mock("./roomImages", () => ({ pruneRoomImages: async () => {}, keepPostedImage: async () => {} }));
 
-const room = { code: "ABC234", theme: "", hostId: "ana", version: 1, createdAt: 0, lastActivityAt: 0, expiresAt: 0, members: ["ana"], people: {}, photos: [], notes: [] } as RoomSnapshot;
+const room = { code: "ABC234", name: "", theme: "", hostId: "ana", version: 1, createdAt: 0, lastActivityAt: 0, expiresAt: 0, members: ["ana"], people: {}, photos: [], notes: [] } as RoomSnapshot;
 
 async function launch(path: string) {
   window.history.replaceState(null, "", path);

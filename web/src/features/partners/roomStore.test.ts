@@ -9,7 +9,7 @@ import { applySnapshot, handleRoomFailure, nudgeRoomSync, pollDelay, refreshRoom
 vi.mock("./roomImages", () => ({ pruneRoomImages: vi.fn(async () => {}) }));
 
 const room = (version: number, code = "ABC234"): RoomSnapshot => ({
-  code, theme: "", hostId: "ana", version, createdAt: 0, lastActivityAt: 0, expiresAt: 0,
+  code, name: "", theme: "", hostId: "ana", version, createdAt: 0, lastActivityAt: 0, expiresAt: 0,
   members: ["ana"], people: {}, photos: [], notes: [],
 });
 

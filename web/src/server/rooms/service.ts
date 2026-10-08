@@ -63,6 +63,7 @@ export async function listMyRooms({ db, user, now }: RoomDeps): Promise<RoomSumm
   const membersIn = new Map(memberCounts.map((r) => [r.roomId, r.n]));
   return mine.map(({ room }) => ({
     code: room.code,
+    name: room.name,
     theme: room.theme,
     isHost: room.hostId === user.id,
     photoCount: photosIn.get(room.id) ?? 0,
@@ -92,9 +93,10 @@ export async function readPhoto(deps: RoomDeps, photoId: string): Promise<Stored
 
 /* ---------- Rooms and people ---------- */
 
-export async function createRoom(deps: RoomDeps, theme: string): Promise<RoomSnapshot> {
+export async function createRoom(deps: RoomDeps, theme: string, name = ""): Promise<RoomSnapshot> {
   const { db, user, now } = deps;
   const title = cleanText(theme, LIMITS.theme, { allowEmpty: true });
+  const roomName = cleanText(name, LIMITS.roomName, { allowEmpty: true });
   const [{ hosted }] = await db.select({ hosted: count() }).from(rooms)
     .where(and(eq(rooms.hostId, user.id), gt(rooms.lastActivityAt, cutoff(now))));
   if (hosted >= LIMITS.hostedRooms) throw new HttpError(409, "too_many_rooms");
@@ -103,7 +105,7 @@ export async function createRoom(deps: RoomDeps, theme: string): Promise<RoomSna
     const id = newId();
     const created = await db.transaction(async (tx) => {
       const [row] = await tx.insert(rooms)
-        .values({ id, code: newRoomCode(deps.random), hostId: user.id, theme: title, createdAt: now, lastActivityAt: now })
+        .values({ id, code: newRoomCode(deps.random), hostId: user.id, name: roomName, theme: title, createdAt: now, lastActivityAt: now })
         .onConflictDoNothing({ target: rooms.code })
         .returning();
       if (!row) return null; // that code is taken: try another
@@ -113,6 +115,19 @@ export async function createRoom(deps: RoomDeps, theme: string): Promise<RoomSna
     if (created) return snapshot(db, created);
   }
   throw new HttpError(503, "busy");
+}
+
+/** The host names the room, or clears the name (the code stands in). */
+export async function renameRoom(deps: RoomDeps, rawCode: string, name: string): Promise<RoomSnapshot> {
+  const { db, user, now } = deps;
+  const roomName = cleanText(name, LIMITS.roomName, { allowEmpty: true });
+  const room = await liveRoom(db, rawCode, now);
+  await requireMember(db, room.id, user.id);
+  if (room.hostId !== user.id) throw new HttpError(403, "host_only");
+  return db.transaction(async (tx) => {
+    await tx.update(rooms).set({ name: roomName }).where(eq(rooms.id, room.id));
+    return snapshot(tx, await bump(tx, room.id));
+  });
 }
 
 /** Joins with a code (or a pasted invite link). Joining a room you're in just returns it. */
@@ -381,6 +396,7 @@ async function snapshot(db: Q, room: RoomRow): Promise<RoomSnapshot> {
 
   return {
     code: room.code,
+    name: room.name,
     theme: room.theme,
     hostId: room.hostId,
     version: room.version,

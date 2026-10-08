@@ -14,6 +14,8 @@ export const rooms = pgTable("rooms", {
   id: text("id").primaryKey(),
   code: text("code").notNull().unique(),
   hostId: text("host_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  /** What the host called the room. Empty when unnamed. */
+  name: text("name").notNull().default(""),
   theme: text("theme").notNull().default(""),
   /** Goes up with every change, so a poll can ask "anything since N?" in one cheap query. */
   version: integer("version").notNull().default(1),
