@@ -5,7 +5,7 @@ const SCREENS = [
   { path: "/live/", title: "Live Walk", tab: "Live Walk" },
   { path: "/analysis/", title: "Analysis", tab: "Analysis" },
   { path: "/album/", title: "Album", tab: "Album" },
-  { path: "/partners/", title: "Partners", tab: null },
+  { path: "/partners/", title: "Rooms", tab: null },
   { path: "/settings/", title: "Settings", tab: null },
   { path: "/themes/", title: "My Themes", tab: null },
 ];
@@ -61,9 +61,9 @@ test("the menu opens, navigates, and closes", async ({ page }) => {
 
 test("a new account starts empty: no sample history, no sample photos", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator(".streak-badge")).toContainText("0-day streak");
+  await expect(page.locator(".activity-lifetime")).toContainText("0-day streak");
   await page.reload();
-  await expect(page.locator(".streak-badge")).toContainText("0-day streak");
+  await expect(page.locator(".activity-lifetime")).toContainText("0-day streak");
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("photoeye:state")!).state);
   expect(saved.seededHistory).toBeNull();
   expect(saved.walkHistory).toEqual([]);

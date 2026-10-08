@@ -5,14 +5,11 @@ import { Icon } from "@/components/icons/Icon";
 import { install, useInstallPrompt } from "@/features/pwa/install";
 import { openReview } from "@/features/review/ReviewModal";
 import { t } from "@/lib/i18n/core";
-import { currentStreak } from "@/lib/walk";
 import { screenTitle, viewForPath } from "@/routes";
-import { useAppStore } from "@/state/appStore";
 import { openDrawer } from "@/state/ui";
 
 export function TopBar() {
   const pathname = usePathname();
-  const streak = useAppStore((s) => currentStreak(s.profile));
   const installable = useInstallPrompt((s) => Boolean(s.event));
 
   return (
@@ -33,10 +30,6 @@ export function TopBar() {
       </button>
 
       <div className="topbar-actions">
-        <span className="streak-badge" title={t("Current streak")}>
-          <Icon name="flame" style={{ width: 13, height: 13 }} />
-          <span>{t("{n}-day streak", { n: streak })}</span>
-        </span>
         {installable && (
           <button type="button" className="btn btn-ghost btn-sm" onClick={() => void install()}>{t("Install")}</button>
         )}

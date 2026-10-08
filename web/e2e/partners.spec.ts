@@ -6,14 +6,18 @@ const dialog = (page: Page) => page.getByRole("dialog");
 const toast = (page: Page, text: string | RegExp) => page.getByRole("status").filter({ hasText: text });
 // Another person's changes arrive by polling, every 5 s while the room is lively.
 const POLL = { timeout: 15_000 };
+// "Group Review · Room ABC234": the room on screen.
+const roomLabel = (page: Page) => page.locator(".debrief-head .label-caps");
 
-async function createRoom(page: Page): Promise<string> {
-  await page.goto("/live/");
+const roomList = (page: Page) => page.getByRole("heading", { name: "Your rooms" });
+
+async function createRoom(page: Page, name = ""): Promise<string> {
+  await page.goto("/partners/");
   await page.getByRole("button", { name: "Create Room" }).click();
-  await page.getByRole("button", { name: "Manage Room" }).click();
-  await expect(page).toHaveURL(/\/partners\/$/);
-  await expect(page.locator(".debrief-title")).toHaveText(/^[A-Z2-9]{6}$/);
-  return (await page.locator(".debrief-title").textContent())!;
+  if (name) await dialog(page).getByLabel("Room name (optional)").fill(name);
+  await dialog(page).getByRole("button", { name: "Create", exact: true }).click();
+  await expect(roomLabel(page)).toHaveText(/Room [A-Z2-9]{6}$/);
+  return (await roomLabel(page).textContent())!.slice(-6);
 }
 
 async function upload(page: Page, files: string[]) {
@@ -35,7 +39,7 @@ test("two people share a room from their own phones: photos, side by side, and n
   // Ken, signed in on his own phone, opens the invite link: he joins, and the code leaves the address.
   const ken = await openAs(PARTNER);
   await ken.goto(link);
-  await expect(ken.locator(".debrief-title")).toHaveText(code);
+  await expect(roomLabel(ken)).toHaveText(new RegExp(`Room ${code}$`));
   await expect(ken).toHaveURL(/\/partners\/$/);
   await expect(ken.locator(".room-thumb")).toHaveCount(1);
   await expect(ken.locator(".room-thumb").first()).toHaveAttribute("style", /background-image: url\("blob:/);
@@ -44,7 +48,7 @@ test("two people share a room from their own phones: photos, side by side, and n
 
   // Aki's phone follows without a reload.
   await expect(aki.locator(".room-thumb")).toHaveCount(2, POLL);
-  await expect(aki.locator(".debrief-meta-cyan strong")).toHaveText(`@${TEST_USER.name} & @${PARTNER.name}`);
+  await expect(aki.locator(".room-person")).toHaveText([/Aki Tanaka\s*Host/, /Ken Ito/]);
   await expect(aki.locator(".split-pane-who")).toHaveText([`@${TEST_USER.name}`, `@${PARTNER.name}`]);
   await expect(aki.locator(".split-pane").nth(1)).toContainText("1/250s");
 
@@ -92,7 +96,7 @@ test("the host removes someone, who can't come back", async ({ page: aki, openAs
   const code = await createRoom(aki);
   const ken = await openAs(PARTNER);
   await ken.goto(`/partners/?room=${code}`);
-  await expect(ken.locator(".debrief-title")).toHaveText(code);
+  await expect(roomLabel(ken)).toHaveText(new RegExp(`Room ${code}$`));
   // Only the host sees Remove; Ken leaves rather than closes.
   await expect(ken.getByRole("button", { name: "Remove from room" })).toHaveCount(0);
   await expect(ken.getByRole("button", { name: "Leave Room" })).toBeVisible();
@@ -103,7 +107,7 @@ test("the host removes someone, who can't come back", async ({ page: aki, openAs
   await expect(aki.locator(".room-person")).toHaveCount(1);
 
   await expect(toast(ken, "You were removed from this room.")).toBeVisible(POLL);
-  await expect(ken.getByText("No active room yet.")).toBeVisible();
+  await expect(roomList(ken)).toBeVisible();
   await ken.goto(`/partners/?room=${code}`);
   await expect(toast(ken, "You were removed from this room.")).toBeVisible();
 });
@@ -121,23 +125,68 @@ test("the study sheet downloads, and the host closes the room for everyone", asy
 
   await aki.getByRole("button", { name: "Close Room" }).click();
   await dialog(aki).getByRole("button", { name: "Close Room" }).click();
-  await expect(aki.getByText("No active room yet.")).toBeVisible();
+  await expect(roomList(aki)).toBeVisible();
   await expect(toast(ken, `Room ${code} has closed.`)).toBeVisible(POLL);
-  await expect(ken.getByText("No active room yet.")).toBeVisible();
-
-  await aki.getByRole("button", { name: "Go to Live Walk" }).click();
-  await expect(aki).toHaveURL(/\/live\/$/);
+  await expect(roomList(ken)).toBeVisible();
+  await expect(aki.getByText("No rooms yet. Create one or join with a code.")).toBeVisible();
 });
 
-test("rooms you're in show on the Live Walk card on another device", async ({ page: aki, openAs }) => {
-  const code = await createRoom(aki);
+test("rooms you're in are listed on another device, and open with a tap", async ({ page: aki, openAs }) => {
+  const code = await createRoom(aki, "Sunday crew");
   const ken = await openAs(PARTNER);
   await ken.goto(`/partners/?room=${code}`);
-  await expect(ken.locator(".debrief-title")).toHaveText(code);
-  // Ken's other phone: no room on this device yet, but his rooms are listed.
+  await expect(roomLabel(ken)).toHaveText(new RegExp(`Room ${code}$`));
+  // Ken's other phone: no room open on this device yet, but his rooms are listed.
   const kenAgain = await openAs(PARTNER);
-  await kenAgain.goto("/live/");
+  await kenAgain.goto("/partners/");
+  await expect(kenAgain.locator(".your-room")).toHaveText([new RegExp(`Sunday crew\\s*${code} · 0 photos`)]);
   await kenAgain.locator(".your-room", { hasText: code }).click();
-  await expect(kenAgain).toHaveURL(/\/partners\/$/);
-  await expect(kenAgain.locator(".debrief-title")).toHaveText(code);
+  await expect(roomLabel(kenAgain)).toHaveText(new RegExp(`Room ${code}$`));
+  await expect(kenAgain.locator(".room-name")).toHaveText("Sunday crew");
+
+  // All rooms goes back to the list without leaving the room.
+  await kenAgain.getByRole("button", { name: "← All rooms" }).click();
+  await expect(kenAgain.locator(".your-room", { hasText: code })).toBeVisible();
+});
+
+test("the host names the room for everyone; others can't", async ({ page: aki, openAs }) => {
+  const code = await createRoom(aki);
+  await expect(aki.locator(".room-name")).toHaveCount(0);
+  const ken = await openAs(PARTNER);
+  await ken.goto(`/partners/?room=${code}`);
+  await expect(roomLabel(ken)).toHaveText(new RegExp(`Room ${code}$`));
+  await expect(ken.getByRole("button", { name: "Name this room" })).toHaveCount(0);
+
+  await aki.getByRole("button", { name: "Name this room" }).click();
+  await dialog(aki).getByLabel("Room name").fill("Harbour walk");
+  await dialog(aki).getByRole("button", { name: "Save" }).click();
+  await expect(aki.locator(".room-name")).toHaveText("Harbour walk");
+  await expect(ken.locator(".room-name")).toHaveText("Harbour walk", POLL);
+});
+
+test("a code that doesn't work says why", async ({ page }) => {
+  await page.goto("/partners/");
+  await page.getByRole("button", { name: "Join Room" }).click();
+  await dialog(page).getByPlaceholder("Room code").fill("nope");
+  await dialog(page).getByRole("button", { name: "Join" }).click();
+  await expect(dialog(page).getByRole("alert")).toHaveText("That doesn't look like a room code.");
+  await dialog(page).getByPlaceholder("Room code").fill("ZZZ999");
+  await dialog(page).getByRole("button", { name: "Join" }).click();
+  await expect(dialog(page).getByRole("alert")).toContainText("Room not found");
+});
+
+test("the side menu leads to Rooms, showing the room you have open", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Profile" }).click();
+  await page.getByRole("dialog", { name: "Menu" }).getByRole("link", { name: "Rooms" }).click();
+  await expect(page).toHaveURL(/\/partners\/$/);
+  await expect(roomList(page)).toBeVisible();
+
+  const code = await createRoom(page);
+  await page.goto("/album/");
+  await page.getByRole("button", { name: "Profile" }).click();
+  const link = page.getByRole("dialog", { name: "Menu" }).getByRole("link", { name: new RegExp(`Rooms\\s*${code}`) });
+  await expect(link).toBeVisible();
+  await link.click();
+  await expect(roomLabel(page)).toHaveText(new RegExp(`Room ${code}$`));
 });

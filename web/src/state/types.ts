@@ -157,7 +157,7 @@ export interface Reminder {
 export interface AppData {
   profile: Profile;
   album: AlbumItem[];
-  /** The Walk Partners room this device is in. The room itself lives on the server. */
+  /** The room open on the Rooms tab, if any. The room itself lives on the server. */
   currentRoom: string | null;
   activeWalk: ActiveWalk | null;
   /** The most recent finished walk; the Analysis tab pins its theme tips for a day. */

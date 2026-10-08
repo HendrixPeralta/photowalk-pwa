@@ -7,12 +7,14 @@ import { getDateLocale, t } from "@/lib/i18n/core";
 import { totalActivityHours } from "@/lib/stats";
 import { useNow } from "@/lib/useNow";
 import { formatHours, localDateKey } from "@/lib/util";
+import { currentStreak } from "@/lib/walk";
 import { useAppStore } from "@/state/appStore";
 
 /** The full year of shooting as a heatmap, under this week's film strip. */
 export function ActivityYear() {
   const activityLog = useAppStore((s) => s.activityLog);
   const walks = useAppStore((s) => s.profile.walksCompleted);
+  const streak = useAppStore((s) => currentStreak(s.profile));
   const now = useNow(60_000);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -38,8 +40,8 @@ export function ActivityYear() {
         <span className="label-caps">{t("Shooting activity")}</span>
         <span className="activity-lifetime">
           <Trans
-            k="<strong>{hours}</strong> shot · <strong>{walks}</strong> walks"
-            values={{ hours: formatHours(totalActivityHours(activityLog)), walks }}
+            k="<strong>{hours}</strong> shots · <strong>{walks}</strong> walks · <strong>{streak}</strong>-day streak"
+            values={{ hours: formatHours(totalActivityHours(activityLog)), walks, streak }}
           />
         </span>
       </div>

@@ -60,6 +60,7 @@ export const LIMITS = {
   noteText: 400,
   commentText: 200,
   photoNote: 200,
+  roomName: 40,
   theme: 80,
   themeId: 64,
   tagsPerNote: CRITIQUE_TAGS.length,
@@ -114,6 +115,8 @@ export interface RoomNote {
 
 export interface RoomSnapshot {
   code: string;
+  /** What the host called the room. Empty when unnamed: the code stands in. */
+  name: string;
   theme: string;
   hostId: string;
   /** Goes up with every change, so asking "anything new since N?" is cheap. */
@@ -134,6 +137,7 @@ export interface RoomSnapshot {
 /** One line per room in "Your rooms". */
 export interface RoomSummary {
   code: string;
+  name: string;
   theme: string;
   isHost: boolean;
   photoCount: number;

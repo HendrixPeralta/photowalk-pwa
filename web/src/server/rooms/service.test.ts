@@ -107,6 +107,23 @@ describe("creating and joining", () => {
     expect(mine).toMatchObject({ code: room.code, isHost: false, memberCount: 2, photoCount: 0 });
     expect(await rooms.listMyRooms(as("mia"))).toEqual([]);
   });
+
+  it("names a room, and only the host renames it", async () => {
+    const room = await rooms.createRoom(as("ana"), "", "  Sunday crew  ");
+    expect(room.name).toBe("Sunday crew");
+    await rooms.joinRoom(as("ken"), room.code);
+    await expect(rooms.renameRoom(as("ken"), room.code, "Ken's room")).rejects.toMatchObject({ status: 403, code: "host_only" });
+    await expect(rooms.renameRoom(as("ana"), room.code, "x".repeat(LIMITS.roomName + 1))).rejects.toMatchObject({ code: "invalid" });
+
+    const renamed = await rooms.renameRoom(as("ana"), room.code, "Harbour walk");
+    expect(renamed.name).toBe("Harbour walk");
+    expect(renamed.version).toBeGreaterThan(room.version);
+    const [mine] = await rooms.listMyRooms(as("ken"));
+    expect(mine.name).toBe("Harbour walk");
+    // Renaming isn't activity: it doesn't keep the room open longer.
+    expect(renamed.lastActivityAt).toBe(room.lastActivityAt);
+    expect((await rooms.renameRoom(as("ana"), room.code, "")).name).toBe("");
+  });
 });
 
 describe("who may do what", () => {

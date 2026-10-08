@@ -59,12 +59,6 @@ export function detailOf(photo: RoomPhoto): string {
 
 export const shutterOf = (photo: RoomPhoto): string => photo.exif?.shutter || "--";
 
-export function formatSpan(ms: number): string {
-  const mins = Math.max(0, Math.round(ms / 60000));
-  const h = Math.floor(mins / 60);
-  return h ? t("{h}h {m}m", { h, m: mins % 60 }) : t("{m}m", { m: mins });
-}
-
 /** "@Ana Sato & @Ken Ito", or "--" before anyone has posted. Full names: Japanese ones put the family name first. */
 export function partnersLabel(room: Pick<RoomSnapshot, "people" | "photos">): string {
   const ids = [...new Set(room.photos.map((p) => p.userId))];

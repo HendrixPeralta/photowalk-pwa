@@ -7,7 +7,9 @@ import { defaultState } from "@/state/defaults";
 import { useToasts } from "@/state/ui";
 import { useShareInbox } from "./inbox";
 import { keepPostedImage } from "./roomImages";
-import { addComment, closeRoom, createRoom, inviteUrl, joinRoom, leaveRoom, postNote, uploadToRoom } from "./rooms";
+import {
+  addComment, closeRoom, createRoom, inviteUrl, joinRoom, leaveRoom, postNote, renameRoom, roomLabel, uploadToRoom,
+} from "./rooms";
 import { useRoom } from "./roomStore";
 
 vi.mock("./roomImages", () => ({ keepPostedImage: vi.fn(async () => {}), pruneRoomImages: vi.fn(async () => {}) }));
@@ -23,7 +25,7 @@ vi.mock("@/lib/image", () => ({
 }));
 
 const room = (over: Partial<RoomSnapshot> = {}): RoomSnapshot => ({
-  code: "ABC234", theme: "", hostId: "ana", version: 1, createdAt: 0, lastActivityAt: 0, expiresAt: 0,
+  code: "ABC234", name: "", theme: "", hostId: "ana", version: 1, createdAt: 0, lastActivityAt: 0, expiresAt: 0,
   members: ["ana"], people: { ana: { id: "ana", name: "Ana", image: null } }, photos: [], notes: [], ...over,
 });
 const photo = (name: string) => new File(["x"], name, { type: "image/jpeg" });
@@ -47,6 +49,23 @@ describe("rooms", () => {
     expect(create.mock.calls[0][0]).not.toBe("");
     expect(getData().currentRoom).toBe("XYZ789");
     expect(toasts()[0]).toContain("Room XYZ789 created.");
+  });
+
+  it("names a new room, and lets the host rename it", async () => {
+    const create = vi.spyOn(roomsApi, "create").mockResolvedValue({ ok: true, data: { room: room({ name: "Sunday crew" }) } });
+    expect(await createRoom("  Sunday crew  ")).toBeNull();
+    expect(create.mock.calls[0][1]).toBe("Sunday crew");
+
+    const rename = vi.spyOn(roomsApi, "rename").mockResolvedValue({ ok: true, data: { room: room({ name: "Harbour walk" }) } });
+    expect(await renameRoom(" Harbour walk ")).toBe(true);
+    expect(rename).toHaveBeenCalledWith("ABC234", "Harbour walk");
+    expect(useRoom.getState().room?.name).toBe("Harbour walk");
+    expect(roomLabel(useRoom.getState().room!)).toBe("Harbour walk");
+    expect(roomLabel(room())).toBe("ABC234");
+
+    rename.mockResolvedValue({ ok: false, error: "host_only" });
+    expect(await renameRoom("Mine now")).toBe(false);
+    expect(toasts()).toContain("Only the host can do that.");
   });
 
   it("joins with a code typed any way, or says why not", async () => {

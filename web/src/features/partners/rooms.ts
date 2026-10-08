@@ -41,9 +41,14 @@ function walkTheme(): string {
   return (id && themeById(id, customThemes)?.title) || "";
 }
 
+/** What a room is called: its name, or its code until it has one. */
+export function roomLabel(room: { name: string; code: string }): string {
+  return room.name || room.code;
+}
+
 /** Opens a new room, with you as its host. Null on success, else what went wrong. */
-export async function createRoom(): Promise<string | null> {
-  const res = await roomsApi.create(walkTheme().slice(0, LIMITS.theme));
+export async function createRoom(name = ""): Promise<string | null> {
+  const res = await roomsApi.create(walkTheme().slice(0, LIMITS.theme), name.trim().slice(0, LIMITS.roomName));
   if (!res.ok) return roomErrorMessage(res.error);
   applySnapshot(res.data.room);
   showToast(t("Room {code} created. Share the code or QR code with your walk partners.", { code: res.data.room.code }));
@@ -59,6 +64,17 @@ export async function joinRoom(raw: string): Promise<string | null> {
   if (!res.ok) return roomErrorMessage(res.error);
   applySnapshot(res.data.room);
   return null;
+}
+
+/** The host names the room for everyone in it. An empty name goes back to the code. */
+export async function renameRoom(name: string): Promise<boolean> {
+  const code = getData().currentRoom;
+  if (!code) return false;
+  const res = await roomsApi.rename(code, name.trim().slice(0, LIMITS.roomName));
+  if (!res.ok) { handleRoomFailure(res.error); return false; }
+  applySnapshot(res.data.room);
+  nudgeRoomSync();
+  return true;
 }
 
 /** Leaves the room. The host closes it instead (closeRoom). */

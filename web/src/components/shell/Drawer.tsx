@@ -6,15 +6,18 @@ import { useEffect, useRef } from "react";
 import { Avatar } from "@/components/Avatar";
 import { Icon } from "@/components/icons/Icon";
 import type { IconName } from "@/components/icons/sprite";
+import { useCurrentRoom } from "@/features/partners/roomStore";
 import { accountsEnabled } from "@/lib/authApi";
 import { t } from "@/lib/i18n/core";
 import { ROUTES, viewForPath, type View } from "@/routes";
 import { useAccount } from "@/state/account";
+import { useAppStore } from "@/state/appStore";
 import { closeDrawer, useDrawer } from "@/state/ui";
 import { focusFirst, inertAppChrome } from "./focus";
 
 // The side menu fronts the screens that have no tab of their own.
 const ITEMS: { view: View; icon: IconName; label: () => string }[] = [
+  { view: "share", icon: "share", label: () => t("Rooms") },
   { view: "themes", icon: "bookmark", label: () => t("My Themes") },
   { view: "settings", icon: "settings", label: () => t("Settings") },
 ];
@@ -22,6 +25,8 @@ const ITEMS: { view: View; icon: IconName; label: () => string }[] = [
 export function Drawer() {
   const open = useDrawer((s) => s.open);
   const current = viewForPath(usePathname());
+  const roomCode = useAppStore((s) => s.currentRoom);
+  const roomName = useCurrentRoom()?.name;
   const asideRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -61,6 +66,8 @@ export function Drawer() {
               >
                 <span className="drawer-item-icon"><Icon name={icon} /></span>
                 <span>{label()}</span>
+                {/* The room open on the Rooms tab, so it's one tap away from anywhere. */}
+                {view === "share" && roomCode && <span className="drawer-item-hint">{roomName || roomCode}</span>}
               </Link>
             ))}
           </div>

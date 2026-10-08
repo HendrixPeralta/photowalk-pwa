@@ -3,9 +3,8 @@
 import { useEffect, useRef } from "react";
 import { Icon } from "@/components/icons/Icon";
 import { useImageUrl } from "@/components/useImageUrl";
-import { WalkPartnersCard } from "@/features/partners/WalkPartnersCard";
 import { ChallengeList } from "@/features/walks/ChallengeList";
-import { finishWalk, launchIfRequested, pauseWalk, resumeWalk } from "@/features/walks/actions";
+import { finishWalk, launchIfRequested, launchWalk, pauseWalk, resumeWalk } from "@/features/walks/actions";
 import { challengesFor, useWalkTheme } from "@/features/walks/walkUi";
 import { concept } from "@/lib/content/themes";
 import { getDateLocale, t } from "@/lib/i18n/core";
@@ -14,7 +13,7 @@ import { clockText } from "@/lib/walk";
 import { useAppStore } from "@/state/appStore";
 import type { ActiveWalk, Frame } from "@/state/types";
 import { openModal } from "@/state/ui";
-import { logFrames, openInMaps } from "./actions";
+import { logFrames } from "./actions";
 import { FrameSheetModal } from "./FrameSheet";
 
 /**
@@ -32,8 +31,12 @@ export function LiveScreen() {
 
   return (
     <section className="view" data-view="hud">
-      {walk && <OpenWalk walk={walk} />}
-      <WalkPartnersCard />
+      {walk ? <OpenWalk walk={walk} /> : (
+        <div className="empty-state">
+          <p>{t("No walk in progress. Once you start one, this screen shows your timer, your theme and challenges, and the photos you log.")}</p>
+          <button type="button" className="btn btn-accent" onClick={launchWalk}>{t("Start Photo Walk")}</button>
+        </div>
+      )}
     </section>
   );
 }
@@ -49,22 +52,16 @@ function OpenWalk({ walk }: { walk: ActiveWalk }) {
 
       <div className="log-head">
         <span className="label-caps">{t("Photo Log")}</span>
-        <span className="log-last">
-          {last
-            ? t("Last: #{n} at {time}", {
-                n: frames.length,
-                time: new Date(last.at).toLocaleTimeString(getDateLocale(), { hour: "2-digit", minute: "2-digit" }),
-              })
-            : t("No photos yet")}
-        </span>
+        {last && (
+          <span className="log-last">
+            {t("Last: #{n} at {time}", {
+              n: frames.length,
+              time: new Date(last.at).toLocaleTimeString(getDateLocale(), { hour: "2-digit", minute: "2-digit" }),
+            })}
+          </span>
+        )}
       </div>
-      <div className="hud-footer-row">
-        <LogPhotoButton next={frames.length + 1} />
-        <button type="button" className="btn btn-primary log-btn" onClick={() => void openInMaps()}>
-          <Icon name="pin" />
-          {t("Open in Maps")}
-        </button>
-      </div>
+      <LogPhotoButton next={frames.length + 1} />
 
       <div className="hud-footer-row">
         <button

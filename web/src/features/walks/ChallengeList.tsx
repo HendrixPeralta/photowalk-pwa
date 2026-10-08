@@ -1,14 +1,14 @@
 "use client";
 
-import { useAppStore } from "@/state/appStore";
 import { setChallengeChecked } from "./actions";
+import { useBriefWalk } from "./walkUi";
 
 /**
- * The open walk's mini-challenges as checkboxes. Bound to the saved walk, so
- * every copy on screen (brief, Live Walk) stays in step.
+ * The walk's mini-challenges as checkboxes. Bound to the open walk (or the
+ * one being set up on the brief), so every copy on screen stays in step.
  */
 export function ChallengeList({ challenges }: { challenges: readonly string[] }) {
-  const checked = useAppStore((s) => s.activeWalk?.challengesChecked);
+  const checked = useBriefWalk()?.challengesChecked;
 
   return (
     <ul className="challenges-list">

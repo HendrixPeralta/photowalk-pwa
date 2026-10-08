@@ -4,8 +4,9 @@
 // answer the app's /api/rooms requests with these same handlers.
 //
 //   GET    /api/rooms/                     my rooms            { rooms }
-//   POST   /api/rooms/        { theme }    create              201 { room }
+//   POST   /api/rooms/        { theme, name? } create         201 { room }
 //   DELETE /api/rooms/?code=               close (host)        204
+//   POST   /api/rooms/rename/ { code, name } rename (host)      { room }
 //   POST   /api/rooms/join/   { code }     join                { room }
 //   GET    /api/rooms/state/?code=&since=  poll                { changed, version } | { changed, room }
 //   DELETE /api/rooms/members/?code=&user= leave, or remove     { room } | 204
@@ -35,11 +36,16 @@ export async function handleRoomsRequest(req: Request, deps: () => Promise<RoomD
       return Response.json({ rooms: await service.listMyRooms(await deps()) });
     case "POST /api/rooms": {
       const body = await jsonBody(req);
-      return Response.json({ room: await service.createRoom(await deps(), stringField(body, "theme", "")) }, { status: 201 });
+      const room = await service.createRoom(await deps(), stringField(body, "theme", ""), stringField(body, "name", ""));
+      return Response.json({ room }, { status: 201 });
     }
     case "DELETE /api/rooms":
       await service.closeRoom(await deps(), q("code"));
       return new Response(null, { status: 204 });
+    case "POST /api/rooms/rename": {
+      const body = await jsonBody(req);
+      return Response.json({ room: await service.renameRoom(await deps(), stringField(body, "code"), stringField(body, "name")) });
+    }
     case "POST /api/rooms/join": {
       const body = await jsonBody(req);
       return Response.json({ room: await service.joinRoom(await deps(), stringField(body, "code")) });

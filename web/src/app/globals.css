@@ -177,23 +177,6 @@ button, input, select {
   gap: 10px;
 }
 
-.streak-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 9px;
-  background: var(--surface-3);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  font-family: var(--font-data);
-  font-variant-numeric: tabular-nums;
-  font-weight: 500;
-  font-size: 11px;
-  white-space: nowrap;
-  color: var(--accent-strong);
-}
-.streak-badge svg { width: 16px; height: 16px; }
-
 .icon-btn {
   display: inline-flex;
   align-items: center;
@@ -1169,7 +1152,17 @@ input[type="file"].text-input { padding: 8px; }
 .room-person .btn { margin-left: auto; }
 .room-sync-notice { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .room-expiry { text-align: center; }
-.your-rooms { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
+.your-rooms { display: flex; flex-direction: column; gap: 6px; }
+.room-back { margin-bottom: 10px; }
+.room-title-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+.room-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
 .your-room { justify-content: space-between; text-align: left; }
 .your-room .muted { font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -1420,6 +1413,15 @@ input[type="file"].text-input { padding: 8px; }
   margin-left: auto;
   color: var(--text-dim);
   flex-shrink: 0;
+}
+.drawer-item-hint {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  color: var(--accent-strong);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
 }
 .drawer-user { color: inherit; text-decoration: none; }
 .profile-avatar { overflow: hidden; }
@@ -2300,38 +2302,6 @@ input[type="file"].text-input { padding: 8px; }
   white-space: nowrap;
 }
 
-.debrief-title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-.debrief-sub { margin: 2px 0 12px; font-size: 13px; color: var(--text-dim); }
-
-.debrief-meta {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  padding: 10px 12px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  margin-bottom: 12px;
-}
-.debrief-meta div { min-width: 0; }
-.debrief-meta .label-caps { color: var(--text-dim); }
-.debrief-meta strong {
-  display: block;
-  margin-top: 4px;
-  font-family: var(--font-data);
-  font-size: 13px;
-  font-weight: 500;
-  overflow-wrap: anywhere;
-}
-.debrief-meta-accent strong { color: var(--accent-strong); }
-.debrief-meta-cyan strong { color: var(--cyan); }
-
 /* --- Partners: A/B split comparison -------------------------------------- */
 .split-toolbar {
   display: flex;
@@ -2737,7 +2707,7 @@ input[type="file"].text-input { padding: 8px; }
 
 .topbar-review-star { font-size: 13px; line-height: 1; color: var(--accent-strong); }
 
-/* Under ~420px the bar is carrying a 34px badge, a streak pill and the brand
+/* Under ~420px the bar is carrying a 34px badge and the brand
    lockup already; drop to the star alone rather than let the title ellipsis
    eat itself. */
 @media (max-width: 420px) {

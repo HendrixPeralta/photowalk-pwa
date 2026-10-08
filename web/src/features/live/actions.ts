@@ -1,5 +1,4 @@
-// Live Walk: logging photos to the open walk, labelling or removing them, and
-// handing the current position to the phone's maps app.
+// Live Walk: logging photos to the open walk, labelling or removing them.
 
 import { deleteImage, putImage, revokeImageUrl } from "@/lib/db";
 import { exposureLine, readExif } from "@/lib/exif";
@@ -9,8 +8,8 @@ import { canvasToBlob, drawToCanvas } from "@/lib/image";
 import { addFrame } from "@/lib/stats";
 import { localDateKey, uid } from "@/lib/util";
 import { getData, update } from "@/state/appStore";
-import { locate, useFix } from "@/state/geo";
-import type { Fix, Frame } from "@/state/types";
+import { useFix } from "@/state/geo";
+import type { Frame } from "@/state/types";
 import { showToast } from "@/state/ui";
 
 // Walk photos are a log, not the library: this is plenty, and it keeps a long
@@ -101,30 +100,4 @@ export function removeFrame(frameId: string): void {
   });
   revokeImageUrl(frame.imageId);
   void deleteImage(frame.imageId);
-}
-
-/**
- * A link that opens the position in the maps app the device has: `maps:` on
- * iOS, `geo:` on Android, OpenStreetMap everywhere else.
- */
-export function mapsUrl(lat: number, lon: number, userAgent: string): string {
-  const coords = `${lat},${lon}`;
-  if (/iPhone|iPad|iPod/.test(userAgent)) return `maps://?ll=${coords}&q=${encodeURIComponent(t("You are here"))}`;
-  if (/Android/.test(userAgent)) return `geo:${coords}?q=${coords}`;
-  return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=17/${lat}/${lon}`;
-}
-
-/** Where you are, in the phone's maps app. The tap is what lets it ask for location. */
-export async function openInMaps(): Promise<void> {
-  let fix: Fix | null = useFix.getState().fix;
-  if (!fix || !fixIsFresh(fix)) {
-    showToast(t("Finding your location…"));
-    try {
-      fix = await locate({ highAccuracy: true });
-    } catch (err) {
-      showToast((err as Error).message);
-      return;
-    }
-  }
-  window.open(mapsUrl(fix.lat, fix.lon, navigator.userAgent), "_blank", "noopener");
 }

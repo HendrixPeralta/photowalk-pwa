@@ -3,7 +3,7 @@ import { interpolate, t, type TParams } from "@/lib/i18n/core";
 
 /**
  * A translated sentence that carries inline markup, e.g.
- *   <Trans k="<strong>{hours}</strong> shot · <strong>{walks}</strong> walks" values={...} />
+ *   <Trans k="<strong>{hours}</strong> shots · <strong>{walks}</strong> walks" values={...} />
  * The translation decides where the markup goes (Japanese word order often
  * moves it). Only <strong>, <span> and <br> are understood; values are always
  * inserted as text, never as markup.
