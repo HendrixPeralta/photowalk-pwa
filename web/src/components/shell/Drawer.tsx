@@ -10,11 +10,13 @@ import { accountsEnabled } from "@/lib/authApi";
 import { t } from "@/lib/i18n/core";
 import { ROUTES, viewForPath, type View } from "@/routes";
 import { useAccount } from "@/state/account";
+import { useAppStore } from "@/state/appStore";
 import { closeDrawer, useDrawer } from "@/state/ui";
 import { focusFirst, inertAppChrome } from "./focus";
 
 // The side menu fronts the screens that have no tab of their own.
 const ITEMS: { view: View; icon: IconName; label: () => string }[] = [
+  { view: "share", icon: "share", label: () => t("Partners") },
   { view: "themes", icon: "bookmark", label: () => t("My Themes") },
   { view: "settings", icon: "settings", label: () => t("Settings") },
 ];
@@ -22,6 +24,7 @@ const ITEMS: { view: View; icon: IconName; label: () => string }[] = [
 export function Drawer() {
   const open = useDrawer((s) => s.open);
   const current = viewForPath(usePathname());
+  const roomCode = useAppStore((s) => s.currentRoom);
   const asideRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -61,6 +64,8 @@ export function Drawer() {
               >
                 <span className="drawer-item-icon"><Icon name={icon} /></span>
                 <span>{label()}</span>
+                {/* The room you're in, so it's one tap away from anywhere. */}
+                {view === "share" && roomCode && <span className="drawer-item-hint">{roomCode}</span>}
               </Link>
             ))}
           </div>

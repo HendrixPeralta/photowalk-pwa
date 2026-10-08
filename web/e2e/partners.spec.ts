@@ -141,3 +141,19 @@ test("rooms you're in show on the Live Walk card on another device", async ({ pa
   await expect(kenAgain).toHaveURL(/\/partners\/$/);
   await expect(kenAgain.locator(".debrief-title")).toHaveText(code);
 });
+
+test("the side menu leads to Partners, showing the room you're in", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Profile" }).click();
+  await page.getByRole("dialog", { name: "Menu" }).getByRole("link", { name: "Partners" }).click();
+  await expect(page).toHaveURL(/\/partners\/$/);
+  await expect(page.getByText("No active room yet.")).toBeVisible();
+
+  const code = await createRoom(page);
+  await page.goto("/album/");
+  await page.getByRole("button", { name: "Profile" }).click();
+  const link = page.getByRole("dialog", { name: "Menu" }).getByRole("link", { name: new RegExp(`Partners\\s*${code}`) });
+  await expect(link).toBeVisible();
+  await link.click();
+  await expect(page.locator(".debrief-title")).toHaveText(code);
+});
