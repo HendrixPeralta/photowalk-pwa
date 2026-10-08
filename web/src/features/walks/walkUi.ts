@@ -1,11 +1,12 @@
 // What the Walks screen holds between taps but never saves: the mode picked
-// for the next walk and the theme on hand for it. A running walk keeps its own
-// mode and theme id in the saved data, so those always win while one is open.
+// for the next walk, the theme on hand for it, and the walk being set up on
+// its brief. A walk only lands in the saved data once shooting starts, and
+// then its own mode and theme id always win.
 
 import { create } from "zustand";
 import { themeById, type Theme } from "@/lib/content/themes";
 import { getData, useAppStore } from "@/state/appStore";
-import type { AppData, WalkMode } from "@/state/types";
+import type { ActiveWalk, AppData, WalkMode } from "@/state/types";
 
 interface WalkUi {
   /** The mode the next walk starts in. */
@@ -14,7 +15,12 @@ interface WalkUi {
   theme: Theme | null;
   /** Why the theme was suggested, shown in the brief. */
   reason: string;
-  /** Set by the Live tab so the walk starts once the Live screen is showing. */
+  /**
+   * The walk being set up on its brief, not started and not saved. Start
+   * shooting turns it into the open walk; leaving the brief just drops it.
+   */
+  draft: ActiveWalk | null;
+  /** Set by the Live tab so the brief opens once the Live screen is showing. */
   launchOnArrival: boolean;
 }
 
@@ -22,8 +28,16 @@ export const useWalkUi = create<WalkUi>(() => ({
   mode: "casual",
   theme: null,
   reason: "",
+  draft: null,
   launchOnArrival: false,
 }));
+
+/** The open walk, or else the one being set up on its brief. */
+export function useBriefWalk(): ActiveWalk | null {
+  const open = useAppStore((s) => s.activeWalk);
+  const draft = useWalkUi((s) => s.draft);
+  return open ?? draft;
+}
 
 /** The open walk's theme, or the one on hand for the next walk. */
 export function walkTheme(data: AppData = getData()): Theme | null {

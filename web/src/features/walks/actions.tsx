@@ -1,4 +1,4 @@
-// The walk lifecycle: open a walk on its brief, start the clock, nudge, pause,
+// The walk lifecycle: set a walk up on its brief, start the clock, nudge, pause,
 // finish, and bank the hours. Plain functions over the stores, so the Walks
 // screen, the Live tab, the walk engine and the pop-ups all share one path.
 
@@ -34,17 +34,19 @@ export function setMode(mode: WalkMode): void {
 
 /**
  * Puts a theme (random pick, custom build, or a saved one) on hand for the
- * walk brief. If a walk is open on its brief (not yet shooting), the walk
- * follows, so rerolling or editing mid-brief sticks.
+ * walk brief. The walk being set up on the brief follows, so rerolling or
+ * editing mid-brief sticks.
  */
 export function putThemeOnHand(theme: Theme, reason = ""): void {
-  useWalkUi.setState({ theme, reason });
-  update((d) => {
-    const w = d.activeWalk;
-    if (!w || w.startedAt) return;
-    w.themeId = theme.id;
-    w.challengesChecked = new Array(challengesFor(theme, w.mode).length).fill(false);
-  });
+  useWalkUi.setState(({ draft }) => ({
+    theme,
+    reason,
+    draft: draft && {
+      ...draft,
+      themeId: theme.id,
+      challengesChecked: new Array(challengesFor(theme, draft.mode).length).fill(false),
+    },
+  }));
 }
 
 /** A fresh suggestion, never the theme already on hand. */
@@ -73,12 +75,13 @@ export function removeSavedTheme(id: string): void {
   update((d) => { d.customThemes = d.customThemes.filter((th) => th.id !== id); });
 }
 
-/* ---------- Opening a walk ---------- */
+/* ---------- Setting a walk up ---------- */
 
 /**
- * The Start Photo Walk button. Picking the theme (or rerolling, or building
- * one) happens in the brief this opens, so a fresh theme is picked here if
- * none is on hand yet.
+ * The Start Photo Walk button. Opens the brief on a fresh draft walk; nothing
+ * is open or saved until Start shooting. Picking the theme (or rerolling, or
+ * building one) happens in the brief, so a fresh theme is picked here if none
+ * is on hand yet.
  */
 export function launchWalk(): void {
   if (getData().activeWalk) return;
@@ -86,25 +89,25 @@ export function launchWalk(): void {
   const { theme, mode } = useWalkUi.getState();
   if (!theme) return;
 
-  update((d) => {
-    d.activeWalk = {
+  useWalkUi.setState({
+    draft: {
       mode,
       themeId: theme.id,
       startedAt: null,
-      durationMin: mode === "guided" ? validGuidedDuration(d.profile.guidedDurationMin) : null,
+      durationMin: mode === "guided" ? validGuidedDuration(getData().profile.guidedDurationMin) : null,
       challengesChecked: new Array(challengesFor(theme, mode).length).fill(false),
       nudges: [],
       pausedAt: null,
       frames: [],
-    };
+    },
   });
   openWalkBrief();
 }
 
 /**
- * The Live tab. With no walk running it starts one, but only once the Live
- * screen is showing: a pop-up opened before the screen changes would close
- * with the move. Opening /live/ any other way never starts a walk.
+ * The Live tab. With no walk running it opens the brief for one, but only
+ * once the Live screen is showing: a pop-up opened before the screen changes
+ * would close with the move. Opening /live/ any other way never does.
  */
 export function goLive(alreadyThere: boolean): void {
   if (getData().activeWalk) return;
@@ -120,20 +123,19 @@ export function launchIfRequested(): void {
 }
 
 /**
- * Picks up a walk left open by an earlier visit. One still on its brief
- * reopens the brief; one whose custom theme is gone is dropped, since
- * nothing was logged against a walk that can't say what it was for.
+ * Picks up a walk left open by an earlier visit. One that never started
+ * (saved by older versions, which opened the walk with its brief) or whose
+ * custom theme is gone is dropped, since nothing was logged against it.
  */
 export function restoreActiveWalk(): void {
   const data = getData();
   const w = data.activeWalk;
   if (!w) return;
-  if (!themeById(w.themeId, data.customThemes)) {
+  if (!w.startedAt || !themeById(w.themeId, data.customThemes)) {
     update((d) => { d.activeWalk = null; });
     return;
   }
   useWalkUi.setState({ mode: w.mode });
-  if (!w.startedAt) openWalkBrief();
 }
 
 /* ---------- Brief and theme pop-ups ---------- */
@@ -162,32 +164,42 @@ export function openThemeEditor(existing: Theme | null = null, onSaved?: () => v
 
 /* ---------- While the walk runs ---------- */
 
-/** Starts the clock once "Start shooting" is tapped in the brief, and heads to Live Walk. */
+/**
+ * "Start shooting" in the brief: the draft becomes the open walk with its
+ * clock running, and the app heads to Live Walk.
+ */
 export function beginShooting(): void {
-  const w = getData().activeWalk;
-  if (!w || w.startedAt) return;
+  const { draft } = useWalkUi.getState();
+  if (!draft || getData().activeWalk) return;
   const now = Date.now();
   update((d) => {
-    const walk = d.activeWalk!;
-    walk.startedAt = now;
-    if (walk.mode === "guided" && walk.durationMin) walk.nudges = nudgePlan(now, walk.durationMin);
+    d.activeWalk = {
+      ...draft,
+      startedAt: now,
+      nudges: draft.mode === "guided" && draft.durationMin ? nudgePlan(now, draft.durationMin) : [],
+    };
   });
+  useWalkUi.setState({ draft: null });
   navigate("hud");
 }
 
 export function setChallengeChecked(index: number, checked: boolean): void {
-  update((d) => {
-    if (d.activeWalk) d.activeWalk.challengesChecked[index] = checked;
-  });
+  if (!getData().activeWalk) {
+    useWalkUi.setState(({ draft }) => ({
+      draft: draft && { ...draft, challengesChecked: draft.challengesChecked.map((c, i) => (i === index ? checked : c)) },
+    }));
+    return;
+  }
+  update((d) => { d.activeWalk!.challengesChecked[index] = checked; });
 }
 
 /** The guided length is only decided before the clock starts; the pick is remembered. */
 export function setGuidedDuration(minutes: number): void {
   const value = validGuidedDuration(minutes);
-  update((d) => {
-    d.profile.guidedDurationMin = value;
-    if (d.activeWalk && !d.activeWalk.startedAt && d.activeWalk.mode === "guided") d.activeWalk.durationMin = value;
-  });
+  update((d) => { d.profile.guidedDurationMin = value; });
+  useWalkUi.setState(({ draft }) => ({
+    draft: draft?.mode === "guided" ? { ...draft, durationMin: value } : draft,
+  }));
 }
 
 export function pauseWalk(): void {
@@ -246,19 +258,12 @@ function fireDueNudges(now: number): void {
 /* ---------- Finishing ---------- */
 
 /**
- * Stop Walk, Complete, or a guided walk running out of time (`auto`). A walk
- * still on its brief just closes, since nothing was logged. A manual stop
- * can't be undone, so it asks first.
+ * Stop Walk, Complete, or a guided walk running out of time (`auto`). A
+ * manual stop can't be undone, so it asks first.
  */
 export function finishWalk(auto = false): void {
   const w = getData().activeWalk;
-  if (!w) return;
-
-  if (!w.startedAt) {
-    update((d) => { d.activeWalk = null; });
-    useWalkUi.setState({ theme: null, reason: "" });
-    return;
-  }
+  if (!w?.startedAt) return;
 
   const startedAt = w.startedAt;
   if (auto) {

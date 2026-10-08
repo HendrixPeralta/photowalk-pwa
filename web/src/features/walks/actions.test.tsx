@@ -22,6 +22,7 @@ const modal = () => useModal.getState().current;
 const modalProps = () => modal()!.element.props as any;
 const toasts = () => useToasts.getState().toasts.map((toast) => toast.message);
 const walk = () => getData().activeWalk!;
+const draft = () => useWalkUi.getState().draft!;
 
 let push: ReturnType<typeof vi.fn<(href: string) => void>>;
 let visibility: MockInstance;
@@ -32,7 +33,7 @@ beforeEach(() => {
   useAppStore.setState(defaultState(), true);
   useToasts.setState({ toasts: [] });
   useModal.setState({ current: null });
-  useWalkUi.setState({ mode: "casual", theme: null, reason: "", launchOnArrival: false });
+  useWalkUi.setState({ mode: "casual", theme: null, reason: "", draft: null, launchOnArrival: false });
   push = vi.fn<(href: string) => void>();
   setNavigator(push);
   visibility = vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
@@ -53,16 +54,30 @@ function startShooting(mode: "casual" | "guided" = "casual"): number {
 }
 
 describe("opening a walk", () => {
-  it("opens on its brief with the theme on hand, and the clock starts on Start shooting", () => {
+  it("opens a brief with the theme on hand, and nothing is open until Start shooting", () => {
     const theme = themes()[3];
     putThemeOnHand(theme, "Because.");
     launchWalk();
-    expect(walk()).toMatchObject({ themeId: theme.id, mode: "casual", startedAt: null, challengesChecked: [] });
+    expect(getData().activeWalk).toBeNull();
+    expect(draft()).toMatchObject({ themeId: theme.id, mode: "casual", startedAt: null, challengesChecked: [] });
     expect(modal()!.element.type).toBe(WalkBriefModal);
 
     beginShooting();
-    expect(walk().startedAt).toBe(START.getTime());
+    expect(walk()).toMatchObject({ themeId: theme.id, startedAt: START.getTime() });
+    expect(useWalkUi.getState().draft).toBeNull();
     expect(push).toHaveBeenCalledWith("/live");
+  });
+
+  it("leaving the brief without starting leaves nothing open or logged", () => {
+    launchWalk();
+    closeModal();
+    expect(getData().activeWalk).toBeNull();
+    expect(getData().walkHistory).toEqual([]);
+
+    // Opening it again starts over on a fresh brief.
+    launchWalk();
+    expect(modal()!.element.type).toBe(WalkBriefModal);
+    expect(getData().activeWalk).toBeNull();
   });
 
   it("picks a theme when none is on hand, and a guided walk gets its checklist and nudges", () => {
@@ -70,14 +85,14 @@ describe("opening a walk", () => {
     launchWalk();
     const theme = walkTheme()!;
     expect(theme).toBeTruthy();
-    expect(walk().durationMin).toBe(30);
-    expect(walk().challengesChecked).toEqual(theme.challenges.map(() => false));
+    expect(draft().durationMin).toBe(30);
+    expect(draft().challengesChecked).toEqual(theme.challenges.map(() => false));
     beginShooting();
     expect(walk().nudges.map((n) => n.at - START.getTime())).toEqual([15 * MIN, 25.5 * MIN, 30 * MIN]);
   });
 
   it("keeps the mode fixed while a walk is open", () => {
-    launchWalk();
+    startShooting();
     setMode("guided");
     expect(useWalkUi.getState().mode).toBe("casual");
   });
@@ -87,11 +102,12 @@ describe("opening a walk", () => {
     putThemeOnHand(themes()[0]);
     launchWalk();
     setChallengeChecked(0, true);
+    expect(draft().challengesChecked[0]).toBe(true);
     putThemeOnHand(themes()[1]);
-    expect(walk().themeId).toBe(themes()[1].id);
-    expect(walk().challengesChecked.every((c) => !c)).toBe(true);
+    expect(draft().themeId).toBe(themes()[1].id);
+    expect(draft().challengesChecked.every((c) => !c)).toBe(true);
     setGuidedDuration(15);
-    expect(walk().durationMin).toBe(15);
+    expect(draft().durationMin).toBe(15);
     expect(getData().profile.guidedDurationMin).toBe(15);
 
     beginShooting();
@@ -101,14 +117,16 @@ describe("opening a walk", () => {
     expect(walk().durationMin).toBe(15);
   });
 
-  it("the Live tab starts a walk once the Live screen is showing", () => {
+  it("the Live tab opens the brief once the Live screen is showing, without starting a walk", () => {
     goLive(false);
-    expect(getData().activeWalk).toBeNull();
+    expect(modal()).toBeNull();
     launchIfRequested();
-    expect(getData().activeWalk).not.toBeNull();
+    expect(modal()!.element.type).toBe(WalkBriefModal);
+    expect(getData().activeWalk).toBeNull();
     expect(useWalkUi.getState().launchOnArrival).toBe(false);
 
     // With a walk already open, the tab just goes there.
+    beginShooting();
     goLive(false);
     expect(useWalkUi.getState().launchOnArrival).toBe(false);
   });
@@ -164,14 +182,6 @@ describe("a running walk", () => {
 });
 
 describe("finishing", () => {
-  it("a walk stopped on its brief just closes; nothing is logged", () => {
-    launchWalk();
-    finishWalk();
-    expect(getData().activeWalk).toBeNull();
-    expect(getData().walkHistory).toEqual([]);
-    expect(useWalkUi.getState().theme).toBeNull();
-  });
-
   it("asks before a manual stop, and backing out keeps walking", () => {
     startShooting();
     finishWalk();
@@ -229,13 +239,22 @@ describe("finishing", () => {
 });
 
 describe("restoring and themes", () => {
-  it("reopens a walk left on its brief, in the mode it was started in", () => {
+  it("picks up a running walk in the mode it was started in", () => {
+    update((d) => {
+      d.activeWalk = { mode: "guided", themeId: themes()[0].id, startedAt: 1, durationMin: 30, challengesChecked: [], nudges: [], pausedAt: null };
+    });
+    restoreActiveWalk();
+    expect(useWalkUi.getState().mode).toBe("guided");
+    expect(getData().activeWalk).not.toBeNull();
+  });
+
+  it("drops a walk an older version saved before it started", () => {
     update((d) => {
       d.activeWalk = { mode: "guided", themeId: themes()[0].id, startedAt: null, durationMin: 30, challengesChecked: [], nudges: [], pausedAt: null };
     });
     restoreActiveWalk();
-    expect(useWalkUi.getState().mode).toBe("guided");
-    expect(modal()!.element.type).toBe(WalkBriefModal);
+    expect(getData().activeWalk).toBeNull();
+    expect(modal()).toBeNull();
   });
 
   it("drops a walk whose custom theme is gone", () => {
@@ -249,12 +268,13 @@ describe("restoring and themes", () => {
   it("won't remove the theme the open walk is using", () => {
     update((d) => { d.customThemes.push({ id: "mine", title: "Mine", brief: "", concepts: [], challenges: [] }); });
     putThemeOnHand(getData().customThemes[0]);
-    launchWalk();
+    startShooting();
     removeSavedTheme("mine");
     expect(getData().customThemes).toHaveLength(1);
     expect(toasts()).toEqual(["Finish your current walk before removing its theme."]);
 
     finishWalk();
+    modalProps().onConfirm();
     removeSavedTheme("mine");
     expect(getData().customThemes).toEqual([]);
   });

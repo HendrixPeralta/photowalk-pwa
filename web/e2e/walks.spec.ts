@@ -25,6 +25,11 @@ test("a casual walk runs from the brief to the summary", async ({ page }) => {
   const before = await saved(page);
   await expect(dialog(page)).toContainText("Casual walk · no timer");
 
+  // Nothing is open behind the brief until Start shooting.
+  expect(before.activeWalk).toBeNull();
+  await expect(page.locator(".walk-panel")).toHaveCount(0);
+  await expect(page.locator(".nav-live")).toHaveCount(0);
+
   await dialog(page).getByRole("button", { name: "Start shooting" }).click();
   await expect(page).toHaveURL(/\/live\/$/);
   await expect(dialog(page)).toBeHidden();
@@ -128,9 +133,9 @@ test("a custom theme built from the brief is used and kept in My Themes", async 
   // Straight back to the brief, now on the new theme.
   await expect(dialog(page).getByRole("heading", { name: "Rainy Day Reflections" })).toBeVisible();
   await expect(dialog(page)).toContainText("Your own custom theme.");
-  await page.keyboard.press("Escape");
+  await dialog(page).getByRole("button", { name: "Start shooting" }).click();
+  await expect(dialog(page)).toBeHidden();
 
-  // Through the menu: a reload would reopen the brief of the walk left open.
   await page.getByRole("button", { name: "Profile" }).click();
   await page.getByRole("dialog", { name: "Menu" }).getByRole("link", { name: "My Themes" }).click();
   await expect(page.locator(".log-last")).toHaveText("1 saved");
@@ -145,7 +150,7 @@ test("a custom theme built from the brief is used and kept in My Themes", async 
   expect(state.activeWalk.themeId).toBe(state.customThemes[0].id);
 });
 
-test("the Live tab starts a walk, but opening /live/ directly does not", async ({ page }) => {
+test("the Live tab opens the brief, but opening /live/ directly does not", async ({ page }) => {
   await page.goto("/live/");
   await expect(page.locator("#screenTitle")).toHaveText("Live Walk");
   await expect(dialog(page)).toHaveCount(0);
@@ -155,9 +160,18 @@ test("the Live tab starts a walk, but opening /live/ directly does not", async (
   await expect(page).toHaveURL(/\/live\/$/);
   await expect(dialog(page).getByRole("button", { name: "Start shooting" })).toBeVisible();
 
-  // A walk left on its brief comes back on its brief after a reload.
+  // Nothing runs behind the brief, and leaving it leaves no walk open.
+  await expect(page.locator(".telemetry-grid")).toHaveCount(0);
+  await expect(page.locator(".nav-live")).toHaveCount(0);
+  await page.keyboard.press("Escape");
   await page.reload();
-  await expect(dialog(page).getByRole("button", { name: "Start shooting" })).toBeVisible();
+  await expect(dialog(page)).toHaveCount(0);
+  expect((await saved(page)).activeWalk).toBeNull();
+
+  await page.getByRole("link", { name: "Live Walk", exact: true }).click();
+  await dialog(page).getByRole("button", { name: "Start shooting" }).click();
+  await expect(page.locator(".telemetry-grid")).toBeVisible();
+  await expect(page.locator(".nav-live")).toBeVisible();
 });
 
 test("the golden-hour badge asks for a location, then shows the light", async ({ page, context }) => {

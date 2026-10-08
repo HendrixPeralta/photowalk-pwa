@@ -3,11 +3,10 @@
 import { useId } from "react";
 import { t } from "@/lib/i18n/core";
 import { durationOptions } from "@/lib/walk";
-import { useAppStore } from "@/state/appStore";
 import { closeModal } from "@/state/ui";
 import { beginShooting, openThemeEditor, openThemePicker, openWalkBrief, setGuidedDuration } from "../actions";
 import { ChallengeList } from "../ChallengeList";
-import { challengesFor, useWalkTheme, useWalkUi } from "../walkUi";
+import { challengesFor, useBriefWalk, useWalkTheme, useWalkUi } from "../walkUi";
 
 /**
  * The walk brief: what you are shooting and what to try. Before shooting
@@ -16,7 +15,7 @@ import { challengesFor, useWalkTheme, useWalkUi } from "../walkUi";
  * as a read-only recap, with live checkboxes.
  */
 export function WalkBriefModal() {
-  const walk = useAppStore((s) => s.activeWalk);
+  const walk = useBriefWalk();
   const theme = useWalkTheme();
   const reason = useWalkUi((s) => s.reason);
   const lengthId = useId();
