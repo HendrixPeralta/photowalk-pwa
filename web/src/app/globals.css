@@ -2292,38 +2292,6 @@ input[type="file"].text-input { padding: 8px; }
   white-space: nowrap;
 }
 
-.debrief-title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-.debrief-sub { margin: 2px 0 12px; font-size: 13px; color: var(--text-dim); }
-
-.debrief-meta {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  padding: 10px 12px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  margin-bottom: 12px;
-}
-.debrief-meta div { min-width: 0; }
-.debrief-meta .label-caps { color: var(--text-dim); }
-.debrief-meta strong {
-  display: block;
-  margin-top: 4px;
-  font-family: var(--font-data);
-  font-size: 13px;
-  font-weight: 500;
-  overflow-wrap: anywhere;
-}
-.debrief-meta-accent strong { color: var(--accent-strong); }
-.debrief-meta-cyan strong { color: var(--cyan); }
-
 /* --- Partners: A/B split comparison -------------------------------------- */
 .split-toolbar {
   display: flex;

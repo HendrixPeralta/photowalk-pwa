@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { RoomPhoto, RoomSnapshot } from "@/lib/rooms/protocol";
-import { critiqueTagLabel, detailOf, exposureOf, formatSpan, partnersLabel, personName, pickPair, shutterOf } from "./debrief";
+import { critiqueTagLabel, detailOf, exposureOf, partnersLabel, personName, pickPair, shutterOf } from "./debrief";
 
 const photo = (userId: string, ts: number, exif: RoomPhoto["exif"] = null): RoomPhoto => ({
   id: `${userId}-${ts}`, userId, note: "", ts, width: 900, height: 600, comments: [], exif, themeId: null,
@@ -28,12 +28,10 @@ describe("group review", () => {
     expect([exposureOf(bare), detailOf(bare), shutterOf(bare)]).toEqual(["no camera data", "", "--"]);
   });
 
-  it("names the partners by their full account names, and the span of the session", () => {
+  it("names the partners by their full account names", () => {
     expect(partnersLabel({ people, photos: [photo("ana", 1), photo("ken", 2), photo("ana", 3)] })).toBe("@Ana Sato & @伊藤 健");
     expect(partnersLabel({ people, photos: [] })).toBe("--");
     expect(personName({ people }, "gone")).toBe("Someone");
-    expect(formatSpan(42 * 60000)).toBe("42m");
-    expect(formatSpan(135 * 60000)).toBe("2h 15m");
   });
 
   it("shows critique tags in the reader's language", () => {

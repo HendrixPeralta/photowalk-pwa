@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/Avatar";
 import { Icon } from "@/components/icons/Icon";
 import { openAnalysis } from "@/features/analysis/request";
-import { themeById } from "@/lib/content/themes";
 import { t } from "@/lib/i18n/core";
 import { navigate } from "@/lib/nav";
 import { qrPathData } from "@/lib/qr";
@@ -15,7 +14,7 @@ import { useAccount } from "@/state/account";
 import { useAppStore } from "@/state/appStore";
 import { closeModal, openModal, showToast } from "@/state/ui";
 import {
-  critiqueTagLabel, detailOf, exportRoomSheet, exposureOf, formatSpan, partnersLabel, personName, pickPair, shutterOf,
+  critiqueTagLabel, detailOf, exportRoomSheet, exposureOf, personName, pickPair, shutterOf,
 } from "./debrief";
 import { useShareInbox } from "./inbox";
 import { ensureRoomImage, roomImageId, useRoomPhotoUrl } from "./roomImages";
@@ -80,14 +79,9 @@ function SyncNotice() {
 }
 
 function RoomView({ room }: { room: RoomSnapshot }) {
-  const lastWalk = useAppStore((s) => s.lastWalk);
-  const customThemes = useAppStore((s) => s.customThemes);
   const me = useAccount((s) => s.user?.id);
   const isHost = room.hostId === me;
   const photos = room.photos;
-  const span = photos.length >= 2 ? photos[photos.length - 1].ts - photos[0].ts : null;
-  // The theme the room was made under, or that of the walk just finished.
-  const theme = room.theme || (lastWalk && themeById(lastWalk.themeId, customThemes)?.title) || "";
   const [exporting, setExporting] = useState(false);
 
   return (
@@ -99,39 +93,6 @@ function RoomView({ room }: { room: RoomSnapshot }) {
         </span>
         <span className="debrief-privacy">{t("Private")}</span>
       </div>
-      <h2 className="debrief-title">{room.code}</h2>
-      <p className="debrief-sub">{room.theme ? t("Theme: {theme}", { theme: room.theme }) : t("No theme set")}</p>
-
-      <div className="debrief-meta">
-        <div>
-          <span className="label-caps">{t("Duration")}</span>
-          <strong title={span !== null ? t("Span between the first and last shot shared here") : undefined}>
-            {span !== null ? formatSpan(span) : "--"}
-          </strong>
-        </div>
-        <div className="debrief-meta-accent">
-          <span className="label-caps">{t("Photos")}</span>
-          <strong>
-            {photos.length ? (photos.length === 1 ? t("{n} photo", { n: 1 }) : t("{n} photos", { n: photos.length })) : t("none yet")}
-          </strong>
-        </div>
-        <div className="debrief-meta-cyan">
-          <span className="label-caps">{t("Partners")}</span>
-          <strong>{partnersLabel(room)}</strong>
-        </div>
-      </div>
-
-      {theme && (
-        <div className="theme-card">
-          <span className="label-caps">{t("The Challenge")}</span>
-          <h3>{theme}</h3>
-          <p className="muted card-text">
-            {lastWalk?.challengeCount
-              ? t("{done} of {total} mini-challenges done on this walk.", { done: lastWalk.challengesDone, total: lastWalk.challengeCount })
-              : t("Compare what each of you did with the same brief.")}
-          </p>
-        </div>
-      )}
 
       <SideBySide room={room} />
       <FeedbackNotes room={room} />

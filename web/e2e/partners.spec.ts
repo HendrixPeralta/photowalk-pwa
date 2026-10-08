@@ -6,14 +6,16 @@ const dialog = (page: Page) => page.getByRole("dialog");
 const toast = (page: Page, text: string | RegExp) => page.getByRole("status").filter({ hasText: text });
 // Another person's changes arrive by polling, every 5 s while the room is lively.
 const POLL = { timeout: 15_000 };
+// "Group Review · Room ABC234": the room on screen.
+const roomLabel = (page: Page) => page.locator(".debrief-head .label-caps");
 
 async function createRoom(page: Page): Promise<string> {
   await page.goto("/live/");
   await page.getByRole("button", { name: "Create Room" }).click();
   await page.getByRole("button", { name: "Manage Room" }).click();
   await expect(page).toHaveURL(/\/partners\/$/);
-  await expect(page.locator(".debrief-title")).toHaveText(/^[A-Z2-9]{6}$/);
-  return (await page.locator(".debrief-title").textContent())!;
+  await expect(roomLabel(page)).toHaveText(/Room [A-Z2-9]{6}$/);
+  return (await roomLabel(page).textContent())!.slice(-6);
 }
 
 async function upload(page: Page, files: string[]) {
@@ -35,7 +37,7 @@ test("two people share a room from their own phones: photos, side by side, and n
   // Ken, signed in on his own phone, opens the invite link: he joins, and the code leaves the address.
   const ken = await openAs(PARTNER);
   await ken.goto(link);
-  await expect(ken.locator(".debrief-title")).toHaveText(code);
+  await expect(roomLabel(ken)).toHaveText(new RegExp(`Room ${code}$`));
   await expect(ken).toHaveURL(/\/partners\/$/);
   await expect(ken.locator(".room-thumb")).toHaveCount(1);
   await expect(ken.locator(".room-thumb").first()).toHaveAttribute("style", /background-image: url\("blob:/);
@@ -44,7 +46,7 @@ test("two people share a room from their own phones: photos, side by side, and n
 
   // Aki's phone follows without a reload.
   await expect(aki.locator(".room-thumb")).toHaveCount(2, POLL);
-  await expect(aki.locator(".debrief-meta-cyan strong")).toHaveText(`@${TEST_USER.name} & @${PARTNER.name}`);
+  await expect(aki.locator(".room-person")).toHaveText([/Aki Tanaka\s*Host/, /Ken Ito/]);
   await expect(aki.locator(".split-pane-who")).toHaveText([`@${TEST_USER.name}`, `@${PARTNER.name}`]);
   await expect(aki.locator(".split-pane").nth(1)).toContainText("1/250s");
 
@@ -92,7 +94,7 @@ test("the host removes someone, who can't come back", async ({ page: aki, openAs
   const code = await createRoom(aki);
   const ken = await openAs(PARTNER);
   await ken.goto(`/partners/?room=${code}`);
-  await expect(ken.locator(".debrief-title")).toHaveText(code);
+  await expect(roomLabel(ken)).toHaveText(new RegExp(`Room ${code}$`));
   // Only the host sees Remove; Ken leaves rather than closes.
   await expect(ken.getByRole("button", { name: "Remove from room" })).toHaveCount(0);
   await expect(ken.getByRole("button", { name: "Leave Room" })).toBeVisible();
@@ -133,13 +135,13 @@ test("rooms you're in show on the Live Walk card on another device", async ({ pa
   const code = await createRoom(aki);
   const ken = await openAs(PARTNER);
   await ken.goto(`/partners/?room=${code}`);
-  await expect(ken.locator(".debrief-title")).toHaveText(code);
+  await expect(roomLabel(ken)).toHaveText(new RegExp(`Room ${code}$`));
   // Ken's other phone: no room on this device yet, but his rooms are listed.
   const kenAgain = await openAs(PARTNER);
   await kenAgain.goto("/live/");
   await kenAgain.locator(".your-room", { hasText: code }).click();
   await expect(kenAgain).toHaveURL(/\/partners\/$/);
-  await expect(kenAgain.locator(".debrief-title")).toHaveText(code);
+  await expect(roomLabel(kenAgain)).toHaveText(new RegExp(`Room ${code}$`));
 });
 
 test("the side menu leads to Partners, showing the room you're in", async ({ page }) => {
@@ -155,5 +157,5 @@ test("the side menu leads to Partners, showing the room you're in", async ({ pag
   const link = page.getByRole("dialog", { name: "Menu" }).getByRole("link", { name: new RegExp(`Partners\\s*${code}`) });
   await expect(link).toBeVisible();
   await link.click();
-  await expect(page.locator(".debrief-title")).toHaveText(code);
+  await expect(roomLabel(page)).toHaveText(new RegExp(`Room ${code}$`));
 });
