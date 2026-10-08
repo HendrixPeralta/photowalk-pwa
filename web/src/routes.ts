@@ -32,7 +32,7 @@ export function screenTitle(view: View | null): string {
     case "hud": return t("Live Walk");
     case "analyze": return t("Analysis");
     case "album": return t("Album");
-    case "share": return t("Partners");
+    case "share": return t("Rooms");
     case "settings": return t("Settings");
     case "themes": return t("My Themes");
     default: return "PhotoEYE";

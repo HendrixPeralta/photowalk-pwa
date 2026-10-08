@@ -5,7 +5,7 @@ const SCREENS = [
   { path: "/live/", title: "Live Walk", tab: "Live Walk" },
   { path: "/analysis/", title: "Analysis", tab: "Analysis" },
   { path: "/album/", title: "Album", tab: "Album" },
-  { path: "/partners/", title: "Partners", tab: null },
+  { path: "/partners/", title: "Rooms", tab: null },
   { path: "/settings/", title: "Settings", tab: null },
   { path: "/themes/", title: "My Themes", tab: null },
 ];

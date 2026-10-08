@@ -3,9 +3,8 @@
 import { useEffect, useRef } from "react";
 import { Icon } from "@/components/icons/Icon";
 import { useImageUrl } from "@/components/useImageUrl";
-import { WalkPartnersCard } from "@/features/partners/WalkPartnersCard";
 import { ChallengeList } from "@/features/walks/ChallengeList";
-import { finishWalk, launchIfRequested, pauseWalk, resumeWalk } from "@/features/walks/actions";
+import { finishWalk, launchIfRequested, launchWalk, pauseWalk, resumeWalk } from "@/features/walks/actions";
 import { challengesFor, useWalkTheme } from "@/features/walks/walkUi";
 import { concept } from "@/lib/content/themes";
 import { getDateLocale, t } from "@/lib/i18n/core";
@@ -32,8 +31,12 @@ export function LiveScreen() {
 
   return (
     <section className="view" data-view="hud">
-      {walk && <OpenWalk walk={walk} />}
-      <WalkPartnersCard />
+      {walk ? <OpenWalk walk={walk} /> : (
+        <div className="empty-state">
+          <p>{t("No walk in progress. Once you start one, this screen shows your timer, your theme and challenges, and the photos you log.")}</p>
+          <button type="button" className="btn btn-accent" onClick={launchWalk}>{t("Start Photo Walk")}</button>
+        </div>
+      )}
     </section>
   );
 }

@@ -7,7 +7,7 @@ const SCREENS = [
   { path: "/live/", title: "Live Walk" },
   { path: "/analysis/", title: "Analysis" },
   { path: "/album/", title: "Album" },
-  { path: "/partners/", title: "Partners" },
+  { path: "/partners/", title: "Rooms" },
   { path: "/settings/", title: "Settings" },
   { path: "/themes/", title: "My Themes" },
 ];
@@ -30,9 +30,9 @@ test("every screen opens offline once the app has been visited", async ({ page, 
     await page.goto(screen.path);
     await expect(page.locator("#screenTitle")).toHaveText(screen.title);
   }
-  // An invite link is still the Partners page offline.
+  // An invite link is still the Rooms page offline.
   await page.goto("/partners/?room=ABC234");
-  await expect(page.locator("#screenTitle")).toHaveText("Partners");
+  await expect(page.locator("#screenTitle")).toHaveText("Rooms");
   // The sample photo and its analysis work offline too.
   await page.goto("/analysis/");
   await expect(page.locator(".shot-exposure")).toContainText("1/250s");
@@ -46,7 +46,7 @@ test("Japanese works offline", async ({ page, context }) => {
   await expect(page.locator("#screenTitle")).toHaveText("アルバム");
 });
 
-test("photos from the share sheet land on Partners", async ({ page }) => {
+test("photos from the share sheet land on Rooms", async ({ page }) => {
   await installed(page);
   const photo = readFileSync(join(process.cwd(), "public/photos/a_49.jpg")).toString("base64");
   // What the phone's share sheet does: a multipart POST to the share target.
@@ -64,9 +64,8 @@ test("photos from the share sheet land on Partners", async ({ page }) => {
   await expect(page.locator(".shared-notice")).toHaveText(/^1 photo ready to share\./);
   await expect(page).toHaveURL(/\/partners\/$/);
 
-  await page.getByRole("button", { name: "Go to Live Walk" }).click();
   await page.getByRole("button", { name: "Create Room" }).click();
-  await page.getByRole("button", { name: "Manage Room" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Create", exact: true }).click();
   await page.getByRole("button", { name: "Upload", exact: true }).click();
   await expect(page.locator(".room-thumb")).toHaveCount(1);
   await expect(page.locator(".shared-notice")).toHaveCount(0);

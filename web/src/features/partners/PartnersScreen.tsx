@@ -18,10 +18,16 @@ import {
 } from "./debrief";
 import { useShareInbox } from "./inbox";
 import { ensureRoomImage, roomImageId, useRoomPhotoUrl } from "./roomImages";
-import { addComment, closeRoom, copyInvite, deletePhoto, inviteUrl, leaveRoom, postNote, removeMember, uploadToRoom } from "./rooms";
-import { nudgeRoomSync, startRoomSync, useCurrentRoom, useRoom } from "./roomStore";
+import { RoomList } from "./RoomList";
+import {
+  addComment, closeRoom, copyInvite, deletePhoto, inviteUrl, leaveRoom, postNote, removeMember, renameRoom, uploadToRoom,
+} from "./rooms";
+import { nudgeRoomSync, showRoomList, startRoomSync, useCurrentRoom, useRoom } from "./roomStore";
 
-/** The group review for the room you're in: shots side by side, notes, uploads and the invite. */
+/**
+ * Rooms: the list of your rooms (create, join, open), or the room you opened:
+ * uploads, shots side by side, notes and the invite.
+ */
 export function PartnersScreen() {
   const code = useAppStore((s) => s.currentRoom);
   const room = useCurrentRoom();
@@ -34,13 +40,11 @@ export function PartnersScreen() {
       <SharedNotice inRoom={Boolean(code)} />
       {code && <SyncNotice />}
       {room ? <RoomView room={room} /> : code ? (
-        <p className="empty-state-sm">{t("Opening room {code}…", { code })}</p>
-      ) : (
-        <div className="empty-state">
-          <p>{t("No active room yet. Create or join one with your walk partners from the Live Walk tab.")}</p>
-          <button type="button" className="btn btn-accent" onClick={() => navigate("hud")}>{t("Go to Live Walk")}</button>
-        </div>
-      )}
+        <>
+          <BackToRooms />
+          <p className="empty-state-sm">{t("Opening room {code}…", { code })}</p>
+        </>
+      ) : <RoomList />}
     </section>
   );
 }
@@ -52,9 +56,17 @@ function SharedNotice({ inRoom }: { inRoom: boolean }) {
   const text = inRoom
     ? (n === 1 ? t("1 photo ready to share. Press Upload to post them.") : t("{n} photos ready to share. Press Upload to post them.", { n }))
     : (n === 1
-      ? t("1 photo ready to share. Create or join a room from the Live Walk tab to post them.")
-      : t("{n} photos ready to share. Create or join a room from the Live Walk tab to post them.", { n }));
+      ? t("1 photo ready to share. Open a room below to post them.")
+      : t("{n} photos ready to share. Open a room below to post them.", { n }));
   return <p className="banner shared-notice">{text}</p>;
+}
+
+function BackToRooms() {
+  return (
+    <button type="button" className="btn btn-ghost btn-sm room-back" onClick={showRoomList}>
+      {t("← All rooms")}
+    </button>
+  );
 }
 
 /** Offline (showing the room as last seen), or updates paused after a quiet spell. */
@@ -86,6 +98,7 @@ function RoomView({ room }: { room: RoomSnapshot }) {
 
   return (
     <div>
+      <BackToRooms />
       <div className="debrief-head">
         <span className="debrief-head-left">
           <span className="solar-dot" />
@@ -93,10 +106,16 @@ function RoomView({ room }: { room: RoomSnapshot }) {
         </span>
         <span className="debrief-privacy">{t("Private")}</span>
       </div>
-
-      <SideBySide room={room} />
-      <FeedbackNotes room={room} />
-      <Momentum notes={room.notes.length} />
+      {(room.name || isHost) && (
+        <div className="room-title-row">
+          {room.name && <h2 className="room-name">{room.name}</h2>}
+          {isHost && (
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => openModal(<RenameRoomModal name={room.name} />)}>
+              {room.name ? t("Rename") : t("Name this room")}
+            </button>
+          )}
+        </div>
+      )}
 
       <h2 className="section-title">{t("Share your shots")}</h2>
       <ShareForm />
@@ -104,6 +123,10 @@ function RoomView({ room }: { room: RoomSnapshot }) {
       <div className="album-grid">
         {photos.slice().reverse().map((p) => <RoomThumb key={p.id} room={room} photo={p} />)}
       </div>
+
+      <SideBySide room={room} />
+      <FeedbackNotes room={room} />
+      <Momentum notes={room.notes.length} />
 
       <People room={room} isHost={isHost} />
       <Invite code={room.code} />
@@ -505,6 +528,38 @@ function RemoveMemberModal({ name, userId }: { name: string; userId: string }) {
         <button type="button" className="btn btn-danger-solid" onClick={() => { closeModal(); void removeMember(userId); }}>
           {t("Remove from room")}
         </button>
+        <button type="button" className="btn btn-ghost btn-block" onClick={closeModal}>{t("Cancel")}</button>
+      </div>
+    </>
+  );
+}
+
+function RenameRoomModal({ name: current }: { name: string }) {
+  const [name, setName] = useState(current);
+  const [busy, setBusy] = useState(false);
+  const save = async () => {
+    if (busy) return;
+    setBusy(true);
+    const saved = await renameRoom(name);
+    setBusy(false);
+    if (saved) closeModal();
+  };
+  return (
+    <>
+      <h3>{t("Name this room")}</h3>
+      <input
+        type="text"
+        className="text-input"
+        placeholder={t("Room name")}
+        aria-label={t("Room name")}
+        maxLength={LIMITS.roomName}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        onKeyDown={(e) => { if (e.key === "Enter") void save(); }}
+      />
+      <p className="hint">{t("Everyone in the room sees this name. Leave it empty to show the code.")}</p>
+      <div className="theme-actions">
+        <button type="button" className="btn btn-accent btn-block" disabled={busy} onClick={() => void save()}>{t("Save")}</button>
         <button type="button" className="btn btn-ghost btn-block" onClick={closeModal}>{t("Cancel")}</button>
       </div>
     </>

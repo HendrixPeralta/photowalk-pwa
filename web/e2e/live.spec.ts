@@ -85,20 +85,9 @@ test("a guided walk shows its countdown and checklist progress", async ({ page }
   await expect(page.locator(".mission-progress-text")).toHaveText(`Progress: ${Math.round(100 / total)}%`);
 });
 
-test("walk partners can create a room or are told when a code doesn't work", async ({ page }) => {
+test("with no walk under way, Live offers to start one", async ({ page }) => {
   await page.goto("/live/");
-  await page.getByRole("button", { name: "Join Room" }).click();
-  await dialog(page).getByPlaceholder("Room code").fill("nope");
-  await dialog(page).getByRole("button", { name: "Join" }).click();
-  await expect(dialog(page).getByRole("alert")).toHaveText("That doesn't look like a room code.");
-  await dialog(page).getByPlaceholder("Room code").fill("ZZZ999");
-  await dialog(page).getByRole("button", { name: "Join" }).click();
-  await expect(dialog(page).getByRole("alert")).toContainText("Room not found");
-  await page.keyboard.press("Escape");
-
-  await page.getByRole("button", { name: "Create Room" }).click();
-  await expect(toast(page, /Room [A-Z2-9]{6} created/)).toBeVisible();
-  await expect(page.locator(".theme-card")).toContainText(/Room [A-Z2-9]{6} is open for your walk partners\./);
-  await page.getByRole("button", { name: "Manage Room" }).click();
-  await expect(page).toHaveURL(/\/partners\/$/);
+  await expect(page.getByText(/^No walk in progress\./)).toBeVisible();
+  await page.getByRole("button", { name: "Start Photo Walk" }).click();
+  await expect(dialog(page).getByRole("button", { name: "Start shooting" })).toBeVisible();
 });

@@ -55,6 +55,19 @@ export function applySnapshot(room: RoomSnapshot): void {
   void pruneRoomImages(new Set(room.photos.map((p) => p.id)));
 }
 
+/**
+ * Puts a room you're in on screen. The cached copy shows straight away if it
+ * is that room; polling fetches it otherwise.
+ */
+export function openRoom(code: string): void {
+  if (getData().currentRoom !== code) update((d) => { d.currentRoom = code; });
+}
+
+/** Back to the list of rooms. You stay in the room, one tap away in the list. */
+export function showRoomList(): void {
+  if (getData().currentRoom !== null) update((d) => { d.currentRoom = null; });
+}
+
 /** Leaves the room on this device: forgets it and its pictures. */
 export function forgetRoom(): void {
   if (getData().currentRoom !== null) update((d) => { d.currentRoom = null; });
