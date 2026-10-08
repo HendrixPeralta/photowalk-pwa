@@ -14,7 +14,7 @@ import { clockText } from "@/lib/walk";
 import { useAppStore } from "@/state/appStore";
 import type { ActiveWalk, Frame } from "@/state/types";
 import { openModal } from "@/state/ui";
-import { logFrames, openInMaps } from "./actions";
+import { logFrames } from "./actions";
 import { FrameSheetModal } from "./FrameSheet";
 
 /**
@@ -49,22 +49,16 @@ function OpenWalk({ walk }: { walk: ActiveWalk }) {
 
       <div className="log-head">
         <span className="label-caps">{t("Photo Log")}</span>
-        <span className="log-last">
-          {last
-            ? t("Last: #{n} at {time}", {
-                n: frames.length,
-                time: new Date(last.at).toLocaleTimeString(getDateLocale(), { hour: "2-digit", minute: "2-digit" }),
-              })
-            : t("No photos yet")}
-        </span>
+        {last && (
+          <span className="log-last">
+            {t("Last: #{n} at {time}", {
+              n: frames.length,
+              time: new Date(last.at).toLocaleTimeString(getDateLocale(), { hour: "2-digit", minute: "2-digit" }),
+            })}
+          </span>
+        )}
       </div>
-      <div className="hud-footer-row">
-        <LogPhotoButton next={frames.length + 1} />
-        <button type="button" className="btn btn-primary log-btn" onClick={() => void openInMaps()}>
-          <Icon name="pin" />
-          {t("Open in Maps")}
-        </button>
-      </div>
+      <LogPhotoButton next={frames.length + 1} />
 
       <div className="hud-footer-row">
         <button

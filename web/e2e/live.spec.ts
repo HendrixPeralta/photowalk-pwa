@@ -19,7 +19,7 @@ test("photos logged on a walk show up with their camera data", async ({ page }) 
   const errors: string[] = [];
   page.on("pageerror", (err) => errors.push(err.message));
   await startWalk(page);
-  await expect(page.locator(".log-last")).toHaveText("No photos yet");
+  await expect(page.locator(".log-last")).toBeHidden();
 
   await page.locator("input[type=file]").setInputFiles([join(PHOTOS, "a_33.jpg"), join(PHOTOS, "a_1.jpg")]);
   await expect(toast(page, "2 photos logged.")).toBeVisible();
