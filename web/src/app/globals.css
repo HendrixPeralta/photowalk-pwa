@@ -1161,6 +1161,18 @@ input[type="file"].text-input { padding: 8px; }
 .shared-notice { display: block; margin-top: 0; }
 
 .invite-card { text-align: center; }
+/* Walk Partners: who is in the room, your rooms, and the sync notice */
+.room-people-list { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.room-person { display: flex; align-items: center; gap: 10px; }
+.room-person .profile-avatar { width: 32px; height: 32px; }
+.room-person-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.room-person .btn { margin-left: auto; }
+.room-sync-notice { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.room-expiry { text-align: center; }
+.your-rooms { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
+.your-room { justify-content: space-between; text-align: left; }
+.your-room .muted { font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 .room-qr {
   display: flex;
   justify-content: center;

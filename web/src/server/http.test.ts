@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from "vitest";
 import { requireEnv } from "./env";
-import { withServer } from "./http";
+import { HttpError, withServer } from "./http";
 
 describe("withServer", () => {
   it("answers 503 when the server is missing settings", async () => {
@@ -13,6 +13,12 @@ describe("withServer", () => {
     });
     expect(res.status).toBe(503);
     expect(await res.json()).toEqual({ error: "not_configured" });
+  });
+
+  it("answers an HttpError with its status and code", async () => {
+    const res = await withServer(() => { throw new HttpError(403, "not_member"); });
+    expect(res.status).toBe(403);
+    expect(await res.json()).toEqual({ error: "not_member" });
   });
 
   it("lets other errors through", async () => {

@@ -1,32 +1,42 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Avatar } from "@/components/Avatar";
 import { Icon } from "@/components/icons/Icon";
-import { useImageUrl } from "@/components/useImageUrl";
 import { openAnalysis } from "@/features/analysis/request";
 import { themeById } from "@/lib/content/themes";
 import { t } from "@/lib/i18n/core";
 import { navigate } from "@/lib/nav";
 import { qrPathData } from "@/lib/qr";
-import { formatTime } from "@/lib/util";
+import { CRITIQUE_TAGS, LIMITS, type CritiqueTag, type RoomPhoto, type RoomSnapshot } from "@/lib/rooms/protocol";
+import { formatDate, formatTime } from "@/lib/util";
 import { currentStreak } from "@/lib/walk";
+import { useAccount } from "@/state/account";
 import { useAppStore } from "@/state/appStore";
-import type { Room, RoomPhoto } from "@/state/types";
 import { closeModal, openModal, showToast } from "@/state/ui";
 import {
-  critiqueTags, detailOf, exportRoomSheet, exposureOf, formatSpan, partnersLabel, pickPair, shutterOf,
+  critiqueTagLabel, detailOf, exportRoomSheet, exposureOf, formatSpan, partnersLabel, personName, pickPair, shutterOf,
 } from "./debrief";
 import { useShareInbox } from "./inbox";
-import { addComment, copyInvite, inviteUrl, leaveRoom, postNote, uploadToRoom } from "./rooms";
+import { ensureRoomImage, roomImageId, useRoomPhotoUrl } from "./roomImages";
+import { addComment, closeRoom, copyInvite, deletePhoto, inviteUrl, leaveRoom, postNote, removeMember, uploadToRoom } from "./rooms";
+import { nudgeRoomSync, startRoomSync, useCurrentRoom, useRoom } from "./roomStore";
 
 /** The group review for the room you're in: shots side by side, notes, uploads and the invite. */
 export function PartnersScreen() {
-  const room = useAppStore((s) => (s.currentRoom ? s.rooms[s.currentRoom] ?? null : null));
+  const code = useAppStore((s) => s.currentRoom);
+  const room = useCurrentRoom();
+
+  // Fresh while on screen; nothing is asked while Partners isn't showing.
+  useEffect(() => (code ? startRoomSync() : undefined), [code]);
 
   return (
     <section className="view" data-view="share">
-      <SharedNotice inRoom={Boolean(room)} />
-      {room ? <RoomView room={room} /> : (
+      <SharedNotice inRoom={Boolean(code)} />
+      {code && <SyncNotice />}
+      {room ? <RoomView room={room} /> : code ? (
+        <p className="empty-state-sm">{t("Opening room {code}…", { code })}</p>
+      ) : (
         <div className="empty-state">
           <p>{t("No active room yet. Create or join one with your walk partners from the Live Walk tab.")}</p>
           <button type="button" className="btn btn-accent" onClick={() => navigate("hud")}>{t("Go to Live Walk")}</button>
@@ -48,9 +58,32 @@ function SharedNotice({ inRoom }: { inRoom: boolean }) {
   return <p className="banner shared-notice">{text}</p>;
 }
 
-function RoomView({ room }: { room: Room }) {
+/** Offline (showing the room as last seen), or updates paused after a quiet spell. */
+function SyncNotice() {
+  const offline = useRoom((s) => s.offline);
+  const paused = useRoom((s) => s.paused);
+  const syncedAt = useRoom((s) => s.syncedAt);
+  if (offline) {
+    return (
+      <p className="banner room-sync-notice">
+        {syncedAt ? t("Offline. Showing the room as of {time}.", { time: formatTime(syncedAt) }) : t("Offline. Connect to see the room.")}
+      </p>
+    );
+  }
+  if (!paused) return null;
+  return (
+    <p className="banner room-sync-notice">
+      {t("Updates paused.")}
+      <button type="button" className="btn btn-ghost btn-sm" onClick={nudgeRoomSync}>{t("Refresh")}</button>
+    </p>
+  );
+}
+
+function RoomView({ room }: { room: RoomSnapshot }) {
   const lastWalk = useAppStore((s) => s.lastWalk);
   const customThemes = useAppStore((s) => s.customThemes);
+  const me = useAccount((s) => s.user?.id);
+  const isHost = room.hostId === me;
   const photos = room.photos;
   const span = photos.length >= 2 ? photos[photos.length - 1].ts - photos[0].ts : null;
   // The theme the room was made under, or that of the walk just finished.
@@ -84,7 +117,7 @@ function RoomView({ room }: { room: Room }) {
         </div>
         <div className="debrief-meta-cyan">
           <span className="label-caps">{t("Partners")}</span>
-          <strong>{partnersLabel(photos)}</strong>
+          <strong>{partnersLabel(room)}</strong>
         </div>
       </div>
 
@@ -100,17 +133,18 @@ function RoomView({ room }: { room: Room }) {
         </div>
       )}
 
-      <SideBySide photos={photos} />
+      <SideBySide room={room} />
       <FeedbackNotes room={room} />
-      <Momentum notes={room.critique?.length ?? 0} />
+      <Momentum notes={room.notes.length} />
 
       <h2 className="section-title">{t("Share your shots")}</h2>
       <ShareForm />
       {!photos.length && <p className="empty-state-sm">{t("No shots shared yet.")}</p>}
       <div className="album-grid">
-        {photos.slice().reverse().map((p) => <RoomThumb key={p.id} code={room.code} photo={p} />)}
+        {photos.slice().reverse().map((p) => <RoomThumb key={p.id} room={room} photo={p} />)}
       </div>
 
+      <People room={room} isHost={isHost} />
       <Invite code={room.code} />
 
       <div className="action-stack">
@@ -139,8 +173,17 @@ function RoomView({ room }: { room: Room }) {
         </button>
         <div className="theme-btn-row">
           <button type="button" className="btn btn-ghost btn-sm" onClick={copyInvite}>{t("Copy Invite")}</button>
-          <button type="button" className="btn btn-ghost btn-sm" onClick={leaveRoom}>{t("Leave Room")}</button>
+          {isHost ? (
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => openModal(<CloseRoomModal code={room.code} />)}>
+              {t("Close Room")}
+            </button>
+          ) : (
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => void leaveRoom()}>{t("Leave Room")}</button>
+          )}
         </div>
+        <p className="hint room-expiry">
+          {t("Rooms close 30 days after the last activity.")} {t("This one closes on {date} unless someone posts.", { date: formatDate(room.expiresAt) })}
+        </p>
       </div>
     </div>
   );
@@ -148,9 +191,9 @@ function RoomView({ room }: { room: Room }) {
 
 /* ---------- Side by side ---------- */
 
-function SideBySide({ photos }: { photos: RoomPhoto[] }) {
+function SideBySide({ room }: { room: RoomSnapshot }) {
   const [mode, setMode] = useState<"dual" | "wipe">("dual");
-  const pair = pickPair(photos);
+  const pair = pickPair(room.photos);
   const enough = pair.length === 2;
 
   return (
@@ -167,21 +210,22 @@ function SideBySide({ photos }: { photos: RoomPhoto[] }) {
       </div>
       {!enough && <div className="empty-state-sm">{t("Share at least two shots to line them up side by side.")}</div>}
       {enough && mode === "dual" && (
-        <div className="split-grid">{pair.map((p) => <SplitPane key={p.id} photo={p} />)}</div>
+        <div className="split-grid">{pair.map((p) => <SplitPane key={p.id} room={room} photo={p} />)}</div>
       )}
-      {enough && mode === "wipe" && <Wipe left={pair[0]} right={pair[1]} />}
+      {enough && mode === "wipe" && <Wipe room={room} left={pair[0]} right={pair[1]} />}
     </>
   );
 }
 
-function SplitPane({ photo }: { photo: RoomPhoto }) {
-  const url = useImageUrl(photo.imageId);
+function SplitPane({ room, photo }: { room: RoomSnapshot; photo: RoomPhoto }) {
+  const url = useRoomPhotoUrl(photo.id);
+  const name = personName(room, photo.userId);
   return (
     <div className="split-pane">
       <div className="split-pane-photo">
         {/* eslint-disable-next-line @next/next/no-img-element -- a local object URL, nothing to optimize */}
-        <img src={url ?? undefined} alt={t("Shared by {name}", { name: photo.name })} />
-        <span className="split-pane-who">@{photo.name}</span>
+        <img src={url ?? undefined} alt={t("Shared by {name}", { name })} />
+        <span className="split-pane-who">@{name}</span>
       </div>
       <div className="split-pane-exif">
         <span className="split-pane-exif-row"><span>{exposureOf(photo)}</span><b>{shutterOf(photo)}</b></span>
@@ -192,11 +236,11 @@ function SplitPane({ photo }: { photo: RoomPhoto }) {
 }
 
 /** One shot over the other, revealed by dragging the handle. */
-function Wipe({ left, right }: { left: RoomPhoto; right: RoomPhoto }) {
+function Wipe({ room, left, right }: { room: RoomSnapshot; left: RoomPhoto; right: RoomPhoto }) {
   const [fraction, setFraction] = useState(0.5);
   const dragging = useRef(false);
-  const top = useImageUrl(left.imageId);
-  const bottom = useImageUrl(right.imageId);
+  const top = useRoomPhotoUrl(left.id);
+  const bottom = useRoomPhotoUrl(right.id);
   const pct = Math.max(0, Math.min(1, fraction)) * 100;
 
   const move = (el: HTMLElement, clientX: number) => {
@@ -224,9 +268,9 @@ function Wipe({ left, right }: { left: RoomPhoto; right: RoomPhoto }) {
         <div className="wipe-handle" style={{ left: `${pct}%` }} />
       </div>
       <div className="wipe-caption">
-        <span>← @{left.name}</span>
+        <span>← @{personName(room, left.userId)}</span>
         <span>{t("Drag to compare")}</span>
-        <span>@{right.name} →</span>
+        <span>@{personName(room, right.userId)} →</span>
       </div>
     </div>
   );
@@ -234,16 +278,22 @@ function Wipe({ left, right }: { left: RoomPhoto; right: RoomPhoto }) {
 
 /* ---------- Feedback ---------- */
 
-function FeedbackNotes({ room }: { room: Room }) {
-  const me = useAppStore((s) => s.profile.displayName);
+function FeedbackNotes({ room }: { room: RoomSnapshot }) {
+  const me = useAccount((s) => s.user?.id);
   const [text, setText] = useState("");
-  const [tags, setTags] = useState<string[]>([]);
-  const notes = room.critique ?? [];
+  const [tags, setTags] = useState<CritiqueTag[]>([]);
+  const [busy, setBusy] = useState(false);
 
-  const send = () => {
-    if (!postNote(text, tags)) return;
-    setText("");
-    setTags([]);
+  const send = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      if (!(await postNote(text, tags))) return;
+      setText("");
+      setTags([]);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -256,7 +306,7 @@ function FeedbackNotes({ room }: { room: Room }) {
         <span className="critique-motto">{t("No likes, just notes")}</span>
       </div>
       <div className="critique-tags">
-        {critiqueTags().map((tag) => {
+        {CRITIQUE_TAGS.map((tag) => {
           const on = tags.includes(tag);
           return (
             <button
@@ -266,34 +316,34 @@ function FeedbackNotes({ room }: { room: Room }) {
               aria-pressed={on}
               onClick={() => setTags((prev) => (on ? prev.filter((x) => x !== tag) : [...prev, tag]))}
             >
-              {tag}
+              {critiqueTagLabel(tag)}
             </button>
           );
         })}
       </div>
       <div className="critique-list">
-        {notes.map((n, i) => (
-          <div key={i} className={`critique-note${n.name === me ? " critique-note-mine" : ""}`}>
+        {room.notes.map((n) => (
+          <div key={n.id} className={`critique-note${n.userId === me ? " critique-note-mine" : ""}`}>
             <div className="critique-note-head">
-              <span className="critique-note-who">{t("{name} · note at {time}", { name: n.name, time: formatTime(n.ts) })}</span>
-              {n.spec && <span className="critique-note-spec">{n.spec}</span>}
+              <span className="critique-note-who">{t("{name} · note at {time}", { name: personName(room, n.userId), time: formatTime(n.ts) })}</span>
+              {n.tags.length > 0 && <span className="critique-note-spec">{n.tags.map(critiqueTagLabel).join(" ")}</span>}
             </div>
             <p>{n.text}</p>
           </div>
         ))}
       </div>
-      {!notes.length && <p className="empty-state-sm">{t("No notes yet. Start with what you were trying to capture.")}</p>}
+      {!room.notes.length && <p className="empty-state-sm">{t("No notes yet. Start with what you were trying to capture.")}</p>}
       <div className="critique-form">
         <input
           type="text"
           className="text-input"
           placeholder={t("Add a note or ask a question…")}
-          maxLength={400}
+          maxLength={LIMITS.noteText}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") send(); }}
+          onKeyDown={(e) => { if (e.key === "Enter") void send(); }}
         />
-        <button type="button" className="btn btn-accent" aria-label={t("Post note")} onClick={send}>
+        <button type="button" className="btn btn-accent" aria-label={t("Post note")} disabled={busy} onClick={() => void send()}>
           <Icon name="send" />
         </button>
       </div>
@@ -318,31 +368,28 @@ function Momentum({ notes }: { notes: number }) {
 /* ---------- Sharing ---------- */
 
 function ShareForm() {
-  const savedName = useAppStore((s) => s.profile.displayName);
   const inbox = useShareInbox((s) => s.files);
-  const [name, setName] = useState(savedName);
   const [note, setNote] = useState("");
   const [picked, setPicked] = useState<File[]>([]);
-  const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const upload = async () => {
-    setBusy(true);
+    setProgress({ done: 0, total: 0 });
     try {
       // Photos from the share sheet go first; picking files replaces them.
-      if (await uploadToRoom(inbox.length ? inbox : picked, name, note)) {
+      if (await uploadToRoom(inbox.length ? inbox : picked, note, (done, total) => setProgress({ done, total }))) {
         setNote("");
         setPicked([]);
         if (fileRef.current) fileRef.current.value = "";
       }
     } finally {
-      setBusy(false);
+      setProgress(null);
     }
   };
 
   return (
     <div className="theme-card">
-      <input type="text" className="text-input" placeholder={t("Your name")} aria-label={t("Your name")} value={name} onChange={(e) => setName(e.target.value)} />
       <input
         ref={fileRef}
         type="file"
@@ -355,41 +402,56 @@ function ShareForm() {
           useShareInbox.setState({ files: [] });
         }}
       />
-      <input type="text" className="text-input" placeholder={t("Note (optional)")} aria-label={t("Note (optional)")} value={note} onChange={(e) => setNote(e.target.value)} />
-      <button type="button" className="btn btn-accent btn-block" disabled={busy} onClick={upload}>{t("Upload")}</button>
+      <input
+        type="text"
+        className="text-input"
+        placeholder={t("Note (optional)")}
+        aria-label={t("Note (optional)")}
+        maxLength={LIMITS.photoNote}
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+      />
+      <button type="button" className="btn btn-accent btn-block" disabled={progress !== null} onClick={() => void upload()}>
+        {progress && progress.total > 1
+          ? t("Uploading {done} of {total}…", { done: Math.min(progress.done + 1, progress.total), total: progress.total })
+          : progress ? t("Uploading…") : t("Upload")}
+      </button>
     </div>
   );
 }
 
-function RoomThumb({ code, photo }: { code: string; photo: RoomPhoto }) {
-  const url = useImageUrl(photo.imageId);
+function RoomThumb({ room, photo }: { room: RoomSnapshot; photo: RoomPhoto }) {
+  const url = useRoomPhotoUrl(photo.id);
   return (
     <button
       type="button"
       className="room-thumb"
       style={url ? { backgroundImage: `url("${url}")` } : undefined}
-      onClick={() => openModal(<RoomPhotoModal code={code} photoId={photo.id} />)}
+      onClick={() => openModal(<RoomPhotoModal photoId={photo.id} />)}
     >
-      <span className="room-thumb-name">{photo.name}</span>
+      <span className="room-thumb-name">{personName(room, photo.userId)}</span>
     </button>
   );
 }
 
-/** One shared shot: who posted it, their note, the comments, and Analyze. */
-function RoomPhotoModal({ code, photoId }: { code: string; photoId: string }) {
-  const photo = useAppStore((s) => s.rooms[code]?.photos.find((p) => p.id === photoId));
-  const savedName = useAppStore((s) => s.profile.displayName);
-  const url = useImageUrl(photo?.imageId);
-  const [name, setName] = useState(savedName);
+/** One shared shot: who posted it, their note, the comments, Analyze, and taking it down. */
+function RoomPhotoModal({ photoId }: { photoId: string }) {
+  const room = useCurrentRoom();
+  const me = useAccount((s) => s.user?.id);
+  const photo = room?.photos.find((p) => p.id === photoId);
+  const url = useRoomPhotoUrl(photo?.id);
   const [text, setText] = useState("");
-  if (!photo) return null;
+  const [confirming, setConfirming] = useState(false);
+  if (!room || !photo) return <p className="muted">{t("This photo was taken down.")}</p>;
+  const name = personName(room, photo.userId);
+  const mayDelete = photo.userId === me || room.hostId === me;
 
   return (
     <>
       {/* eslint-disable-next-line @next/next/no-img-element -- a local object URL, nothing to optimize */}
-      {url && <img className="detail-image" src={url} alt={t("Shared by {name}", { name: photo.name })} />}
+      {url && <img className="detail-image" src={url} alt={t("Shared by {name}", { name })} />}
       <div className="detail-meta">
-        <span className="chip">{photo.name}</span>
+        <span className="chip">{name}</span>
         <span className="chip chip-muted">{formatTime(photo.ts)}</span>
       </div>
       {photo.note && <p className="muted">{photo.note}</p>}
@@ -397,9 +459,10 @@ function RoomPhotoModal({ code, photoId }: { code: string; photoId: string }) {
         <button
           type="button"
           className="btn btn-primary btn-block"
-          onClick={() => {
+          onClick={async () => {
+            await ensureRoomImage(photo.id);
             closeModal();
-            openAnalysis({ imageId: photo.imageId, exif: photo.exif });
+            openAnalysis({ imageId: roomImageId(photo.id), exif: photo.exif });
           }}
         >
           {t("Analyze this shot")}
@@ -407,20 +470,97 @@ function RoomPhotoModal({ code, photoId }: { code: string; photoId: string }) {
       )}
       <div className="comment-list">
         {photo.comments.length
-          ? photo.comments.map((c, i) => <p key={i} className="comment"><strong>{c.name}</strong> {c.text}</p>)
+          ? photo.comments.map((c) => <p key={c.id} className="comment"><strong>{personName(room, c.userId)}</strong> {c.text}</p>)
           : <p className="muted">{t("No comments yet. Be the first!")}</p>}
       </div>
       <form
         className="comment-form"
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
-          if (addComment(code, photo.id, name, text)) setText("");
+          if (await addComment(photo.id, text)) setText("");
         }}
       >
-        <input type="text" placeholder={t("Your name")} aria-label={t("Your name")} maxLength={30} value={name} onChange={(e) => setName(e.target.value)} />
-        <input type="text" placeholder={t("Add a comment")} aria-label={t("Add a comment")} maxLength={200} value={text} onChange={(e) => setText(e.target.value)} />
+        <input type="text" placeholder={t("Add a comment")} aria-label={t("Add a comment")} maxLength={LIMITS.commentText} value={text} onChange={(e) => setText(e.target.value)} />
         <button type="submit" className="btn btn-accent">{t("Post")}</button>
       </form>
+      {mayDelete && (confirming ? (
+        <div className="theme-actions">
+          <button
+            type="button"
+            className="btn btn-danger-solid"
+            onClick={async () => { if (await deletePhoto(photo.id)) closeModal(); }}
+          >
+            {t("Delete for everyone")}
+          </button>
+          <button type="button" className="btn btn-ghost btn-block" onClick={() => setConfirming(false)}>{t("Keep it")}</button>
+        </div>
+      ) : (
+        <button type="button" className="btn btn-danger" onClick={() => setConfirming(true)}>{t("Take down this photo")}</button>
+      ))}
+    </>
+  );
+}
+
+/* ---------- People ---------- */
+
+/** Who is in the room. The host can take someone out. */
+function People({ room, isHost }: { room: RoomSnapshot; isHost: boolean }) {
+  return (
+    <div className="theme-card room-people">
+      <h4 className="subsection-title" style={{ marginTop: 0 }}>
+        {t("People")} <span className="muted">{room.members.length}</span>
+      </h4>
+      <ul className="room-people-list">
+        {room.members.map((id) => {
+          const person = room.people[id];
+          return (
+            <li key={id} className="room-person">
+              <Avatar user={person} />
+              <span className="room-person-name">{personName(room, id)}</span>
+              {id === room.hostId && <span className="chip chip-muted">{t("Host")}</span>}
+              {isHost && id !== room.hostId && (
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => openModal(<RemoveMemberModal name={personName(room, id)} userId={id} />)}
+                >
+                  {t("Remove from room")}
+                </button>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+function RemoveMemberModal({ name, userId }: { name: string; userId: string }) {
+  return (
+    <>
+      <h3>{t("Remove {name} from the room?", { name })}</h3>
+      <p className="muted">{t("They won't be able to rejoin. Their photos and notes stay.")}</p>
+      <div className="theme-actions">
+        <button type="button" className="btn btn-danger-solid" onClick={() => { closeModal(); void removeMember(userId); }}>
+          {t("Remove from room")}
+        </button>
+        <button type="button" className="btn btn-ghost btn-block" onClick={closeModal}>{t("Cancel")}</button>
+      </div>
+    </>
+  );
+}
+
+function CloseRoomModal({ code }: { code: string }) {
+  return (
+    <>
+      <h3>{t("Close room {code}?", { code })}</h3>
+      <p className="muted">{t("Everyone loses access and the room's photos are deleted. This can't be undone.")}</p>
+      <div className="theme-actions">
+        <button type="button" className="btn btn-danger-solid" onClick={() => { closeModal(); void closeRoom(); }}>
+          {t("Close Room")}
+        </button>
+        <button type="button" className="btn btn-ghost btn-block" onClick={closeModal}>{t("Cancel")}</button>
+      </div>
     </>
   );
 }

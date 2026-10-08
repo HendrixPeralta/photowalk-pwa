@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@serwist/window": "^9.5.13",
+    "@vercel/blob": "^2.8.1",
     "@vercel/functions": "^3.9.11",
     "better-auth": "^1.7.7",
     "drizzle-orm": "^0.45.3",

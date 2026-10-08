@@ -7,8 +7,14 @@
 //
 // Starting sign-in "signs in" straight away and sends the browser back to
 // where it started, as the Google round trip would.
+//
+// Walk Partners rooms are answered by FakeRooms (e2e/rooms.ts): the real
+// rooms handlers on an in-memory database, one per worker, emptied before
+// each test. openAs(person) opens a second browser as someone else, in the
+// same rooms.
 
-import { test as base, type Route } from "@playwright/test";
+import { test as base, type Browser, type Page, type Route } from "@playwright/test";
+import { FakeRooms } from "./rooms";
 
 export { expect } from "@playwright/test";
 export type { Locator, Page } from "@playwright/test";
@@ -54,14 +60,49 @@ export class FakeAuth {
   }
 }
 
-export const test = base.extend<{ signedInAs: FakeUser | null; auth: FakeAuth }>({
+/** Someone else, for two-person tests. */
+export const PARTNER: FakeUser = { id: "e2e-partner", name: "Ken Ito", email: "ken@example.com", image: null };
+
+async function openPerson(browser: Browser, rooms: FakeRooms, person: FakeUser, baseURL: string | undefined, contextOptions: object) {
+  const context = await browser.newContext({ ...contextOptions, baseURL });
+  const auth = new FakeAuth(person);
+  await context.route("**/api/auth/**", (route) => auth.handle(route));
+  await rooms.attach(context, () => auth.signedInAs);
+  return { context, page: await context.newPage(), auth };
+}
+
+export const test = base.extend<
+  { signedInAs: FakeUser | null; auth: FakeAuth; openAs: (person: FakeUser) => Promise<Page> },
+  { rooms: FakeRooms }
+>({
+  rooms: [
+    async ({}, use) => {
+      const rooms = new FakeRooms();
+      await rooms.start();
+      await use(rooms);
+      await rooms.close();
+    },
+    { scope: "worker" },
+  ],
   signedInAs: [TEST_USER, { option: true }],
   auth: [
-    async ({ context, signedInAs }, use) => {
+    async ({ context, signedInAs, rooms }, use) => {
       const auth = new FakeAuth(signedInAs);
       await context.route("**/api/auth/**", (route) => auth.handle(route));
+      await rooms.reset();
+      await rooms.attach(context, () => auth.signedInAs);
       await use(auth);
     },
     { auto: true },
   ],
+  // Named provide, not use: ESLint's React hook rule misreads `use` here.
+  openAs: async ({ browser, rooms, baseURL, contextOptions }, provide) => {
+    const opened: { close: () => Promise<void> }[] = [];
+    await provide(async (person) => {
+      const { context, page } = await openPerson(browser, rooms, person, baseURL, contextOptions);
+      opened.push(context);
+      return page;
+    });
+    for (const context of opened) await context.close();
+  },
 });

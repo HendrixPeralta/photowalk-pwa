@@ -50,10 +50,38 @@ export async function warnIfStorageTight(): Promise<void> {
   showToast(t("Storage is {pct}% full. Try deleting some older references.", { pct: Math.round(info.ratio * 100) }), 6000);
 }
 
+/**
+ * Photos from the rooms of before (when a room lived in this browser), found
+ * while migrating saved data. Boot deletes them from IndexedDB.
+ */
+const legacyRoomImages: string[] = [];
+export const takeLegacyRoomImages = (): string[] => legacyRoomImages.splice(0);
+
+/**
+ * Brings data saved by an older build up to date.
+ * Version 2: rooms moved to the server. The old same-browser rooms (and the
+ * name people typed for them) are dropped, no carry-over, like everything
+ * from the demo days.
+ */
+export function migrateSavedData(saved: unknown, version: number): AppData {
+  const data = (saved && typeof saved === "object" ? saved : {}) as Record<string, unknown>;
+  if (version < 2) {
+    const rooms = (data.rooms ?? {}) as Record<string, { photos?: { imageId?: unknown }[] }>;
+    for (const room of Object.values(rooms)) {
+      for (const photo of room?.photos ?? []) if (typeof photo?.imageId === "string") legacyRoomImages.push(photo.imageId);
+    }
+    delete data.rooms;
+    data.currentRoom = null;
+    if (data.profile && typeof data.profile === "object") delete (data.profile as Record<string, unknown>).displayName;
+  }
+  return data as unknown as AppData;
+}
+
 export const useAppStore = create<AppData>()(
   persist(immer(() => defaultState()), {
     name: STATE_KEY,
-    version: 1,
+    version: 2,
+    migrate: migrateSavedData,
     storage: createJSONStorage(() => quotaAwareStorage),
     // Loaded explicitly during boot, after the language is set, so nothing
     // reads storage on the server.

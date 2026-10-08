@@ -1,11 +1,16 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { RoomSnapshot } from "@/lib/rooms/protocol";
+import { roomsApi } from "@/lib/roomsApi";
+import { useAccount } from "@/state/account";
 import { getData, update, useAppStore } from "@/state/appStore";
 import { defaultState } from "@/state/defaults";
 import { useToasts } from "@/state/ui";
 import { useShareInbox } from "./inbox";
-import { addComment, createRoom, inviteUrl, joinRoom, leaveRoom, postNote, uploadToRoom } from "./rooms";
+import { keepPostedImage } from "./roomImages";
+import { addComment, closeRoom, createRoom, inviteUrl, joinRoom, leaveRoom, postNote, uploadToRoom } from "./rooms";
+import { useRoom } from "./roomStore";
 
-vi.mock("@/lib/db", () => ({ putImage: async () => {}, storageEstimate: async () => null }));
+vi.mock("./roomImages", () => ({ keepPostedImage: vi.fn(async () => {}), pruneRoomImages: vi.fn(async () => {}) }));
 vi.mock("@/lib/exif", () => ({ readExif: async () => ({ shutter: "1/60s" }) }));
 vi.mock("@/lib/image", () => ({
   readFileAsDataUrl: async (file: File) => file.name,
@@ -13,84 +18,131 @@ vi.mock("@/lib/image", () => ({
     if (src === "broken.jpg") throw new Error("cannot decode");
     return {};
   },
-  drawToCanvas: () => ({}),
-  canvasToBlob: async () => new Blob(["x"]),
+  drawToCanvas: () => ({ width: 900, height: 600 }),
+  canvasToBlob: async () => new Blob(["x"], { type: "image/jpeg" }),
 }));
 
+const room = (over: Partial<RoomSnapshot> = {}): RoomSnapshot => ({
+  code: "ABC234", theme: "", hostId: "ana", version: 1, createdAt: 0, lastActivityAt: 0, expiresAt: 0,
+  members: ["ana"], people: { ana: { id: "ana", name: "Ana", image: null } }, photos: [], notes: [], ...over,
+});
 const photo = (name: string) => new File(["x"], name, { type: "image/jpeg" });
 const toasts = () => useToasts.getState().toasts.map((toast) => toast.message);
 
 beforeEach(() => {
   localStorage.clear();
   useAppStore.setState(defaultState(), true);
+  useRoom.setState({ room: null, syncedAt: null, offline: false, paused: false });
+  useAccount.setState({ user: { id: "ana", name: "Ana", email: "ana@example.com", image: null }, status: "signed-in" });
   useToasts.setState({ toasts: [] });
   useShareInbox.setState({ files: [] });
 });
+afterEach(() => vi.restoreAllMocks());
 
 describe("rooms", () => {
-  it("creates a room and joins it", () => {
-    const code = createRoom(1000);
-    expect(code).toMatch(/^[A-Z2-9]{6}$/);
-    expect(getData().currentRoom).toBe(code);
-    expect(getData().rooms[code]).toEqual({ code, theme: "", createdAt: 1000, photos: [] });
-    expect(useToasts.getState().toasts[0].message).toContain(`Room ${code} created.`);
+  it("creates a room on the server, named after the walk", async () => {
+    update((d) => { d.lastWalk = { id: "w", themeId: "reflections", mode: "casual", durationMin: null, hours: 1, challengesDone: 0, challengeCount: 0, endedAt: 0 }; });
+    const create = vi.spyOn(roomsApi, "create").mockResolvedValue({ ok: true, data: { room: room({ code: "XYZ789" }) } });
+    expect(await createRoom()).toBeNull();
+    expect(create.mock.calls[0][0]).not.toBe("");
+    expect(getData().currentRoom).toBe("XYZ789");
+    expect(toasts()[0]).toContain("Room XYZ789 created.");
   });
 
-  it("joins an existing room by code, whatever the case and spacing", () => {
-    const code = createRoom();
-    leaveRoom();
-    expect(getData().currentRoom).toBeNull();
-    expect(joinRoom(`  ${code.toLowerCase()} `)).toBeNull();
-    expect(getData().currentRoom).toBe(code);
+  it("joins with a code typed any way, or says why not", async () => {
+    const join = vi.spyOn(roomsApi, "join").mockResolvedValue({ ok: true, data: { room: room() } });
+    expect(await joinRoom(" abc-234 ")).toBeNull();
+    expect(join).toHaveBeenCalledWith("ABC234");
+    expect(getData().currentRoom).toBe("ABC234");
+
+    expect(await joinRoom("")).toBe("Enter a room code.");
+    expect(await joinRoom("nope")).toBe("That doesn't look like a room code.");
+    join.mockResolvedValue({ ok: false, error: "room_not_found" });
+    expect(await joinRoom("ZZZ999")).toBe("Room not found. It may have closed.");
   });
 
-  it("says why a code doesn't work", () => {
-    expect(joinRoom(" ")).toBe("Enter a room code.");
-    expect(joinRoom("NOPE22")).toMatch(/^Room not found/);
+  it("leaves the room, or forgets it if it's already gone", async () => {
+    update((d) => { d.currentRoom = "ABC234"; });
+    const remove = vi.spyOn(roomsApi, "removeMember").mockResolvedValue({ ok: true, data: undefined });
+    await leaveRoom();
+    expect(remove).toHaveBeenCalledWith("ABC234", "ana");
     expect(getData().currentRoom).toBeNull();
+
+    update((d) => { d.currentRoom = "ABC234"; });
+    remove.mockResolvedValue({ ok: false, error: "room_not_found" });
+    await leaveRoom();
+    expect(getData().currentRoom).toBeNull();
+  });
+
+  it("closes the host's room", async () => {
+    update((d) => { d.currentRoom = "ABC234"; });
+    vi.spyOn(roomsApi, "close").mockResolvedValue({ ok: true, data: undefined });
+    await closeRoom();
+    expect(getData().currentRoom).toBeNull();
+    expect(toasts()).toEqual(["Room ABC234 closed."]);
   });
 });
 
-describe("in a room", () => {
-  it("shares photos under the poster's name, skipping files that can't be read", async () => {
-    const code = createRoom();
-    update((d) => { d.activeWalk = { mode: "casual", themeId: "reflections", startedAt: 1, durationMin: null, challengesChecked: [], nudges: [], pausedAt: null }; });
-    useShareInbox.setState({ files: [photo("inbox.jpg")] });
-    expect(await uploadToRoom([photo("a.jpg"), photo("broken.jpg")], " Ana ", " at dusk ")).toBe(true);
+describe("posting", () => {
+  beforeEach(() => { update((d) => { d.currentRoom = "ABC234"; }); });
 
-    const [shot] = getData().rooms[code].photos;
-    expect(getData().rooms[code].photos).toHaveLength(1);
-    expect(shot).toMatchObject({ name: "Ana", note: "at dusk", exif: { shutter: "1/60s" }, themeId: "reflections", comments: [] });
-    expect(getData().profile.displayName).toBe("Ana");
-    expect(useShareInbox.getState().files).toEqual([]);
-    expect(toasts().at(-1)).toBe("Shared with the room.");
+  it("uploads shrunk photos one at a time, skipping unreadable files, and keeps them on the device", async () => {
+    const upload = vi.spyOn(roomsApi, "uploadPhoto").mockImplementation(async () => ({
+      ok: true, data: { photo: { id: `p${upload.mock.calls.length}` } as never, room: room() },
+    }));
+    const progress: string[] = [];
+    useShareInbox.setState({ files: [photo("a.jpg"), photo("broken.jpg"), photo("b.jpg")] });
+    const files = useShareInbox.getState().files;
+    expect(await uploadToRoom(files, "  At the pier ", (d, n) => progress.push(`${d}/${n}`))).toBe(true);
+    expect(upload).toHaveBeenCalledTimes(2);
+    expect(upload.mock.calls[0][2]).toEqual({ note: "At the pier", width: 900, height: 600, exif: { shutter: "1/60s" }, themeId: null });
+    expect(keepPostedImage).toHaveBeenCalledWith("p1", expect.any(Blob));
+    expect(progress).toEqual(["0/3", "1/3", "2/3", "3/3"]);
+    // Posted files leave the share inbox; the unreadable one is left to the person.
+    expect(useShareInbox.getState().files.map((f) => f.name)).toEqual(["broken.jpg"]);
+    expect(toasts()).toEqual(["Shared 2 shots with the room."]);
   });
 
-  it("says what is missing before uploading", async () => {
-    expect(await uploadToRoom([photo("a.jpg")], "Ana", "")).toBe(false);
-    createRoom();
-    expect(await uploadToRoom([], "Ana", "")).toBe(false);
-    expect(await uploadToRoom([photo("broken.jpg")], "Ana", "")).toBe(false);
-    expect(toasts().filter((m) => !m.startsWith("Room "))).toEqual([
+  it("stops at the first failure and keeps what didn't go", async () => {
+    vi.spyOn(roomsApi, "uploadPhoto").mockResolvedValue({ ok: false, error: "photo_too_large" });
+    useShareInbox.setState({ files: [photo("a.jpg")] });
+    expect(await uploadToRoom(useShareInbox.getState().files, "")).toBe(false);
+    expect(useShareInbox.getState().files).toHaveLength(1);
+    expect(toasts()).toEqual(["That photo is too large."]);
+  });
+
+  it("asks for a room, a photo, and a connection first", async () => {
+    update((d) => { d.currentRoom = null; });
+    expect(await uploadToRoom([photo("a.jpg")], "")).toBe(false);
+    update((d) => { d.currentRoom = "ABC234"; });
+    expect(await uploadToRoom([], "")).toBe(false);
+    vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+    expect(await uploadToRoom([photo("a.jpg")], "")).toBe(false);
+    expect(toasts()).toEqual([
       "Create or join a room first, then upload.",
       "Choose at least one photo to upload first.",
-      "None of those files could be read as images.",
+      "You're offline. Connect to use the room.",
     ]);
   });
 
-  it("takes comments and feedback notes", async () => {
-    const code = createRoom();
-    await uploadToRoom([photo("a.jpg")], "Ana", "");
-    const id = getData().rooms[code].photos[0].id;
-    expect(addComment(code, id, "", "  ")).toBe(false);
-    expect(addComment(code, id, "Ken", "Nice light")).toBe(true);
-    expect(getData().rooms[code].photos[0].comments).toMatchObject([{ name: "Ken", text: "Nice light" }]);
-
-    expect(postNote("Shot from the hip", ["#LowAngle", "#Backlit"])).toBe(true);
-    expect(getData().rooms[code].critique).toMatchObject([{ name: "Ken", text: "Shot from the hip", spec: "#LowAngle #Backlit" }]);
+  it("posts comments and notes with canonical tags", async () => {
+    const comment = vi.spyOn(roomsApi, "comment").mockResolvedValue({ ok: true, data: { room: room() } });
+    const note = vi.spyOn(roomsApi, "note").mockResolvedValue({ ok: true, data: { room: room() } });
+    expect(await addComment("p1", "  Nice light ")).toBe(true);
+    expect(comment).toHaveBeenCalledWith("p1", "Nice light");
+    expect(await addComment("p1", "   ")).toBe(false);
+    expect(await postNote("Shot from the hip", ["#LowAngle", "#Backlit"])).toBe(true);
+    expect(note).toHaveBeenCalledWith("ABC234", "Shot from the hip", ["#LowAngle", "#Backlit"]);
   });
 
-  it("invites with a link straight to the room", () => {
-    expect(inviteUrl("ABC234", "https://photoeye.app")).toBe("https://photoeye.app/partners/?room=ABC234");
+  it("a room that closed meanwhile is forgotten", async () => {
+    vi.spyOn(roomsApi, "note").mockResolvedValue({ ok: false, error: "room_not_found" });
+    expect(await postNote("Hello", [])).toBe(false);
+    expect(getData().currentRoom).toBeNull();
+    expect(toasts()).toEqual(["Room ABC234 has closed."]);
   });
+});
+
+it("invite links open the room's page", () => {
+  expect(inviteUrl("ABC234", "https://example.com")).toBe("https://example.com/partners/?room=ABC234");
 });

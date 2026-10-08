@@ -13,6 +13,7 @@
 // here it is wiped first, so no one ever sees someone else's walks or photos.
 
 import { create } from "zustand";
+import { ROOM_KEY, useRoom } from "@/features/partners/roomStore";
 import { accountsEnabled, endSession, fetchSession, startGoogleSignIn, type AccountUser } from "@/lib/authApi";
 import { clearImages, takeSharedFiles } from "@/lib/db";
 import { FIX_KEY } from "@/lib/geo";
@@ -30,7 +31,7 @@ export const ACCOUNT_KEY = "photoeye:account";
 export const OWNER_KEY = "photoeye:owner";
 
 /** Everything personal kept on the device. The language and unsent anonymous reviews stay. */
-const PERSONAL_KEYS = [STATE_KEY, PRE_DEMO_KEY, PRE_SEED_KEY, FIX_KEY, ACCOUNT_KEY];
+const PERSONAL_KEYS = [STATE_KEY, ROOM_KEY, PRE_DEMO_KEY, PRE_SEED_KEY, FIX_KEY, ACCOUNT_KEY];
 
 export interface AccountState {
   user: AccountUser | null;
@@ -88,6 +89,7 @@ export async function signOut(): Promise<void> {
 export async function wipeLocalData(): Promise<void> {
   for (const key of PERSONAL_KEYS) localStorage.removeItem(key);
   useAppStore.setState(defaultState(), true);
+  useRoom.setState({ room: null, syncedAt: null, offline: false, paused: false });
   await Promise.allSettled([
     clearImages(),
     takeSharedFiles(),

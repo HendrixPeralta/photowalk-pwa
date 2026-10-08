@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getData, loadSavedData, STATE_KEY, syncAcrossTabs, update, useAppStore } from "./appStore";
+import { getData, loadSavedData, STATE_KEY, syncAcrossTabs, takeLegacyRoomImages, update, useAppStore } from "./appStore";
 import { defaultState } from "./defaults";
 import { useToasts } from "./ui";
 
@@ -14,8 +14,8 @@ afterEach(() => vi.restoreAllMocks());
 
 describe("saved data", () => {
   it("saves every change straight to localStorage", () => {
-    update((d) => { d.profile.displayName = "Hendrix"; d.activityLog["2026-06-01"] = 1.5; });
-    expect(saved().profile.displayName).toBe("Hendrix");
+    update((d) => { d.profile.guidedDurationMin = 75; d.activityLog["2026-06-01"] = 1.5; });
+    expect(saved().profile.guidedDurationMin).toBe(75);
     expect(saved().activityLog).toEqual({ "2026-06-01": 1.5 });
   });
 
@@ -31,10 +31,27 @@ describe("saved data", () => {
     expect(getData().reminder).toEqual(defaultState().reminder);
   });
 
+  it("drops the same-browser rooms of before, and lists their photos for deleting", async () => {
+    const old = {
+      ...defaultState(),
+      profile: { ...defaultState().profile, displayName: "Ana", walksCompleted: 3 },
+      rooms: { ABC234: { code: "ABC234", theme: "", createdAt: 0, photos: [{ id: "p", imageId: "img-1" }] } },
+      currentRoom: "ABC234",
+    };
+    localStorage.setItem(STATE_KEY, JSON.stringify({ state: old, version: 1 }));
+    await loadSavedData();
+    expect(getData()).not.toHaveProperty("rooms");
+    expect(getData().profile).not.toHaveProperty("displayName");
+    expect(getData().profile.walksCompleted).toBe(3);
+    expect(getData().currentRoom).toBeNull();
+    expect(takeLegacyRoomImages()).toEqual(["img-1"]);
+    expect(saved()).not.toHaveProperty("rooms");
+  });
+
   it("follows changes another tab saves", async () => {
     const stop = syncAcrossTabs();
     const other = { ...defaultState(), currentRoom: "ABC234" };
-    localStorage.setItem(STATE_KEY, JSON.stringify({ state: other, version: 1 }));
+    localStorage.setItem(STATE_KEY, JSON.stringify({ state: other, version: 2 }));
     window.dispatchEvent(new StorageEvent("storage", { key: STATE_KEY }));
     await vi.waitFor(() => expect(getData().currentRoom).toBe("ABC234"));
     stop();

@@ -46,6 +46,7 @@ for (const lang of ["en", "ja"] as const) {
     // The app asks for sign-in first. A pretend person is signed in, as in
     // the e2e tests, so every screen is the app; the sign-in screen comes last.
     let signedIn = true;
+    await context.route("**/api/rooms/**", (route) => route.fulfill({ json: { rooms: [] } }));
     await context.route("**/api/auth/**", (route) => route.fulfill({
       json: signedIn ? { user: { id: "shots", name: "Aki Tanaka", email: "aki@example.com", image: null }, session: {} } : null,
     }));

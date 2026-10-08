@@ -18,14 +18,14 @@ beforeEach(() => {
 
 describe("demo data", () => {
   it("loads a year ending today and parks the real profile first", () => {
-    update((d) => { d.profile.displayName = "Me"; });
+    update((d) => { d.profile.guidedDurationMin = 45; });
     const mine = localStorage.getItem(STATE_KEY);
     seedDemoData({}, NOW);
     expect(localStorage.getItem(PRE_DEMO_KEY)).toBe(mine);
     expect(getData().demoMode?.seed).toBe(20260908);
     expect(getData().activityLog[localDateKey(NOW)]).toBeGreaterThan(0);
     expect(Object.keys(getData().activityLog).length).toBeGreaterThan(100);
-    expect(getData().profile.displayName).toBe("Me");
+    expect(getData().profile.guidedDurationMin).toBe(45);
   });
 
   it("only re-seeds when the history no longer reaches today or a new seed is asked for", () => {
@@ -40,7 +40,7 @@ describe("demo data", () => {
   });
 
   it("Restore mine hands back the parked profile with a reload", () => {
-    update((d) => { d.profile.displayName = "Me"; });
+    update((d) => { d.profile.guidedDurationMin = 45; });
     const mine = localStorage.getItem(STATE_KEY);
     seedDemoData({}, NOW);
     expect(clearDemoData()).toBe(true);

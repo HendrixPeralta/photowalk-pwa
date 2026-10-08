@@ -6,8 +6,9 @@ import { takeSharedFiles } from "@/lib/db";
 import { t } from "@/lib/i18n/core";
 import { navigate } from "@/lib/nav";
 import { showToast } from "@/state/ui";
+import { getData } from "@/state/appStore";
 import { useShareInbox } from "./inbox";
-import { currentRoom, joinRoom } from "./rooms";
+import { joinRoom } from "./rooms";
 
 let handled = false;
 
@@ -36,11 +37,12 @@ export async function handleLaunchIntent(): Promise<void> {
   }
 
   if (code) {
-    const problem = joinRoom(code);
+    // Offline the join can't happen; whatever room this device was in stays.
+    const problem = await joinRoom(code);
     if (problem) showToast(problem, 6000);
     navigate("share");
   } else if (shared.length) {
     navigate("share");
-    if (!currentRoom()) showToast(t("Create or join a room, then press Upload to post the photos you shared."), 6000);
+    if (!getData().currentRoom) showToast(t("Create or join a room, then press Upload to post the photos you shared."), 6000);
   }
 }
