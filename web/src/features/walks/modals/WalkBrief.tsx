@@ -7,7 +7,7 @@ import { useAppStore } from "@/state/appStore";
 import { closeModal } from "@/state/ui";
 import { beginShooting, openThemePicker, setGuidedDuration } from "../actions";
 import { ChallengeList } from "../ChallengeList";
-import { challengesFor, useWalkTheme, useWalkUi } from "../walkUi";
+import { challengesFor, useWalkTheme } from "../walkUi";
 
 /**
  * The walk brief: what you are shooting and what to try. Before shooting
@@ -18,7 +18,6 @@ import { challengesFor, useWalkTheme, useWalkUi } from "../walkUi";
 export function WalkBriefModal() {
   const walk = useAppStore((s) => s.activeWalk);
   const theme = useWalkTheme();
-  const reason = useWalkUi((s) => s.reason);
   const lengthId = useId();
   if (!walk || !theme) return null;
 
@@ -30,12 +29,6 @@ export function WalkBriefModal() {
     <>
       <h3 className="walk-brief-title">{theme.title}</h3>
       <p className="muted">{theme.brief}</p>
-      {reason && <p className="theme-reason">{reason}</p>}
-      <p className="walk-brief-mode">
-        {guided
-          ? t("Challenge walk · {n}-minute timer", { n: walk.durationMin ?? 0 })
-          : t("Casual walk · no timer, stop whenever you're done")}
-      </p>
 
       {/* Changing the length mid-walk would disagree with the nudges already planned. */}
       {preShooting && guided && (

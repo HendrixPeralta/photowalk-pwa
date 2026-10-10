@@ -23,7 +23,6 @@ test("a casual walk runs from the brief to the summary", async ({ page }) => {
   const errors = watchErrors(page);
   await openBrief(page);
   const before = await saved(page);
-  await expect(dialog(page)).toContainText("Casual walk · no timer");
 
   await dialog(page).getByRole("button", { name: "Start shooting" }).click();
   await expect(page).toHaveURL(/\/live\/$/);
@@ -58,7 +57,7 @@ test("a guided walk nudges halfway and ends itself when time is up", async ({ pa
   await page.clock.install();
   await openBrief(page, "Challenge Walk");
   await dialog(page).getByLabel("Walk length").selectOption("2");
-  await expect(dialog(page)).toContainText("2-minute timer");
+  await expect(dialog(page).getByLabel("Walk length")).toHaveValue("2");
   await expect(dialog(page).locator(".challenge-check").first()).toBeVisible();
   await dialog(page).locator(".challenge-check").first().check();
   await dialog(page).getByRole("button", { name: "Start shooting" }).click();
@@ -129,7 +128,6 @@ test("a custom theme built from the brief is used and kept in My Themes", async 
 
   // Straight back to the brief, now on the new theme.
   await expect(dialog(page).getByRole("heading", { name: "Rainy Day Reflections" })).toBeVisible();
-  await expect(dialog(page)).toContainText("Your own custom theme.");
   await page.keyboard.press("Escape");
 
   // Through the menu: a reload would reopen the brief of the walk left open.

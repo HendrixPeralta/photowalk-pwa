@@ -230,8 +230,6 @@ const ja: Record<string, string> = {
   "None yet": "まだありません",
   "Finish your current walk before switching themes.": "テーマを切り替える前に、今のウォークを終了してください。",
   "Finish your current walk before removing its theme.": "テーマを削除する前に、そのテーマを使っている今のウォークを終了してください。",
-  "Challenge walk · {n}-minute timer": "チャレンジウォーク · {n}分タイマー",
-  "Casual walk · no timer, stop whenever you're done": "カジュアルウォーク · タイマーなし、好きなときに終了できます",
   "Mini-challenges": "ミニ課題",
   "Walk length": "ウォークの長さ",
   "Change Theme": "テーマを変更",

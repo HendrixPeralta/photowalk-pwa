@@ -632,12 +632,6 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
 
 .hours-input { width: auto; margin: 0; }
 
-.theme-reason {
-  font-size: 0.8rem;
-  color: var(--accent-strong);
-  margin: 6px 0 0;
-}
-
 .quick-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -684,11 +678,6 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
 .walk-panel .timer-track { margin-top: 12px; }
 .walk-panel .theme-actions { margin-top: 14px; }
 
-.walk-brief-mode {
-  font-size: 0.8rem;
-  color: var(--text-dim);
-  margin: 10px 0 0;
-}
 .quick-card strong { font-size: 0.95rem; }
 .quick-card span { font-size: 0.78rem; color: var(--text-dim); }
 .quick-card-accent { border-color: var(--accent); }
