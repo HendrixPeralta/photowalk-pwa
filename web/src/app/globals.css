@@ -807,6 +807,9 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
 .theme-card > .btn { margin-top: 10px; }
 
 .theme-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+/* Side by side, for a pair of equally weighted buttons. */
+.theme-actions-row { flex-direction: row; }
+.theme-actions-row > .btn { flex: 1; min-width: 0; margin: 0; }
 
 .challenges-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .challenge-item { display: flex; align-items: flex-start; gap: 10px; font-size: 0.88rem; cursor: pointer; }

@@ -54,13 +54,12 @@ export function WalkBriefModal() {
         </>
       )}
 
-      {preShooting && (
-        <button type="button" className="btn btn-ghost btn-block" style={{ marginTop: 10 }} onClick={openThemePicker}>
-          {t("Change Theme")}
-        </button>
-      )}
-
-      <div className="theme-actions">
+      <div className="theme-actions theme-actions-row">
+        {preShooting && (
+          <button type="button" className="btn btn-ghost btn-block" onClick={openThemePicker}>
+            {t("Change Theme")}
+          </button>
+        )}
         <button
           type="button"
           className="btn btn-accent btn-block"

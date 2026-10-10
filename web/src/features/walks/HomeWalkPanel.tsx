@@ -48,7 +48,7 @@ export function HomeWalkPanel({ walk }: { walk: ActiveWalk }) {
           <div className="timer-fill" style={{ width: `${pct}%` }} />
         </div>
       )}
-      <div className="theme-actions">
+      <div className="theme-actions theme-actions-row">
         {theme && (
           <button type="button" className="btn btn-accent btn-block" onClick={openWalkBrief}>
             {guided ? t("Theme & challenges") : t("View theme")}
