@@ -1796,9 +1796,6 @@ input[type="file"].text-input { padding: 8px; }
 }
 .micro-stat .timer-track { margin-top: 8px; }
 
-/* --- Mode selector cards ------------------------------------------------- */
-.mode-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-
 /* Keeps a title and its "?" button grouped together on the left when the
    parent .log-head has nothing to push to the right with space-between. */
 .label-caps-row { display: inline-flex; align-items: center; }
@@ -1857,126 +1854,91 @@ input[type="file"].text-input { padding: 8px; }
 .tool-help-refs li { margin-bottom: 4px; }
 .tool-help-refs a { color: var(--accent); }
 
-.mode-card {
-  position: relative;
-  display: block;
+/* --- Floating walk launcher ---------------------------------------------- */
+/* Sits over the bottom-right corner of the app column, above the nav bar. */
+.walk-fab-wrap {
+  position: fixed;
+  right: max(16px, calc((100vw - 480px) / 2 + 16px));
+  bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 16px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  z-index: 20;
+}
+.walk-fab-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 19;
+}
+.walk-fab {
+  width: 56px; height: 56px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  box-shadow: 0 6px 18px var(--shadow);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.walk-fab:hover { background: var(--accent-strong); }
+.walk-fab:active { transform: scale(0.95); }
+.walk-fab svg { width: 26px; height: 26px; transition: transform 0.2s ease; }
+.walk-fab.open svg { transform: rotate(45deg); }
+
+.walk-fab-menu {
+  width: min(280px, calc(100vw - 32px));
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 24px var(--shadow);
+  animation: walk-fab-in 0.15s ease-out;
+}
+@keyframes walk-fab-in { from { opacity: 0; transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) {
+  .walk-fab-menu { animation: none; }
+  .walk-fab svg { transition: none; }
+}
+.walk-fab-menu-head { display: flex; align-items: center; padding: 2px 2px 4px; }
+
+.walk-fab-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   width: 100%;
+  padding: 10px;
   text-align: left;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 12px 30px 12px 12px;
   color: inherit;
   cursor: pointer;
-  opacity: 0.75;
-  transition: opacity 0.15s ease, background 0.15s ease;
 }
-.mode-card:hover { opacity: 1; }
-
-/* Knurled focus rail down the left edge of the engaged mode. */
-.mode-card.active {
-  background: var(--surface-1);
-  opacity: 1;
-  border-color: var(--border-strong);
-}
-.mode-card.active::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 12px; bottom: 12px;
-  width: 3px;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  background: var(--accent);
-}
-
-.mode-card-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-}
-.mode-card-title { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.mode-card-title strong {
-  font-family: var(--font-display);
-  font-size: 16px;
-  font-weight: 600;
-}
-.mode-card-icon {
-  width: 22px; height: 22px;
+.walk-fab-option:hover { border-color: var(--accent); }
+.walk-fab-option-icon {
+  width: 32px; height: 32px;
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  background: var(--surface-4);
-  border-radius: var(--radius-sm);
-  color: var(--text-dim);
-}
-.mode-card-icon svg { width: 14px; height: 14px; }
-.mode-card.active .mode-card-icon { background: var(--accent); color: var(--accent-contrast); }
-
-
-/* --- Hero launch trigger ------------------------------------------------- */
-.launch-btn {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px 16px;
   background: var(--accent);
-  border: none;
-  border-radius: var(--radius-lg);
-  color: var(--accent-contrast);
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.15s ease, transform 0.1s ease;
-}
-.launch-btn:hover { background: var(--accent-strong); }
-.launch-btn:active { transform: scale(0.99); }
-.launch-btn-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
-
-.launch-btn-icon {
-  width: 36px; height: 36px;
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  background: var(--accent-deep);
   border-radius: var(--radius-md);
-  color: var(--accent);
+  color: var(--accent-contrast);
 }
-.launch-btn-icon svg { width: 22px; height: 22px; }
+.walk-fab-option-icon svg { width: 18px; height: 18px; }
+.walk-fab-option-labels { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.walk-fab-option-labels strong { font-family: var(--font-display); font-size: 16px; font-weight: 600; }
+.walk-fab-option-labels .muted { font-size: 12px; }
 
-.launch-btn-labels { display: flex; flex-direction: column; min-width: 0; }
-.launch-btn-labels .label-caps { color: inherit; opacity: 0.75; }
-.launch-btn-labels strong {
-  font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 22px;
-}
-
-.launch-btn-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-  flex-shrink: 0;
-}
-.launch-btn-right .label-caps { color: inherit; opacity: 0.8; }
-
-.launch-fix {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 6px;
-  background: rgba(0, 0, 0, 0.18);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-data);
-  font-variant-numeric: tabular-nums;
-  font-size: 11px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-.launch-fix svg { width: 13px; height: 13px; }
+/* Room under the last card so the button never hides it. */
+.view:has(.walk-fab) { padding-bottom: 72px; }
 
 /* --- Field HUD: telemetry bar -------------------------------------------- */
 .telemetry-grid {
