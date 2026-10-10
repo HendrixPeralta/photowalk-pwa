@@ -105,8 +105,15 @@ test("the theme card folds away and its theme can be changed mid-walk", async ({
   await expect(page.locator(".walk-clock-time")).not.toHaveText("--:--");
 });
 
-test("walk partners can create a room or are told when a code doesn't work", async ({ page }) => {
+test("with no walk under way, Live offers only to start one", async ({ page }) => {
   await page.goto("/live/");
+  await expect(page.getByRole("button", { name: "Create Room" })).toHaveCount(0);
+  await page.locator(".live-start").click();
+  await expect(dialog(page).getByRole("button", { name: "Start shooting" })).toBeVisible();
+});
+
+test("walk partners can create a room or are told when a code doesn't work", async ({ page }) => {
+  await startWalk(page);
   await page.getByRole("button", { name: "Join Room" }).click();
   await dialog(page).getByPlaceholder("Room code").fill("nope");
   await dialog(page).getByRole("button", { name: "Join" }).click();

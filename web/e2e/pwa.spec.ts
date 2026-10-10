@@ -64,9 +64,11 @@ test("photos from the share sheet land on Partners", async ({ page }) => {
   await expect(page.locator(".shared-notice")).toHaveText(/^1 photo ready to share\./);
   await expect(page).toHaveURL(/\/partners\/$/);
 
-  await page.getByRole("button", { name: "Go to Live Walk" }).click();
-  await page.getByRole("button", { name: "Create Room" }).click();
-  await page.getByRole("button", { name: "Manage Room" }).click();
+  // In-app navigation: a reload would empty the share inbox.
+  await page.getByRole("link", { name: "Walks", exact: true }).click();
+  await page.getByRole("button", { name: /Start Photo Walk/ }).click();
+  await page.locator(".walk-fab-menu").getByRole("button", { name: /Create Room/ }).click();
+  await expect(page).toHaveURL(/\/partners\/$/);
   await page.getByRole("button", { name: "Upload", exact: true }).click();
   await expect(page.locator(".room-thumb")).toHaveCount(1);
   await expect(page.locator(".shared-notice")).toHaveCount(0);

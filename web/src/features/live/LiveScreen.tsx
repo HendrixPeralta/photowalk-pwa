@@ -5,7 +5,7 @@ import { Icon } from "@/components/icons/Icon";
 import { useImageUrl } from "@/components/useImageUrl";
 import { WalkPartnersCard } from "@/features/partners/WalkPartnersCard";
 import { ChallengeList } from "@/features/walks/ChallengeList";
-import { launchIfRequested, openWalkThemePicker } from "@/features/walks/actions";
+import { launchIfRequested, launchWalk, openWalkThemePicker } from "@/features/walks/actions";
 import { WalkControls } from "@/features/walks/WalkControls";
 import { challengesFor, useWalkTheme } from "@/features/walks/walkUi";
 import { concept } from "@/lib/content/themes";
@@ -33,10 +33,19 @@ export function LiveScreen() {
 
   return (
     <section className="view" data-view="hud">
-      {walk && <Telemetry walk={walk} />}
-      {walk && <MissionCard walk={walk} />}
-      <WalkPartnersCard />
-      {walk && <WalkControls walk={walk} />}
+      {walk ? (
+        <>
+          <Telemetry walk={walk} />
+          <MissionCard walk={walk} />
+          <WalkPartnersCard />
+          <WalkControls walk={walk} />
+        </>
+      ) : (
+        // Nothing to show until a walk is under way, rooms included.
+        <button type="button" className="live-start" onClick={launchWalk}>
+          {t("Start Photo Walk")}
+        </button>
+      )}
     </section>
   );
 }

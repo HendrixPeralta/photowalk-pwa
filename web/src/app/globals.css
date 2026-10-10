@@ -2036,6 +2036,32 @@ details[open] > .mission-summary .collapse-chevron { transform: rotate(180deg); 
 }
 .hud-pause { padding: 0; justify-content: center; }
 
+/* Live Walk with no walk under way: one solid square button, in the middle
+   of the space between the top bar and the tabs. */
+.views:has(> .view > .live-start) { display: flex; flex-direction: column; }
+.view:has(> .live-start) { flex: 1; display: flex; align-items: center; justify-content: center; }
+.live-start {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  width: min(220px, 60%);
+  aspect-ratio: 1;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-lg);
+  color: var(--accent-contrast);
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-align: center;
+  text-wrap: balance;
+  cursor: pointer;
+}
+.live-start:hover { filter: brightness(0.94); }
+
 .partners-back { display: inline-flex; align-items: center; gap: 4px; margin-bottom: 12px; padding-left: 6px; }
 .partners-back svg { width: 16px; height: 16px; }
 .hud-pause svg { width: 20px; height: 20px; }
