@@ -87,7 +87,8 @@ test("a long casual walk asks for the hours, which can earn a reward", async ({ 
   await expect(toast(page, "Reward set!")).toBeVisible();
   await expect(dialog(page)).toContainText("New lens");
   await page.keyboard.press("Escape");
-  await expect(page.locator(".reward-bar")).toContainText("New lens in 1h");
+  await expect(page.locator(".reward-leg")).toHaveText([/New lens\s*1h of shooting to go/]);
+  await expect(page.getByRole("progressbar", { name: "New lens" })).toHaveAttribute("aria-valuenow", "0");
 
   await page.getByRole("button", { name: /Start Photo Walk/ }).click();
   await page.getByRole("button", { name: "Casual Walk" }).click();

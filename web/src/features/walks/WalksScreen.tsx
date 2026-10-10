@@ -30,7 +30,6 @@ export function WalksScreen() {
 
       {walk ? <HomeWalkPanel walk={walk} /> : <QuickStart />}
 
-      <h2 className="section-title">{t("Reward progress")}</h2>
       <div className="theme-card reward-progress-card">
         <RewardBar />
       </div>
