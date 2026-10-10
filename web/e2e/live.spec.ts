@@ -68,8 +68,8 @@ test("pausing freezes the walk clock until it is resumed", async ({ page }) => {
 
 test("a guided walk shows its countdown and checklist progress", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "Guided Walk" }).click();
   await page.getByRole("button", { name: /Start Photo Walk/ }).click();
+  await page.getByRole("button", { name: "Guided Walk" }).click();
   await dialog(page).getByRole("button", { name: "Start shooting" }).click();
   await expect(page).toHaveURL(/\/live\/$/);
 
