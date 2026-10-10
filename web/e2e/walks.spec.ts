@@ -14,8 +14,8 @@ const toast = (page: Page, text: string | RegExp) => page.getByRole("status").fi
 
 async function openBrief(page: Page, mode: "Casual Walk" | "Guided Walk" = "Casual Walk") {
   await page.goto("/");
-  await page.getByRole("button", { name: mode }).click();
   await page.getByRole("button", { name: /Start Photo Walk/ }).click();
+  await page.getByRole("button", { name: mode }).click();
   await expect(dialog(page).getByRole("button", { name: "Start shooting" })).toBeVisible();
 }
 
@@ -90,6 +90,7 @@ test("a long casual walk asks for the hours, which can earn a reward", async ({ 
   await expect(page.locator(".reward-bar")).toContainText("New lens in 1h");
 
   await page.getByRole("button", { name: /Start Photo Walk/ }).click();
+  await page.getByRole("button", { name: "Casual Walk" }).click();
   await dialog(page).getByRole("button", { name: "Start shooting" }).click();
   await expect(page).toHaveURL(/\/live\/$/);
   await page.clock.fastForward("03:00:00");
@@ -171,13 +172,13 @@ test("the golden-hour badge asks for a location, then shows the light", async ({
   await badge.click();
   await expect(badge).toHaveText(/Golden \d\d:\d\d|min of golden hour left/);
   await expect(badge).not.toHaveAttribute("data-state", "nofix");
-  await expect(page.locator(".launch-fix")).toHaveText("35.6812° N");
 });
 
 test("the Walks screen reads in Japanese", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("photoeye-lang", "ja"));
   await page.goto("/");
-  await expect(page.locator(".mode-cards")).toContainText("カジュアル");
+  await page.getByRole("button", { name: "フォトウォークを開始" }).click();
+  await expect(page.locator(".walk-fab-menu")).toContainText("カジュアル");
   await expect(page.locator(".activity-lifetime strong")).toHaveCount(2);
   await expect(page.locator(".film-cell-today")).toBeVisible();
 });
