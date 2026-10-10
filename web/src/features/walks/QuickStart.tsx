@@ -75,7 +75,7 @@ export function QuickStart() {
                 aria-label={t("About walk modes")}
                 onClick={() => { setOpen(false); openModal(<ModeInfoModal />); }}
               >
-                ?
+                {t("Learn more")}
               </button>
             </div>
             {MODES.map(({ mode, icon }) => (

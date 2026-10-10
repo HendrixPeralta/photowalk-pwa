@@ -107,7 +107,7 @@ export function AdvancedTools() {
 function ScopeName({ name, help, tool, sub }: { name: string; help: string; tool: ToolKey; sub: string }) {
   return (
     <figcaption className="scope-name">
-      {name} <ToolHelpButton tool={tool} label={help} /> <span>{sub}</span>
+      {name} <span>{sub}</span> <ToolHelpButton tool={tool} label={help} />
     </figcaption>
   );
 }

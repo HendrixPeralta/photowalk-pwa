@@ -1,4 +1,4 @@
-// Reference material for the "?" buttons next to each Analysis tool: what the
+// Reference material for the "Learn more" buttons next to each Analysis tool: what the
 // tool actually measures, how to read it, a good and a bad example to
 // calibrate against, and somewhere to read more. Written for someone who has
 // never used any of this before, not for someone who already knows the

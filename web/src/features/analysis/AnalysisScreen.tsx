@@ -33,8 +33,8 @@ export function AnalysisScreen() {
         <span className="debrief-head-left">
           <span className="solar-dot" />
           <span className="label-caps">{t("Photo Breakdown")}</span>
-          <ToolHelpButton tool="composition" label={t("About composition guides")} />
         </span>
+        <ToolHelpButton tool="composition" label={t("About composition guides")} />
       </div>
 
       <input

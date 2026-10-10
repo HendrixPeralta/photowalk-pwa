@@ -45,7 +45,7 @@ export function ToolHelpModal({ tool }: { tool: ToolKey }) {
 }
 
 /**
- * The "?" beside a tool. Several sit inside a <summary>, so the click must not
+ * The "Learn more" beside a tool. Several sit inside a <summary>, so the click must not
  * also open or close the panel around it.
  */
 export function ToolHelpButton({ tool, label }: { tool: ToolKey; label: string }) {
@@ -60,7 +60,7 @@ export function ToolHelpButton({ tool, label }: { tool: ToolKey; label: string }
         openModal(<ToolHelpModal tool={tool} />);
       }}
     >
-      ?
+      {t("Learn more")}
     </button>
   );
 }

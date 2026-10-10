@@ -40,7 +40,7 @@ const MODE_INFO: Record<WalkMode, { title: string; desc: string; best: string }>
   },
 };
 
-/** The "?" explanation for each walk mode, translated. */
+/** The "Learn more" explanation for each walk mode, translated. */
 export function modeInfo(mode: WalkMode): { title: string; desc: string; best: string } {
   const info = MODE_INFO[mode];
   return { title: t(info.title), desc: t(info.desc), best: t(info.best) };
