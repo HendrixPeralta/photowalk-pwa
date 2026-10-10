@@ -289,7 +289,7 @@ export function finishWalk(auto = false): void {
         finalizeWalk(startedAt, false);
       }}
     />,
-    { onClose: () => { if (!settled) showToast(t("Still on your walk.")); } },
+    { alert: true, onClose: () => { if (!settled) showToast(t("Still on your walk.")); } },
   );
 }
 

@@ -1169,6 +1169,10 @@ input[type="file"].text-input { padding: 8px; }
   z-index: 50;
 }
 .modal-root.hidden { display: none; }
+/* A short question: in the middle of the screen, not a sheet from the bottom. */
+.modal-root-alert { align-items: center; padding: 16px; }
+.modal-root-alert .modal-card { width: min(340px, 100%); }
+.modal-root-alert h3 { margin-top: 0; }
 .modal-card {
   width: min(440px, 100%);
   max-height: 86dvh;

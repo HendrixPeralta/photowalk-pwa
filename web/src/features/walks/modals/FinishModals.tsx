@@ -12,9 +12,9 @@ export function ConfirmCompleteModal({ onConfirm }: { onConfirm: () => void }) {
     <>
       <h3>{t("Complete this walk?")}</h3>
       <p className="muted">{t("This ends the walk and saves your time. You can't undo this.")}</p>
-      <div className="theme-actions">
-        <button type="button" className="btn btn-danger btn-block" onClick={onConfirm}>{t("Complete Walk")}</button>
-        <button type="button" className="btn btn-ghost btn-block" onClick={closeModal}>{t("Keep Shooting")}</button>
+      <div className="theme-actions theme-actions-row">
+        <button type="button" className="btn btn-ghost" onClick={closeModal}>{t("Keep Shooting")}</button>
+        <button type="button" className="btn btn-danger" onClick={onConfirm}>{t("Complete Walk")}</button>
       </div>
     </>
   );
