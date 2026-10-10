@@ -3,7 +3,7 @@
 import { Trans } from "@/components/Trans";
 import { interpolate, t } from "@/lib/i18n/core";
 import { openModal } from "@/state/ui";
-import { toolHelp, type HelpRef, type ToolKey } from "./content";
+import { toolHelp, type HelpRef, type ToolHelp as ToolHelpInfo, type ToolKey } from "./content";
 
 function RefItem({ item }: { item: HelpRef }) {
   const label = item.url
@@ -21,6 +21,15 @@ export function ToolHelpModal({ tool }: { tool: ToolKey }) {
   return (
     <>
       <h3>{info.title}</h3>
+      <ToolHelpBody info={info} />
+    </>
+  );
+}
+
+/** Everything under the title: shared by the pop-up and the Tutorials article. */
+export function ToolHelpBody({ info }: { info: ToolHelpInfo }) {
+  return (
+    <>
       <p className="muted card-text">{info.what}</p>
       <h4 className="subsection-title">{t("How to read it")}</h4>
       <p className="card-text">{info.read}</p>

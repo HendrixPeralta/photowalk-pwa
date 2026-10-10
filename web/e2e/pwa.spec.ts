@@ -10,6 +10,7 @@ const SCREENS = [
   { path: "/partners/", title: "Partners" },
   { path: "/settings/", title: "Settings" },
   { path: "/themes/", title: "My Themes" },
+  { path: "/learn/", title: "Tutorials" },
 ];
 
 /** Waits until the service worker has installed (precache done) and controls the page. */

@@ -16,6 +16,7 @@ import { focusFirst, inertAppChrome } from "./focus";
 // The side menu fronts the screens that have no tab of their own.
 const ITEMS: { view: View; icon: IconName; label: () => string }[] = [
   { view: "themes", icon: "bookmark", label: () => t("My Themes") },
+  { view: "learn", icon: "bulb", label: () => t("Tutorials") },
   { view: "settings", icon: "settings", label: () => t("Settings") },
 ];
 

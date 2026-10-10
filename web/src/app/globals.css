@@ -1739,6 +1739,35 @@ input[type="file"].text-input { padding: 8px; }
 .tool-help-refs li { margin-bottom: 4px; }
 .tool-help-refs a { color: var(--accent); }
 
+/* --- Tutorials ----------------------------------------------------------- */
+.tutorial-list { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.tutorial-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  padding: 12px 14px;
+  text-align: left;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+.tutorial-card:hover { border-color: var(--accent); }
+.tutorial-card strong { font-family: var(--font-display); font-size: 1rem; }
+/* Just a taste of the article: two lines, then an ellipsis. */
+.tutorial-card span {
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.tutorial-title { margin: 0 0 6px; font-family: var(--font-display); font-size: 1.4rem; }
+
 /* --- Floating walk launcher ---------------------------------------------- */
 /* Sits over the bottom-right corner of the app column, above the nav bar. */
 .walk-fab-wrap {
