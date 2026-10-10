@@ -1,17 +1,14 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Icon } from "@/components/icons/Icon";
 import type { IconName } from "@/components/icons/sprite";
-import { fixIsFresh, formatLat } from "@/lib/geo";
 import { t } from "@/lib/i18n/core";
-import { useNow } from "@/lib/useNow";
 import { modeInfo } from "@/lib/walk";
 import { useAppStore } from "@/state/appStore";
-import { useFix } from "@/state/geo";
 import type { WalkMode } from "@/state/types";
 import { openModal } from "@/state/ui";
 import { launchWalk, setMode } from "./actions";
-import { useWalkUi } from "./walkUi";
 
 const MODES: { mode: WalkMode; icon: IconName }[] = [
   { mode: "casual", icon: "lens" },
@@ -42,68 +39,72 @@ function ModeInfoModal() {
   );
 }
 
-/** The two mode cards and the Start Photo Walk button, shown while no walk is open. */
+/**
+ * The floating + button, shown while no walk is open. Tapping it offers the
+ * two walk modes; picking one opens that walk's brief.
+ */
 export function QuickStart() {
-  const mode = useWalkUi((s) => s.mode);
+  const [open, setOpen] = useState(false);
   const guidedMin = useAppStore((s) => Number(s.profile.guidedDurationMin) || 30);
-  const fix = useFix((s) => s.fix);
-  const now = useNow(60_000);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  function start(mode: WalkMode) {
+    setOpen(false);
+    setMode(mode);
+    launchWalk();
+  }
 
   return (
-    <div>
-      <div className="log-head">
-        <span className="label-caps-row">
-          <span className="label-caps">{t("Pick a Walk Mode")}</span>
-          <button
-            type="button"
-            className="section-help-btn"
-            aria-label={t("About walk modes")}
-            onClick={() => openModal(<ModeInfoModal />)}
-          >
-            ?
-          </button>
-        </span>
-      </div>
+    <>
+      {open && <div className="walk-fab-backdrop" onClick={() => setOpen(false)} />}
 
-      <div className="mode-cards">
-        {MODES.map(({ mode: m, icon }) => (
-          <button
-            key={m}
-            type="button"
-            className={`mode-card${mode === m ? " active" : ""}`}
-            aria-pressed={mode === m}
-            onClick={() => setMode(m)}
-          >
-            <span className="mode-card-head">
-              <span className="mode-card-title">
-                <span className="mode-card-icon"><Icon name={icon} /></span>
-                <strong>{modeInfo(m).title}</strong>
-              </span>
-            </span>
-          </button>
-        ))}
-      </div>
+      <div className="walk-fab-wrap">
+        {open && (
+          <div className="walk-fab-menu" id="walk-fab-menu">
+            <div className="walk-fab-menu-head">
+              <span className="label-caps">{t("Pick a Walk Mode")}</span>
+              <button
+                type="button"
+                className="section-help-btn"
+                aria-label={t("About walk modes")}
+                onClick={() => { setOpen(false); openModal(<ModeInfoModal />); }}
+              >
+                ?
+              </button>
+            </div>
+            {MODES.map(({ mode, icon }) => (
+              <button key={mode} type="button" className="walk-fab-option" onClick={() => start(mode)}>
+                <span className="walk-fab-option-icon"><Icon name={icon} /></span>
+                <span className="walk-fab-option-labels">
+                  <strong>{modeInfo(mode).title}</strong>
+                  <span className="muted">
+                    {mode === "guided" ? t("{n}-minute timer with mini-challenges", { n: guidedMin }) : t("No timer, at your own pace")}
+                  </span>
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
 
-      <div style={{ marginTop: 12 }}>
-        <button type="button" className="launch-btn" onClick={launchWalk}>
-          <span className="launch-btn-left">
-            <span className="launch-btn-icon"><Icon name="shutter" /></span>
-            <span className="launch-btn-labels">
-              <span className="label-caps">{t("Ready to Shoot")}</span>
-              <strong>{t("Start Photo Walk")}</strong>
-            </span>
-          </span>
-          <span className="launch-btn-right">
-            {fix && fixIsFresh(fix, now) && (
-              <span className="launch-fix">
-                <Icon name="target" />
-                <span>{formatLat(fix.lat)}</span>
-              </span>
-            )}
-            <span className="label-caps">{mode === "guided" ? t("Guided · {n} min", { n: guidedMin }) : t("Casual Mode")}</span>
-          </span>
+        <button
+          type="button"
+          className={`walk-fab${open ? " open" : ""}`}
+          aria-label={t("Start Photo Walk")}
+          aria-expanded={open}
+          aria-controls="walk-fab-menu"
+          onClick={() => setOpen((o) => !o)}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+          </svg>
         </button>
       </div>
-    </div>
+    </>
   );
 }
