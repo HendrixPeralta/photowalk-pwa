@@ -748,17 +748,8 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
 .quick-card-accent strong { color: var(--accent-strong); }
 .quick-card:hover { border-color: var(--border-strong); }
 
-/* Walk brief: theme name with its Edit action riding the same line. The
-   right-hand padding keeps Edit clear of the modal's own close X, which sits
-   in that same corner. */
-.walk-brief-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding-right: 30px;
-}
-.walk-brief-head h3 { margin: 0; }
+/* Walk brief title, kept clear of the modal's close X in the same corner. */
+.walk-brief-title { margin: 0; padding-right: 30px; }
 
 /* Change Theme: a scrollable stack of picks rather than the 2-up grid the
    quick-start cards use: titles and briefs here are too varied in length
