@@ -30,16 +30,16 @@ test("a casual walk runs from the brief to the summary", async ({ page }) => {
   await expect(page.locator(".nav-live")).toBeVisible();
 
   await page.getByRole("link", { name: "Walks", exact: true }).click();
-  await expect(page.locator(".walk-panel")).toContainText("Casual");
+  await expect(page.locator(".home-walk-controls")).toBeVisible();
   await expect(page.getByRole("button", { name: /Start Photo Walk/ })).toHaveCount(0);
 
   // Backing out of the confirmation keeps the walk going.
-  await page.getByRole("button", { name: "Stop Walk" }).click();
+  await page.getByRole("button", { name: "Finish Walk" }).click();
   await dialog(page).getByRole("button", { name: "Keep Shooting" }).click();
   await expect(toast(page, "Still on your walk.")).toBeVisible();
-  await expect(page.locator(".walk-panel")).toBeVisible();
+  await expect(page.locator(".home-walk-controls")).toBeVisible();
 
-  await page.getByRole("button", { name: "Stop Walk" }).click();
+  await page.getByRole("button", { name: "Finish Walk" }).click();
   await dialog(page).getByRole("button", { name: "Complete Walk" }).click();
   await expect(dialog(page).getByRole("heading", { name: "Walk complete!" })).toBeVisible();
   await dialog(page).getByRole("button", { name: "Done" }).click();
@@ -96,7 +96,7 @@ test("a long casual walk asks for the hours, which can earn a reward", async ({ 
   await page.clock.fastForward("03:00:00");
 
   await page.getByRole("link", { name: "Walks", exact: true }).click();
-  await page.getByRole("button", { name: "Stop Walk" }).click();
+  await page.getByRole("button", { name: "Finish Walk" }).click();
   await dialog(page).getByRole("button", { name: "Complete Walk" }).click();
   await expect(dialog(page).getByRole("heading", { name: "How long were you shooting?" })).toBeVisible();
   await expect(dialog(page).getByLabel("Hours to log")).toHaveValue("3.00");

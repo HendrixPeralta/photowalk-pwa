@@ -5,7 +5,8 @@ import { Icon } from "@/components/icons/Icon";
 import { useImageUrl } from "@/components/useImageUrl";
 import { WalkPartnersCard } from "@/features/partners/WalkPartnersCard";
 import { ChallengeList } from "@/features/walks/ChallengeList";
-import { finishWalk, launchIfRequested, openWalkThemePicker, pauseWalk, resumeWalk } from "@/features/walks/actions";
+import { launchIfRequested, openWalkThemePicker } from "@/features/walks/actions";
+import { WalkControls } from "@/features/walks/WalkControls";
 import { challengesFor, useWalkTheme } from "@/features/walks/walkUi";
 import { concept } from "@/lib/content/themes";
 import { t } from "@/lib/i18n/core";
@@ -37,28 +38,6 @@ export function LiveScreen() {
       <WalkPartnersCard />
       {walk && <WalkControls walk={walk} />}
     </section>
-  );
-}
-
-/** Pause or resume (icon only), and finish. */
-function WalkControls({ walk }: { walk: ActiveWalk }) {
-  const paused = Boolean(walk.pausedAt);
-  return (
-    <div className="hud-footer-row">
-      <button
-        type="button"
-        className="btn btn-primary hud-pause"
-        disabled={!walk.startedAt}
-        aria-label={paused ? t("Resume Walk") : t("Pause Walk")}
-        title={paused ? t("Resume Walk") : t("Pause Walk")}
-        onClick={paused ? resumeWalk : pauseWalk}
-      >
-        <Icon name={paused ? "play" : "pause"} />
-      </button>
-      <button type="button" className="btn btn-danger-solid" onClick={() => finishWalk(false)}>
-        {t("Finish Walk")}
-      </button>
-    </div>
   );
 }
 

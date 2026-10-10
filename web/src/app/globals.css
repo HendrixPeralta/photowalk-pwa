@@ -650,33 +650,8 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
   cursor: pointer;
 }
 
-/* Running-walk panel (Home) */
-/* Both states of the top block keep the same gap to the stats grid below. */
+/* The launcher keeps a clear gap to the card below. */
 #quickStart { margin-bottom: 16px; }
-.walk-panel { margin: 0 0 16px; border-color: var(--accent); }
-.walk-panel-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-.walk-panel-titles { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.walk-panel-titles strong { font-size: 1rem; overflow-wrap: anywhere; }
-.walk-panel-titles .muted { font-size: 0.78rem; }
-
-.walk-panel-clock { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; }
-.walk-panel-timer {
-  font-family: var(--font-data);
-  font-size: 1.5rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-  line-height: 1.1;
-}
-.walk-panel-clock .muted { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; }
-
-.walk-panel .timer-track { margin-top: 12px; }
-.walk-panel .theme-actions { margin-top: 14px; }
 
 .quick-card strong { font-size: 0.95rem; }
 .quick-card span { font-size: 0.78rem; color: var(--text-dim); }

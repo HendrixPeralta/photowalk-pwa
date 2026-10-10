@@ -7,8 +7,8 @@ import { useAppStore } from "@/state/appStore";
 import { ActivityYear } from "./ActivityYear";
 import { FilmStrip } from "./FilmStrip";
 import { GoldenBadge } from "./GoldenBadge";
-import { HomeWalkPanel } from "./HomeWalkPanel";
 import { QuickStart } from "./QuickStart";
+import { WalkControls } from "./WalkControls";
 
 /** Home: this week and the year at a glance, the walk launcher (or the open walk), and rewards. */
 export function WalksScreen() {
@@ -28,11 +28,14 @@ export function WalksScreen() {
         <ActivityYear />
       </div>
 
-      {walk ? <HomeWalkPanel walk={walk} /> : <QuickStart />}
+      {!walk && <QuickStart />}
 
       <div className="theme-card reward-progress-card">
         <RewardBar />
       </div>
+
+      {/* At the foot of the screen, as on Live Walk. */}
+      {walk && <WalkControls walk={walk} className="home-walk-controls" />}
     </section>
   );
 }
