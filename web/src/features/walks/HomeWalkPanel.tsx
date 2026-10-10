@@ -36,7 +36,7 @@ export function HomeWalkPanel({ walk }: { walk: ActiveWalk }) {
       <div className="walk-panel-head">
         <div className="walk-panel-titles">
           <strong>{theme ? theme.title : t("Walk in progress")}</strong>
-          <span className="muted">{guided ? t("Guided · {n} min", { n: walk.durationMin ?? 0 }) : t("Casual")}</span>
+          <span className="muted">{guided ? t("Challenge · {n} min", { n: walk.durationMin ?? 0 }) : t("Casual")}</span>
         </div>
         <div className="walk-panel-clock">
           <span className="walk-panel-timer" role="timer">{timer}</span>

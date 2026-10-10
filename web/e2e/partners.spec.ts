@@ -141,3 +141,29 @@ test("rooms you're in show on the Live Walk card on another device", async ({ pa
   await expect(kenAgain).toHaveURL(/\/partners\/$/);
   await expect(kenAgain.locator(".debrief-title")).toHaveText(code);
 });
+
+test("the + button makes a room, and offers the same choices once you're in one", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /Start Photo Walk/ }).click();
+  await page.locator(".walk-fab-menu").getByRole("button", { name: /Create Room/ }).click();
+  await expect(page).toHaveURL(/\/partners\/$/);
+  const code = (await page.locator(".debrief-title").textContent())!;
+  expect(code).toMatch(/^[A-Z2-9]{6}$/);
+
+  await page.goto("/");
+  await page.getByRole("button", { name: /Start Photo Walk/ }).click();
+  const menu = page.locator(".walk-fab-menu");
+  await expect(menu.getByRole("button")).toHaveText(["Create Room", "Join Room", "Challenge Walk", "Casual Walk"]);
+});
+
+test("the + button joins someone else's room by its code", async ({ page: aki, openAs }) => {
+  const code = await createRoom(aki);
+  const ken = await openAs(PARTNER);
+  await ken.goto("/");
+  await ken.getByRole("button", { name: /Start Photo Walk/ }).click();
+  await ken.locator(".walk-fab-menu").getByRole("button", { name: /Join Room/ }).click();
+  await dialog(ken).getByPlaceholder("Room code").fill(code);
+  await dialog(ken).getByRole("button", { name: "Join" }).click();
+  await expect(ken).toHaveURL(/\/partners\/$/);
+  await expect(ken.locator(".debrief-title")).toHaveText(code);
+});

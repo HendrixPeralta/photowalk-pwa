@@ -1795,7 +1795,6 @@ input[type="file"].text-input { padding: 8px; }
 
 /* "Learn more" beside a section or tool title, opening a modal with more
    detail. The auto margin pushes it to the right edge of its flex row. */
-.section-help-btn,
 .tool-help-btn {
   flex-shrink: 0;
   margin-left: auto;
@@ -1812,7 +1811,6 @@ input[type="file"].text-input { padding: 8px; }
   white-space: nowrap;
   cursor: pointer;
 }
-.section-help-btn:hover,
 .tool-help-btn:hover { color: var(--accent-strong); border-color: var(--accent); }
 .tool-help-list { margin: 6px 0 0; padding-left: 18px; font-size: 13px; }
 .tool-help-list li { margin-bottom: 6px; }
@@ -1879,8 +1877,6 @@ input[type="file"].text-input { padding: 8px; }
   .walk-fab-menu { animation: none; }
   .walk-fab svg { transition: none; }
 }
-.walk-fab-menu-head { display: flex; align-items: center; padding: 2px 2px 4px; }
-
 .walk-fab-option {
   display: flex;
   align-items: center;
@@ -1895,6 +1891,7 @@ input[type="file"].text-input { padding: 8px; }
   cursor: pointer;
 }
 .walk-fab-option:hover { border-color: var(--accent); }
+.walk-fab-option:disabled { opacity: 0.6; cursor: progress; }
 .walk-fab-option-icon {
   width: 32px; height: 32px;
   flex-shrink: 0;
@@ -1905,54 +1902,75 @@ input[type="file"].text-input { padding: 8px; }
   color: var(--accent-contrast);
 }
 .walk-fab-option-icon svg { width: 18px; height: 18px; }
-.walk-fab-option-labels { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.walk-fab-option-labels strong { font-family: var(--font-display); font-size: 16px; font-weight: 600; }
-.walk-fab-option-labels .muted { font-size: 12px; }
+.walk-fab-option strong { font-family: var(--font-display); font-size: 16px; font-weight: 600; }
 
 /* Room under the last card so the button never hides it. */
 .view:has(.walk-fab) { padding-bottom: 72px; }
 
 /* --- Field HUD: telemetry bar -------------------------------------------- */
-.telemetry-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  margin-bottom: 8px;
-}
-/* Three tiles breathe where four had to be crammed. */
-.telemetry-grid-3 { grid-template-columns: repeat(3, 1fr); }
-
-.telemetry-cell {
+.walk-clock {
   background: var(--surface-1);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 8px 6px;
-  min-width: 0;
+  border-radius: var(--radius-lg);
+  padding: 20px 14px 12px;
+  margin-bottom: 8px;
 }
-.telemetry-cell-head {
+.walk-clock-main {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 3px;
-  color: var(--text-dim);
+  gap: 4px;
 }
-.telemetry-cell-head svg { width: 12px; height: 12px; flex-shrink: 0; }
-.telemetry-cell-head .label-caps { color: inherit; font-size: 9px; letter-spacing: 0.06em; }
-
-.telemetry-value {
-  display: flex;
-  align-items: baseline;
-  gap: 2px;
-  margin-top: 5px;
+.walk-clock-time {
   font-family: var(--font-data);
   font-variant-numeric: tabular-nums;
-  font-size: 17px;
+  font-size: 56px;
   font-weight: 500;
-  color: var(--accent-strong);
+  line-height: 1;
   letter-spacing: -0.03em;
+  color: var(--accent-strong);
 }
-.telemetry-value small { font-size: 10px; font-weight: 400; color: var(--text-dim); }
-.telemetry-cell-cyan .telemetry-value { color: var(--cyan); }
-.telemetry-cell-plain .telemetry-value { color: var(--text); }
+.walk-clock-left {
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  color: var(--cyan);
+}
+.walk-clock-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 16px;
+  color: var(--text-dim);
+  font-size: 12px;
+}
+.walk-clock-mode,
+.walk-clock-photos { display: inline-flex; align-items: center; gap: 5px; }
+.walk-clock-mode svg,
+.walk-clock-photos svg { width: 14px; height: 14px; flex-shrink: 0; }
+.walk-clock-photos { gap: 7px; }
+.walk-clock-photos > svg { width: 17px; height: 17px; }
+.walk-clock-count {
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--text);
+}
+.walk-clock-add {
+  width: 26px; height: 26px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  cursor: pointer;
+}
+.walk-clock-add:hover { background: var(--accent-strong); }
+.walk-clock-add svg { width: 14px; height: 14px; }
 
 /* --- Field HUD: mission directive ---------------------------------------- */
 .mission-card {
@@ -1962,33 +1980,40 @@ input[type="file"].text-input { padding: 8px; }
   padding: 12px;
   margin-bottom: 12px;
 }
-.mission-head {
+.mission-summary {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
+  cursor: pointer;
+  list-style: none;
 }
-.mission-head-left { display: flex; align-items: center; gap: 6px; }
-.mission-head .label-caps { color: var(--accent-strong); }
-.mission-badge {
-  padding: 3px 7px;
-  border: 1px solid var(--accent);
-  border-radius: var(--radius-sm);
-  color: var(--accent-strong);
-  font-family: var(--font-data);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  white-space: nowrap;
-}
+.mission-summary::-webkit-details-marker { display: none; }
+.mission-summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--radius-md); }
+.mission-summary .collapse-chevron { margin-left: auto; }
+details[open] > .mission-summary .collapse-chevron { transform: rotate(180deg); }
 .mission-title {
-  margin: 10px 0 0;
+  min-width: 0;
+  margin: 0;
   font-family: var(--font-display);
   font-size: 20px;
   font-weight: 600;
   line-height: 27px;
   letter-spacing: -0.01em;
 }
+.mission-change {
+  flex-shrink: 0;
+  width: 30px; height: 30px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface-4);
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.mission-change svg { width: 15px; height: 15px; }
+.mission-change:hover { color: var(--accent-strong); border-color: var(--accent); }
 .mission-hint {
   display: flex;
   gap: 8px;
@@ -2029,17 +2054,6 @@ input[type="file"].text-input { padding: 8px; }
   font-family: var(--font-data);
   font-size: 11px;
   color: var(--text-dim);
-}
-.mission-synced {
-  margin-left: auto;
-  padding: 3px 7px;
-  background: var(--accent-deep);
-  border-radius: var(--radius-sm);
-  color: var(--accent-strong);
-  font-family: var(--font-data);
-  font-size: 10px;
-  font-weight: 600;
-  white-space: nowrap;
 }
 
 /* --- Field HUD: logged frame chips --------------------------------------- */
@@ -2098,19 +2112,18 @@ input[type="file"].text-input { padding: 8px; }
 .log-head .label-caps { color: var(--text-dim); margin: 0; }
 .log-last { font-family: var(--font-data); font-size: 11px; color: var(--accent-strong); }
 
-.log-btn {
-  width: 100%;
-  min-height: 56px;
-  font-size: 14px;
-  letter-spacing: 0.02em;
-}
 
 .hud-footer-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 56px 1fr;
   gap: 8px;
   margin-top: 16px;
 }
+.hud-pause { padding: 0; justify-content: center; }
+
+.partners-back { display: inline-flex; align-items: center; gap: 4px; margin-bottom: 12px; padding-left: 6px; }
+.partners-back svg { width: 16px; height: 16px; }
+.hud-pause svg { width: 20px; height: 20px; }
 /* .btn-danger-solid carries its own top margin for when it's stacked alone;
    paired with Pause Walk in this grid row, that would misalign the two tops. */
 .hud-footer-row .btn-danger-solid { margin-top: 0; }

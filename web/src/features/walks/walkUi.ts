@@ -45,7 +45,7 @@ export function walkMode(data: AppData = getData()): WalkMode {
 }
 
 /**
- * Mini-challenges belong to the Guided Walk. A casual walk is the theme on its
+ * Mini-challenges belong to the Challenge Walk. A casual walk is the theme on its
  * own: nothing to tick off, stop whenever you're done.
  */
 export function challengesFor(theme: Theme | null, mode: WalkMode): string[] {

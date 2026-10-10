@@ -4,7 +4,7 @@ import { expect, test, type Page } from "./fixtures";
 const PHOTOS = join(process.cwd(), "public/photos");
 const dialog = (page: Page) => page.getByRole("dialog");
 const toast = (page: Page, text: string | RegExp) => page.getByRole("status").filter({ hasText: text });
-const photosCell = (page: Page) => page.locator(".telemetry-cell-plain .telemetry-value");
+const photosCell = (page: Page) => page.locator(".walk-clock-count");
 
 /** Starts a walk from the Live tab and begins shooting. */
 async function startWalk(page: Page) {
@@ -19,14 +19,13 @@ test("photos logged on a walk show up with their camera data", async ({ page }) 
   const errors: string[] = [];
   page.on("pageerror", (err) => errors.push(err.message));
   await startWalk(page);
-  await expect(page.locator(".log-last")).toHaveText("No photos yet");
+  await expect(photosCell(page)).toHaveText("0");
 
   await page.locator("input[type=file]").setInputFiles([join(PHOTOS, "a_33.jpg"), join(PHOTOS, "a_1.jpg")]);
   await expect(toast(page, "2 photos logged.")).toBeVisible();
   await expect(photosCell(page)).toHaveText("2");
   await expect(page.locator(".capture-chip")).toHaveCount(2);
   await expect(page.getByRole("button", { name: "Log Photo #3" })).toBeVisible();
-  await expect(page.locator(".log-last")).toContainText("Last: #2 at");
 
   // Label the first photo, then remove it: the other becomes #1.
   await page.locator(".capture-chip").first().click();
@@ -51,7 +50,7 @@ test("photos logged on a walk show up with their camera data", async ({ page }) 
 test("pausing freezes the walk clock until it is resumed", async ({ page }) => {
   await page.clock.install();
   await startWalk(page);
-  const clock = page.locator(".telemetry-value[role=timer]");
+  const clock = page.locator(".walk-clock-time");
 
   await page.clock.runFor(5_000);
   await expect(clock).toHaveText("00:05");
@@ -69,12 +68,12 @@ test("pausing freezes the walk clock until it is resumed", async ({ page }) => {
 test("a guided walk shows its countdown and checklist progress", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /Start Photo Walk/ }).click();
-  await page.getByRole("button", { name: "Guided Walk" }).click();
+  await page.getByRole("button", { name: "Challenge Walk" }).click();
   await dialog(page).getByRole("button", { name: "Start shooting" }).click();
   await expect(page).toHaveURL(/\/live\/$/);
 
-  await expect(page.locator(".mission-badge")).toHaveText("30 min");
-  await expect(page.locator(".telemetry-cell-cyan .telemetry-value")).toHaveText(/^(30:00|29:5\d)$/);
+  await expect(page.locator(".walk-clock-mode")).toHaveText(/30 min/);
+  await expect(page.locator(".walk-clock-left")).toHaveText(/^(30:00|29:5\d) left$/);
   await expect(page.locator(".mission-progress-text")).toHaveText("Progress: 0%");
   const pips = page.locator(".mission-pip");
   const total = await pips.count();
@@ -83,6 +82,27 @@ test("a guided walk shows its countdown and checklist progress", async ({ page }
   await page.locator(".mission-card .challenge-check").first().check();
   await expect(page.locator(".mission-pip.done")).toHaveCount(1);
   await expect(page.locator(".mission-progress-text")).toHaveText(`Progress: ${Math.round(100 / total)}%`);
+});
+
+test("the theme card folds away and its theme can be changed mid-walk", async ({ page }) => {
+  await startWalk(page);
+  const title = page.locator(".mission-title");
+  const hint = page.locator(".mission-hint");
+
+  await title.click();
+  await expect(hint).toBeHidden();
+  await title.click();
+  await expect(hint).toBeVisible();
+
+  const before = await title.textContent();
+  await page.getByRole("button", { name: "Change Theme" }).click();
+  await expect(hint).toBeVisible();
+  const other = dialog(page).locator(".theme-pick-item").filter({ hasNotText: before ?? "" }).first();
+  const next = await other.locator("strong").textContent();
+  await other.click();
+  await expect(dialog(page)).toBeHidden();
+  await expect(title).toHaveText(next ?? "");
+  await expect(page.locator(".walk-clock-time")).not.toHaveText("--:--");
 });
 
 test("walk partners can create a room or are told when a code doesn't work", async ({ page }) => {
@@ -101,4 +121,6 @@ test("walk partners can create a room or are told when a code doesn't work", asy
   await expect(page.locator(".theme-card")).toContainText(/Room [A-Z2-9]{6} is open for your walk partners\./);
   await page.getByRole("button", { name: "Manage Room" }).click();
   await expect(page).toHaveURL(/\/partners\/$/);
+  await page.getByRole("button", { name: "Back", exact: true }).click();
+  await expect(page).toHaveURL(/\/live\/$/);
 });

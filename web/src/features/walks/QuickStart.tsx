@@ -3,49 +3,30 @@
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/icons/Icon";
 import type { IconName } from "@/components/icons/sprite";
+import { createRoom } from "@/features/partners/rooms";
+import { JoinRoomModal } from "@/features/partners/WalkPartnersCard";
 import { t } from "@/lib/i18n/core";
-import { modeInfo } from "@/lib/walk";
-import { useAppStore } from "@/state/appStore";
+import { navigate } from "@/lib/nav";
+import { roomsEnabled } from "@/lib/roomsApi";
+import { modeTitle } from "@/lib/walk";
 import type { WalkMode } from "@/state/types";
-import { openModal } from "@/state/ui";
+import { openModal, showToast } from "@/state/ui";
 import { launchWalk, setMode } from "./actions";
 
+// Challenge first: it's the one with the most to it.
 const MODES: { mode: WalkMode; icon: IconName }[] = [
-  { mode: "casual", icon: "lens" },
   { mode: "guided", icon: "timer" },
+  { mode: "casual", icon: "lens" },
 ];
 
-function ModeInfoModal() {
-  return (
-    <>
-      <h3>{t("Walk Modes")}</h3>
-      <p className="muted card-text">
-        {t("A photo walk is simply going for a walk to take pictures, with a theme to keep you looking. Pick how much guidance you want.")}
-      </p>
-      {MODES.map(({ mode }) => {
-        const info = modeInfo(mode);
-        return (
-          <div key={mode}>
-            <h4 className="subsection-title">{info.title}</h4>
-            <p className="card-text">{info.desc}</p>
-            <p className="card-text muted">{info.best}</p>
-          </div>
-        );
-      })}
-      <p className="card-text">
-        {t("Either way, you can pause at any time, every walk keeps your streak going, and the time you spend shooting counts toward your rewards. You can switch modes before you start a walk.")}
-      </p>
-    </>
-  );
-}
-
 /**
- * The floating + button, shown while no walk is open. Tapping it offers the
- * two walk modes; picking one opens that walk's brief.
+ * The floating + button, shown while no walk is open. Tapping it offers a room
+ * for your walk partners (make or join one), then the two walk modes; picking
+ * one opens that walk's brief.
  */
 export function QuickStart() {
   const [open, setOpen] = useState(false);
-  const guidedMin = useAppStore((s) => Number(s.profile.guidedDurationMin) || 30);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -60,6 +41,16 @@ export function QuickStart() {
     launchWalk();
   }
 
+  async function room() {
+    if (busy) return;
+    setBusy(true);
+    const problem = await createRoom();
+    setBusy(false);
+    if (problem) { showToast(problem); return; }
+    setOpen(false);
+    navigate("share");
+  }
+
   return (
     <>
       {open && <div className="walk-fab-backdrop" onClick={() => setOpen(false)} />}
@@ -67,26 +58,22 @@ export function QuickStart() {
       <div className="walk-fab-wrap">
         {open && (
           <div className="walk-fab-menu" id="walk-fab-menu">
-            <div className="walk-fab-menu-head">
-              <span className="label-caps">{t("Pick a Walk Mode")}</span>
-              <button
-                type="button"
-                className="section-help-btn"
-                aria-label={t("About walk modes")}
-                onClick={() => { setOpen(false); openModal(<ModeInfoModal />); }}
-              >
-                {t("Learn more")}
-              </button>
-            </div>
+            {roomsEnabled() && (
+              <>
+                <button type="button" className="walk-fab-option" disabled={busy} onClick={() => void room()}>
+                  <span className="walk-fab-option-icon"><Icon name="share" /></span>
+                  <strong>{t("Create Room")}</strong>
+                </button>
+                <button type="button" className="walk-fab-option" onClick={() => { setOpen(false); openModal(<JoinRoomModal />); }}>
+                  <span className="walk-fab-option-icon"><Icon name="user" /></span>
+                  <strong>{t("Join Room")}</strong>
+                </button>
+              </>
+            )}
             {MODES.map(({ mode, icon }) => (
               <button key={mode} type="button" className="walk-fab-option" onClick={() => start(mode)}>
                 <span className="walk-fab-option-icon"><Icon name={icon} /></span>
-                <span className="walk-fab-option-labels">
-                  <strong>{modeInfo(mode).title}</strong>
-                  <span className="muted">
-                    {mode === "guided" ? t("{n}-minute timer with mini-challenges", { n: guidedMin }) : t("No timer, at your own pace")}
-                  </span>
-                </span>
+                <strong>{modeTitle(mode)}</strong>
               </button>
             ))}
           </div>

@@ -10,7 +10,7 @@ import { useAppStore } from "@/state/appStore";
 import { closeModal, openModal, showToast } from "@/state/ui";
 import { createRoom, joinRoom } from "./rooms";
 
-function JoinRoomModal() {
+export function JoinRoomModal() {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -52,7 +52,6 @@ export function WalkPartnersCard() {
   if (!roomsEnabled()) {
     return (
       <div className="theme-card">
-        <h4 className="subsection-title" style={{ marginTop: 0 }}>{t("Walk Partners")}</h4>
         <p className="muted card-text">{t("Walk Partners needs a connection to the PhotoEYE server.")}</p>
       </div>
     );
@@ -67,7 +66,6 @@ export function WalkPartnersCard() {
 
   return (
     <div className="theme-card">
-      <h4 className="subsection-title" style={{ marginTop: 0 }}>{t("Walk Partners")}</h4>
       {code ? (
         <div>
           <p className="muted card-text">

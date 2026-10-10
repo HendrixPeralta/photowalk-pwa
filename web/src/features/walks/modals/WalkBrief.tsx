@@ -33,7 +33,7 @@ export function WalkBriefModal() {
       {reason && <p className="theme-reason">{reason}</p>}
       <p className="walk-brief-mode">
         {guided
-          ? t("Guided walk · {n}-minute timer", { n: walk.durationMin ?? 0 })
+          ? t("Challenge walk · {n}-minute timer", { n: walk.durationMin ?? 0 })
           : t("Casual walk · no timer, stop whenever you're done")}
       </p>
 

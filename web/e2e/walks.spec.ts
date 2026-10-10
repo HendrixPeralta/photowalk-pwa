@@ -12,7 +12,7 @@ const saved = (page: Page) => page.evaluate(() => JSON.parse(localStorage.getIte
 const dialog = (page: Page) => page.getByRole("dialog");
 const toast = (page: Page, text: string | RegExp) => page.getByRole("status").filter({ hasText: text });
 
-async function openBrief(page: Page, mode: "Casual Walk" | "Guided Walk" = "Casual Walk") {
+async function openBrief(page: Page, mode: "Casual Walk" | "Challenge Walk" = "Casual Walk") {
   await page.goto("/");
   await page.getByRole("button", { name: /Start Photo Walk/ }).click();
   await page.getByRole("button", { name: mode }).click();
@@ -56,7 +56,7 @@ test("a casual walk runs from the brief to the summary", async ({ page }) => {
 
 test("a guided walk nudges halfway and ends itself when time is up", async ({ page }) => {
   await page.clock.install();
-  await openBrief(page, "Guided Walk");
+  await openBrief(page, "Challenge Walk");
   await dialog(page).getByLabel("Walk length").selectOption("2");
   await expect(dialog(page)).toContainText("2-minute timer");
   await expect(dialog(page).locator(".challenge-check").first()).toBeVisible();
