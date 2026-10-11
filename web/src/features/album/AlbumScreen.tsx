@@ -21,7 +21,6 @@ export function AlbumScreen() {
 
   return (
     <section className="view" data-view="album">
-      <h2 className="section-title">{t("Reference Album")}</h2>
       <FilterBar />
 
       {!items.length && (

@@ -112,7 +112,6 @@ const ja: Record<string, string> = {
   "Download Summary": "まとめを保存",
   "Summary": "まとめ",
   "Upload Photo": "写真をアップロード",
-  "Reference Album": "リファレンスアルバム",
   "Brightness": "明るさ",
   "Bright": "明るい",
   "Balanced": "バランス",
