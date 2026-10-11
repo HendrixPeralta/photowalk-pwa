@@ -71,7 +71,7 @@ test("Tutorials has an article for every Analysis tool", async ({ page }) => {
   await page.locator(".tutorial-card").filter({ has: page.locator("strong", { hasText: /^Brightness Chart:/ }) }).click();
   await expect(page.getByRole("heading", { name: "Brightness Chart: Spot Shadows and Highlights That Lost Detail", level: 2 })).toBeVisible();
   await expect(page.locator(".tutorial-article")).toContainText("What good looks like");
-  await page.getByRole("button", { name: "Back" }).click();
+  await page.getByRole("button", { name: "Back", exact: true }).click();
   await expect(page.locator(".tutorial-card")).toHaveCount(9);
 });
 
