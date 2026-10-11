@@ -1,17 +1,21 @@
 "use client";
 
-import { Fragment, useCallback, useLayoutEffect, useRef, type RefObject } from "react";
+import { Fragment, useCallback, useId, useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { Icon } from "@/components/icons/Icon";
+import type { IconName } from "@/components/icons/sprite";
 import { useImageUrl } from "@/components/useImageUrl";
 import { useRedrawOnResize } from "@/components/useRedrawOnResize";
+import { ToolHelpButton } from "@/features/toolhelp/ToolHelp";
 import { DISPLAY_MAX_DIM, FLIPPABLE_OVERLAYS, OVERLAY_TYPES, ROTATABLE_OVERLAYS } from "@/lib/analysis/constants";
 import { drawGuides } from "@/lib/analysis/drawGuides";
 import type { Exif } from "@/lib/exif";
 import { t } from "@/lib/i18n/core";
+import { navigate } from "@/lib/nav";
 import { getData } from "@/state/appStore";
 import type { AlbumItem, Overlay, OverlayType } from "@/state/types";
 import { closeModal, openModal, showToast } from "@/state/ui";
 import {
-  enterCompare, exitCompare, flipOverlay, resetOverlay, rotateOverlay, setOverlayType, toneCurve, useAnalysis,
+  enterCompare, exitCompare, flipOverlay, rotateOverlay, saveToAlbum, setOverlayType, toneCurve, useAnalysis,
 } from "./session";
 import { TONE_CURVE_FILTER_ID } from "./AdvancedTools";
 import { usePanZoom } from "./usePanZoom";
@@ -52,8 +56,8 @@ interface PaneRefs {
 }
 
 /**
- * Your photo with the guide over it, and the reference beside it in compare
- * mode, then the guide controls.
+ * The guide controls, then your photo with the guide over it and the
+ * reference beside it in compare mode.
  */
 export function PhotoPanes({ imageRef, overlayRef }: PaneRefs) {
   const frame = useAnalysis((s) => s.frame)!;
@@ -85,6 +89,8 @@ export function PhotoPanes({ imageRef, overlayRef }: PaneRefs) {
 
   return (
     <>
+      <GuideControls overlay={overlay} comparing={Boolean(compare)} onFit={fit} />
+
       <div className="compare-strip">
         <div className="compare-pane">
           <p className="compare-label">{t("Yours")}</p>
@@ -99,9 +105,6 @@ export function PhotoPanes({ imageRef, overlayRef }: PaneRefs) {
         </div>
         {compare && <ReferencePane image={compare.image} overlay={overlay} />}
       </div>
-
-      <GuideControls overlay={overlay} comparing={Boolean(compare)} onFit={fit} />
-      <p className="hint">{t("Pinch or scroll to zoom, drag to move around, double-tap to zoom in.")}</p>
     </>
   );
 }
@@ -149,13 +152,18 @@ function ShotStrip({ exif }: { exif: Exif | null }) {
 
   return (
     <div className="shot-strip">
-      <p className="shot-line shot-exposure">{line([exif?.aperture, exif?.shutter, exif?.iso])}</p>
+      <p className="shot-line shot-exposure">
+        {line([exif?.aperture, exif?.shutter, exif?.iso])}
+        <ToolHelpButton tool="composition" label={t("About composition guides")} />
+      </p>
       <p className="shot-line shot-gear">{line([exif?.focalLength, camera])}</p>
     </div>
   );
 }
 
 function GuideControls({ overlay, comparing, onFit }: { overlay: Overlay; comparing: boolean; onFit: () => void }) {
+  const updating = useAnalysis((s) => Boolean(s.albumItemId));
+
   return (
     <div className="overlay-controls guide-controls">
       <label className="visually-hidden" htmlFor="overlaySelect">{t("Composition guide")}</label>
@@ -167,18 +175,81 @@ function GuideControls({ overlay, comparing, onFit }: { overlay: Overlay; compar
       >
         {OVERLAY_TYPES.map((type) => <option key={type} value={type}>{overlayLabel(type)}</option>)}
       </select>
-      {FLIPPABLE_OVERLAYS.includes(overlay.type) && (
-        <button type="button" className="chip-btn" onClick={flipOverlay}>{t("Flip")}</button>
-      )}
       {ROTATABLE_OVERLAYS.includes(overlay.type) && (
-        <button type="button" className="chip-btn" onClick={rotateOverlay}>{t("Rotate")}</button>
+        <IconChip name="rotate" label={t("Rotate")} onClick={rotateOverlay} />
       )}
-      {comparing
-        ? <button type="button" className="chip-btn" onClick={exitCompare}>{t("Exit Compare")}</button>
-        : <button type="button" className="chip-btn" onClick={openComparePicker}>{t("Compare…")}</button>}
-      <button type="button" className="chip-btn chip-btn-push" onClick={resetOverlay}>{t("Reset")}</button>
-      <button type="button" className="chip-btn" onClick={onFit}>{t("Fit")}</button>
+      <IconChip
+        name="bookmark"
+        label={updating ? t("Update Reference") : t("Save to Reference Album")}
+        className="chip-btn-push"
+        onClick={() => openModal(<SaveTagsModal updating={updating} />)}
+      />
+      <IconChip name="share" label={t("Share to Room")} onClick={shareToRoom} />
+      <IconChip
+        name="split"
+        label={comparing ? t("Exit Compare") : t("Compare…")}
+        className={comparing ? "active" : undefined}
+        onClick={comparing ? exitCompare : openComparePicker}
+      />
+      {FLIPPABLE_OVERLAYS.includes(overlay.type) && <IconChip name="swap" label={t("Flip")} onClick={flipOverlay} />}
+      <IconChip name="fullscreen" label={t("Fit")} onClick={onFit} />
     </div>
+  );
+}
+
+function shareToRoom(): void {
+  navigate("share");
+  showToast(t("Upload this photo to share it with your room."));
+}
+
+function IconChip({ name, label, className, disabled, onClick }: {
+  name: IconName; label: string; className?: string; disabled?: boolean; onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={`chip-btn chip-btn-icon ${className ?? ""}`}
+      aria-label={label}
+      title={label}
+      disabled={disabled}
+      onClick={onClick}
+    >
+      <Icon name={name} />
+    </button>
+  );
+}
+
+/** Asks for tags before the photo goes into the Reference Album. */
+function SaveTagsModal({ updating }: { updating: boolean }) {
+  const [tags, setTags] = useState(() => useAnalysis.getState().tags);
+  const [saving, setSaving] = useState(false);
+  const inputId = useId();
+
+  const save = async () => {
+    setSaving(true);
+    useAnalysis.setState({ tags });
+    try { await saveToAlbum(); } finally { setSaving(false); }
+    closeModal();
+  };
+
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); void save(); }}>
+      <h3>{updating ? t("Update Reference") : t("Save to Reference Album")}</h3>
+      <label className="visually-hidden" htmlFor={inputId}>{t("Tags")}</label>
+      <input
+        id={inputId}
+        type="text"
+        className="text-input"
+        placeholder={t("Tags, comma separated (e.g. bridge, sunset)")}
+        value={tags}
+        onChange={(e) => setTags(e.target.value)}
+        autoFocus
+      />
+      <div className="theme-actions theme-actions-row">
+        <button type="button" className="btn btn-ghost" onClick={closeModal}>{t("Cancel")}</button>
+        <button type="submit" className="btn btn-primary" disabled={saving}>{t("Save")}</button>
+      </div>
+    </form>
   );
 }
 

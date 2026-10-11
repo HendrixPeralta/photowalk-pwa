@@ -329,7 +329,6 @@ function completeWalk(startedAt: number, hours: number, auto: boolean): void {
   const w = openWalkStartedAt(startedAt);
   if (!w) return;
 
-  const theme = walkTheme();
   const frames = w.frames ?? [];
   const now = Date.now();
   const record: WalkRecord = {
@@ -368,7 +367,6 @@ function completeWalk(startedAt: number, hours: number, auto: boolean): void {
 
   openModal(
     <WalkSummaryModal
-      theme={theme}
       record={record}
       frames={frames}
       auto={auto}

@@ -65,8 +65,9 @@ test("a reference opens, goes to Analysis, and can be deleted", async ({ page })
   await dialog(page).getByRole("button", { name: "Analyze this shot" }).click();
   await expect(page).toHaveURL(/\/analysis\/$/);
   await expect(page.getByRole("button", { name: "Update Reference" })).toBeVisible();
-  await page.getByPlaceholder("Tags, comma separated (e.g. bridge, sunset)").fill("harbor");
   await page.getByRole("button", { name: "Update Reference" }).click();
+  await dialog(page).getByPlaceholder("Tags, comma separated (e.g. bridge, sunset)").fill("harbor");
+  await dialog(page).getByRole("button", { name: "Save", exact: true }).click();
   await expect(page.getByRole("status").filter({ hasText: "Reference updated." })).toBeVisible();
 
   await page.getByRole("link", { name: "Album", exact: true }).click();

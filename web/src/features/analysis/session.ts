@@ -21,6 +21,8 @@ import { showToast } from "@/state/ui";
 
 export type ScopeKey = "waveform" | "parade" | "vectorscope" | "cie" | "tonecurve";
 export type ScopeView = ScopeKey | "all";
+/** The tabbed card under the photo. */
+export type ReadoutTab = "color" | "light" | "advanced";
 
 /** A photo and the numbers measured from its 640px sample. */
 export interface Frame {
@@ -42,7 +44,7 @@ interface Session {
   /** A reference from the album shown beside the photo. */
   compare: { item: AlbumItem; image: HTMLImageElement; hist: Histogram } | null;
   scopeView: ScopeView;
-  scopesOpen: boolean;
+  readoutTab: ReadoutTab;
   /** Bumped whenever the tone curve changes, so what shows it redraws. */
   curveVersion: number;
 }
@@ -57,7 +59,7 @@ export const useAnalysis = create<Session>(() => ({
   tags: "",
   compare: null,
   scopeView: "waveform",
-  scopesOpen: false,
+  readoutTab: "color",
   curveVersion: 0,
 }));
 
@@ -164,8 +166,8 @@ export async function analyzeStored({ imageId, ...opts }: StoredPhoto): Promise<
 /**
  * The bundled sample photo, so every tool on the screen has something to read
  * on a first visit. Once per session, and only while nothing else is open or
- * on its way: it never lands on top of a photo the user chose, and "Choose
- * Another Photo" stays a way out rather than a loop back here.
+ * on its way: it never lands on top of a photo the user chose, and "Upload
+ * Photo" stays a way out rather than a loop back here.
  */
 export async function loadDefaultPhoto(): Promise<boolean> {
   if (defaultTried || loadSeq > 0 || useAnalysis.getState().frame) return false;
@@ -186,7 +188,7 @@ export async function loadDefaultPhoto(): Promise<boolean> {
   }
 }
 
-/** Choose Another Photo: back to the empty screen. */
+/** Upload Photo: back to the empty screen. */
 export function resetSession(): void {
   ++loadSeq;
   toneCurve.clear();
@@ -215,10 +217,6 @@ export function flipOverlay(): void {
 /** The spirals can start from any corner. */
 export function rotateOverlay(): void {
   useAnalysis.setState((s) => ({ overlay: { ...s.overlay, rotation: (s.overlay.rotation + 1) % 4 } }));
-}
-
-export function resetOverlay(): void {
-  useAnalysis.setState((s) => ({ overlay: { ...s.overlay, flip: false, rotation: 0 } }));
 }
 
 /* ---------- Compare ---------- */

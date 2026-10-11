@@ -44,6 +44,7 @@ test("the sample photo opens with every readout filled in", async ({ page }) => 
   expect(await paintedPixels(page.locator(".histogram-canvas").first())).toBeGreaterThan(1000);
   await expect(page.locator(".gamut-bar-swatch")).toHaveCount(6);
   await expect(page.locator(".harmony-row")).toContainText("Color Harmony");
+  await page.getByRole("tab", { name: "Light" }).click();
   await expect(page.locator(".diag-note-head strong")).toHaveText(/^Tonal key: /);
   // The sample isn't counted as a photo the user analyzed.
   expect((await saved(page)).profile.photosAnalyzed).toBe(before);
@@ -73,20 +74,22 @@ test("guides change, flip and rotate, and stay put across screens", async ({ pag
   expect(await paintedPixels(guides)).toBeGreaterThan(0);
 });
 
-test("a tool's help opens without folding its panel", async ({ page }) => {
+test("a tool's help links to its tutorial by title", async ({ page }) => {
   await openSample(page);
-  const note = page.locator(".diag-note");
-  await note.getByRole("button", { name: "About Tonal Key" }).click();
-  await expect(dialog(page).getByRole("heading", { name: "Tonal Key" })).toBeVisible();
-  await expect(dialog(page)).toContainText("How to read it");
-  await page.keyboard.press("Escape");
-  await expect(note).not.toHaveAttribute("open", "");
+  await page.getByRole("tab", { name: "Light" }).click();
+  await page.getByRole("button", { name: "About Brightness Chart" }).click();
+  await dialog(page).getByRole("link", { name: "Brightness Chart: Spot Shadows and Highlights That Lost Detail" }).click();
+  await expect(page).toHaveURL(/\/learn\/?#histogram$/);
+  await expect(dialog(page)).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Brightness Chart: Spot Shadows and Highlights That Lost Detail", level: 2 })).toBeVisible();
+  await page.getByRole("button", { name: "Back" }).click();
+  await expect(page.locator(".tutorial-card")).toHaveCount(9);
 });
 
 test("bending the tone curve previews it on the photo", async ({ page }) => {
   await openSample(page);
-  await page.locator(".scopes-details summary").click();
-  await page.getByRole("button", { name: "Tone Curve", exact: true }).click();
+  await page.getByRole("tab", { name: "Advanced" }).click();
+  await page.getByRole("tab", { name: "Tone Curve", exact: true }).click();
   const curve = page.locator(".curve-canvas");
   const photo = page.locator(".canvas-inner canvas").first();
   await expect(photo).not.toHaveAttribute("style", /filter/);
@@ -116,14 +119,15 @@ test("a picked photo is analyzed, saved to the album and compared", async ({ pag
   await openSample(page);
 
   const before = (await saved(page)).profile.photosAnalyzed;
-  await page.getByRole("button", { name: "Choose Another Photo" }).click();
+  await page.getByRole("button", { name: "Upload Photo" }).click();
   await expect(page.getByRole("button", { name: "Choose Photo" })).toBeVisible();
   await page.locator("input[type=file]").setInputFiles(join(PHOTOS, "a_1.jpg"));
   await expect(page.locator(".canvas-stack")).toBeVisible();
   await expect.poll(async () => (await saved(page)).profile.photosAnalyzed).toBe(before + 1);
 
-  await page.getByPlaceholder("Tags, comma separated (e.g. bridge, sunset)").fill("sea, people");
   await page.getByRole("button", { name: "Save to Reference Album" }).click();
+  await dialog(page).getByPlaceholder("Tags, comma separated (e.g. bridge, sunset)").fill("sea, people");
+  await dialog(page).getByRole("button", { name: "Save", exact: true }).click();
   await expect(toast(page, "Saved to your Reference Album.")).toBeVisible();
   const state = await saved(page);
   const item = state.album[0];

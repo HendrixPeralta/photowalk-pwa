@@ -43,6 +43,7 @@ test("photos logged on a walk show up with their camera data", async ({ page }) 
   // Finishing counts the walk's photos in the summary.
   await page.getByRole("button", { name: "Finish Walk" }).click();
   await dialog(page).getByRole("button", { name: "Complete Walk" }).click();
+  await expect(dialog(page).locator(".summary-stat-value").nth(1)).toHaveText(/^\d+ photos?$/);
   await expect(dialog(page).locator(".summary-stat-delta").nth(1)).toHaveText("+1 this walk");
   expect(errors).toEqual([]);
 });

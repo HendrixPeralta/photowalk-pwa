@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useSyncExternalStore } from "react";
 import { ToolHelpBody } from "@/features/toolhelp/ToolHelp";
-import { toolHelp, type ToolKey } from "@/features/toolhelp/content";
+import { TOOL_KEYS, toolHelp, type ToolKey } from "@/features/toolhelp/content";
 import { t } from "@/lib/i18n/core";
 
 // The same split as the Analysis screen: the readouts everyone sees, then the
@@ -12,12 +12,25 @@ const SECTIONS: { title: () => string; tools: ToolKey[] }[] = [
   { title: () => t("Advanced Tools"), tools: ["waveform", "parade", "vectorscope", "cie", "tonecurve"] },
 ];
 
-/** One article per Analysis tool: the "Learn more" text, to read any time. */
+// The open article lives in the URL hash, so a tool's "Learn more" pop-up can
+// link straight to it (/learn#histogram).
+function subscribeHash(onChange: () => void): () => void {
+  window.addEventListener("hashchange", onChange);
+  return () => window.removeEventListener("hashchange", onChange);
+}
+
+function hashTool(): ToolKey | null {
+  const tool = window.location.hash.slice(1) as ToolKey;
+  return TOOL_KEYS.includes(tool) ? tool : null;
+}
+
+/** One article per Analysis tool: the full story behind each "Learn more". */
 export function TutorialsScreen() {
-  const [open, setOpen] = useState<ToolKey | null>(null);
+  const open = useSyncExternalStore(subscribeHash, hashTool, () => null);
 
   const show = (tool: ToolKey | null) => {
-    setOpen(tool);
+    history.replaceState(history.state, "", tool ? `#${tool}` : window.location.pathname);
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
     // A new page of text starts at its top, not where the list was scrolled to.
     document.querySelector(".views")?.scrollTo({ top: 0 });
   };
@@ -33,7 +46,7 @@ export function TutorialsScreen() {
           {t("Back")}
         </button>
         <article className="theme-card tutorial-article">
-          <h2 className="tutorial-title">{info.title}</h2>
+          <h2 className="tutorial-title">{info.article}</h2>
           <ToolHelpBody info={info} />
         </article>
       </section>
@@ -52,7 +65,7 @@ export function TutorialsScreen() {
               return (
                 <li key={tool}>
                   <button type="button" className="tutorial-card" onClick={() => show(tool)}>
-                    <strong>{info.title}</strong>
+                    <strong>{info.article}</strong>
                     <span>{info.what}</span>
                   </button>
                 </li>

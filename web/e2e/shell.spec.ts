@@ -68,8 +68,8 @@ test("Tutorials has an article for every Analysis tool", async ({ page }) => {
   await expect(page.locator(".tutorial-card")).toHaveCount(9);
 
   // Other summaries mention the chart too, so match the card's own title.
-  await page.locator(".tutorial-card").filter({ has: page.locator("strong", { hasText: /^Brightness Chart$/ }) }).click();
-  await expect(page.getByRole("heading", { name: "Brightness Chart", level: 2 })).toBeVisible();
+  await page.locator(".tutorial-card").filter({ has: page.locator("strong", { hasText: /^Brightness Chart:/ }) }).click();
+  await expect(page.getByRole("heading", { name: "Brightness Chart: Spot Shadows and Highlights That Lost Detail", level: 2 })).toBeVisible();
   await expect(page.locator(".tutorial-article")).toContainText("What good looks like");
   await page.getByRole("button", { name: "Back" }).click();
   await expect(page.locator(".tutorial-card")).toHaveCount(9);
@@ -77,9 +77,9 @@ test("Tutorials has an article for every Analysis tool", async ({ page }) => {
 
 test("a new account starts empty: no sample history, no sample photos", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator(".streak-badge")).toContainText("0-day streak");
+  await expect(page.locator(".streak-badge")).toHaveAttribute("aria-label", "0-day streak");
   await page.reload();
-  await expect(page.locator(".streak-badge")).toContainText("0-day streak");
+  await expect(page.locator(".streak-badge")).toHaveAttribute("aria-label", "0-day streak");
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("photoeye:state")!).state);
   expect(saved.seededHistory).toBeNull();
   expect(saved.walkHistory).toEqual([]);

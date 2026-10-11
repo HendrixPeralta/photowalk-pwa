@@ -145,6 +145,21 @@ test("a custom theme built from the brief is used and kept in My Themes", async 
   expect(state.activeWalk.themeId).toBe(state.customThemes[0].id);
 });
 
+test("My Themes builds a new theme and stays put to list it", async ({ page }) => {
+  const errors = watchErrors(page);
+  await page.goto("/themes/");
+  await expect(page.locator(".empty-state-sm")).toHaveText("No custom themes yet.");
+
+  await page.getByRole("button", { name: "Build a Custom Theme" }).click();
+  await dialog(page).getByPlaceholder("Title (e.g. Rainy Day Reflections)").fill("Night Neon");
+  await dialog(page).getByRole("button", { name: "Save Theme" }).click();
+
+  await expect(page).toHaveURL(/\/themes\/$/);
+  await expect(page.locator(".log-last")).toHaveText("1 saved");
+  await expect(page.locator(".rewards-list")).toContainText("Night Neon");
+  expect(errors).toEqual([]);
+});
+
 test("the Live tab starts a walk, but opening /live/ directly does not", async ({ page }) => {
   await page.goto("/live/");
   await expect(page.locator("#screenTitle")).toHaveText("Live Walk");
