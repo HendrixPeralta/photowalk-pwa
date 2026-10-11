@@ -5,6 +5,7 @@ import { Icon } from "@/components/icons/Icon";
 import { useRedrawOnResize } from "@/components/useRedrawOnResize";
 import { ToolHelpButton } from "@/features/toolhelp/ToolHelp";
 import { drawHistogram } from "@/lib/analysis/drawHistogram";
+import { rgbToLab } from "@/lib/color";
 import type { HistogramBin } from "@/lib/analysis/histogram";
 import { gamutClusters, tonalKeyNote } from "@/lib/deconstruct";
 import { t } from "@/lib/i18n/core";
@@ -23,8 +24,12 @@ function copyHex(hex: string): void {
 
 /** The handful of colors that fill most of the photo, sized by share, and the scheme they make. */
 export function MainColors() {
+  const frameId = useAnalysis((s) => s.frame!.id);
   const palette = useAnalysis((s) => s.frame!.palette);
-  const clusters = gamutClusters(palette);
+  // Laid out by value, darkest to lightest, so the bar reads like a tonal scale.
+  const clusters = gamutClusters(palette)
+    .map((c, i) => ({ ...c, value: rgbToLab(palette[i].r, palette[i].g, palette[i].b).l }))
+    .sort((a, b) => a.value - b.value);
   const relation = palette.length ? paletteRelationship(palette) : null;
 
   return (
@@ -48,15 +53,20 @@ export function MainColors() {
         ))}
       </div>
       {relation && (
-        <div className="harmony-row">
-          <Icon name="compare" />
-          <div>
-            <span className="label-caps">{t("Color Harmony")}</span>
-            <strong>{relation.label}</strong>
-          </div>
-        </div>
+        <details key={frameId} className="harmony-note">
+          <summary className="collapse-summary harmony-row">
+            <Icon name="compare" />
+            <div>
+              <span className="label-caps">{t("Color Harmony")}</span>
+              <strong>{relation.label}</strong>
+            </div>
+            <svg className="collapse-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </summary>
+          <p className="hint"><ReadingText reading={relation} /></p>
+        </details>
       )}
-      <p className="hint">{relation && <ReadingText reading={relation} />}</p>
     </>
   );
 }
@@ -111,7 +121,6 @@ export function Brightness({ histogramRef }: { histogramRef: RefObject<HTMLCanva
           <div className="diag-note-head">
             <strong>{note.title}</strong>
             <span className="diag-note-tag">{note.tag}</span>
-            <ToolHelpButton tool="tonalkey" label={t("About Tonal Key")} />
           </div>
           <svg className="collapse-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />

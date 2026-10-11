@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { ToolHelpButton } from "@/features/toolhelp/ToolHelp";
+import { useEffect, useRef, type ReactNode, type RefObject } from "react";
 import { t } from "@/lib/i18n/core";
 import { AdvancedTools, ToneCurveFilter } from "./AdvancedTools";
 import { PhotoPanes } from "./PhotoPanes";
 import { Brightness, MainColors } from "./Readouts";
 import { SaveSection } from "./SaveSection";
-import { analyzeFile, loadDefaultPhoto, useAnalysis } from "./session";
+import { analyzeFile, loadDefaultPhoto, useAnalysis, type ReadoutTab } from "./session";
 
 /**
  * Photo Breakdown: composition guides, main colors, brightness and tonal key,
@@ -29,14 +28,6 @@ export function AnalysisScreen() {
   return (
     <section className="view" data-view="analyze">
       <ToneCurveFilter />
-      <div className="debrief-head">
-        <span className="debrief-head-left">
-          <span className="solar-dot" />
-          <span className="label-caps">{t("Photo Breakdown")}</span>
-        </span>
-        <ToolHelpButton tool="composition" label={t("About composition guides")} />
-      </div>
-
       <input
         ref={inputRef}
         type="file"
@@ -54,17 +45,68 @@ export function AnalysisScreen() {
       {hasPhoto ? (
         <div className={comparing ? "comparing" : undefined}>
           <PhotoPanes imageRef={imageRef} overlayRef={overlayRef} />
-          <MainColors />
-          <Brightness histogramRef={histogramRef} />
-          <AdvancedTools />
+          <ReadoutTabs histogramRef={histogramRef} />
           <SaveSection imageRef={imageRef} overlayRef={overlayRef} histogramRef={histogramRef} />
         </div>
       ) : (
-        <div className="empty-state">
-          <p>{t("Pick a photo to check its composition, main colors and brightness, with more detailed tools if you want to dig deeper.")}</p>
-          <button type="button" className="btn btn-accent" onClick={() => inputRef.current?.click()}>{t("Choose Photo")}</button>
-        </div>
+        // The same big start square as Live Walk before a walk.
+        <button type="button" className="live-start live-start-note" onClick={() => inputRef.current?.click()}>
+          {t("Choose Photo")}
+          <small>{t("Pick a photo to check its composition, main colors and brightness, with more detailed tools if you want to dig deeper.")}</small>
+        </button>
       )}
     </section>
+  );
+}
+
+const TABS: { tab: ReadoutTab; label: () => string }[] = [
+  { tab: "color", label: () => t("Color") },
+  { tab: "light", label: () => t("Light") },
+  { tab: "advanced", label: () => t("Advanced") },
+];
+
+/**
+ * Main colors, brightness and the advanced tools, one tab at a time. Every
+ * panel stays mounted so the summary download can still read the histogram.
+ */
+function ReadoutTabs({ histogramRef }: { histogramRef: RefObject<HTMLCanvasElement | null> }) {
+  const active = useAnalysis((s) => s.readoutTab);
+  const panels: Record<ReadoutTab, ReactNode> = {
+    color: <MainColors />,
+    light: <Brightness histogramRef={histogramRef} />,
+    advanced: <AdvancedTools />,
+  };
+
+  return (
+    <div className="readout-tabs">
+      <div className="readout-tab-bar" role="tablist" aria-label={t("Photo readouts")}>
+        {TABS.map(({ tab, label }) => (
+          <button
+            key={tab}
+            type="button"
+            role="tab"
+            id={`readout-tab-${tab}`}
+            aria-selected={active === tab}
+            aria-controls={`readout-panel-${tab}`}
+            className={`readout-tab${active === tab ? " active" : ""}`}
+            onClick={() => useAnalysis.setState({ readoutTab: tab })}
+          >
+            {label()}
+          </button>
+        ))}
+      </div>
+      {TABS.map(({ tab }) => (
+        <div
+          key={tab}
+          role="tabpanel"
+          id={`readout-panel-${tab}`}
+          aria-labelledby={`readout-tab-${tab}`}
+          className="readout-panel"
+          hidden={active !== tab}
+        >
+          {panels[tab]}
+        </div>
+      ))}
+    </div>
   );
 }

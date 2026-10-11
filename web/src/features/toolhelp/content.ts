@@ -19,6 +19,12 @@ interface RawRef { text: string; url?: RawUrl; note?: string }
 
 interface RawHelp {
   title: string;
+  /** The Tutorials article's title: what reading it will teach you. */
+  article: string;
+  /** The short take shown in the Learn more pop-up; the rest is the tutorial. */
+  tip: string;
+  /** Other tutorials worth reading alongside this one. */
+  related?: ToolKey[];
   what: string;
   read: string;
   /** Named items explained under "How to read it", like the guide types. */
@@ -35,6 +41,8 @@ export interface ToolHelp extends Omit<RawHelp, "refs"> { refs: HelpRef[] }
 const RAW: Record<ToolKey, RawHelp> = {
   composition: {
     title: N('Composition Guides'),
+    article: N("Composition Guides: Where to Place Your Subject"),
+    tip: N("These lines help you decide where to put the main thing in your photo. Try placing it on a line, or where two lines cross, instead of right in the middle. It often makes the photo feel more balanced."),
     what: N("Lines drawn over your photo to show where the main subject sits. They're based on layouts that painters and photographers have used for centuries because they tend to feel balanced and lead the eye."),
     read: N("Pick a guide from the menu and see whether the important parts of your photo (a face, the horizon, a tree, the brightest spot) land on or near the lines, especially where lines cross. Close is good enough. These are ways of looking, not rules to obey."),
     list: [
@@ -55,8 +63,10 @@ const RAW: Record<ToolKey, RawHelp> = {
   },
   gamut: {
     title: N('Main Colors'),
+    article: N("Main Colors: Which Colors Fill Your Photo and Work Together"),
+    tip: N("These are the main colors in your photo. The wider a color's block, the more of the photo it covers. Colors from opposite sides of the color wheel, like orange and blue, make each other stand out."),
     what: N("Finds the handful of colors that fill most of your photo, shows how much space each one takes up, and tells you whether they work together as a color scheme."),
-    read: N("The bar is your photo's colors lined up by size: a wider block means more of the photo is that color. Tap a block to copy its color code. Above the bar, Color Harmony names the scheme. Complementary means colors from opposite sides of the color wheel, like orange and blue. Analogous means neighbors, like yellow, orange and red. Monochrome means one color plus grays."),
+    read: N("The bar is your photo's colors lined up from darkest to lightest: a wider block means more of the photo is that color. Tap a block to copy its color code. Below the bar, Color Harmony names the scheme; tap it for an explanation. Complementary means colors from opposite sides of the color wheel, like orange and blue. Analogous means neighbors, like yellow, orange and red. Monochrome means one color plus grays."),
     good: N("A sunset with a warm orange sky over cool blue water comes back as Complementary. Opposite colors make each other stand out, which is why this pairing is so common in photos and film posters."),
     bad: N("A photo taken under mixed indoor lights comes back with four or five murky, slightly different greens and yellows, labeled Mixed. That isn't a color choice. The camera was confused by the lighting. Setting white balance, or shooting near a window, usually fixes it."),
     refs: [
@@ -67,6 +77,9 @@ const RAW: Record<ToolKey, RawHelp> = {
   },
   histogram: {
     title: N('Brightness Chart'),
+    article: N("Brightness Chart: Spot Shadows and Highlights That Lost Detail"),
+    tip: N("This chart shows how much of your photo is dark (left side) and how much is bright (right side). If it is piled up against either edge, some parts are pure black or pure white and have lost their detail."),
+    related: ['tonalkey'],
     what: N("Shows how much of your photo is dark, how much is bright, and how much sits in between. Photographers call this a histogram, and most cameras and editing apps can show one."),
     read: N("Left is black, right is white, and the middle is everything in between. The taller the chart at a spot, the more of the photo has that brightness. There's no single right shape: a snowy scene should lean right and a night scene should lean left. What matters is the two edges."),
     good: N("The chart fades down to almost nothing before it reaches either edge. That means even the darkest shadows and brightest highlights still have detail you can see and edit."),
@@ -78,6 +91,9 @@ const RAW: Record<ToolKey, RawHelp> = {
   },
   tonalkey: {
     title: N('Tonal Key'),
+    article: N("Tonal Key: Is Your Photo Bright, Dark or Punchy?"),
+    tip: N("A one-word summary of how bright or dark your photo is overall, and the mood that usually gives it, like airy, moody or punchy. Check that it matches the feeling you wanted."),
+    related: ['histogram'],
     what: N("Reads the brightness chart for you and sums up the overall mood of your photo in a few words: mostly bright (high-key), mostly dark (low-key), high contrast, low contrast, or balanced."),
     read: N("The title is the verdict and the tag beside it is the mood it usually gives (Airy, Moody, Punchy, Soft or Even). Open it to see how much of the photo is dark or bright, and how much is pure black or pure white. Anything above about 1% pure white or pure black is detail you've lost."),
     good: N("A bright, airy portrait you meant to keep light comes back as High-key with almost 0% pure white. The label matches your plan and no detail was lost."),
@@ -89,6 +105,9 @@ const RAW: Record<ToolKey, RawHelp> = {
   },
   waveform: {
     title: N('Waveform'),
+    article: N("Waveform: Check Brightness Across Your Photo, Left to Right"),
+    tip: N("Shows how bright each part of your photo is, from left to right in the same order as the photo. The higher the shape, the brighter that area. Anything touching the very top is pure white with no detail left."),
+    related: ['histogram'],
     what: N("A brightness chart that keeps its place in the photo. Instead of piling every pixel into one heap, it shows how bright each part of the photo is from left to right. Film and video crews use it to check exposure."),
     read: N("Left to right on the chart matches left to right in your photo. Higher up means brighter: the top line is pure white and the bottom line is pure black. So a bright window on the right side of your photo shows up as a high patch on the right side of the chart."),
     good: N("The shape rises where you expect light, like a bump where a sunlit face is, but stays just under the top line. The brightest parts are bright and still have detail."),
@@ -100,6 +119,9 @@ const RAW: Record<ToolKey, RawHelp> = {
   },
   parade: {
     title: N('RGB Parade'),
+    article: N("RGB Parade: Find an Unwanted Color Tint"),
+    tip: N("Splits your photo into the red, green and blue light that every screen color is made of. If one sits clearly higher or lower than the other two, the whole photo leans toward or away from that color, like the orange look from indoor bulbs."),
+    related: ['waveform'],
     what: N("Three waveforms side by side: one for red, one for green, one for blue. Every color on a screen is a mix of those three, so comparing them shows whether your photo has an unwanted color tint."),
     read: N("Compare the bottoms of the three panels, then the tops. Something white or gray in real life should have red, green and blue at the same height. If one panel sits clearly higher than the others, that color is tinting the photo."),
     good: N("The three panels have roughly the same shape and line up at the top and bottom, with small differences where the scene really is colorful, like a little extra red over a warm face."),
@@ -111,6 +133,8 @@ const RAW: Record<ToolKey, RawHelp> = {
   },
   vectorscope: {
     title: N('Vectorscope'),
+    article: N("Vectorscope: Check How Strong Your Colors Are and Keep Skin Natural"),
+    tip: N("A color wheel showing which colors are in your photo. The direction tells you the color, and the farther from the center, the stronger it is. Skin should land near the dashed line, or it may look too orange, pink or green."),
     what: N("A round chart that shows which colors are in your photo and how strong they are, ignoring brightness completely."),
     read: N("Think of it as a color wheel. The direction a dot sits in tells you its color (reds one way, blues the opposite way). The distance from the center tells you how vivid it is: the center is gray, and the farther out, the stronger the color. The dashed line is where skin tones fall, for every skin color."),
     good: N("Most dots stay in the inner part of the circle, leaning toward the colors you actually saw. If there's a person in the photo, their skin sits on or near the dashed line."),
@@ -122,6 +146,9 @@ const RAW: Record<ToolKey, RawHelp> = {
   },
   cie: {
     title: N('CIE Chromaticity'),
+    article: N("CIE Chromaticity: Your Range of Colors and Warm or Cool Light"),
+    tip: N("Shows the range of colors in your photo on a map of every color people can see. If your colors lean toward orange or blue when the scene didn't look that way, the camera guessed the color of the light wrong."),
+    related: ['vectorscope'],
     what: N("A map of every color your photo uses, drawn over a map of all the colors people can see. It shows the range of colors in the photo and whether the overall light leans warm or cool."),
     read: N("The horseshoe is every color the human eye can see. The triangle inside it is the smaller set of colors a normal screen can show. Your photo's colors appear as a cloud. The white cross (D65) marks normal daylight: if the cloud's average sits near it, the light looks natural. Toward orange means warmer, toward blue means cooler."),
     good: N("A colorful street scene spreads its cloud across a good part of the triangle. A foggy morning stays in a small cloud near the white cross. Both are right for their scene."),
@@ -133,6 +160,9 @@ const RAW: Record<ToolKey, RawHelp> = {
   },
   tonecurve: {
     title: N('Tone Curve'),
+    article: N("Tone Curve: Fine-Tune Brightness and Contrast"),
+    tip: N("Lets you brighten or darken parts of your photo by bending a line. Pull it up to brighten, down to darken. A gentle S-shape makes darks a little darker and brights a little brighter, which adds punch."),
+    related: ['histogram'],
     what: N("The tool most editing apps use to fine-tune brightness and contrast. Here you can see how your photo's tones are spread, then try bending the curve to preview a change."),
     read: N("Measured shows your photo as it is: the line climbs from dark on the left to bright on the right, and a steep stretch means lots of the photo sits in that range of tones. Switch to Adjust to edit. The straight line means no change. Tap to add a point, drag it up to brighten those tones or down to darken them, and double-tap a point to remove it."),
     good: N("A gentle S-shape: the dark end pulled down a little and the bright end pushed up a little. It adds punch and makes the photo feel crisper without losing detail."),
@@ -150,6 +180,9 @@ export function toolHelp(key: ToolKey): ToolHelp {
   const ja = getLang() === "ja";
   return {
     title: t(raw.title),
+    article: t(raw.article),
+    tip: t(raw.tip),
+    related: raw.related,
     what: t(raw.what),
     read: t(raw.read),
     list: raw.list?.map(([name, text]) => [t(name), t(text)] as [string, string]),
