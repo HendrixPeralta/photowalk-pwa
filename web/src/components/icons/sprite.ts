@@ -2,7 +2,7 @@
 // without an icon font. Generated once from the old index.html sprite.
 // <IconSprite> renders these once; <Icon name> references one with <use>.
 
-export const ICON_NAMES = ["camera", "explore", "grid", "library", "timer", "hourglass", "target", "footprint", "bolt", "flame", "star", "reset", "rotate", "film", "sun", "twilight", "lens", "shutter", "bulb", "contrast", "palette", "compare", "tune", "chat", "send", "share", "pin", "navigate", "pause", "play", "plus", "flag", "download", "bookmark", "repeat", "settings", "user", "split", "swap", "fullscreen"] as const;
+export const ICON_NAMES = ["camera", "explore", "grid", "library", "timer", "hourglass", "target", "footprint", "bolt", "flame", "star", "reset", "rotate", "film", "sun", "twilight", "lens", "shutter", "bulb", "contrast", "palette", "compare", "tune", "chat", "send", "share", "pin", "navigate", "pause", "play", "plus", "flag", "download", "bookmark", "repeat", "settings", "user", "split", "swap", "fullscreen", "filter", "chevron-down", "check", "close", "qr"] as const;
 
 export type IconName = (typeof ICON_NAMES)[number];
 
@@ -133,6 +133,23 @@ export const SPRITE_DEFS = `
     </g>
     <g id="i-fullscreen" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
       <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/>
+    </g>
+    <g id="i-filter" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round">
+      <path d="M3.5 4.5h17l-6.5 7.8v6.2l-4 2v-8.2z"/>
+    </g>
+    <g id="i-chevron-down" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7 10l5 5 5-5"/>
+    </g>
+    <g id="i-check" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 12.5l4.5 4.5L19 7.5"/>
+    </g>
+    <g id="i-close" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <path d="M6 6l12 12M18 6L6 18"/>
+    </g>
+    <g id="i-qr" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1"/>
+      <rect x="3.5" y="14" width="6.5" height="6.5" rx="1"/>
+      <path d="M14 14h2.5v2.5H14zM18 18h2.5v2.5H18zM14 18.5v2M18.5 14h2" stroke-linecap="round"/>
     </g>
 
     

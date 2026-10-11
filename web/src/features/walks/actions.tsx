@@ -16,7 +16,7 @@ import {
 } from "@/lib/walk";
 import { getData, update } from "@/state/appStore";
 import type { Reward, WalkMode, WalkRecord } from "@/state/types";
-import { closeModal, openModal, showToast } from "@/state/ui";
+import { closeModal, openModal, showToast, useModal } from "@/state/ui";
 import { ConfirmCompleteModal, ConfirmHoursModal } from "./modals/FinishModals";
 import { ThemeEditorModal } from "./modals/ThemeEditor";
 import { ThemePickerModal } from "./modals/ThemePicker";
@@ -147,9 +147,23 @@ export function restoreActiveWalk(): void {
 
 /* ---------- Brief and theme pop-ups ---------- */
 
+/**
+ * A walk only counts once "Start shooting" is tapped. Backing out of the
+ * brief (or the theme pop-ups it leads to) drops the walk it set up, so Home
+ * and Live don't show controls for a walk that never began. Checked a tick
+ * later, as moving between those pop-ups closes one just before opening the next.
+ */
+export function dropWalkIfNeverStarted(): void {
+  setTimeout(() => {
+    if (useModal.getState().current) return;
+    const w = getData().activeWalk;
+    if (w && !w.startedAt) update((d) => { d.activeWalk = null; });
+  }, 0);
+}
+
 export function openWalkBrief(): void {
   if (!walkTheme()) return;
-  openModal(<WalkBriefModal />);
+  openModal(<WalkBriefModal />, { floating: true });
 }
 
 export function openThemePicker(): void {

@@ -18,7 +18,7 @@ const TABS: { view: View; icon: IconName; label: () => string }[] = [
 
 export function BottomNav() {
   const current = viewForPath(usePathname());
-  const walking = useAppStore((s) => Boolean(s.activeWalk));
+  const walking = useAppStore((s) => Boolean(s.activeWalk?.startedAt));
 
   return (
     <nav className="bottom-nav" data-app-chrome>

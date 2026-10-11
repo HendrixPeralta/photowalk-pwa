@@ -82,7 +82,7 @@ test("a tool's help links to its tutorial by title", async ({ page }) => {
   await expect(page).toHaveURL(/\/learn\/?#histogram$/);
   await expect(dialog(page)).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Brightness Chart: Spot Shadows and Highlights That Lost Detail", level: 2 })).toBeVisible();
-  await page.getByRole("button", { name: "Back" }).click();
+  await page.getByRole("button", { name: "Back", exact: true }).click();
   await expect(page.locator(".tutorial-card")).toHaveCount(9);
 });
 

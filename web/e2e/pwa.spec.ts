@@ -70,8 +70,9 @@ test("photos from the share sheet land on Partners", async ({ page }) => {
   await page.getByRole("button", { name: /Start Photo Walk/ }).click();
   await page.locator(".walk-fab-menu").getByRole("button", { name: /Create Room/ }).click();
   await expect(page).toHaveURL(/\/partners\/$/);
-  await page.getByRole("button", { name: "Upload", exact: true }).click();
-  await expect(page.locator(".room-thumb")).toHaveCount(1);
+  await expect(page.locator(".room-add-count")).toHaveText("1");
+  await page.getByRole("button", { name: "Post the shared photos" }).click();
+  await expect(page.getByRole("img", { name: "1 photo", exact: true })).toBeVisible();
   await expect(page.locator(".shared-notice")).toHaveCount(0);
 });
 

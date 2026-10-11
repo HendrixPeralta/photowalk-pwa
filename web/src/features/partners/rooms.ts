@@ -3,7 +3,6 @@
 // cached copy of it (roomStore). Each action asks the server, takes the
 // fresh room it answers with, and says what went wrong when something did.
 
-import { themeById } from "@/lib/content/themes";
 import { readExif } from "@/lib/exif";
 import { t } from "@/lib/i18n/core";
 import { canvasToBlob, drawToCanvas, loadImage, readFileAsDataUrl } from "@/lib/image";
@@ -25,25 +24,8 @@ export function inviteUrl(code: string, origin = window.location.origin): string
   return `${origin}/partners/?room=${encodeURIComponent(code)}`;
 }
 
-export function copyInvite(): void {
-  const code = getData().currentRoom;
-  if (!code) return;
-  const link = inviteUrl(code);
-  const fallback = () => showToast(t("Code: {code}", { code }));
-  if (!navigator.clipboard?.writeText) { fallback(); return; }
-  navigator.clipboard.writeText(link).then(() => showToast(t("Invite link copied to clipboard.")), fallback);
-}
-
-/** The walk the room is about: the one under way, else the one just finished. */
-function walkTheme(): string {
-  const { activeWalk, lastWalk, customThemes } = getData();
-  const id = activeWalk?.themeId ?? lastWalk?.themeId;
-  return (id && themeById(id, customThemes)?.title) || "";
-}
-
-/** Opens a new room, with you as its host. Null on success, else what went wrong. */
 export async function createRoom(): Promise<string | null> {
-  const res = await roomsApi.create(walkTheme().slice(0, LIMITS.theme));
+  const res = await roomsApi.create("");
   if (!res.ok) return roomErrorMessage(res.error);
   applySnapshot(res.data.room);
   showToast(t("Room {code} created. Share the code or QR code with your walk partners.", { code: res.data.room.code }));
@@ -61,7 +43,7 @@ export async function joinRoom(raw: string): Promise<string | null> {
   return null;
 }
 
-/** Leaves the room. The host closes it instead (closeRoom). */
+/** Leaves the room. */
 export async function leaveRoom(): Promise<void> {
   const code = getData().currentRoom;
   const me = useAccount.getState().user?.id;
@@ -73,16 +55,6 @@ export async function leaveRoom(): Promise<void> {
     return;
   }
   showToast(roomErrorMessage(res.error));
-}
-
-/** The host closes the room: everyone loses access and its photos are deleted. */
-export async function closeRoom(): Promise<void> {
-  const code = getData().currentRoom;
-  if (!code) return;
-  const res = await roomsApi.close(code);
-  if (!res.ok && res.error !== "room_not_found") { showToast(roomErrorMessage(res.error)); return; }
-  forgetRoom();
-  showToast(t("Room {code} closed.", { code }));
 }
 
 /** The host takes someone out of the room. They can't come back. */

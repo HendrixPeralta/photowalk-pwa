@@ -16,11 +16,24 @@ export interface AlbumFilters {
   search: string;
 }
 
+export type FilterKey = Exclude<keyof AlbumFilters, "search">;
+
 export const NO_FILTERS: AlbumFilters = {
   brightness: "all", aspect: "all", color: "all", focal: "all", aperture: "all", location: "all", search: "",
 };
 
-export const useAlbumFilters = create<AlbumFilters>(() => NO_FILTERS);
+/** The filters plus which ones are shown in the bar, in the order they were added. */
+export const useAlbumFilters = create<AlbumFilters & { shown: FilterKey[] }>(() => ({ ...NO_FILTERS, shown: [] }));
+
+/** Puts a filter in the bar, unset. */
+export function addFilter(key: FilterKey) {
+  useAlbumFilters.setState((s) => (s.shown.includes(key) ? s : { shown: [...s.shown, key] }));
+}
+
+/** Takes a filter out of the bar and stops it narrowing the album. */
+export function removeFilter(key: FilterKey) {
+  useAlbumFilters.setState((s) => ({ [key]: "all", shown: s.shown.filter((k) => k !== key) }));
+}
 
 /** True when `item` passes every filter. */
 export function matchesFilters(item: AlbumItem, f: AlbumFilters): boolean {

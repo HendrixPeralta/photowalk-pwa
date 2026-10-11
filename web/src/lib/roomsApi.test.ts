@@ -32,7 +32,7 @@ describe("roomsApi", () => {
 
   it("treats an empty success as done", async () => {
     answer(204);
-    expect(await roomsApi.close("ABC234")).toEqual({ ok: true, data: undefined });
+    expect(await roomsApi.removeMember("ABC234", "me")).toEqual({ ok: true, data: undefined });
   });
 
   it("uploads a photo as a form with its details", async () => {

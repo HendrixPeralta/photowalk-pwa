@@ -126,9 +126,10 @@ test("walk partners can create a room or are told when a code doesn't work", asy
 
   await page.getByRole("button", { name: "Create Room" }).click();
   await expect(toast(page, /Room [A-Z2-9]{6} created/)).toBeVisible();
-  await expect(page.locator(".theme-card")).toContainText(/Room [A-Z2-9]{6} is open for your walk partners\./);
-  await page.getByRole("button", { name: "Manage Room" }).click();
+  await expect(page.locator(".your-room")).toHaveCount(1);
+  await expect(page.locator(".room-code-card")).toHaveText(/^[A-Z2-9]{6}$/);
+  await page.getByRole("button", { name: "Enter room" }).click();
   await expect(page).toHaveURL(/\/partners\/$/);
-  await page.getByRole("button", { name: "Back", exact: true }).click();
+  await page.getByRole("link", { name: "Live Walk" }).click();
   await expect(page).toHaveURL(/\/live\/$/);
 });

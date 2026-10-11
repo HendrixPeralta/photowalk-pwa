@@ -131,7 +131,7 @@ export interface RoomSnapshot {
   notes: RoomNote[];
 }
 
-/** One line per room in "Your rooms". */
+/** One line per room in "Active rooms". */
 export interface RoomSummary {
   code: string;
   theme: string;
