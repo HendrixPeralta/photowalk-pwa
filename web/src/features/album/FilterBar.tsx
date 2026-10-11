@@ -77,12 +77,14 @@ function Popover({ open, onClose, anchor, children }: { open: boolean; onClose: 
   );
 }
 
-/** One filter in the bar: shows its value, and opens to change or remove it. */
+/** One filter in the bar: shows its value, and opens to change it, switch it off, or remove it. */
 function FilterPill({ filterKey, open, setOpen }: { filterKey: FilterKey; open: boolean; setOpen: (open: boolean) => void }) {
   const filter = byKey(filterKey);
   const value = useAlbumFilters((s) => s[filterKey]);
   const options = filter.options();
   const valueLabel = options.find(([v]) => v === value)?.[1];
+  // "All" switches the filter off but keeps it in the bar, ready to set again.
+  const choices: [string, string][] = [["all", t("All")], ...options];
 
   return (
     <Popover
@@ -102,16 +104,16 @@ function FilterPill({ filterKey, open, setOpen }: { filterKey: FilterKey; open: 
       }
     >
       <p className="filter-menu-title">{filter.name()}</p>
-      {options.map(([v, label], i) => (
+      {choices.map(([v, label]) => (
         <button
           key={v}
           type="button"
           role="menuitemradio"
           aria-checked={v === value}
           className="filter-menu-item"
-          autoFocus={i === 0}
+          autoFocus={v === value}
           onClick={() => {
-            useAlbumFilters.setState({ [filterKey]: v === value ? "all" : v });
+            useAlbumFilters.setState({ [filterKey]: v });
             setOpen(false);
           }}
         >

@@ -42,6 +42,9 @@ test("filters and search narrow the album", async ({ page }) => {
   // becomes its own dropdown under the search box.
   await page.getByRole("button", { name: "Filter", exact: true }).click();
   await page.getByRole("menuitemcheckbox", { name: "Shape" }).click();
+  // A new filter starts on All, so nothing is hidden yet.
+  await expect(page.getByRole("menuitemradio", { name: "All" })).toHaveAttribute("aria-checked", "true");
+  await expect(thumbs(page)).toHaveCount(6);
   await page.getByRole("menuitemradio", { name: "Portrait" }).click();
   await expect(page.getByRole("menu")).toHaveCount(0);
   const portraits = await thumbs(page).count();
@@ -53,6 +56,15 @@ test("filters and search narrow the album", async ({ page }) => {
   await page.getByRole("link", { name: "Walks", exact: true }).click();
   await page.getByRole("link", { name: "Album", exact: true }).click();
   await expect(page.getByRole("button", { name: "Shape: Portrait" })).toBeVisible();
+  await expect(thumbs(page)).toHaveCount(portraits);
+
+  // "All" switches the filter off but keeps it in the bar.
+  await page.getByRole("button", { name: "Shape: Portrait" }).click();
+  await page.getByRole("menuitemradio", { name: "All" }).click();
+  await expect(thumbs(page)).toHaveCount(6);
+  await page.getByRole("button", { name: "Shape", exact: true }).click();
+  await expect(page.getByRole("menuitemradio", { name: "All" })).toHaveAttribute("aria-checked", "true");
+  await page.getByRole("menuitemradio", { name: "Portrait" }).click();
   await expect(thumbs(page)).toHaveCount(portraits);
 
   // Removing the filter shows everything again.
