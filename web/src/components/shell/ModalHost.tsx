@@ -67,9 +67,15 @@ export function ModalHost() {
   if (!current) return <div className="modal-root hidden" />;
 
   return (
-    <div className="modal-root" onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}>
+    <div
+      className={`modal-root${current.alert ? " modal-root-alert" : ""}`}
+      onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
+    >
       <div ref={cardRef} className="modal-card" role="dialog" aria-modal="true" tabIndex={-1} key={current.id}>
-        <button type="button" className="modal-close" aria-label={t("Close")} onClick={closeModal}>&times;</button>
+        {/* An alert is answered with its own buttons (or Escape, or a tap outside). */}
+        {!current.alert && (
+          <button type="button" className="modal-close" aria-label={t("Close")} onClick={closeModal}>&times;</button>
+        )}
         {current.element}
       </div>
     </div>

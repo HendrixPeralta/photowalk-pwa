@@ -33,6 +33,8 @@ export interface ModalEntry {
   id: number;
   element: ReactElement;
   onClose?: () => void;
+  /** A short question with its answers: centered, no close button. */
+  alert?: boolean;
 }
 
 /**
@@ -44,8 +46,8 @@ export interface ModalEntry {
 export const useModal = create<{ current: ModalEntry | null }>(() => ({ current: null }));
 let nextModalId = 1;
 
-export function openModal(element: ReactElement, opts: { onClose?: () => void } = {}): void {
-  useModal.setState({ current: { id: nextModalId++, element, onClose: opts.onClose } });
+export function openModal(element: ReactElement, opts: { onClose?: () => void; alert?: boolean } = {}): void {
+  useModal.setState({ current: { id: nextModalId++, element, onClose: opts.onClose, alert: opts.alert } });
 }
 
 export function closeModal(): void {

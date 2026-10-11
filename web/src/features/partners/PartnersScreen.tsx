@@ -32,6 +32,13 @@ export function PartnersScreen() {
 
   return (
     <section className="view" data-view="share">
+      {/* Partners has no tab of its own, so this is the way back to the walk. */}
+      <button type="button" className="btn btn-ghost btn-sm partners-back" onClick={() => navigate("hud")}>
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        {t("Back")}
+      </button>
       <SharedNotice inRoom={Boolean(code)} />
       {code && <SyncNotice />}
       {room ? <RoomView room={room} /> : code ? (

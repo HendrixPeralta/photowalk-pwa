@@ -29,7 +29,7 @@ export function MainColors() {
 
   return (
     <>
-      <div className="gamut-head">
+      <div className="help-head">
         <h4 className="subsection-title">{t("Main Colors")}</h4>
         <ToolHelpButton tool="gamut" label={t("About Main Colors")} />
       </div>
@@ -85,9 +85,10 @@ export function Brightness({ histogramRef }: { histogramRef: RefObject<HTMLCanva
 
   return (
     <>
-      <h4 className="subsection-title">
-        {t("Brightness Chart")} <ToolHelpButton tool="histogram" label={t("About Brightness Chart")} />
-      </h4>
+      <div className="help-head">
+        <h4 className="subsection-title">{t("Brightness Chart")}</h4>
+        <ToolHelpButton tool="histogram" label={t("About Brightness Chart")} />
+      </div>
       <div className="hist-grid">
         <div>
           <p className="compare-label">{t("Yours")}</p>
@@ -109,8 +110,8 @@ export function Brightness({ histogramRef }: { histogramRef: RefObject<HTMLCanva
           <Icon name="contrast" className="diag-note-icon" />
           <div className="diag-note-head">
             <strong>{note.title}</strong>
-            <ToolHelpButton tool="tonalkey" label={t("About Tonal Key")} />
             <span className="diag-note-tag">{note.tag}</span>
+            <ToolHelpButton tool="tonalkey" label={t("About Tonal Key")} />
           </div>
           <svg className="collapse-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />

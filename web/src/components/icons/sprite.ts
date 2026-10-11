@@ -2,7 +2,7 @@
 // without an icon font. Generated once from the old index.html sprite.
 // <IconSprite> renders these once; <Icon name> references one with <use>.
 
-export const ICON_NAMES = ["camera", "explore", "grid", "library", "timer", "hourglass", "target", "footprint", "bolt", "flame", "film", "sun", "twilight", "lens", "shutter", "bulb", "contrast", "palette", "compare", "tune", "chat", "send", "share", "pin", "navigate", "pause", "flag", "download", "bookmark", "repeat", "settings", "user"] as const;
+export const ICON_NAMES = ["camera", "explore", "grid", "library", "timer", "hourglass", "target", "footprint", "bolt", "flame", "film", "sun", "twilight", "lens", "shutter", "bulb", "contrast", "palette", "compare", "tune", "chat", "send", "share", "pin", "navigate", "pause", "play", "plus", "flag", "download", "bookmark", "repeat", "settings", "user"] as const;
 
 export type IconName = (typeof ICON_NAMES)[number];
 
@@ -92,6 +92,12 @@ export const SPRITE_DEFS = `
     </g>
     <g id="i-pause" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
       <path d="M9 5v14M15 5v14"/>
+    </g>
+    <g id="i-play" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+      <path d="M8 5.5v13l10.5-6.5z"/>
+    </g>
+    <g id="i-plus" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <path d="M12 5v14M5 12h14"/>
     </g>
     <g id="i-flag" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
       <path d="M6 21V4h12l-2.5 4L18 12H6"/>

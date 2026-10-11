@@ -38,10 +38,19 @@ export function setMode(mode: WalkMode): void {
  * follows, so rerolling or editing mid-brief sticks.
  */
 export function putThemeOnHand(theme: Theme, reason = ""): void {
+  if (getData().activeWalk?.startedAt) useWalkUi.setState({ theme, reason });
+  else changeWalkTheme(theme, reason);
+}
+
+/**
+ * Swaps the open walk's theme, even mid-walk, from the Live screen. The
+ * checklist starts over for the new theme; the clock and photos carry on.
+ */
+export function changeWalkTheme(theme: Theme, reason = ""): void {
   useWalkUi.setState({ theme, reason });
   update((d) => {
     const w = d.activeWalk;
-    if (!w || w.startedAt) return;
+    if (!w) return;
     w.themeId = theme.id;
     w.challengesChecked = new Array(challengesFor(theme, w.mode).length).fill(false);
   });
@@ -145,6 +154,11 @@ export function openWalkBrief(): void {
 
 export function openThemePicker(): void {
   openModal(<ThemePickerModal />);
+}
+
+/** Change Theme from the Live screen, which swaps the running walk's theme. */
+export function openWalkThemePicker(): void {
+  openModal(<ThemePickerModal midWalk />);
 }
 
 /**
@@ -275,7 +289,7 @@ export function finishWalk(auto = false): void {
         finalizeWalk(startedAt, false);
       }}
     />,
-    { onClose: () => { if (!settled) showToast(t("Still on your walk.")); } },
+    { alert: true, onClose: () => { if (!settled) showToast(t("Still on your walk.")); } },
   );
 }
 
