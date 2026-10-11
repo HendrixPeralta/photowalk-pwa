@@ -12,7 +12,8 @@ import { WalkControls } from "./WalkControls";
 
 /** Home: this week and the year at a glance, the walk launcher (or the open walk), and rewards. */
 export function WalksScreen() {
-  const walk = useAppStore((s) => s.activeWalk);
+  // Only once Start shooting is tapped; a walk still on its brief isn't under way.
+  const walk = useAppStore((s) => (s.activeWalk?.startedAt ? s.activeWalk : null));
 
   return (
     <section className="view" data-view="walks">

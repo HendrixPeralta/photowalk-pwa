@@ -33,7 +33,8 @@ export function LiveScreen() {
 
   return (
     <section className="view" data-view="hud">
-      {walk ? (
+      {/* A walk still on its brief hasn't begun: nothing of it shows until Start shooting. */}
+      {walk?.startedAt ? (
         <>
           <Telemetry walk={walk} />
           <MissionCard walk={walk} />

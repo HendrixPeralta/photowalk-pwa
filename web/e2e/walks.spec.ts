@@ -128,9 +128,9 @@ test("a custom theme built from the brief is used and kept in My Themes", async 
 
   // Straight back to the brief, now on the new theme.
   await expect(dialog(page).getByRole("heading", { name: "Rainy Day Reflections" })).toBeVisible();
-  await page.keyboard.press("Escape");
+  await dialog(page).getByRole("button", { name: "Start shooting" }).click();
+  await expect(page).toHaveURL(/\/live\/$/);
 
-  // Through the menu: a reload would reopen the brief of the walk left open.
   await page.getByRole("button", { name: "Profile" }).click();
   await page.getByRole("dialog", { name: "Menu" }).getByRole("link", { name: "My Themes" }).click();
   await expect(page.locator(".log-last")).toHaveText("1 saved");
@@ -173,6 +173,30 @@ test("the Live tab starts a walk, but opening /live/ directly does not", async (
   // A walk left on its brief comes back on its brief after a reload.
   await page.reload();
   await expect(dialog(page).getByRole("button", { name: "Start shooting" })).toBeVisible();
+});
+
+test("closing the brief without starting leaves no walk behind", async ({ page }) => {
+  for (const mode of ["Casual Walk", "Challenge Walk"] as const) {
+    await openBrief(page, mode);
+    // Through Change Theme and back first: moving between the pop-ups keeps the walk.
+    await dialog(page).getByRole("button", { name: "Change Theme" }).click();
+    await dialog(page).getByRole("button", { name: "Randomize" }).click();
+    await expect(dialog(page).getByRole("button", { name: "Start shooting" })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(dialog(page)).toHaveCount(0);
+
+    await expect(page.getByRole("button", { name: /Start Photo Walk/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Finish Walk" })).toHaveCount(0);
+    await expect.poll(async () => (await saved(page)).activeWalk).toBeNull();
+    // The Live tab sets up a walk too; backing out of its brief drops it the same way.
+    await page.getByRole("link", { name: "Live Walk", exact: true }).click();
+    await expect(dialog(page).getByRole("button", { name: "Start shooting" })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("button", { name: "Finish Walk" })).toHaveCount(0);
+    await expect(page.locator(".live-start")).toBeVisible();
+    await expect(page.locator(".nav-live")).toHaveCount(0);
+    await expect.poll(async () => (await saved(page)).activeWalk).toBeNull();
+  }
 });
 
 test("the golden-hour badge asks for a location, then shows the light", async ({ page, context }) => {
