@@ -7,7 +7,7 @@ import { defaultState } from "@/state/defaults";
 import { useToasts } from "@/state/ui";
 import { useShareInbox } from "./inbox";
 import { keepPostedImage } from "./roomImages";
-import { addComment, closeRoom, createRoom, inviteUrl, joinRoom, leaveRoom, postNote, uploadToRoom } from "./rooms";
+import { addComment, createRoom, inviteUrl, joinRoom, leaveRoom, postNote, uploadToRoom } from "./rooms";
 import { useRoom } from "./roomStore";
 
 vi.mock("./roomImages", () => ({ keepPostedImage: vi.fn(async () => {}), pruneRoomImages: vi.fn(async () => {}) }));
@@ -40,11 +40,11 @@ beforeEach(() => {
 afterEach(() => vi.restoreAllMocks());
 
 describe("rooms", () => {
-  it("creates a room on the server, named after the walk", async () => {
+  it("creates a room on the server, not tied to the walk's theme", async () => {
     update((d) => { d.lastWalk = { id: "w", themeId: "reflections", mode: "casual", durationMin: null, hours: 1, challengesDone: 0, challengeCount: 0, endedAt: 0 }; });
     const create = vi.spyOn(roomsApi, "create").mockResolvedValue({ ok: true, data: { room: room({ code: "XYZ789" }) } });
     expect(await createRoom()).toBeNull();
-    expect(create.mock.calls[0][0]).not.toBe("");
+    expect(create.mock.calls[0][0]).toBe("");
     expect(getData().currentRoom).toBe("XYZ789");
     expect(toasts()[0]).toContain("Room XYZ789 created.");
   });
@@ -74,13 +74,6 @@ describe("rooms", () => {
     expect(getData().currentRoom).toBeNull();
   });
 
-  it("closes the host's room", async () => {
-    update((d) => { d.currentRoom = "ABC234"; });
-    vi.spyOn(roomsApi, "close").mockResolvedValue({ ok: true, data: undefined });
-    await closeRoom();
-    expect(getData().currentRoom).toBeNull();
-    expect(toasts()).toEqual(["Room ABC234 closed."]);
-  });
 });
 
 describe("posting", () => {
