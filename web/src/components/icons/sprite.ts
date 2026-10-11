@@ -134,8 +134,8 @@ export const SPRITE_DEFS = `
     <g id="i-fullscreen" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
       <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/>
     </g>
-    <g id="i-filter" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-      <path d="M4 7h16M7 12h10M10 17h4"/>
+    <g id="i-filter" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round">
+      <path d="M3.5 4.5h17l-6.5 7.8v6.2l-4 2v-8.2z"/>
     </g>
     <g id="i-chevron-down" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <path d="M7 10l5 5 5-5"/>
