@@ -2676,7 +2676,6 @@ details[open] > .harmony-row .collapse-chevron { transform: rotate(180deg); }
   font-size: 12px;
   color: var(--text-dim);
 }
-.review-field-hint-block { display: block; margin: -4px 0 6px; }
 
 .review-chip-row {
   display: flex;
@@ -2686,8 +2685,7 @@ details[open] > .harmony-row .collapse-chevron { transform: rotate(180deg); }
 
 /* The shared .chip-btn default (surface-0, a "recessed well" tone) reads as
    nearly flush with the modal card behind it. Raised chips need surface-3. */
-.review-chip-row .chip-btn,
-.review-lang-toggle .chip-btn {
+.review-chip-row .chip-btn {
   background: var(--surface-3);
   border-color: var(--border-strong);
 }
