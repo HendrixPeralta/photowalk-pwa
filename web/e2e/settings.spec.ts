@@ -92,7 +92,7 @@ test("a review asks for something first, then sends", async ({ page }) => {
     await route.fulfill({ status: 200, body: "ok" });
   });
   await page.goto("/");
-  await page.getByRole("button", { name: "Leave a review" }).click();
+  await page.getByRole("button", { name: "Leave feedback" }).click();
   await dialog(page).getByRole("button", { name: "Send review" }).click();
   await expect(dialog(page)).toContainText("Add a rating or an answer first.");
 

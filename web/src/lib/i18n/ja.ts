@@ -12,7 +12,7 @@ const ja: Record<string, string> = {
   "Deep": "f/8以上",
   "Walks": "ウォーク",
   "Leave a review": "レビューを書く",
-  "Review": "レビュー",
+  "Leave feedback": "フィードバックを送る",
   "Current streak": "現在の連続記録",
   "Install": "インストール",
   "Profile": "プロフィール",

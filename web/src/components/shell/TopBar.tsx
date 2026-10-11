@@ -25,9 +25,9 @@ export function TopBar() {
         <h1 id="screenTitle" className="visually-hidden">{screenTitle(viewForPath(pathname))}</h1>
       </div>
 
-      <button type="button" className="topbar-review" aria-label={t("Leave a review")} onClick={openReview}>
+      <button type="button" className="topbar-review" aria-label={t("Leave feedback")} onClick={openReview}>
         <Icon name="star" className="topbar-review-star" />
-        <span className="topbar-review-label">{t("Review")}</span>
+        <span className="topbar-review-label">{t("Feedback")}</span>
       </button>
 
       <div className="topbar-actions">
