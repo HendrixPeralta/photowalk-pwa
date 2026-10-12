@@ -1,8 +1,9 @@
 "use client";
 
+import { Icon } from "@/components/icons/Icon";
 import { useImageUrl } from "@/components/useImageUrl";
 import { openAnalysis } from "@/features/analysis/request";
-import { exifRows } from "@/lib/analysis/album";
+import { byLightness } from "@/lib/color";
 import { themeById } from "@/lib/content/themes";
 import { t } from "@/lib/i18n/core";
 import { formatDate } from "@/lib/util";
@@ -60,20 +61,27 @@ function ReferenceDetail({ id }: { id: string }) {
   const labels = [item.aspectLabel, item.brightnessLabel, item.colorName, item.focalLabel, item.apertureLabel]
     .filter((label): label is NonNullable<typeof label> => Boolean(label));
   const notes = (item.notes ?? []).filter((n) => n?.a);
-  const rows = exifRows(item.exif);
+  const settings = [item.exif?.focalLength, item.exif?.aperture, item.exif?.shutter];
 
   return (
     <>
+      <div className="detail-date">
+        <span className="chip chip-muted">{t("Saved {date}", { date: formatDate(item.savedAt) })}</span>
+      </div>
       {/* eslint-disable-next-line @next/next/no-img-element -- a local object URL, nothing to optimize */}
       {url && <img className="detail-image" src={url} alt={t("Saved reference")} />}
       {url === null && <p className="muted">{t("This photo is missing from storage.")}</p>}
+      <div className="detail-strip">
+        <div className="swatch-row">
+          {byLightness(item.colors).map((hex, i) => <span key={i} className="swatch-sm" style={{ background: hex }} title={hex} />)}
+        </div>
+        <p className="detail-settings">
+          {settings.map((value, i) => <span key={i} className={value ? undefined : "muted"}>{value || "--"}</span>)}
+        </p>
+      </div>
       <div className="detail-meta">
         {labels.map((label) => <span key={label} className="chip">{t(label)}</span>)}
         {theme && <span className="chip">{t("Walk: {theme}", { theme: theme.title })}</span>}
-        <span className="chip chip-muted">{t("Saved {date}", { date: formatDate(item.savedAt) })}</span>
-      </div>
-      <div className="swatch-row">
-        {item.colors.map((hex, i) => <span key={i} className="swatch-sm" style={{ background: hex }} title={hex} />)}
       </div>
       {item.tags.length > 0 && (
         <p className="tag-list">{item.tags.map((tag, i) => <span key={i} className="tag">{tag}</span>)}</p>
@@ -86,40 +94,32 @@ function ReferenceDetail({ id }: { id: string }) {
           </dl>
         </>
       )}
-      {rows.length ? (
-        <dl className="exif-list">
-          {rows.map((row) => [
-            <dt key={`${row.field}-k`}>{row.label}</dt>,
-            <dd key={`${row.field}-v`}>
-              {row.href ? <a className="exif-link" href={row.href} target="_blank" rel="noopener noreferrer">{row.value}</a> : row.value}
-            </dd>,
-          ])}
-        </dl>
-      ) : (
-        <p className="muted">{t("No EXIF metadata found for this image.")}</p>
-      )}
-      {url && (
+      <div className="theme-btn-row detail-actions">
+        {url && (
+          <button
+            type="button"
+            className="btn btn-accent"
+            onClick={() => {
+              closeModal();
+              openAnalysis({ imageId: item.imageId, exif: item.exif, albumItemId: item.id, overlay: item.overlay, tags: item.tags });
+            }}
+          >
+            {t("Analyze this shot")}
+          </button>
+        )}
         <button
           type="button"
-          className="btn btn-accent btn-block"
+          className="btn btn-danger btn-icon-only"
+          aria-label={t("Delete from Album")}
+          title={t("Delete from Album")}
           onClick={() => {
             closeModal();
-            openAnalysis({ imageId: item.imageId, exif: item.exif, albumItemId: item.id, overlay: item.overlay, tags: item.tags });
+            void deleteReference(item.id);
           }}
         >
-          {t("Analyze this shot")}
+          <Icon name="trash" />
         </button>
-      )}
-      <button
-        type="button"
-        className="btn btn-danger"
-        onClick={() => {
-          closeModal();
-          void deleteReference(item.id);
-        }}
-      >
-        {t("Delete from Album")}
-      </button>
+      </div>
     </>
   );
 }

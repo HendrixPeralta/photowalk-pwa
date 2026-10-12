@@ -40,6 +40,15 @@ export function rgbToLab(r: number, g: number, b: number): Lab {
   return { l: 116 * fy - 16, a: 500 * (fx - fy), b: 200 * (fy - fz) };
 }
 
+/** Hex colors ordered by perceived value (L*), darkest first. */
+export function byLightness(hexes: readonly string[]): string[] {
+  const lightness = (hex: string) => {
+    const n = parseInt(hex.replace("#", ""), 16);
+    return rgbToLab((n >> 16) & 255, (n >> 8) & 255, n & 255).l;
+  };
+  return [...hexes].sort((a, b) => lightness(a) - lightness(b));
+}
+
 /** Euclidean distance between two Lab colors (CIE76 deltaE): how different two colors actually look. */
 export function deltaE(lab1: Lab, lab2: Lab): number {
   return Math.sqrt((lab1.l - lab2.l) ** 2 + (lab1.a - lab2.a) ** 2 + (lab1.b - lab2.b) ** 2);

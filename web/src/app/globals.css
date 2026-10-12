@@ -267,6 +267,8 @@ button, input, select {
 .btn-danger-solid { background: var(--danger); color: var(--accent-contrast); border-color: var(--danger); width: 100%; margin-top: 6px; }
 .btn-danger-solid:hover { filter: brightness(0.92); }
 .btn-icon-only { flex: 0 0 auto; width: 44px; padding: 11px; }
+.detail-actions { margin-top: 14px; }
+.detail-actions > .btn-danger { margin-top: 0; }
 
 /* Home */
 .banner {
@@ -1615,6 +1617,10 @@ input[type="file"].text-input { padding: 8px; }
 .concept-credit { margin: 5px 0 0; font-size: 0.62rem; color: var(--text-dim); }
 
 .detail-image { width: 100%; border-radius: var(--radius-md); display: block; margin-bottom: 12px; }
+.detail-date { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+.detail-strip { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.detail-strip .swatch-row { margin-bottom: 0; }
+.detail-settings { display: flex; gap: 10px; margin: 0; font-family: var(--font-data); font-size: 12px; font-weight: 600; }
 .detail-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
 .chip {
   background: var(--surface-0);

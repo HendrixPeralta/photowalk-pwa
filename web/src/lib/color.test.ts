@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { digest } from "@/test/digest";
-import { deltaE, nearestColorName, rgbToHex, rgbToHsl, rgbToLab } from "./color";
+import { byLightness, deltaE, nearestColorName, rgbToHex, rgbToHsl, rgbToLab } from "./color";
 
 describe("color math", () => {
   it("hex", () => {
@@ -30,5 +30,11 @@ describe("color math", () => {
     }
     expect(digest(grid)).toMatchSnapshot();
     expect(nearestColorName(204, 51, 51)).toBe("Red");
+  });
+});
+
+describe("byLightness", () => {
+  it("orders hex colors darkest to lightest", () => {
+    expect(byLightness(["#ffffff", "#a24b36", "#2c2d28", "#a6b0a8"])).toEqual(["#2c2d28", "#a24b36", "#a6b0a8", "#ffffff"]);
   });
 });
