@@ -1617,7 +1617,8 @@ input[type="file"].text-input { padding: 8px; }
 .concept-credit { margin: 5px 0 0; font-size: 0.62rem; color: var(--text-dim); }
 
 .detail-image { width: 100%; border-radius: var(--radius-md); display: block; margin-bottom: 12px; }
-.detail-date { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+/* Clear of the pop-up's close button, which sits in the same top-right corner. */
+.detail-date { display: flex; justify-content: flex-end; margin: 0 28px 8px 0; }
 .detail-strip { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
 .detail-strip .swatch-row { margin-bottom: 0; }
 .detail-settings { display: flex; gap: 10px; margin: 0; font-family: var(--font-data); font-size: 12px; font-weight: 600; }
