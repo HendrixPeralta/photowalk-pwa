@@ -2,7 +2,7 @@
 // without an icon font. Generated once from the old index.html sprite.
 // <IconSprite> renders these once; <Icon name> references one with <use>.
 
-export const ICON_NAMES = ["camera", "explore", "grid", "library", "timer", "hourglass", "target", "footprint", "bolt", "flame", "film", "sun", "twilight", "lens", "shutter", "bulb", "contrast", "palette", "compare", "tune", "chat", "send", "share", "pin", "navigate", "pause", "flag", "download", "bookmark", "repeat", "settings", "user"] as const;
+export const ICON_NAMES = ["camera", "explore", "grid", "library", "timer", "hourglass", "target", "footprint", "bolt", "flame", "star", "reset", "rotate", "film", "sun", "twilight", "lens", "shutter", "bulb", "contrast", "palette", "compare", "tune", "chat", "send", "share", "pin", "navigate", "pause", "play", "plus", "flag", "download", "bookmark", "repeat", "settings", "user", "split", "swap", "fullscreen", "filter", "chevron-down", "check", "close", "qr"] as const;
 
 export type IconName = (typeof ICON_NAMES)[number];
 
@@ -38,8 +38,9 @@ export const SPRITE_DEFS = `
     </g>
     <g id="i-bolt" fill="currentColor"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></g>
     <g id="i-flame" fill="currentColor">
-      <path d="M12 2c1 3-2 4-2 7a4 4 0 0 0 8 0c0-1-.4-2-1-3 1.5 1 2.5 3 2.5 5a6.5 6.5 0 0 1-13 0C6.5 7 9 4 12 2z"/>
+      <path d="M19.48 12.35c-1.57-4.08-7.16-4.3-5.81-10.23.1-.44-.37-.78-.75-.55C9.29 3.71 6.68 8 8.87 13.62c.18.46-.36.89-.75.59-1.81-1.37-2-3.34-1.84-4.75.06-.52-.62-.77-.91-.34C4.69 10.16 4 11.84 4 14.37c.38 5.6 5.11 7.32 6.81 7.54 2.43.31 5.06-.14 6.95-1.87 2.08-1.93 2.84-5.01 1.72-7.69zm-9.28 5.03c1.44-.35 2.18-1.39 2.38-2.31.33-1.43-.96-2.83-.09-5.09.33 1.87 3.27 3.04 3.27 5.08.08 2.53-2.66 4.7-5.56 2.32z"/>
     </g>
+    <g id="i-star" fill="currentColor"><path d="M12 2.5l2.94 5.96 6.56.95-4.75 4.63 1.12 6.54L12 17.5l-5.87 3.08 1.12-6.54L2.5 9.41l6.56-.95z"/></g>
     <g id="i-film" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
       <rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M8 4v16M16 4v16"/>
       <path d="M4 9h4M4 15h4M16 9h4M16 15h4"/>
@@ -93,6 +94,12 @@ export const SPRITE_DEFS = `
     <g id="i-pause" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
       <path d="M9 5v14M15 5v14"/>
     </g>
+    <g id="i-play" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+      <path d="M8 5.5v13l10.5-6.5z"/>
+    </g>
+    <g id="i-plus" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <path d="M12 5v14M5 12h14"/>
+    </g>
     <g id="i-flag" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
       <path d="M6 21V4h12l-2.5 4L18 12H6"/>
     </g>
@@ -101,6 +108,12 @@ export const SPRITE_DEFS = `
     </g>
     <g id="i-bookmark" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
       <path d="M6 3h12v18l-6-4.5L6 21z"/>
+    </g>
+    <g id="i-reset" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4 3.5v4h4"/>
+    </g>
+    <g id="i-rotate" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M20 3.5v4h-4"/>
     </g>
     <g id="i-repeat" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
       <path d="M4 9V7a2 2 0 0 1 2-2h11l-2.5-2.5M20 15v2a2 2 0 0 1-2 2H7l2.5 2.5"/>
@@ -111,6 +124,32 @@ export const SPRITE_DEFS = `
     </g>
     <g id="i-user" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
       <circle cx="12" cy="8" r="3.4"/><path d="M5 20c1.2-3.4 3.8-5 7-5s5.8 1.6 7 5"/>
+    </g>
+    <g id="i-split" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2.5" y="7" width="7.5" height="10" rx="1"/><rect x="14" y="7" width="7.5" height="10" rx="1"/><path d="M12 4v16"/>
+    </g>
+    <g id="i-swap" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 8h15M15.5 4.5L19 8l-3.5 3.5"/><path d="M20 16H5M8.5 12.5L5 16l3.5 3.5"/>
+    </g>
+    <g id="i-fullscreen" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/>
+    </g>
+    <g id="i-filter" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round">
+      <path d="M3.5 4.5h17l-6.5 7.8v6.2l-4 2v-8.2z"/>
+    </g>
+    <g id="i-chevron-down" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7 10l5 5 5-5"/>
+    </g>
+    <g id="i-check" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 12.5l4.5 4.5L19 7.5"/>
+    </g>
+    <g id="i-close" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <path d="M6 6l12 12M18 6L6 18"/>
+    </g>
+    <g id="i-qr" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+      <rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1"/>
+      <rect x="3.5" y="14" width="6.5" height="6.5" rx="1"/>
+      <path d="M14 14h2.5v2.5H14zM18 18h2.5v2.5H18zM14 18.5v2M18.5 14h2" stroke-linecap="round"/>
     </g>
 
     

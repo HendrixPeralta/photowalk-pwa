@@ -38,7 +38,15 @@ test("a new account starts with an empty Album, and Settings adds the sample pho
 
 test("filters and search narrow the album", async ({ page }) => {
   await openAlbum(page);
-  await page.getByLabel("Any shape").selectOption("Portrait");
+  // Like a Notion database: the filter button lists filters, each one picked
+  // becomes its own dropdown under the search box.
+  await page.getByRole("button", { name: "Filter", exact: true }).click();
+  await page.getByRole("menuitemcheckbox", { name: "Shape" }).click();
+  // A new filter starts on All, so nothing is hidden yet.
+  await expect(page.getByRole("menuitemradio", { name: "All" })).toHaveAttribute("aria-checked", "true");
+  await expect(thumbs(page)).toHaveCount(6);
+  await page.getByRole("menuitemradio", { name: "Portrait" }).click();
+  await expect(page.getByRole("menu")).toHaveCount(0);
   const portraits = await thumbs(page).count();
   expect(portraits).toBeGreaterThan(0);
   expect(portraits).toBeLessThan(6);
@@ -47,8 +55,23 @@ test("filters and search narrow the album", async ({ page }) => {
   // Filters survive a trip to another tab.
   await page.getByRole("link", { name: "Walks", exact: true }).click();
   await page.getByRole("link", { name: "Album", exact: true }).click();
-  await expect(page.getByLabel("Any shape")).toHaveValue("Portrait");
+  await expect(page.getByRole("button", { name: "Shape: Portrait" })).toBeVisible();
   await expect(thumbs(page)).toHaveCount(portraits);
+
+  // "All" switches the filter off but keeps it in the bar.
+  await page.getByRole("button", { name: "Shape: Portrait" }).click();
+  await page.getByRole("menuitemradio", { name: "All" }).click();
+  await expect(thumbs(page)).toHaveCount(6);
+  await page.getByRole("button", { name: "Shape", exact: true }).click();
+  await expect(page.getByRole("menuitemradio", { name: "All" })).toHaveAttribute("aria-checked", "true");
+  await page.getByRole("menuitemradio", { name: "Portrait" }).click();
+  await expect(thumbs(page)).toHaveCount(portraits);
+
+  // Removing the filter shows everything again.
+  await page.getByRole("button", { name: "Shape: Portrait" }).click();
+  await page.getByRole("menuitem", { name: "Remove filter" }).click();
+  await expect(page.getByRole("button", { name: /^Shape/ })).toHaveCount(0);
+  await expect(thumbs(page)).toHaveCount(6);
 
   await page.getByLabel("Search tags, camera, or settings").fill("no such thing");
   await expect(thumbs(page)).toHaveCount(0);
@@ -65,8 +88,9 @@ test("a reference opens, goes to Analysis, and can be deleted", async ({ page })
   await dialog(page).getByRole("button", { name: "Analyze this shot" }).click();
   await expect(page).toHaveURL(/\/analysis\/$/);
   await expect(page.getByRole("button", { name: "Update Reference" })).toBeVisible();
-  await page.getByPlaceholder("Tags, comma separated (e.g. bridge, sunset)").fill("harbor");
   await page.getByRole("button", { name: "Update Reference" }).click();
+  await dialog(page).getByPlaceholder("Tags, comma separated (e.g. bridge, sunset)").fill("harbor");
+  await dialog(page).getByRole("button", { name: "Save", exact: true }).click();
   await expect(page.getByRole("status").filter({ hasText: "Reference updated." })).toBeVisible();
 
   await page.getByRole("link", { name: "Album", exact: true }).click();

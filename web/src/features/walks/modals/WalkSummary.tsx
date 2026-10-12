@@ -2,7 +2,6 @@
 
 import { Icon } from "@/components/icons/Icon";
 import { useImageUrl } from "@/components/useImageUrl";
-import type { Theme } from "@/lib/content/themes";
 import { t } from "@/lib/i18n/core";
 import type { Milestone } from "@/lib/milestones";
 import { navigate } from "@/lib/nav";
@@ -15,7 +14,6 @@ import { closeModal, openModal } from "@/state/ui";
 import { openAnalysis } from "@/features/analysis/request";
 
 interface SummaryProps {
-  theme: Theme | null;
   record: WalkRecord;
   frames: readonly Frame[];
   auto: boolean;
@@ -24,7 +22,7 @@ interface SummaryProps {
 }
 
 /** What the walk added up to, anything it unlocked, and where to go next. */
-export function WalkSummaryModal({ theme, record, frames, auto, unlocked, milestones }: SummaryProps) {
+export function WalkSummaryModal({ record, frames, auto, unlocked, milestones }: SummaryProps) {
   const totalHours = useAppStore((s) => totalActivityHours(s.activityLog));
   const totalFrames = useAppStore((s) => totalFramesLogged(s.frameLog));
   const rewards = useAppStore((s) => s.rewards);
@@ -42,18 +40,18 @@ export function WalkSummaryModal({ theme, record, frames, auto, unlocked, milest
           <span className="summary-stat-delta">{t("+{n} this walk", { n: formatHours(record.hours) })}</span>
         </div>
         <div className="summary-stat">
-          <span className="summary-stat-value">{totalFrames}</span>
+          <span className="summary-stat-value">
+            {totalFrames === 1 ? t("{n} photo", { n: 1 }) : t("{n} photos", { n: totalFrames })}
+          </span>
           <span className="summary-stat-delta">{t("+{n} this walk", { n: frames.length })}</span>
         </div>
       </div>
 
-      <div className="summary-theme-recap">
-        <span className="label-caps">{t("Theme")}</span>
-        <strong>{theme?.title ?? t("Walk in progress")}</strong>
-        {record.challengeCount > 0 && (
-          <p>{t("{done} of {total} mini-challenges done", { done: record.challengesDone, total: record.challengeCount })}</p>
-        )}
-      </div>
+      {record.challengeCount > 0 && (
+        <p className="muted card-text" style={{ marginTop: 10 }}>
+          {t("{done} of {total} mini-challenges done", { done: record.challengesDone, total: record.challengeCount })}
+        </p>
+      )}
 
       {hasWins && (
         <ul className="summary-wins">
@@ -86,10 +84,7 @@ export function WalkSummaryModal({ theme, record, frames, auto, unlocked, milest
         </>
       )}
 
-      <p className="muted card-text" style={{ marginTop: 14 }}>
-        {t("Look over your shots while the walk is fresh. Pick your best three and see how well they fit the theme.")}
-      </p>
-      <div className="theme-btn-row" style={{ marginTop: 10 }}>
+      <div className="theme-btn-row" style={{ marginTop: 14 }}>
         <button type="button" className="btn btn-accent" onClick={() => openModal(<FramePickerModal frames={frames} />)}>
           {t("Analyze your best shots")}
         </button>

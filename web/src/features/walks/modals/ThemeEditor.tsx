@@ -94,7 +94,7 @@ export function ThemeEditorModal({ existing, onSaved }: { existing: Theme | null
       />
 
       <h4 className="subsection-title">{t("Pick from existing challenges")}</h4>
-      <p className="muted card-text">{t("Optional. Challenges only show up on a Guided Walk. A casual walk uses the theme alone.")}</p>
+      <p className="muted card-text">{t("Optional. Challenges only show up on a Challenge Walk. A casual walk uses the theme alone.")}</p>
       <ul className="challenges-list">
         {pool.map((challenge) => (
           <li key={challenge}>

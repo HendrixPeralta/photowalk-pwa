@@ -43,6 +43,6 @@ export async function handleLaunchIntent(): Promise<void> {
     navigate("share");
   } else if (shared.length) {
     navigate("share");
-    if (!getData().currentRoom) showToast(t("Create or join a room, then press Upload to post the photos you shared."), 6000);
+    if (!getData().currentRoom) showToast(t("Create or join a room, then press + to post the photos you shared."), 6000);
   }
 }

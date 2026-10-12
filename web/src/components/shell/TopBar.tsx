@@ -21,21 +21,19 @@ export function TopBar() {
         <span className="brand-mark">
           <Icon name="shutter" className="brand-icon" />
         </span>
-        <span className="brand-titles">
-          <span className="label-caps">PhotoEYE</span>
-          <h1 id="screenTitle">{screenTitle(viewForPath(pathname))}</h1>
-        </span>
+        {/* Only the mark shows; the screen name stays for screen readers. */}
+        <h1 id="screenTitle" className="visually-hidden">{screenTitle(viewForPath(pathname))}</h1>
       </div>
 
-      <button type="button" className="topbar-review" aria-label={t("Leave a review")} onClick={openReview}>
-        <span className="topbar-review-star" aria-hidden="true">★</span>
-        <span className="topbar-review-label">{t("Review")}</span>
+      <button type="button" className="topbar-review" aria-label={t("Leave feedback")} onClick={openReview}>
+        <Icon name="star" className="topbar-review-star" />
+        <span className="topbar-review-label">{t("Feedback")}</span>
       </button>
 
       <div className="topbar-actions">
-        <span className="streak-badge" title={t("Current streak")}>
-          <Icon name="flame" style={{ width: 13, height: 13 }} />
-          <span>{t("{n}-day streak", { n: streak })}</span>
+        <span className="streak-badge" title={t("{n}-day streak", { n: streak })} aria-label={t("{n}-day streak", { n: streak })}>
+          <Icon name="flame" />
+          <span aria-hidden="true">{streak}</span>
         </span>
         {installable && (
           <button type="button" className="btn btn-ghost btn-sm" onClick={() => void install()}>{t("Install")}</button>

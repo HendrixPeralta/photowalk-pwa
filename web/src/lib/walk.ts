@@ -27,23 +27,14 @@ export function validGuidedDuration(minutes: unknown): number {
   return (GUIDED_DURATIONS as readonly number[]).includes(n) ? n : DEFAULT_GUIDED_MIN;
 }
 
-const MODE_INFO: Record<WalkMode, { title: string; desc: string; best: string }> = {
-  casual: {
-    title: N("Casual Walk"),
-    desc: N("You get a theme to look for, like Reflections or Look Up, and that's it. There's no timer and no checklist, so wander at your own pace and stop whenever you like."),
-    best: N("Best for: easing in, walks with friends, or when you just want an excuse to get out with your camera."),
-  },
-  guided: {
-    title: N("Guided Walk"),
-    desc: N("The same themes, with more structure. You pick a length (15 to 60 minutes), get a few mini-challenges to tick off, and receive a nudge halfway through and another near the end."),
-    best: N("Best for: building skills, or when you tend to run out of ideas once you are out."),
-  },
+const MODE_TITLES: Record<WalkMode, string> = {
+  casual: N("Casual Walk"),
+  guided: N("Challenge Walk"),
 };
 
-/** The "?" explanation for each walk mode, translated. */
-export function modeInfo(mode: WalkMode): { title: string; desc: string; best: string } {
-  const info = MODE_INFO[mode];
-  return { title: t(info.title), desc: t(info.desc), best: t(info.best) };
+/** A walk mode's name, translated. */
+export function modeTitle(mode: WalkMode): string {
+  return t(MODE_TITLES[mode]);
 }
 
 /* ---------- Guided nudges ---------- */

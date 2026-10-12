@@ -10,10 +10,6 @@ import type { Reward } from "@/state/types";
 
 export const MAX_TARGET_HOURS = 1000;
 
-// The Home bar plots rewards on one lifetime-hours axis; a goal that is already
-// met would otherwise squash the axis to nothing.
-const MIN_AXIS_SPAN_HOURS = 0.5;
-
 export function earnedHours(reward: Reward, totalHours: number): number {
   return Math.max(0, totalHours - reward.baselineHours);
 }
@@ -94,28 +90,22 @@ export function claimRewardUnlocks(rewards: Reward[], totalHours: number): Rewar
 
 export interface TimelineStop {
   kind: "earned" | "next";
-  label: string;
   title: string;
   /** Set on the earned stop, for its Claim button. */
   id?: string;
-  /** Position along the bar, 0 to 100. */
-  pct: number;
+  /** How far along this goal is on its own, 0 to 100. */
+  progress: number;
   ready: boolean;
-  remaining?: string;
   note: string;
 }
 
 export interface RewardTimeline {
-  now: number;
-  nowPct: number;
   stops: TimelineStop[];
-  upcoming: number;
 }
 
 /**
- * Places the most recently earned reward and the next two due onto a single
- * lifetime-hours axis, so Home can show where the current hour total sits
- * between the reward just banked and the ones still ahead.
+ * The most recently earned reward and the next two due, each with its own
+ * progress, for the Reward progress card on Home.
  */
 export function rewardTimeline(rewards: readonly Reward[], totalHours: number): RewardTimeline {
   const now = totalHours;
@@ -123,50 +113,26 @@ export function rewardTimeline(rewards: readonly Reward[], totalHours: number): 
   const upcoming = rewards.filter((r) => !isEarned(r, now)).sort(byTargetTotal).slice(0, 2);
   const last = earned[earned.length - 1] || null;
 
-  // Without a reward behind us the axis starts where the nearest goal's clock
-  // started, not at hour zero; otherwise banked hours inflate the fill.
-  const start = last ? targetTotalHours(last)
-    : upcoming.length ? Math.min(...upcoming.map((r) => r.baselineHours))
-      : 0;
-
-  // The axis is piecewise, not linear in hours: every leg between two stops
-  // gets an equal slice of the bar. A far-off reward (say 200h) would otherwise
-  // squash the walk toward the next one (10h) into a sliver of fill.
-  const nodes = [start, ...upcoming.map(targetTotalHours)];
-  const legPct = 100 / Math.max(nodes.length - 1, 1);
-  const pctOf = (hours: number) => {
-    for (let i = 1; i < nodes.length; i++) {
-      if (hours > nodes[i]) continue;
-      const leg = Math.max(nodes[i] - nodes[i - 1], MIN_AXIS_SPAN_HOURS);
-      const within = (hours - nodes[i - 1]) / leg;
-      return clamp((i - 1 + within) * legPct, 0, 100);
-    }
-    return nodes.length > 1 ? 100 : 0;
-  };
-
   const stops: TimelineStop[] = [];
   if (last) {
     stops.push({
       kind: "earned",
-      label: t("Last"),
       title: last.title,
       id: last.id,
-      pct: pctOf(targetTotalHours(last)),
+      progress: 100,
       ready: !last.claimedAt,
       note: last.claimedAt ? t("Claimed {date}", { date: formatDate(last.claimedAt) }) : t("Earned: ready to claim"),
     });
   }
-  upcoming.forEach((r, i) => {
+  upcoming.forEach((r) => {
     stops.push({
       kind: "next",
-      label: i === 0 ? t("Next") : t("Then"),
       title: r.title,
-      pct: pctOf(targetTotalHours(r)),
+      progress: clamp((earnedHours(r, now) / r.targetHours) * 100, 0, 100),
       ready: false,
-      remaining: formatHours(targetTotalHours(r) - now),
       note: t("{hours} of shooting to go", { hours: formatHours(targetTotalHours(r) - now) }),
     });
   });
 
-  return { now, nowPct: pctOf(now), stops, upcoming: upcoming.length };
+  return { stops };
 }

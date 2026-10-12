@@ -8,6 +8,7 @@ const SCREENS = [
   { path: "/partners/", title: "Partners", tab: null },
   { path: "/settings/", title: "Settings", tab: null },
   { path: "/themes/", title: "My Themes", tab: null },
+  { path: "/learn/", title: "Tutorials", tab: null },
 ];
 
 /** Fails the test on any console error or uncaught exception. */
@@ -59,11 +60,26 @@ test("the menu opens, navigates, and closes", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Profile" })).toBeFocused();
 });
 
+test("Tutorials has an article for every Analysis tool", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Profile" }).click();
+  await page.getByRole("dialog", { name: "Menu" }).getByRole("link", { name: "Tutorials" }).click();
+  await expect(page).toHaveURL(/\/learn\/$/);
+  await expect(page.locator(".tutorial-card")).toHaveCount(9);
+
+  // Other summaries mention the chart too, so match the card's own title.
+  await page.locator(".tutorial-card").filter({ has: page.locator("strong", { hasText: /^Brightness Chart:/ }) }).click();
+  await expect(page.getByRole("heading", { name: "Brightness Chart: Spot Shadows and Highlights That Lost Detail", level: 2 })).toBeVisible();
+  await expect(page.locator(".tutorial-article")).toContainText("What good looks like");
+  await page.getByRole("button", { name: "Back", exact: true }).click();
+  await expect(page.locator(".tutorial-card")).toHaveCount(9);
+});
+
 test("a new account starts empty: no sample history, no sample photos", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator(".streak-badge")).toContainText("0-day streak");
+  await expect(page.locator(".streak-badge")).toHaveAttribute("aria-label", "0-day streak");
   await page.reload();
-  await expect(page.locator(".streak-badge")).toContainText("0-day streak");
+  await expect(page.locator(".streak-badge")).toHaveAttribute("aria-label", "0-day streak");
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("photoeye:state")!).state);
   expect(saved.seededHistory).toBeNull();
   expect(saved.walkHistory).toEqual([]);

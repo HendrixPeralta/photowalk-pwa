@@ -44,7 +44,6 @@ const q = encodeURIComponent;
 export const roomsApi = {
   list: () => call<{ rooms: RoomSummary[] }>("/api/rooms/"),
   create: (theme: string) => call<{ room: RoomSnapshot }>("/api/rooms/", post({ theme })),
-  close: (code: string) => call<void>(`/api/rooms/?code=${q(code)}`, { method: "DELETE" }),
   join: (code: string) => call<{ room: RoomSnapshot }>("/api/rooms/join/", post({ code })),
   state: (code: string, since: number | null) =>
     call<{ changed: false; version: number } | { changed: true; room: RoomSnapshot }>(

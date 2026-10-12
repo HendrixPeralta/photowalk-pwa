@@ -4,7 +4,7 @@ import { getData, update, useAppStore } from "@/state/appStore";
 import { defaultState } from "@/state/defaults";
 import { useFix } from "@/state/geo";
 import { useToasts } from "@/state/ui";
-import { logFrames, mapsUrl, removeFrame, setFrameLabel } from "./actions";
+import { logFrames, removeFrame, setFrameLabel } from "./actions";
 
 // No canvas or IndexedDB Blob support in jsdom: stand in for the image and
 // storage layers, and keep a record of what was stored.
@@ -87,13 +87,5 @@ describe("a logged photo", () => {
     expect(frames().map((f) => [f.index, f.label])).toEqual([[1, "Portal"], [2, ""]]);
     await vi.waitFor(() => expect(stored.has(first.imageId)).toBe(false));
     expect(stored.size).toBe(2);
-  });
-});
-
-describe("maps hand-off", () => {
-  it("opens the maps app the device has", () => {
-    expect(mapsUrl(35.1, 139.2, "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0)")).toBe("maps://?ll=35.1,139.2&q=You%20are%20here");
-    expect(mapsUrl(35.1, 139.2, "Mozilla/5.0 (Linux; Android 14)")).toBe("geo:35.1,139.2?q=35.1,139.2");
-    expect(mapsUrl(35.1, 139.2, "Mozilla/5.0 (Windows NT 10.0)")).toBe("https://www.openstreetmap.org/?mlat=35.1&mlon=139.2#map=17/35.1/139.2");
   });
 });

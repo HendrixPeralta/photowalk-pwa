@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useLayoutEffect, useRef, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
+import { useCallback, useLayoutEffect, useRef, useState, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { Trans } from "@/components/Trans";
+import { Icon } from "@/components/icons/Icon";
 import { useRedrawOnResize } from "@/components/useRedrawOnResize";
 import { ToolHelpButton } from "@/features/toolhelp/ToolHelp";
 import type { ToolKey } from "@/features/toolhelp/content";
@@ -25,7 +26,6 @@ interface ScopeInfo {
   key: Exclude<ScopeKey, "tonecurve">;
   tab: () => string;
   name: () => string;
-  sub: () => string;
   help: () => string;
   draw: (canvas: HTMLCanvasElement, scopes: Scopes) => void;
   read: (stats: ScopeStats) => Reading;
@@ -34,81 +34,77 @@ interface ScopeInfo {
 const SCOPES: ScopeInfo[] = [
   {
     key: "waveform", tab: () => t("Waveform"), name: () => t("Waveform"), help: () => t("About Waveform"),
-    sub: () => t("brightness, left to right across the photo"), draw: drawWaveform, read: waveformSummary,
+    draw: drawWaveform, read: waveformSummary,
   },
   {
     key: "parade", tab: () => t("Parade"), name: () => t("RGB Parade"), help: () => t("About RGB Parade"),
-    sub: () => t("the same, split into red, green and blue"), draw: drawParade, read: paradeSummary,
+    draw: drawParade, read: paradeSummary,
   },
   {
     key: "vectorscope", tab: () => t("Vector"), name: () => t("Vectorscope"), help: () => t("About Vectorscope"),
-    sub: () => t("which colors, and how strong"), draw: drawVectorscope, read: vectorscopeSummary,
+    draw: drawVectorscope, read: vectorscopeSummary,
   },
   {
     key: "cie", tab: () => t("CIE"), name: () => t("CIE Chromaticity"), help: () => t("About CIE Chromaticity"),
-    sub: () => t("the range of colors in the photo"), draw: drawChromaticity, read: chromaticitySummary,
+    draw: drawChromaticity, read: chromaticitySummary,
   },
 ];
 
 const TABS: { view: ScopeView; label: () => string }[] = [
   ...SCOPES.map((s) => ({ view: s.key as ScopeView, label: s.tab })),
   { view: "tonecurve", label: () => t("Tone Curve") },
-  { view: "all", label: () => t("All 5") },
+  { view: "all", label: () => t("All") },
 ];
 
 /**
  * Waveform, RGB Parade, Vectorscope, CIE and the Tone Curve, one at a time or
- * all together. Folded away by default; nothing is drawn until it is opened,
- * since a hidden canvas has no size to draw at.
+ * all together. Nothing is drawn until its tab is open, since a hidden canvas
+ * has no size to draw at.
  */
 export function AdvancedTools() {
   const scopes = useAnalysis((s) => s.frame!.scopes);
   const view = useAnalysis((s) => s.scopeView);
-  const open = useAnalysis((s) => s.scopesOpen);
+  const open = useAnalysis((s) => s.readoutTab === "advanced");
 
   return (
-    <details
-      className="theme-card collapse-card scopes-details"
-      open={open}
-      onToggle={(e) => useAnalysis.setState({ scopesOpen: e.currentTarget.open })}
-    >
-      <summary className="collapse-summary">
-        <span className="collapse-title">{t("Advanced Tools")}</span>
-        <span className="muted collapse-meta">{t("A closer look at brightness and color")}</span>
-        <svg className="collapse-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </summary>
-      <div className="collapse-body">
-        <div className="overlay-controls">
-          {TABS.map((tab) => (
-            <button
-              key={tab.view}
-              type="button"
-              className={`chip-btn${view === tab.view ? " active" : ""}`}
-              aria-pressed={view === tab.view}
-              onClick={() => useAnalysis.setState({ scopeView: tab.view })}
-            >
-              {tab.label()}
-            </button>
-          ))}
-        </div>
-        <div className={`scope-grid${view === "all" ? " scope-grid-all" : ""}`}>
-          {SCOPES.map((scope) => (
-            <ScopeCell key={scope.key} scope={scope} scopes={scopes} shown={open && (view === "all" || view === scope.key)} />
-          ))}
-          <ToneCurveCell shown={open && (view === "all" || view === "tonecurve")} />
-        </div>
+    <>
+      <div className="sub-tab-bar" role="tablist" aria-label={t("Advanced Tools")}>
+        {TABS.map((tab) => (
+          <button
+            key={tab.view}
+            type="button"
+            role="tab"
+            id={`scope-tab-${tab.view}`}
+            aria-selected={view === tab.view}
+            aria-controls="scope-panel"
+            className={`sub-tab${view === tab.view ? " active" : ""}`}
+            onClick={() => useAnalysis.setState({ scopeView: tab.view })}
+          >
+            {tab.label()}
+          </button>
+        ))}
       </div>
-    </details>
+      <div
+        id="scope-panel"
+        role="tabpanel"
+        aria-labelledby={`scope-tab-${view}`}
+        className={`scope-grid${view === "all" ? " scope-grid-all" : ""}`}
+      >
+        {SCOPES.map((scope) => (
+          <ScopeCell key={scope.key} scope={scope} scopes={scopes} shown={open && (view === "all" || view === scope.key)} />
+        ))}
+        <ToneCurveCell shown={open && (view === "all" || view === "tonecurve")} />
+      </div>
+    </>
   );
 }
 
-function ScopeName({ name, help, tool, sub }: { name: string; help: string; tool: ToolKey; sub: string }) {
+/** The "Learn more" under a scope, after its reading. */
+function ScopeHelp({ help, tool }: { help: string; tool: ToolKey }) {
   return (
-    <figcaption className="scope-name">
-      {name} <ToolHelpButton tool={tool} label={help} /> <span>{sub}</span>
-    </figcaption>
+    <div className="scope-help">
+      <ToolHelpButton tool={tool} label={help} />
+    </div>
   );
 }
 
@@ -123,9 +119,10 @@ function ScopeCell({ scope, scopes, shown }: { scope: ScopeInfo; scopes: Scopes;
 
   return (
     <figure className={`scope-cell${shown ? "" : " hidden"}`} data-scope={scope.key}>
-      <ScopeName name={scope.name()} help={scope.help()} tool={scope.key} sub={scope.sub()} />
+      <figcaption className="scope-name">{scope.name()}</figcaption>
       <canvas ref={ref} className="scope-canvas" />
       <p className="hint scope-caption">{shown && <ReadingText reading={scope.read(scopes.stats)} />}</p>
+      <ScopeHelp help={scope.help()} tool={scope.key} />
     </figure>
   );
 }
@@ -139,6 +136,7 @@ function ToneCurveCell({ shown }: { shown: boolean }) {
   const version = useAnalysis((s) => s.curveVersion);
   const ref = useRef<HTMLCanvasElement>(null);
   const adjusting = toneCurve.mode === "adjust";
+  const [hintOpen, setHintOpen] = useState(false);
 
   const draw = useCallback(() => {
     const canvas = ref.current;
@@ -158,12 +156,7 @@ function ToneCurveCell({ shown }: { shown: boolean }) {
 
   return (
     <figure className={`scope-cell${shown ? "" : " hidden"}`} data-scope="tonecurve">
-      <ScopeName
-        name={t("Tone Curve")}
-        help={t("About Tone Curve")}
-        tool="tonecurve"
-        sub={t("how the photo's light and dark tones are spread")}
-      />
+      <figcaption className="scope-name">{t("Tone Curve")}</figcaption>
       <div className="overlay-controls curve-modes">
         <button type="button" className={`chip-btn${adjusting ? "" : " active"}`} aria-pressed={!adjusting} onClick={() => toneCurve.setMode("measured")}>
           {t("Measured")}
@@ -171,7 +164,36 @@ function ToneCurveCell({ shown }: { shown: boolean }) {
         <button type="button" className={`chip-btn${adjusting ? " active" : ""}`} aria-pressed={adjusting} onClick={() => toneCurve.setMode("adjust")}>
           {t("Adjust")}
         </button>
+        {adjusting && (
+          <button
+            type="button"
+            className="chip-btn chip-btn-icon chip-btn-push"
+            aria-label={t("Reset curve")}
+            title={t("Reset curve")}
+            disabled={toneCurve.isIdentity()}
+            onClick={() => toneCurve.reset()}
+          >
+            <Icon name="reset" />
+          </button>
+        )}
+        <button
+          type="button"
+          className={`chip-btn chip-btn-icon${adjusting ? "" : " chip-btn-push"}${hintOpen ? " active" : ""}`}
+          aria-label={t("How to use the curve")}
+          aria-expanded={hintOpen}
+          aria-controls="curve-hint"
+          onClick={() => setHintOpen((o) => !o)}
+        >
+          ?
+        </button>
       </div>
+      {hintOpen && (
+        <p id="curve-hint" className="hint curve-hint">
+          {adjusting
+            ? t("Tap to add a point · double-tap one to remove it")
+            : t("This is measured from your photo. Switch to Adjust to try changes.")}
+        </p>
+      )}
       <canvas
         ref={ref}
         className="scope-canvas curve-canvas"
@@ -185,19 +207,8 @@ function ToneCurveCell({ shown }: { shown: boolean }) {
         onPointerCancel={end}
         onDoubleClick={(e) => toneCurve.removeAt(...at(e))}
       />
-      <div className="curve-actions">
-        {adjusting && (
-          <button type="button" className="btn btn-ghost btn-sm" disabled={toneCurve.isIdentity()} onClick={() => toneCurve.reset()}>
-            {t("Reset curve")}
-          </button>
-        )}
-        <span className="hint curve-hint">
-          {adjusting
-            ? t("Tap to add a point · double-tap one to remove it")
-            : t("This is measured from your photo. Switch to Adjust to try changes.")}
-        </span>
-      </div>
       <p className="hint scope-caption">{shown && <ReadingText reading={toneCurve.summary()} />}</p>
+      <ScopeHelp help={t("About Tone Curve")} tool="tonecurve" />
     </figure>
   );
 }

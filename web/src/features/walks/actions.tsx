@@ -16,7 +16,7 @@ import {
 } from "@/lib/walk";
 import { getData, update } from "@/state/appStore";
 import type { Reward, WalkMode, WalkRecord } from "@/state/types";
-import { closeModal, openModal, showToast } from "@/state/ui";
+import { closeModal, openModal, showToast, useModal } from "@/state/ui";
 import { ConfirmCompleteModal, ConfirmHoursModal } from "./modals/FinishModals";
 import { ThemeEditorModal } from "./modals/ThemeEditor";
 import { ThemePickerModal } from "./modals/ThemePicker";
@@ -38,10 +38,19 @@ export function setMode(mode: WalkMode): void {
  * follows, so rerolling or editing mid-brief sticks.
  */
 export function putThemeOnHand(theme: Theme, reason = ""): void {
+  if (getData().activeWalk?.startedAt) useWalkUi.setState({ theme, reason });
+  else changeWalkTheme(theme, reason);
+}
+
+/**
+ * Swaps the open walk's theme, even mid-walk, from the Live screen. The
+ * checklist starts over for the new theme; the clock and photos carry on.
+ */
+export function changeWalkTheme(theme: Theme, reason = ""): void {
   useWalkUi.setState({ theme, reason });
   update((d) => {
     const w = d.activeWalk;
-    if (!w || w.startedAt) return;
+    if (!w) return;
     w.themeId = theme.id;
     w.challengesChecked = new Array(challengesFor(theme, w.mode).length).fill(false);
   });
@@ -138,13 +147,32 @@ export function restoreActiveWalk(): void {
 
 /* ---------- Brief and theme pop-ups ---------- */
 
+/**
+ * A walk only counts once "Start shooting" is tapped. Backing out of the
+ * brief (or the theme pop-ups it leads to) drops the walk it set up, so Home
+ * and Live don't show controls for a walk that never began. Checked a tick
+ * later, as moving between those pop-ups closes one just before opening the next.
+ */
+export function dropWalkIfNeverStarted(): void {
+  setTimeout(() => {
+    if (useModal.getState().current) return;
+    const w = getData().activeWalk;
+    if (w && !w.startedAt) update((d) => { d.activeWalk = null; });
+  }, 0);
+}
+
 export function openWalkBrief(): void {
   if (!walkTheme()) return;
-  openModal(<WalkBriefModal />);
+  openModal(<WalkBriefModal />, { floating: true });
 }
 
 export function openThemePicker(): void {
   openModal(<ThemePickerModal />);
+}
+
+/** Change Theme from the Live screen, which swaps the running walk's theme. */
+export function openWalkThemePicker(): void {
+  openModal(<ThemePickerModal midWalk />);
 }
 
 /**
@@ -275,7 +303,7 @@ export function finishWalk(auto = false): void {
         finalizeWalk(startedAt, false);
       }}
     />,
-    { onClose: () => { if (!settled) showToast(t("Still on your walk.")); } },
+    { alert: true, onClose: () => { if (!settled) showToast(t("Still on your walk.")); } },
   );
 }
 
@@ -315,7 +343,6 @@ function completeWalk(startedAt: number, hours: number, auto: boolean): void {
   const w = openWalkStartedAt(startedAt);
   if (!w) return;
 
-  const theme = walkTheme();
   const frames = w.frames ?? [];
   const now = Date.now();
   const record: WalkRecord = {
@@ -354,7 +381,6 @@ function completeWalk(startedAt: number, hours: number, auto: boolean): void {
 
   openModal(
     <WalkSummaryModal
-      theme={theme}
       record={record}
       frames={frames}
       auto={auto}

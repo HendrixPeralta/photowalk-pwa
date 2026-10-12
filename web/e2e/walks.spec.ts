@@ -12,7 +12,7 @@ const saved = (page: Page) => page.evaluate(() => JSON.parse(localStorage.getIte
 const dialog = (page: Page) => page.getByRole("dialog");
 const toast = (page: Page, text: string | RegExp) => page.getByRole("status").filter({ hasText: text });
 
-async function openBrief(page: Page, mode: "Casual Walk" | "Guided Walk" = "Casual Walk") {
+async function openBrief(page: Page, mode: "Casual Walk" | "Challenge Walk" = "Casual Walk") {
   await page.goto("/");
   await page.getByRole("button", { name: /Start Photo Walk/ }).click();
   await page.getByRole("button", { name: mode }).click();
@@ -23,7 +23,6 @@ test("a casual walk runs from the brief to the summary", async ({ page }) => {
   const errors = watchErrors(page);
   await openBrief(page);
   const before = await saved(page);
-  await expect(dialog(page)).toContainText("Casual walk · no timer");
 
   await dialog(page).getByRole("button", { name: "Start shooting" }).click();
   await expect(page).toHaveURL(/\/live\/$/);
@@ -31,16 +30,16 @@ test("a casual walk runs from the brief to the summary", async ({ page }) => {
   await expect(page.locator(".nav-live")).toBeVisible();
 
   await page.getByRole("link", { name: "Walks", exact: true }).click();
-  await expect(page.locator(".walk-panel")).toContainText("Casual");
+  await expect(page.locator(".home-walk-controls")).toBeVisible();
   await expect(page.getByRole("button", { name: /Start Photo Walk/ })).toHaveCount(0);
 
   // Backing out of the confirmation keeps the walk going.
-  await page.getByRole("button", { name: "Stop Walk" }).click();
+  await page.getByRole("button", { name: "Finish Walk" }).click();
   await dialog(page).getByRole("button", { name: "Keep Shooting" }).click();
   await expect(toast(page, "Still on your walk.")).toBeVisible();
-  await expect(page.locator(".walk-panel")).toBeVisible();
+  await expect(page.locator(".home-walk-controls")).toBeVisible();
 
-  await page.getByRole("button", { name: "Stop Walk" }).click();
+  await page.getByRole("button", { name: "Finish Walk" }).click();
   await dialog(page).getByRole("button", { name: "Complete Walk" }).click();
   await expect(dialog(page).getByRole("heading", { name: "Walk complete!" })).toBeVisible();
   await dialog(page).getByRole("button", { name: "Done" }).click();
@@ -56,9 +55,9 @@ test("a casual walk runs from the brief to the summary", async ({ page }) => {
 
 test("a guided walk nudges halfway and ends itself when time is up", async ({ page }) => {
   await page.clock.install();
-  await openBrief(page, "Guided Walk");
+  await openBrief(page, "Challenge Walk");
   await dialog(page).getByLabel("Walk length").selectOption("2");
-  await expect(dialog(page)).toContainText("2-minute timer");
+  await expect(dialog(page).getByLabel("Walk length")).toHaveValue("2");
   await expect(dialog(page).locator(".challenge-check").first()).toBeVisible();
   await dialog(page).locator(".challenge-check").first().check();
   await dialog(page).getByRole("button", { name: "Start shooting" }).click();
@@ -87,7 +86,8 @@ test("a long casual walk asks for the hours, which can earn a reward", async ({ 
   await expect(toast(page, "Reward set!")).toBeVisible();
   await expect(dialog(page)).toContainText("New lens");
   await page.keyboard.press("Escape");
-  await expect(page.locator(".reward-bar")).toContainText("New lens in 1h");
+  await expect(page.locator(".reward-leg")).toHaveText([/New lens\s*1h of shooting to go/]);
+  await expect(page.getByRole("progressbar", { name: "New lens" })).toHaveAttribute("aria-valuenow", "0");
 
   await page.getByRole("button", { name: /Start Photo Walk/ }).click();
   await page.getByRole("button", { name: "Casual Walk" }).click();
@@ -96,7 +96,7 @@ test("a long casual walk asks for the hours, which can earn a reward", async ({ 
   await page.clock.fastForward("03:00:00");
 
   await page.getByRole("link", { name: "Walks", exact: true }).click();
-  await page.getByRole("button", { name: "Stop Walk" }).click();
+  await page.getByRole("button", { name: "Finish Walk" }).click();
   await dialog(page).getByRole("button", { name: "Complete Walk" }).click();
   await expect(dialog(page).getByRole("heading", { name: "How long were you shooting?" })).toBeVisible();
   await expect(dialog(page).getByLabel("Hours to log")).toHaveValue("3.00");
@@ -128,10 +128,9 @@ test("a custom theme built from the brief is used and kept in My Themes", async 
 
   // Straight back to the brief, now on the new theme.
   await expect(dialog(page).getByRole("heading", { name: "Rainy Day Reflections" })).toBeVisible();
-  await expect(dialog(page)).toContainText("Your own custom theme.");
-  await page.keyboard.press("Escape");
+  await dialog(page).getByRole("button", { name: "Start shooting" }).click();
+  await expect(page).toHaveURL(/\/live\/$/);
 
-  // Through the menu: a reload would reopen the brief of the walk left open.
   await page.getByRole("button", { name: "Profile" }).click();
   await page.getByRole("dialog", { name: "Menu" }).getByRole("link", { name: "My Themes" }).click();
   await expect(page.locator(".log-last")).toHaveText("1 saved");
@@ -144,6 +143,21 @@ test("a custom theme built from the brief is used and kept in My Themes", async 
   const state = await saved(page);
   expect(state.customThemes[0].challenges).toEqual(["Find a puddle"]);
   expect(state.activeWalk.themeId).toBe(state.customThemes[0].id);
+});
+
+test("My Themes builds a new theme and stays put to list it", async ({ page }) => {
+  const errors = watchErrors(page);
+  await page.goto("/themes/");
+  await expect(page.locator(".empty-state-sm")).toHaveText("No custom themes yet.");
+
+  await page.getByRole("button", { name: "Build a Custom Theme" }).click();
+  await dialog(page).getByPlaceholder("Title (e.g. Rainy Day Reflections)").fill("Night Neon");
+  await dialog(page).getByRole("button", { name: "Save Theme" }).click();
+
+  await expect(page).toHaveURL(/\/themes\/$/);
+  await expect(page.locator(".log-last")).toHaveText("1 saved");
+  await expect(page.locator(".rewards-list")).toContainText("Night Neon");
+  expect(errors).toEqual([]);
 });
 
 test("the Live tab starts a walk, but opening /live/ directly does not", async ({ page }) => {
@@ -159,6 +173,30 @@ test("the Live tab starts a walk, but opening /live/ directly does not", async (
   // A walk left on its brief comes back on its brief after a reload.
   await page.reload();
   await expect(dialog(page).getByRole("button", { name: "Start shooting" })).toBeVisible();
+});
+
+test("closing the brief without starting leaves no walk behind", async ({ page }) => {
+  for (const mode of ["Casual Walk", "Challenge Walk"] as const) {
+    await openBrief(page, mode);
+    // Through Change Theme and back first: moving between the pop-ups keeps the walk.
+    await dialog(page).getByRole("button", { name: "Change Theme" }).click();
+    await dialog(page).getByRole("button", { name: "Randomize" }).click();
+    await expect(dialog(page).getByRole("button", { name: "Start shooting" })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(dialog(page)).toHaveCount(0);
+
+    await expect(page.getByRole("button", { name: /Start Photo Walk/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Finish Walk" })).toHaveCount(0);
+    await expect.poll(async () => (await saved(page)).activeWalk).toBeNull();
+    // The Live tab sets up a walk too; backing out of its brief drops it the same way.
+    await page.getByRole("link", { name: "Live Walk", exact: true }).click();
+    await expect(dialog(page).getByRole("button", { name: "Start shooting" })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("button", { name: "Finish Walk" })).toHaveCount(0);
+    await expect(page.locator(".live-start")).toBeVisible();
+    await expect(page.locator(".nav-live")).toHaveCount(0);
+    await expect.poll(async () => (await saved(page)).activeWalk).toBeNull();
+  }
 });
 
 test("the golden-hour badge asks for a location, then shows the light", async ({ page, context }) => {

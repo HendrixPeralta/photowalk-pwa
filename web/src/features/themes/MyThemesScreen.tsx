@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@/components/icons/Icon";
 import { chooseSavedTheme, openThemeEditor, removeSavedTheme } from "@/features/walks/actions";
 import { t } from "@/lib/i18n/core";
 import { useAppStore } from "@/state/appStore";
@@ -16,7 +17,7 @@ export function MyThemesScreen() {
       </div>
       <p className="muted card-text">{t("Themes you've made yourself, saved so you can use them again.")}</p>
       {!custom.length && (
-        <p className="empty-state-sm">{t("No custom themes yet. Make one from Change Theme on the Walks tab.")}</p>
+        <p className="empty-state-sm">{t("No custom themes yet.")}</p>
       )}
       <ul className="rewards-list">
         {custom.map((theme) => (
@@ -32,6 +33,13 @@ export function MyThemesScreen() {
           </li>
         ))}
       </ul>
+      {/* Same corner button as the walk launcher. Stays on this screen after
+          saving, so the new theme shows up in the list. */}
+      <div className="walk-fab-wrap">
+        <button type="button" className="walk-fab" aria-label={t("Build a Custom Theme")} onClick={() => openThemeEditor(null, () => {})}>
+          <Icon name="plus" />
+        </button>
+      </div>
     </section>
   );
 }

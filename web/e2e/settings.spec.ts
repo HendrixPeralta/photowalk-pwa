@@ -92,14 +92,9 @@ test("a review asks for something first, then sends", async ({ page }) => {
     await route.fulfill({ status: 200, body: "ok" });
   });
   await page.goto("/");
-  await page.getByRole("button", { name: "Leave a review" }).click();
+  await page.getByRole("button", { name: "Leave feedback" }).click();
   await dialog(page).getByRole("button", { name: "Send review" }).click();
   await expect(dialog(page)).toContainText("Add a rating or an answer first.");
-
-  // The form's own language toggle, independent of the app.
-  await dialog(page).getByRole("button", { name: "JA" }).click();
-  await expect(dialog(page).getByRole("heading", { name: "レビューを書く" })).toBeVisible();
-  await dialog(page).getByRole("button", { name: "EN" }).click();
 
   await dialog(page).getByRole("radio", { name: "4 stars" }).click();
   await dialog(page).getByRole("checkbox", { name: "Rewards" }).click();

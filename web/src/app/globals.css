@@ -140,20 +140,6 @@ button, input, select {
   min-width: 0;
 }
 
-/* Stacked lockup: engraved wordmark over the current screen name. */
-.brand-titles { display: flex; flex-direction: column; min-width: 0; }
-.brand-titles .label-caps { color: var(--accent-strong); }
-.brand-titles h1 {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: 500;
-  line-height: 22px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .brand-icon {
   width: 20px; height: 20px;
   color: var(--accent);
@@ -187,12 +173,12 @@ button, input, select {
   border-radius: 999px;
   font-family: var(--font-data);
   font-variant-numeric: tabular-nums;
-  font-weight: 500;
-  font-size: 11px;
+  font-weight: 600;
+  font-size: 16px;
   white-space: nowrap;
   color: var(--accent-strong);
 }
-.streak-badge svg { width: 16px; height: 16px; }
+.streak-badge svg { width: 20px; height: 20px; color: #ff3b30; }
 
 .icon-btn {
   display: inline-flex;
@@ -410,91 +396,38 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
 
 /* Reward progress bar (Home) */
 .reward-progress-card { padding: 14px 16px; }
-.reward-bar-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-  font-size: 0.8rem;
-}
-.reward-bar-now { font-weight: 700; flex-shrink: 0; }
-.reward-bar-head .muted { text-align: right; }
+.reward-bar-title { margin: 0; }
 
-.reward-bar-track {
-  position: relative;
-  height: 8px;
-  margin: 16px 0 18px;
+.reward-bar-legend {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.reward-leg { display: flex; flex-direction: column; gap: 6px; }
+.reward-leg-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+}
+.reward-leg-track {
+  height: 4px;
   background: var(--surface-3);
   border-radius: 999px;
+  overflow: hidden;
 }
-.reward-bar-fill {
+.reward-leg-fill {
   height: 100%;
   border-radius: 999px;
   background: var(--accent);
   transition: width 0.4s ease;
 }
-.reward-bar-mark {
-  position: absolute;
-  top: 50%;
-  width: 13px;
-  height: 13px;
-  margin-left: -6.5px;
-  transform: translateY(-50%);
-  border-radius: 50%;
-  background: var(--surface-1);
-  border: 2px solid var(--accent);
-}
-
-/* The head of the fill: where the hours have got to. Its transition matches
-   .reward-bar-fill's exactly so the circle and the bar move as one piece. */
-.reward-bar-handle {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 15px;
-  height: 15px;
-  margin-left: -7.5px;
-  transform: translateY(-50%);
-  border-radius: 50%;
-  background: var(--accent);
-  border: 2px solid var(--surface-1);
-  box-shadow: 0 0 0 1px var(--accent);
-  transition: left 0.4s ease;
-}
-
-.reward-bar-legend {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.reward-leg {
-  display: grid;
-  grid-template-columns: auto 1fr auto auto;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.82rem;
-}
-.reward-leg-label {
-  flex-shrink: 0;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 2px 8px;
-  font-size: 0.68rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text-dim);
-}
-.reward-leg-done .reward-leg-label {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-contrast);
-}
 .reward-leg-title { font-weight: 600; overflow-wrap: anywhere; }
-.reward-leg-note { color: var(--text-dim); font-size: 0.76rem; text-align: right; }
+.reward-leg-note { color: var(--text-dim); font-size: 0.76rem; text-align: right; white-space: nowrap; }
 
 .reward-bar > .btn { margin-top: 14px; }
 .reward-bar .empty-state-sm { padding: 8px 0 14px; }
@@ -642,19 +575,6 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
   color: var(--text-dim);
 }
 
-/* Groups the theme name with its challenge tally as one recap, distinct from
-   the lifetime stat tiles above it. */
-.summary-theme-recap {
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
-  margin: 12px 0;
-}
-.summary-theme-recap .label-caps { display: block; color: var(--text-dim); margin-bottom: 2px; }
-.summary-theme-recap strong { display: block; font-size: 1rem; }
-.summary-theme-recap p { margin: 6px 0 0; font-size: 0.85rem; color: var(--text-dim); }
-
 .summary-wins, .summary-progress-list {
   list-style: none;
   margin: 12px 0;
@@ -685,12 +605,6 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
 
 .hours-input { width: auto; margin: 0; }
 
-.theme-reason {
-  font-size: 0.8rem;
-  color: var(--accent-strong);
-  margin: 6px 0 0;
-}
-
 .quick-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -709,56 +623,17 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
   cursor: pointer;
 }
 
-/* Running-walk panel (Home) */
-/* Both states of the top block keep the same gap to the stats grid below. */
+/* The launcher keeps a clear gap to the card below. */
 #quickStart { margin-bottom: 16px; }
-.walk-panel { margin: 0 0 16px; border-color: var(--accent); }
-.walk-panel-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-.walk-panel-titles { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.walk-panel-titles strong { font-size: 1rem; overflow-wrap: anywhere; }
-.walk-panel-titles .muted { font-size: 0.78rem; }
 
-.walk-panel-clock { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; }
-.walk-panel-timer {
-  font-family: var(--font-data);
-  font-size: 1.5rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-  line-height: 1.1;
-}
-.walk-panel-clock .muted { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; }
-
-.walk-panel .timer-track { margin-top: 12px; }
-.walk-panel .theme-actions { margin-top: 14px; }
-
-.walk-brief-mode {
-  font-size: 0.8rem;
-  color: var(--text-dim);
-  margin: 10px 0 0;
-}
 .quick-card strong { font-size: 0.95rem; }
 .quick-card span { font-size: 0.78rem; color: var(--text-dim); }
 .quick-card-accent { border-color: var(--accent); }
 .quick-card-accent strong { color: var(--accent-strong); }
 .quick-card:hover { border-color: var(--border-strong); }
 
-/* Walk brief: theme name with its Edit action riding the same line. The
-   right-hand padding keeps Edit clear of the modal's own close X, which sits
-   in that same corner. */
-.walk-brief-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding-right: 30px;
-}
-.walk-brief-head h3 { margin: 0; }
+/* Walk brief title, kept clear of the modal's close X in the same corner. */
+.walk-brief-title { margin: 0; padding-right: 30px; }
 
 /* Change Theme: a scrollable stack of picks rather than the 2-up grid the
    quick-start cards use: titles and briefs here are too varied in length
@@ -816,6 +691,9 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
 .theme-card > .btn { margin-top: 10px; }
 
 .theme-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+/* Side by side, for a pair of equally weighted buttons. */
+.theme-actions-row { flex-direction: row; }
+.theme-actions-row > .btn { flex: 1; min-width: 0; margin: 0; }
 
 .challenges-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .challenge-item { display: flex; align-items: flex-start; gap: 10px; font-size: 0.88rem; cursor: pointer; }
@@ -897,7 +775,7 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
   scrollbar-width: none;
   /* Scrolling one axis clips the other, so buy back room for focus rings. */
   padding: 2px 0;
-  margin-top: 10px;
+  margin-bottom: 10px;
 }
 .guide-controls::-webkit-scrollbar { display: none; }
 .guide-controls .chip-btn { flex: 0 0 auto; }
@@ -923,8 +801,12 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
   cursor: pointer;
 }
 .chip-btn.active { background: var(--accent); color: var(--accent-contrast); border-color: var(--accent); font-weight: 500; }
+/* Analysis rounds off its controls; elsewhere they keep the squarer edge. */
+[data-view="analyze"] :is(.btn, .chip-btn, .chip-select) { border-radius: var(--radius-lg); }
 /* Starts the right-hand utility group: everything after it hugs the edge. */
 .chip-btn-push { margin-left: auto; }
+.chip-btn-icon { display: inline-flex; align-items: center; justify-content: center; width: 34px; padding: 0; }
+.chip-btn-icon svg { width: 18px; height: 18px; }
 .chip-select {
   padding: 7px 11px;
   min-height: 34px;
@@ -946,24 +828,72 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
 
 /* Scopes live behind an Advanced fold: most reads only need the palette and the
    histogram, so the four traces stay one tap away instead of in the way. */
-.scopes-details { margin-top: 18px; }
-.scopes-details .collapse-body > .overlay-controls:first-child { margin-top: 0; }
+/* Color, Light and Advanced share one card, a tab at a time. */
+.readout-tabs {
+  margin: 4px 0 20px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.readout-tab-bar { display: flex; border-bottom: 1px solid var(--border); }
+.readout-tab {
+  flex: 1;
+  padding: 12px 8px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  color: var(--text-dim);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.readout-tab.active { color: var(--accent-strong); border-bottom-color: var(--accent); }
+.readout-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.readout-panel { padding: 14px 12px; }
+.readout-panel > .help-head:first-child { margin-top: 0; }
+/* Advanced's own tabs: a lighter, scrolling row under the main tabs. */
+.sub-tab-bar {
+  display: flex;
+  margin: -6px 0 14px;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.sub-tab-bar::-webkit-scrollbar { display: none; }
+.sub-tab {
+  flex: 1 0 auto;
+  padding: 8px 5px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  color: var(--text-dim);
+  font-family: var(--font-data);
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.sub-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+@media (max-width: 400px) { .sub-tab { padding: 8px 3px; font-size: 11px; } }
+.sub-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
 /* Scopes. Deliberately dark in both themes: a waveform trace is a thin bright
    line, and it disappears on a light background. */
 .scope-grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
 .scope-grid-all { grid-template-columns: 1fr 1fr; gap: 12px; }
 .scope-cell { margin: 0; min-width: 0; }
+/* One scope at a time, its tab already names it; under All, each needs its own. */
 .scope-name {
+  display: none;
   font-size: 0.8rem;
   font-weight: 700;
   margin-bottom: 6px;
 }
-.scope-name span {
-  font-weight: 500;
-  color: var(--text-dim);
-  font-size: 0.74rem;
-}
+.scope-grid-all .scope-name { display: block; }
+.scope-help { display: flex; margin-top: 8px; }
 .scope-canvas {
   width: 100%;
   height: 210px;
@@ -982,24 +912,17 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
   height: 260px;
 }
 .scope-grid-all .curve-canvas { height: 180px; }
-.curve-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 8px 0 6px;
-  flex-wrap: wrap;
-}
 .curve-modes { margin: 0 0 8px; }
-.curve-hint { margin: 0; font-size: 0.72rem; }
+.curve-modes .chip-btn-icon { font-size: 15px; font-weight: 700; }
+.chip-btn:disabled { opacity: 0.45; cursor: default; }
+.curve-hint { margin: 0 0 8px; font-size: 0.72rem; }
 .btn-sm { padding: 6px 11px; font-size: 0.8rem; }
 .btn-sm:disabled { opacity: 0.45; pointer-events: none; }
-.scope-grid-all .scope-name span { display: none; }
 .scope-caption { margin-bottom: 0; }
 
 @media (max-width: 520px) {
   .scope-grid-all { grid-template-columns: 1fr; }
   .scope-grid-all .scope-canvas { height: 180px; }
-  .scope-grid-all .scope-name span { display: inline; }
 }
 
 .palette-row { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -1094,18 +1017,94 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
 input[type="file"].text-input { padding: 8px; }
 
 /* Album */
-.filter-row { display: flex; gap: 8px; margin-bottom: 10px; }
-.filter-row select {
-  flex: 1 1 0;
-  min-width: 0;
-  padding: 9px 8px;
-  min-height: 40px;
-  background: var(--surface-0);
+.album-toolbar { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 10px; }
+.album-toolbar .text-input { flex: 1; min-width: 0; margin: 0; }
+.filter-pop { position: relative; }
+.filter-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: var(--surface-1);
   border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.filter-toggle svg { width: 20px; height: 20px; }
+.filter-toggle.set, .filter-toggle[aria-expanded="true"] { color: var(--accent-strong); border-color: var(--accent); }
+.filter-count {
+  position: absolute;
+  top: -6px; right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+}
+.filter-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  padding: 4px 8px 4px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  color: var(--text-dim);
+  font-size: 12px;
+  cursor: pointer;
+}
+.filter-pill svg { width: 14px; height: 14px; }
+.filter-pill.set { color: var(--accent-strong); border-color: var(--accent); background: rgba(245, 158, 11, 0.1); }
+.filter-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 30;
+  width: max-content;
+  min-width: 180px;
+  max-width: calc(100vw - 32px);
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 6px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 24px var(--shadow);
+}
+/* The filter button sits at the right edge, so its menu opens leftward. */
+.album-toolbar .filter-menu { left: auto; right: 0; }
+.filter-menu-title { margin: 4px 8px 6px; color: var(--text-dim); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+.filter-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 8px;
+  background: none;
+  border: 0;
   border-radius: var(--radius-md);
   color: var(--text);
-  font-size: 12px;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
 }
+.filter-menu-item:hover, .filter-menu-item:focus-visible { background: var(--surface-3); outline: none; }
+.filter-menu-item svg { width: 16px; height: 16px; flex: none; color: var(--accent-strong); }
+.filter-menu-remove { justify-content: flex-start; color: var(--text-dim); }
+.filter-menu-remove svg { color: inherit; }
+.filter-menu-rule { margin: 6px 0; border: 0; border-top: 1px solid var(--border); }
 
 .album-grid {
   display: grid;
@@ -1113,7 +1112,7 @@ input[type="file"].text-input { padding: 8px; }
   gap: 8px;
   margin-top: 12px;
 }
-.album-thumb, .room-thumb {
+.album-thumb {
   position: relative;
   aspect-ratio: 1;
   border: 1px solid var(--border);
@@ -1128,7 +1127,7 @@ input[type="file"].text-input { padding: 8px; }
   background-position: center;
   background-repeat: no-repeat;
 }
-.album-thumb-tag, .room-thumb-name {
+.album-thumb-tag {
   position: absolute;
   left: 4px; bottom: 4px;
   font-size: 0.6rem;
@@ -1162,22 +1161,122 @@ input[type="file"].text-input { padding: 8px; }
 
 .invite-card { text-align: center; }
 /* Walk Partners: who is in the room, your rooms, and the sync notice */
-.room-people-list { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.room-person { display: flex; align-items: center; gap: 10px; }
-.room-person .profile-avatar { width: 32px; height: 32px; }
-.room-person-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.room-person .btn { margin-left: auto; }
+.room-people { flex: 1; min-width: 0; display: flex; align-items: center; padding-left: 4px; }
+.room-person { padding: 0; border: none; background: none; border-radius: 50%; cursor: pointer; }
+.room-person + .room-person { margin-left: -8px; }
+.room-person .profile-avatar { width: 30px; height: 30px; border: 2px solid var(--bg); }
+.room-person .profile-initial { font-size: 0.8rem; }
+.room-people-more { margin-left: 6px; font-size: 12px; color: var(--text-dim); }
+.room-person-card { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding-right: 32px; }
+.room-person-card h3 { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .room-sync-notice { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .room-expiry { text-align: center; }
-.your-rooms { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
-.your-room { justify-content: space-between; text-align: left; }
-.your-room .muted { font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.your-rooms-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.your-rooms { display: flex; flex-direction: column; gap: 8px; }
+.your-room { display: flex; align-items: center; gap: 8px; }
+.your-room-meta { flex: 1; min-width: 0; text-align: right; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* A code card that copies, and the amber way in. Softly squared, like the app's cards. */
+.room-code-card,
+.room-enter {
+  flex: 0 0 auto;
+  min-height: 32px;
+  padding: 0 14px;
+  border-radius: var(--radius-lg);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s ease, border-color 0.12s ease;
+}
+.room-code-card:active,
+.room-enter:active { transform: scale(0.97); }
+.room-code-card {
+  border: 1px solid var(--border-strong);
+  background: var(--surface-4);
+  color: var(--accent-strong);
+  letter-spacing: 0.12em;
+  /* Codes are six letters but not equally wide; a set width keeps Enter lined up. */
+  width: 7.6em;
+  padding: 0;
+}
+.room-code-card:hover { border-color: var(--accent); }
+.room-enter { border: none; background: var(--accent); color: var(--accent-contrast); }
+.room-enter:hover { background: var(--accent-strong); }
+.rooms-add {
+  width: 30px; height: 30px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  cursor: pointer;
+}
+.rooms-add svg { width: 18px; height: 18px; }
 
 .room-qr {
   display: flex;
   justify-content: center;
-  margin: 4px 0 10px;
+  margin: 4px auto 10px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
 }
+.room-qr:active { transform: scale(0.98); }
+/* The invite QR, beside the room code on Partners. */
+.room-qr-btn {
+  flex: 0 0 auto;
+  width: 32px; height: 32px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--surface-4);
+  color: var(--accent-strong);
+  cursor: pointer;
+}
+.room-qr-btn:hover { border-color: var(--accent); }
+.room-qr-btn svg { width: 20px; height: 20px; }
+/* The count, + and QR on the right of the title row, evenly spaced. */
+.room-actions { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; }
+/* How many photos the room has, just left of the +. Boxed like the buttons beside it. */
+.room-photo-count {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--surface-4);
+  font-family: var(--font-data);
+  font-size: 14.4px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent-strong);
+}
+.room-photo-count svg { width: 20px; height: 20px; }
+.room-qr-btn:disabled { opacity: 0.5; cursor: default; }
+/* The + for sharing shots, beside the QR. A count shows photos waiting from the share sheet. */
+.room-add-btn { position: relative; background: var(--accent); border-color: var(--accent); color: var(--accent-contrast); }
+.room-add-btn:hover { border-color: var(--accent-strong); background: var(--accent-strong); }
+.room-add-count {
+  position: absolute;
+  top: -6px; right: -6px;
+  min-width: 16px; height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--cyan);
+  color: var(--bg);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+}
+.room-upload-progress { margin: 0 0 8px; }
 .room-qr svg {
   width: min(190px, 60vw);
   height: auto;
@@ -1261,6 +1360,22 @@ input[type="file"].text-input { padding: 8px; }
   z-index: 50;
 }
 .modal-root.hidden { display: none; }
+/* A short question: in the middle of the screen, not a sheet from the bottom. */
+.modal-root-alert { align-items: center; padding: 16px; }
+.modal-root-alert .modal-card { width: min(340px, 100%); }
+.modal-root-alert h3 { margin-top: 0; }
+/* A window hovering over the page: centered, clear of every edge, lifted by a
+   shadow, and growing in from slightly smaller. */
+.modal-root-floating { align-items: center; padding: 20px 16px; }
+.modal-root-floating .modal-card {
+  max-height: calc(100dvh - 40px);
+  padding: 20px;
+  border-color: var(--border-strong);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.4);
+  animation: modal-float-in 180ms ease-out;
+}
+@keyframes modal-float-in { from { opacity: 0; transform: translateY(8px) scale(0.96); } }
+@media (prefers-reduced-motion: reduce) { .modal-root-floating .modal-card { animation: none; } }
 .modal-card {
   width: min(440px, 100%);
   max-height: 86dvh;
@@ -1615,18 +1730,6 @@ input[type="file"].text-input { padding: 8px; }
    Precision Darkroom: new instrument components
    ========================================================================== */
 
-/* --- Status dot: shared by the cadence, HUD and mission readouts --------- */
-.solar-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--accent);
-  flex-shrink: 0;
-  animation: solar-ping 2s ease-in-out infinite;
-}
-.solar-dot[data-state="night"] { background: var(--cyan); }
-@keyframes solar-ping { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-@media (prefers-reduced-motion: reduce) { .solar-dot { animation: none; } }
-
 /* --- Discipline cadence: seven-day film canister strip ------------------- */
 .cadence-card {
   background: var(--surface-1);
@@ -1796,49 +1899,23 @@ input[type="file"].text-input { padding: 8px; }
 }
 .micro-stat .timer-track { margin-top: 8px; }
 
-/* Keeps a title and its "?" button grouped together on the left when the
-   parent .log-head has nothing to push to the right with space-between. */
-.label-caps-row { display: inline-flex; align-items: center; }
-
-/* Small inline "?" next to a section title, opening a modal with more detail. */
-.section-help-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  padding: 0;
-  margin-left: 4px;
-  vertical-align: middle;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  background: var(--surface-4);
-  color: var(--text-dim);
-  font-family: var(--font-display);
-  font-size: 10px;
-  font-weight: 700;
-  cursor: pointer;
-}
-.section-help-btn:hover { color: var(--accent-strong); border-color: var(--accent); }
-
-/* Inline variant, sat next to an Analysis tool's title instead of floating
-   over a card corner. */
+/* "Learn more" beside a section or tool title, opening a modal with more
+   detail. The auto margin pushes it to the right edge of its flex row. */
 .tool-help-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  padding: 0;
-  margin-left: 4px;
-  vertical-align: middle;
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 2px 8px;
   border: 1px solid var(--border);
-  border-radius: 50%;
+  border-radius: 999px;
   background: var(--surface-4);
   color: var(--text-dim);
   font-family: var(--font-display);
   font-size: 10px;
-  font-weight: 700;
+  line-height: 20px;   /* its own, so every one is the same height wherever it sits */
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  white-space: nowrap;
   cursor: pointer;
 }
 .tool-help-btn:hover { color: var(--accent-strong); border-color: var(--accent); }
@@ -1853,6 +1930,44 @@ input[type="file"].text-input { padding: 8px; }
 }
 .tool-help-refs li { margin-bottom: 4px; }
 .tool-help-refs a { color: var(--accent); }
+
+/* --- Tutorials ----------------------------------------------------------- */
+.tutorial-list { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.tutorial-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  padding: 12px 14px;
+  text-align: left;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+.tutorial-card:hover { border-color: var(--accent); }
+.tutorial-card strong { font-family: var(--font-display); font-size: 1.1rem; }
+/* Just a taste of the article: two lines, then an ellipsis. */
+.tutorial-card span {
+  color: var(--text-dim);
+  font-size: 0.95rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.tutorial-title { margin: 0 0 6px; font-family: var(--font-display); font-size: 1.6rem; line-height: 1.25; }
+/* The article is read on a phone, not glanced at in a pop-up: the same body as
+   ToolHelpModal, at a size meant for reading. */
+[data-view="learn"] .section-title { font-size: 12px; line-height: 14px; }
+.tutorial-article .card-text { font-size: 1.1rem; line-height: 1.55; }
+.tutorial-article .subsection-title { font-size: 14px; letter-spacing: 0.06em; margin: 24px 0 8px; }
+.tutorial-article .tool-help-list { font-size: 1.05rem; line-height: 1.5; }
+.tutorial-article .tool-help-list li { margin-bottom: 8px; }
+.tutorial-article .tool-help-refs { font-size: 1rem; line-height: 1.5; }
 
 /* --- Floating walk launcher ---------------------------------------------- */
 /* Sits over the bottom-right corner of the app column, above the nav bar. */
@@ -1885,6 +2000,10 @@ input[type="file"].text-input { padding: 8px; }
   cursor: pointer;
   transition: background 0.15s ease, transform 0.1s ease;
 }
+/* Toasts clear the button instead of covering it. */
+body:has(.walk-fab-wrap) .toast-root {
+  bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 16px + 56px + 12px);
+}
 .walk-fab:hover { background: var(--accent-strong); }
 .walk-fab:active { transform: scale(0.95); }
 .walk-fab svg { width: 26px; height: 26px; transition: transform 0.2s ease; }
@@ -1907,8 +2026,6 @@ input[type="file"].text-input { padding: 8px; }
   .walk-fab-menu { animation: none; }
   .walk-fab svg { transition: none; }
 }
-.walk-fab-menu-head { display: flex; align-items: center; padding: 2px 2px 4px; }
-
 .walk-fab-option {
   display: flex;
   align-items: center;
@@ -1923,6 +2040,7 @@ input[type="file"].text-input { padding: 8px; }
   cursor: pointer;
 }
 .walk-fab-option:hover { border-color: var(--accent); }
+.walk-fab-option:disabled { opacity: 0.6; cursor: progress; }
 .walk-fab-option-icon {
   width: 32px; height: 32px;
   flex-shrink: 0;
@@ -1933,54 +2051,75 @@ input[type="file"].text-input { padding: 8px; }
   color: var(--accent-contrast);
 }
 .walk-fab-option-icon svg { width: 18px; height: 18px; }
-.walk-fab-option-labels { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.walk-fab-option-labels strong { font-family: var(--font-display); font-size: 16px; font-weight: 600; }
-.walk-fab-option-labels .muted { font-size: 12px; }
+.walk-fab-option strong { font-family: var(--font-display); font-size: 16px; font-weight: 600; }
 
 /* Room under the last card so the button never hides it. */
 .view:has(.walk-fab) { padding-bottom: 72px; }
 
 /* --- Field HUD: telemetry bar -------------------------------------------- */
-.telemetry-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  margin-bottom: 8px;
-}
-/* Three tiles breathe where four had to be crammed. */
-.telemetry-grid-3 { grid-template-columns: repeat(3, 1fr); }
-
-.telemetry-cell {
+.walk-clock {
   background: var(--surface-1);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 8px 6px;
-  min-width: 0;
+  border-radius: var(--radius-lg);
+  padding: 20px 14px 12px;
+  margin-bottom: 8px;
 }
-.telemetry-cell-head {
+.walk-clock-main {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 3px;
-  color: var(--text-dim);
+  gap: 4px;
 }
-.telemetry-cell-head svg { width: 12px; height: 12px; flex-shrink: 0; }
-.telemetry-cell-head .label-caps { color: inherit; font-size: 9px; letter-spacing: 0.06em; }
-
-.telemetry-value {
-  display: flex;
-  align-items: baseline;
-  gap: 2px;
-  margin-top: 5px;
+.walk-clock-time {
   font-family: var(--font-data);
   font-variant-numeric: tabular-nums;
-  font-size: 17px;
+  font-size: 56px;
   font-weight: 500;
-  color: var(--accent-strong);
+  line-height: 1;
   letter-spacing: -0.03em;
+  color: var(--accent-strong);
 }
-.telemetry-value small { font-size: 10px; font-weight: 400; color: var(--text-dim); }
-.telemetry-cell-cyan .telemetry-value { color: var(--cyan); }
-.telemetry-cell-plain .telemetry-value { color: var(--text); }
+.walk-clock-left {
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  color: var(--cyan);
+}
+.walk-clock-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 16px;
+  color: var(--text-dim);
+  font-size: 12px;
+}
+.walk-clock-mode,
+.walk-clock-photos { display: inline-flex; align-items: center; gap: 5px; }
+.walk-clock-mode svg,
+.walk-clock-photos svg { width: 14px; height: 14px; flex-shrink: 0; }
+.walk-clock-photos { gap: 7px; }
+.walk-clock-photos > svg { width: 17px; height: 17px; }
+.walk-clock-count {
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--text);
+}
+.walk-clock-add {
+  width: 26px; height: 26px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  cursor: pointer;
+}
+.walk-clock-add:hover { background: var(--accent-strong); }
+.walk-clock-add svg { width: 14px; height: 14px; }
 
 /* --- Field HUD: mission directive ---------------------------------------- */
 .mission-card {
@@ -1990,33 +2129,40 @@ input[type="file"].text-input { padding: 8px; }
   padding: 12px;
   margin-bottom: 12px;
 }
-.mission-head {
+.mission-summary {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
+  cursor: pointer;
+  list-style: none;
 }
-.mission-head-left { display: flex; align-items: center; gap: 6px; }
-.mission-head .label-caps { color: var(--accent-strong); }
-.mission-badge {
-  padding: 3px 7px;
-  border: 1px solid var(--accent);
-  border-radius: var(--radius-sm);
-  color: var(--accent-strong);
-  font-family: var(--font-data);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  white-space: nowrap;
-}
+.mission-summary::-webkit-details-marker { display: none; }
+.mission-summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--radius-md); }
+.mission-summary .collapse-chevron { margin-left: auto; }
+details[open] > .mission-summary .collapse-chevron { transform: rotate(180deg); }
 .mission-title {
-  margin: 10px 0 0;
+  min-width: 0;
+  margin: 0;
   font-family: var(--font-display);
   font-size: 20px;
   font-weight: 600;
   line-height: 27px;
   letter-spacing: -0.01em;
 }
+.mission-change {
+  flex-shrink: 0;
+  width: 30px; height: 30px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface-4);
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.mission-change svg { width: 15px; height: 15px; }
+.mission-change:hover { color: var(--accent-strong); border-color: var(--accent); }
 .mission-hint {
   display: flex;
   gap: 8px;
@@ -2057,17 +2203,6 @@ input[type="file"].text-input { padding: 8px; }
   font-family: var(--font-data);
   font-size: 11px;
   color: var(--text-dim);
-}
-.mission-synced {
-  margin-left: auto;
-  padding: 3px 7px;
-  background: var(--accent-deep);
-  border-radius: var(--radius-sm);
-  color: var(--accent-strong);
-  font-family: var(--font-data);
-  font-size: 10px;
-  font-weight: 600;
-  white-space: nowrap;
 }
 
 /* --- Field HUD: logged frame chips --------------------------------------- */
@@ -2126,19 +2261,54 @@ input[type="file"].text-input { padding: 8px; }
 .log-head .label-caps { color: var(--text-dim); margin: 0; }
 .log-last { font-family: var(--font-data); font-size: 11px; color: var(--accent-strong); }
 
-.log-btn {
-  width: 100%;
-  min-height: 56px;
-  font-size: 14px;
-  letter-spacing: 0.02em;
-}
 
 .hud-footer-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 56px 1fr;
   gap: 8px;
   margin-top: 16px;
 }
+.hud-pause { padding: 0; justify-content: center; }
+
+/* Live Walk with no walk under way: one solid square button, in the middle
+   of the space between the top bar and the tabs. */
+.views:has(> .view > .live-start) { display: flex; flex-direction: column; }
+.view:has(> .live-start) { flex: 1; display: flex; align-items: center; justify-content: center; }
+.live-start {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  width: min(220px, 60%);
+  aspect-ratio: 1;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-lg);
+  color: var(--accent-contrast);
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-align: center;
+  text-wrap: balance;
+  cursor: pointer;
+}
+.live-start:hover { filter: brightness(0.94); }
+/* Analysis's empty state: the same square, with what it's for written under the title. */
+.live-start-note { flex-direction: column; gap: 12px; width: min(260px, 70%); }
+.live-start-note small {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0;
+  opacity: 0.8;
+}
+
+.partners-back { display: inline-flex; align-items: center; gap: 4px; margin-bottom: 12px; padding-left: 6px; }
+.partners-back svg { width: 16px; height: 16px; }
+.hud-pause svg { width: 20px; height: 20px; }
 /* .btn-danger-solid carries its own top margin for when it's stacked alone;
    paired with Pause Walk in this grid row, that would misalign the two tops. */
 .hud-footer-row .btn-danger-solid { margin-top: 0; }
@@ -2180,13 +2350,14 @@ input[type="file"].text-input { padding: 8px; }
 .diag-note p { margin: 10px 0 0; padding-left: 28px; font-size: 13px; line-height: 19px; color: var(--text-dim); }
 
 /* --- Analysis: colour gamut deconstruction ------------------------------- */
-.gamut-head {
+/* A subsection title with its "Learn more" on the right. */
+.help-head {
   display: flex;
   align-items: center;
   gap: 8px;
   margin: 18px 0 8px;
 }
-.gamut-head .subsection-title { margin: 0; }
+.help-head .subsection-title { margin: 0; }
 
 .harmony-row {
   display: flex;
@@ -2197,6 +2368,9 @@ input[type="file"].text-input { padding: 8px; }
   border-radius: var(--radius-md);
   margin-bottom: 8px;
 }
+.harmony-row.collapse-summary { padding: 10px; }
+.harmony-row .collapse-chevron { margin-left: auto; color: var(--text-dim); }
+details[open] > .harmony-row .collapse-chevron { transform: rotate(180deg); }
 .harmony-row svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--accent); }
 .harmony-row .label-caps { color: var(--text-dim); display: block; }
 .harmony-row strong {
@@ -2211,7 +2385,7 @@ input[type="file"].text-input { padding: 8px; }
 /* Segmented dominance tape: each swatch is as wide as its share of the frame. */
 .gamut-bar {
   display: flex;
-  height: 44px;
+  height: 88px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   overflow: hidden;
@@ -2242,26 +2416,7 @@ input[type="file"].text-input { padding: 8px; }
 }
 
 /* --- Partners: debrief header -------------------------------------------- */
-.debrief-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-.debrief-head-left { display: flex; align-items: center; gap: 6px; }
-.debrief-head .label-caps { color: var(--accent-strong); }
-.debrief-privacy {
-  padding: 3px 7px;
-  background: var(--surface-3);
-  border-radius: var(--radius-sm);
-  color: var(--text-dim);
-  font-family: var(--font-data);
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  white-space: nowrap;
-}
-
+.debrief-title-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
 .debrief-title {
   margin: 0;
   font-family: var(--font-display);
@@ -2271,54 +2426,8 @@ input[type="file"].text-input { padding: 8px; }
 }
 .debrief-sub { margin: 2px 0 12px; font-size: 13px; color: var(--text-dim); }
 
-.debrief-meta {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  padding: 10px 12px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  margin-bottom: 12px;
-}
-.debrief-meta div { min-width: 0; }
-.debrief-meta .label-caps { color: var(--text-dim); }
-.debrief-meta strong {
-  display: block;
-  margin-top: 4px;
-  font-family: var(--font-data);
-  font-size: 13px;
-  font-weight: 500;
-  overflow-wrap: anywhere;
-}
-.debrief-meta-accent strong { color: var(--accent-strong); }
-.debrief-meta-cyan strong { color: var(--cyan); }
 
-/* --- Partners: A/B split comparison -------------------------------------- */
-.split-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-  flex-wrap: wrap;
-}
-.split-synced {
-  margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--font-data);
-  font-size: 11px;
-  color: var(--cyan);
-  white-space: nowrap;
-}
-.split-synced::before {
-  content: '';
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--cyan);
-}
-
+/* --- Partners: the room's shots, each with its camera settings ----------- */
 .split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
 .split-pane {
@@ -2328,207 +2437,27 @@ input[type="file"].text-input { padding: 8px; }
   background: var(--surface-0);
   min-width: 0;
 }
-.split-pane-photo { position: relative; aspect-ratio: 3 / 4; }
+.split-pane-photo { position: relative; display: block; width: 100%; aspect-ratio: 1; padding: 0; border: none; background: none; cursor: pointer; }
 .split-pane-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-.split-pane-who {
-  position: absolute;
-  top: 6px; left: 6px;
-  padding: 3px 6px;
-  background: rgba(12, 14, 19, 0.85);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-data);
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--accent-strong);
+.split-pane-who { position: absolute; top: 6px; left: 6px; }
+.split-pane-who .profile-avatar {
+  width: 28px; height: 28px;
+  background: var(--surface-2);
+  border: 2px solid rgba(12, 14, 19, 0.85);
 }
+.split-pane-who .profile-initial { font-size: 0.75rem; }
 
 /* EXIF footer sits flush under the frame, split by a hairline. */
 .split-pane-exif {
   border-top: 1px solid var(--border);
   padding: 6px 7px;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  font-family: var(--font-data);
-  font-size: 10px;
-}
-.split-pane-exif-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 6px;
-}
-.split-pane-exif-row span { color: var(--text-dim); }
-.split-pane-exif-row b { color: var(--cyan); font-weight: 500; }
-
-/* Rangefinder wipe: one frame revealed over the other by a draggable prism. */
-.wipe-frame {
-  position: relative;
-  aspect-ratio: 3 / 4;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: var(--surface-0);
-  touch-action: none;
-  user-select: none;
-}
-.wipe-frame img {
-  position: absolute;
-  inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-}
-.wipe-top { clip-path: inset(0 50% 0 0); }
-.wipe-handle {
-  position: absolute;
-  top: 0; bottom: 0;
-  left: 50%;
-  width: 2px;
-  margin-left: -1px;
-  background: var(--accent);
-  cursor: ew-resize;
-}
-.wipe-handle::after {
-  content: '';
-  position: absolute;
-  top: 50%; left: 50%;
-  width: 30px; height: 30px;
-  margin: -15px 0 0 -15px;
-  border: 2px solid var(--accent);
-  border-radius: 50%;
-  background: rgba(12, 14, 19, 0.6);
-}
-.wipe-caption {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  margin-top: 6px;
+  text-align: right;
   font-family: var(--font-data);
   font-size: 10px;
   color: var(--text-dim);
 }
-
-/* --- Partners: technical critique thread --------------------------------- */
-.critique-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin: 18px 0 8px;
-}
-.critique-head-left { display: flex; align-items: center; gap: 7px; }
-.critique-head-left svg { width: 18px; height: 18px; color: var(--text); }
-.critique-head-left strong { font-family: var(--font-display); font-size: 17px; font-weight: 600; }
-.critique-motto {
-  font-family: var(--font-data);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.critique-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
-.critique-tag {
-  padding: 4px 8px;
-  background: var(--surface-3);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-data);
-  font-size: 11px;
-  color: var(--text);
-  border: none;
-  cursor: pointer;
-}
-.critique-tag.active { background: var(--accent); color: var(--accent-contrast); }
-.critique-tag-cyan { color: var(--cyan); }
-
-.critique-list { display: flex; flex-direction: column; gap: 8px; }
-.critique-note {
-  background: var(--surface-2);
-  border-radius: var(--radius-md);
-  padding: 10px;
-}
-.critique-note-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-.critique-note-who {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-display);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--cyan);
-  min-width: 0;
-}
-.critique-note-who::before {
-  content: '';
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: currentColor;
-  flex-shrink: 0;
-}
-.critique-note-mine .critique-note-who { color: var(--accent-strong); }
-.critique-note-spec {
-  font-family: var(--font-data);
-  font-size: 10px;
-  color: var(--text-dim);
-  white-space: nowrap;
-}
-.critique-note p { margin: 0; font-size: 13px; line-height: 19px; }
-
-.critique-form { display: flex; gap: 8px; margin-top: 10px; }
-.critique-form .text-input { margin: 0; }
-.critique-form .btn { flex-shrink: 0; padding: 0 14px; }
-
-/* --- Partners: habit momentum -------------------------------------------- */
-.momentum-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background: var(--surface-1);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  margin-top: 16px;
-}
-.momentum-flame {
-  width: 44px; height: 44px;
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  background: var(--surface-3);
-  border-radius: 50%;
-  color: var(--accent);
-}
-.momentum-flame svg { width: 22px; height: 22px; }
-.momentum-body { min-width: 0; flex: 1; }
-.momentum-body .label-caps { color: var(--accent-strong); }
-.momentum-body strong {
-  display: block;
-  margin-top: 2px;
-  font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: 600;
-}
-.momentum-badge {
-  flex-shrink: 0;
-  padding: 6px 9px;
-  background: var(--surface-0);
-  border-radius: var(--radius-md);
-  text-align: center;
-  font-family: var(--font-data);
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--accent-strong);
-  line-height: 15px;
-}
+.split-pane-exif b { color: var(--cyan); font-weight: 500; }
 
 .action-stack { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
 
@@ -2577,19 +2506,7 @@ input[type="file"].text-input { padding: 8px; }
   border-color: var(--accent);
 }
 
-.review-modal-head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
-.review-modal-head .label-caps { font-size: 13px; line-height: 16px; }
-
-.review-lang-toggle { display: flex; gap: 4px; flex-shrink: 0; grid-column: 2; }
-.review-lang-toggle .chip-btn { padding: 5px 10px; min-height: 0; font-size: 12px; }
-/* Invite blue, not instrument amber: this toggle switches the review form
-   itself, so it borrows the topbar-review treatment instead of matching the
-   level/feature chips it sits above. */
-.review-lang-toggle .chip-btn.active {
-  background: var(--invite);
-  border-color: var(--invite-bright);
-  color: #fff;
-}
+.review-modal-title { margin: 0; font-size: 13px; line-height: 16px; color: var(--accent-strong); }
 
 .review-field-label { display: block; margin: 14px 0 6px; font-size: 13px; line-height: 16px; }
 .review-field-hint {
@@ -2599,7 +2516,6 @@ input[type="file"].text-input { padding: 8px; }
   font-size: 12px;
   color: var(--text-dim);
 }
-.review-field-hint-block { display: block; margin: -4px 0 6px; }
 
 .review-chip-row {
   display: flex;
@@ -2609,8 +2525,7 @@ input[type="file"].text-input { padding: 8px; }
 
 /* The shared .chip-btn default (surface-0, a "recessed well" tone) reads as
    nearly flush with the modal card behind it. Raised chips need surface-3. */
-.review-chip-row .chip-btn,
-.review-lang-toggle .chip-btn {
+.review-chip-row .chip-btn {
   background: var(--surface-3);
   border-color: var(--border-strong);
 }
@@ -2651,10 +2566,9 @@ input[type="file"].text-input { padding: 8px; }
 }
 
 /* The top bar's review button.
-   Auto margins centre it in the space left between the brand lockup and the
-   right-hand actions. Kept in flow rather than absolutely centred so it can
-   never end up underneath either neighbour on a narrow phone. The trade is
-   that it sits at the centre of the gap, not the exact centre of the bar.
+   Grows to fill the space between the brand mark and the right-hand actions.
+   Kept in flow rather than absolutely placed so it can never end up
+   underneath either neighbour on a narrow phone.
 
    Solid in amber's complement rather than another outlined amber chip: the bar
    it sits in is all warm hairlines, so a cool fill is the only treatment that
@@ -2663,9 +2577,11 @@ input[type="file"].text-input { padding: 8px; }
 .topbar-review {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  flex-shrink: 0;
-  margin: 0 auto;
+  flex: 1;
+  min-width: 0;
+  margin: 0 12px;
   padding: 6px 13px;
   min-height: 34px;
   background: var(--invite);
@@ -2673,7 +2589,7 @@ input[type="file"].text-input { padding: 8px; }
   border-radius: 999px;
   color: #fff;                 /* 5.2:1 on the fill */
   font-family: var(--font-data);
-  font-size: 11px;
+  font-size: 16px;   /* matches the streak count */
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -2697,15 +2613,8 @@ input[type="file"].text-input { padding: 8px; }
   box-shadow: 0 0 0 2px var(--surface-0), 0 0 0 4px var(--invite-bright);
 }
 
-.topbar-review-star { font-size: 13px; line-height: 1; color: var(--accent-strong); }
-
-/* Under ~420px the bar is carrying a 34px badge, a streak pill and the brand
-   lockup already; drop to the star alone rather than let the title ellipsis
-   eat itself. */
-@media (max-width: 420px) {
-  .topbar-review { padding: 6px 10px; }
-  .topbar-review-label { display: none; }
-}
+/* Same size as the streak flame beside it. */
+.topbar-review-star { width: 20px; height: 20px; flex-shrink: 0; color: var(--accent-strong); }
 
 /* --- Port additions ------------------------------------------------------ */
 

@@ -2,7 +2,8 @@
 
 import { useEffect } from "react";
 import { useAppStore } from "@/state/appStore";
-import { restoreActiveWalk, tickWalk } from "./actions";
+import { useModal } from "@/state/ui";
+import { dropWalkIfNeverStarted, restoreActiveWalk, tickWalk } from "./actions";
 
 /**
  * Keeps an open walk running whichever screen is showing: delivers nudges and
@@ -14,6 +15,9 @@ export function WalkEngine() {
   useEffect(() => {
     restoreActiveWalk();
   }, []);
+
+  // Whenever the last pop-up closes, a walk still on its brief is let go.
+  useEffect(() => useModal.subscribe((s, prev) => { if (prev.current && !s.current) dropWalkIfNeverStarted(); }), []);
 
   useEffect(() => {
     if (!running) return;

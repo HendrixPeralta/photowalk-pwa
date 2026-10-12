@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Trans } from "@/components/Trans";
+import { Icon } from "@/components/icons/Icon";
 import { t } from "@/lib/i18n/core";
 import { navigate } from "@/lib/nav";
 import type { RoomSummary } from "@/lib/rooms/protocol";
@@ -10,7 +10,7 @@ import { useAppStore } from "@/state/appStore";
 import { closeModal, openModal, showToast } from "@/state/ui";
 import { createRoom, joinRoom } from "./rooms";
 
-function JoinRoomModal() {
+export function JoinRoomModal() {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -44,19 +44,53 @@ function JoinRoomModal() {
   );
 }
 
-/** Create or join a room for the people you're walking with, or go to the one you're in. */
-export function WalkPartnersCard() {
-  const code = useAppStore((s) => s.currentRoom);
+/** Create a room or join one, without leaving the list of rooms you're in. */
+function AddRoomModal() {
   const [busy, setBusy] = useState(false);
+  const create = async () => {
+    setBusy(true);
+    const problem = await createRoom();
+    setBusy(false);
+    if (problem) showToast(problem);
+    else closeModal();
+  };
+  return (
+    <>
+      <h3>{t("Add a room")}</h3>
+      <div className="theme-actions theme-actions-row">
+        <button type="button" className="btn btn-accent" disabled={busy} onClick={() => void create()}>{t("Create Room")}</button>
+        <button type="button" className="btn btn-primary" onClick={() => openModal(<JoinRoomModal />, { floating: true })}>{t("Join Room")}</button>
+      </div>
+    </>
+  );
+}
 
-  if (!roomsEnabled()) {
+/** Every room you're in, from any device: tap a code to copy it, or go in. The + makes or joins another. */
+export function WalkPartnersCard() {
+  const current = useAppStore((s) => s.currentRoom);
+  const [rooms, setRooms] = useState<RoomSummary[]>([]);
+  const [busy, setBusy] = useState(false);
+  const enabled = roomsEnabled();
+
+  // Only asked for when online. Asked again when the room on this device changes.
+  useEffect(() => {
+    if (!enabled || !navigator.onLine) return;
+    let live = true;
+    void roomsApi.list().then((res) => { if (live && res.ok) setRooms(res.data.rooms); });
+    return () => { live = false; };
+  }, [enabled, current]);
+
+  if (!enabled) {
     return (
       <div className="theme-card">
-        <h4 className="subsection-title" style={{ marginTop: 0 }}>{t("Walk Partners")}</h4>
         <p className="muted card-text">{t("Walk Partners needs a connection to the PhotoEYE server.")}</p>
       </div>
     );
   }
+
+  // The room on this device shows even before the list arrives, or offline.
+  const shown: Array<RoomSummary | { code: string }> =
+    current && !rooms.some((r) => r.code === current) ? [{ code: current }, ...rooms] : rooms;
 
   const create = async () => {
     setBusy(true);
@@ -65,17 +99,51 @@ export function WalkPartnersCard() {
     if (problem) showToast(problem);
   };
 
+  const enter = async (code: string) => {
+    if (code !== current) {
+      const problem = await joinRoom(code);
+      if (problem) { showToast(problem); return; }
+    }
+    navigate("share");
+  };
+
   return (
     <div className="theme-card">
-      <h4 className="subsection-title" style={{ marginTop: 0 }}>{t("Walk Partners")}</h4>
-      {code ? (
-        <div>
-          <p className="muted card-text">
-            <Trans k="Room <strong>{code}</strong> is open for your walk partners." values={{ code }} />
-          </p>
-          <button type="button" className="btn btn-primary btn-block" onClick={() => navigate("share")}>
-            {t("Manage Room")}
-          </button>
+      <div className="your-rooms-head">
+        <span className="label-caps">{t("Active rooms")}</span>
+        <button
+          type="button"
+          className="rooms-add"
+          aria-label={t("Add a room")}
+          onClick={() => openModal(<AddRoomModal />, { floating: true })}
+        >
+          <Icon name="plus" />
+        </button>
+      </div>
+      {shown.length ? (
+        <div className="your-rooms">
+          {shown.map((r) => (
+            <div key={r.code} className="your-room">
+              <button
+                type="button"
+                className="room-code-card"
+                aria-label={t("Copy room code {code}", { code: r.code })}
+                title={t("Tap to copy")}
+                onClick={() => copyCode(r.code)}
+              >
+                {r.code}
+              </button>
+              <button type="button" className="room-enter" onClick={() => void enter(r.code)}>{t("Enter room")}</button>
+              <span className="your-room-meta muted">
+                {"photoCount" in r && (
+                  <>
+                    {r.photoCount === 1 ? t("{n} photo", { n: 1 }) : t("{n} photos", { n: r.photoCount })}
+                    {r.isHost ? ` · ${t("Host")}` : ""}
+                  </>
+                )}
+              </span>
+            </div>
+          ))}
         </div>
       ) : (
         <div>
@@ -86,42 +154,14 @@ export function WalkPartnersCard() {
             <button type="button" className="btn btn-accent" disabled={busy} onClick={() => void create()}>{t("Create Room")}</button>
             <button type="button" className="btn btn-primary" onClick={() => openModal(<JoinRoomModal />)}>{t("Join Room")}</button>
           </div>
-          <YourRooms />
         </div>
       )}
     </div>
   );
 }
 
-/** Rooms you're in from any device, to go back to one. Only asked for when online. */
-function YourRooms() {
-  const [rooms, setRooms] = useState<RoomSummary[]>([]);
-  useEffect(() => {
-    if (!navigator.onLine) return;
-    let live = true;
-    void roomsApi.list().then((res) => { if (live && res.ok) setRooms(res.data.rooms); });
-    return () => { live = false; };
-  }, []);
-  if (!rooms.length) return null;
-
-  const open = async (code: string) => {
-    const problem = await joinRoom(code);
-    if (problem) showToast(problem);
-    else navigate("share");
-  };
-
-  return (
-    <div className="your-rooms">
-      <span className="label-caps">{t("Your rooms")}</span>
-      {rooms.map((r) => (
-        <button key={r.code} type="button" className="btn btn-ghost btn-sm your-room" onClick={() => void open(r.code)}>
-          <strong>{r.code}</strong>
-          <span className="muted">
-            {r.theme ? `${r.theme} · ` : ""}{r.photoCount === 1 ? t("{n} photo", { n: 1 }) : t("{n} photos", { n: r.photoCount })}
-            {r.isHost ? ` · ${t("Host")}` : ""}
-          </span>
-        </button>
-      ))}
-    </div>
-  );
+function copyCode(code: string) {
+  const fallback = () => showToast(t("Code: {code}", { code }));
+  if (!navigator.clipboard?.writeText) { fallback(); return; }
+  navigator.clipboard.writeText(code).then(() => showToast(t("Room code {code} copied.", { code })), fallback);
 }

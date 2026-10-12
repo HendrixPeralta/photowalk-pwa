@@ -13,6 +13,7 @@ export const ROUTES = {
   share: "/partners",
   settings: "/settings",
   themes: "/themes",
+  learn: "/learn",
 } as const satisfies Record<string, Route>;
 
 export type View = keyof typeof ROUTES;
@@ -35,6 +36,7 @@ export function screenTitle(view: View | null): string {
     case "share": return t("Partners");
     case "settings": return t("Settings");
     case "themes": return t("My Themes");
+    case "learn": return t("Tutorials");
     default: return "PhotoEYE";
   }
 }

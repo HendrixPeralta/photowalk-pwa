@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { Trans } from "@/components/Trans";
 import { interpolate, t } from "@/lib/i18n/core";
+import { ROUTES } from "@/routes";
 import { openModal } from "@/state/ui";
-import { toolHelp, type HelpRef, type ToolKey } from "./content";
+import { toolHelp, type HelpRef, type ToolHelp as ToolHelpInfo, type ToolKey } from "./content";
 
 function RefItem({ item }: { item: HelpRef }) {
   const label = item.url
@@ -15,12 +17,28 @@ function RefItem({ item }: { item: HelpRef }) {
   return <li>{before}{label}{interpolate(after, { note: item.note })}</li>;
 }
 
-/** What a tool shows, how to read it, good and bad examples, and where to learn more. */
+/** The short take on a tool, with links into its tutorial and related ones. */
 export function ToolHelpModal({ tool }: { tool: ToolKey }) {
   const info = toolHelp(tool);
   return (
     <>
       <h3>{info.title}</h3>
+      <p className="card-text">{info.tip}</p>
+      <h4 className="subsection-title">{t("Tutorials")}</h4>
+      {/* Leaving the screen closes the pop-up. */}
+      <ul className="tool-help-refs">
+        {[tool, ...(info.related ?? [])].map((key) => (
+          <li key={key}><Link href={`${ROUTES.learn}#${key}`}>{toolHelp(key).article}</Link></li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
+/** Everything under a Tutorials article's title. */
+export function ToolHelpBody({ info }: { info: ToolHelpInfo }) {
+  return (
+    <>
       <p className="muted card-text">{info.what}</p>
       <h4 className="subsection-title">{t("How to read it")}</h4>
       <p className="card-text">{info.read}</p>
@@ -45,7 +63,7 @@ export function ToolHelpModal({ tool }: { tool: ToolKey }) {
 }
 
 /**
- * The "?" beside a tool. Several sit inside a <summary>, so the click must not
+ * The "Learn more" beside a tool. If one sits inside a <summary>, the click must not
  * also open or close the panel around it.
  */
 export function ToolHelpButton({ tool, label }: { tool: ToolKey; label: string }) {
@@ -60,7 +78,7 @@ export function ToolHelpButton({ tool, label }: { tool: ToolKey; label: string }
         openModal(<ToolHelpModal tool={tool} />);
       }}
     >
-      ?
+      {t("Learn more")}
     </button>
   );
 }

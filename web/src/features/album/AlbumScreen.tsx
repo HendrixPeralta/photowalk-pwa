@@ -9,62 +9,9 @@ import { formatDate } from "@/lib/util";
 import { useAppStore } from "@/state/appStore";
 import type { AlbumItem } from "@/state/types";
 import { closeModal, openModal } from "@/state/ui";
-import { matchesFilters, useAlbumFilters, type AlbumFilters } from "./filters";
+import { FilterBar } from "./FilterBar";
+import { matchesFilters, useAlbumFilters } from "./filters";
 import { deleteReference } from "./references";
-
-type FilterKey = Exclude<keyof AlbumFilters, "search">;
-
-/** Each dropdown: its "any" label, then the stored values and how they read. */
-const FILTERS: { key: FilterKey; any: () => string; options: () => [string, string][] }[] = [
-  {
-    key: "brightness",
-    any: () => t("Any brightness"),
-    options: () => [["Bright", t("Bright")], ["Balanced", t("Balanced")], ["Dark", t("Dark")]],
-  },
-  {
-    key: "aspect",
-    any: () => t("Any shape"),
-    options: () => [["Landscape", t("Landscape")], ["Portrait", t("Portrait")], ["Square", t("Square")]],
-  },
-  {
-    key: "color",
-    any: () => t("Any color"),
-    options: () => [
-      ["Red", t("Red")], ["Orange", t("Orange")], ["Yellow", t("Yellow")], ["Green", t("Green")],
-      ["Teal", t("Teal")], ["Blue", t("Blue")], ["Purple", t("Purple")], ["Pink", t("Pink")],
-      ["Neutral", t("Neutral")], ["Black", t("Black")], ["White", t("White")],
-    ],
-  },
-  {
-    key: "focal",
-    any: () => t("Any focal length"),
-    options: () => [["Wide", t("Wide (under 35mm)")], ["Normal", t("Normal (35–70mm)")], ["Tele", t("Tele (over 70mm)")]],
-  },
-  {
-    key: "aperture",
-    any: () => t("Any aperture"),
-    options: () => [["Fast", t("Fast (f/2.8 and wider)")], ["Mid", t("Mid (f/2.8–f/8)")], ["Deep", t("Deep (f/8 and narrower)")]],
-  },
-  {
-    key: "location",
-    any: () => t("Any location"),
-    options: () => [["yes", t("Has location")], ["no", t("No location")]],
-  },
-];
-
-function FilterSelect({ filter }: { filter: (typeof FILTERS)[number] }) {
-  const value = useAlbumFilters((s) => s[filter.key]);
-  return (
-    <select
-      aria-label={filter.any()}
-      value={value}
-      onChange={(e) => useAlbumFilters.setState({ [filter.key]: e.target.value })}
-    >
-      <option value="all">{filter.any()}</option>
-      {filter.options().map(([v, label]) => <option key={v} value={v}>{label}</option>)}
-    </select>
-  );
-}
 
 /** Saved references, filterable by look, lens, settings and place, and searchable. */
 export function AlbumScreen() {
@@ -74,21 +21,7 @@ export function AlbumScreen() {
 
   return (
     <section className="view" data-view="album">
-      <h2 className="section-title">{t("Reference Album")}</h2>
-      <div className="filter-row">
-        {FILTERS.slice(0, 3).map((f) => <FilterSelect key={f.key} filter={f} />)}
-      </div>
-      <div className="filter-row">
-        {FILTERS.slice(3).map((f) => <FilterSelect key={f.key} filter={f} />)}
-      </div>
-      <input
-        type="text"
-        className="text-input"
-        placeholder={t("Search tags, camera, or settings")}
-        aria-label={t("Search tags, camera, or settings")}
-        value={filters.search}
-        onChange={(e) => useAlbumFilters.setState({ search: e.target.value })}
-      />
+      <FilterBar />
 
       {!items.length && (
         <p className="empty-state-sm">

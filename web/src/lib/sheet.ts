@@ -10,7 +10,7 @@
 import type { GamutCluster, GamutRole } from "./deconstruct";
 import type { ExifRow } from "./analysis/album";
 import { getDateLocale, t } from "./i18n/core";
-import { canvasToBlob, loadImage } from "./image";
+import { canvasToBlob } from "./image";
 
 type Ctx = CanvasRenderingContext2D;
 
@@ -259,114 +259,6 @@ export async function exportBreakdownSheet(spec: BreakdownSpec): Promise<boolean
   }
 
   return finish(canvas, y, "photoeye-breakdown");
-}
-
-export interface StudyPane {
-  /** Image URL (an object URL from the photo store). */
-  src: string;
-  who: string;
-  exposure: string;
-  detail: string;
-}
-
-export interface StudyNote { author: string; when: string; text: string }
-
-export interface StudySpec {
-  title: string;
-  subtitle: string;
-  panes: StudyPane[];
-  notes: StudyNote[];
-}
-
-/**
- * Partner study sheet: two frames side by side with their EXIF, and the
- * critique thread. Resolves true once the download has started.
- */
-export async function exportStudySheet(spec: StudySpec): Promise<boolean> {
-  const canvas = document.createElement("canvas");
-  const inner = W - PAD * 2;
-  const gap = 32;
-  const paneW = Math.floor((inner - gap) / 2);
-  const paneH = Math.round(paneW * 1.25);
-
-  canvas.width = W;
-  canvas.height = PAD + 200 + paneH + 200 + Math.max(1, spec.notes.length) * 130;
-  const ctx = canvas.getContext("2d")!;
-  ctx.fillStyle = BG;
-  ctx.fillRect(0, 0, W, canvas.height);
-
-  let y = PAD + 34;
-  ctx.font = display(20, 700);
-  ctx.fillStyle = AMBER;
-  ctx.fillText(`P H O T O E Y E   ·   ${t("G R O U P   R E V I E W")}`, PAD, y);
-  y += 50;
-  ctx.font = display(40, 600);
-  ctx.fillStyle = INK;
-  ctx.fillText(spec.title || t("Side-by-side study"), PAD, y);
-  y += 30;
-  ctx.font = body(20);
-  ctx.fillStyle = DIM;
-  y = wrapText(ctx, spec.subtitle || "", PAD, y, inner, 28);
-  y += 8;
-  hairline(ctx, y, inner);
-  y += 32;
-
-  const images = await Promise.all(spec.panes.slice(0, 2).map(async (p) => {
-    try { return { ...p, img: await loadImage(p.src) as HTMLImageElement | null }; } catch { return { ...p, img: null }; }
-  }));
-
-  images.forEach((pane, i) => {
-    const px = PAD + i * (paneW + gap);
-    ctx.fillStyle = PANEL;
-    ctx.fillRect(px, y, paneW, paneH);
-    if (pane.img) {
-      // Cover-fit, so neither frame is letterboxed against the other.
-      const scale = Math.max(paneW / pane.img.naturalWidth, paneH / pane.img.naturalHeight);
-      const dw = pane.img.naturalWidth * scale;
-      const dh = pane.img.naturalHeight * scale;
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(px, y, paneW, paneH);
-      ctx.clip();
-      ctx.drawImage(pane.img, px + (paneW - dw) / 2, y + (paneH - dh) / 2, dw, dh);
-      ctx.restore();
-    }
-    ctx.strokeStyle = HAIRLINE;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(px, y, paneW, paneH);
-
-    ctx.font = mono(20, 600);
-    ctx.fillStyle = AMBER;
-    ctx.fillText(pane.who || "", px + 14, y + 34);
-
-    ctx.font = mono(18, 500);
-    ctx.fillStyle = INK;
-    ctx.fillText(pane.exposure || t("no camera data"), px + 14, y + paneH + 30);
-    ctx.fillStyle = DIM;
-    ctx.fillText(pane.detail || "", px + 14, y + paneH + 56);
-  });
-
-  y += paneH + 90;
-  hairline(ctx, y, inner);
-  y += 34;
-  y = capsLabel(ctx, t("Feedback notes"), PAD, y);
-
-  for (const note of spec.notes) {
-    ctx.font = mono(17, 600);
-    ctx.fillStyle = AMBER;
-    ctx.fillText(`${(note.author || t("partner")).toUpperCase()} · ${note.when || ""}`, PAD, y);
-    y += 28;
-    ctx.font = body(20);
-    ctx.fillStyle = INK;
-    y = wrapText(ctx, note.text, PAD, y, inner, 28) + 16;
-  }
-  if (!spec.notes.length) {
-    ctx.font = body(20);
-    ctx.fillStyle = DIM;
-    y = wrapText(ctx, t("No feedback notes yet."), PAD, y, inner, 28);
-  }
-
-  return finish(canvas, y, "photoeye-study-sheet");
 }
 
 /** Trims the canvas to the content height, encodes it, and starts the download. */

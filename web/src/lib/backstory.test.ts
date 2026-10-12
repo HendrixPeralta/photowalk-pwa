@@ -43,8 +43,8 @@ describe("backstory", () => {
     expect(currentStreak(data.profile, NOW)).toBe(data.profile.streak);
     expect(data.profile.streak).toBeGreaterThanOrEqual(STARTER.streakDays);
     expect(hoursInPeriod(data.activityLog, "week", NOW)).toBeCloseTo(STARTER.weeklyGoal * STARTER.weekFill, 0);
-    const stops = rewardTimeline(data.rewards, totalActivityHours(data.activityLog)).stops.map((s) => s.label);
-    expect(stops).toEqual(["Last", "Next", "Then"]);
+    const stops = rewardTimeline(data.rewards, totalActivityHours(data.activityLog)).stops.map((s) => s.kind);
+    expect(stops).toEqual(["earned", "next", "next"]);
     expect(data.walkHistory.every((w) => w.endedAt < NOW.getTime())).toBe(true);
   });
 });
