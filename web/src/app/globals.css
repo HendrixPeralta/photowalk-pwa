@@ -894,16 +894,7 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
 /* Scopes. Deliberately dark in both themes: a waveform trace is a thin bright
    line, and it disappears on a light background. */
 .scope-grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
-.scope-grid-all { grid-template-columns: 1fr 1fr; gap: 12px; }
 .scope-cell { margin: 0; min-width: 0; }
-/* One scope at a time, its tab already names it; under All, each needs its own. */
-.scope-name {
-  display: none;
-  font-size: 0.8rem;
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-.scope-grid-all .scope-name { display: block; }
 .scope-help { display: flex; margin-top: 8px; }
 .scope-canvas {
   width: 100%;
@@ -913,7 +904,6 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
   border-radius: var(--radius-sm);
   display: block;
 }
-.scope-grid-all .scope-canvas { height: 150px; }
 
 /* The one scope you touch. touch-action:none stops the browser claiming a
    drag as a page scroll, which would make a point impossible to pull down. */
@@ -922,7 +912,6 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
   cursor: crosshair;
   height: 260px;
 }
-.scope-grid-all .curve-canvas { height: 180px; }
 .curve-modes { margin: 0 0 8px; }
 .curve-modes .chip-btn-icon { font-size: 15px; font-weight: 700; }
 .chip-btn:disabled { opacity: 0.45; cursor: default; }
@@ -930,11 +919,6 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
 .btn-sm { padding: 6px 11px; font-size: 0.8rem; }
 .btn-sm:disabled { opacity: 0.45; pointer-events: none; }
 .scope-caption { margin-bottom: 0; }
-
-@media (max-width: 520px) {
-  .scope-grid-all { grid-template-columns: 1fr; }
-  .scope-grid-all .scope-canvas { height: 180px; }
-}
 
 .palette-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .swatch {

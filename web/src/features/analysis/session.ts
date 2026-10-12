@@ -20,7 +20,6 @@ import type { AlbumItem, Overlay, OverlayType } from "@/state/types";
 import { showToast } from "@/state/ui";
 
 export type ScopeKey = "waveform" | "parade" | "vectorscope" | "cie" | "tonecurve";
-export type ScopeView = ScopeKey | "all";
 /** The tabbed card under the photo. */
 export type ReadoutTab = "color" | "light" | "advanced";
 
@@ -43,7 +42,7 @@ interface Session {
   tags: string;
   /** A reference from the album shown beside the photo. */
   compare: { item: AlbumItem; image: HTMLImageElement; hist: Histogram } | null;
-  scopeView: ScopeView;
+  scopeView: ScopeKey;
   readoutTab: ReadoutTab;
   /** Bumped whenever the tone curve changes, so what shows it redraws. */
   curveVersion: number;
@@ -58,7 +57,7 @@ export const useAnalysis = create<Session>(() => ({
   overlay: DEFAULT_OVERLAY,
   tags: "",
   compare: null,
-  scopeView: "waveform",
+  scopeView: "tonecurve",
   readoutTab: "color",
   curveVersion: 0,
 }));

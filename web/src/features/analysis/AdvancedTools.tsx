@@ -13,7 +13,7 @@ import {
 import type { ScopeStats, Scopes } from "@/lib/scopes/compute";
 import { drawChromaticity, drawParade, drawVectorscope, drawWaveform } from "@/lib/scopes/draw";
 import { drawToneCurve } from "@/lib/tonecurve/draw";
-import { toneCurve, useAnalysis, type ScopeKey, type ScopeView } from "./session";
+import { toneCurve, useAnalysis, type ScopeKey } from "./session";
 
 export const TONE_CURVE_FILTER_ID = "toneCurveFilter";
 
@@ -25,7 +25,6 @@ export function ReadingText({ reading }: { reading: Reading }) {
 interface ScopeInfo {
   key: Exclude<ScopeKey, "tonecurve">;
   tab: () => string;
-  name: () => string;
   help: () => string;
   draw: (canvas: HTMLCanvasElement, scopes: Scopes) => void;
   read: (stats: ScopeStats) => Reading;
@@ -33,32 +32,31 @@ interface ScopeInfo {
 
 const SCOPES: ScopeInfo[] = [
   {
-    key: "waveform", tab: () => t("Waveform"), name: () => t("Waveform"), help: () => t("About Waveform"),
+    key: "waveform", tab: () => t("Waveform"), help: () => t("About Waveform"),
     draw: drawWaveform, read: waveformSummary,
   },
   {
-    key: "parade", tab: () => t("Parade"), name: () => t("RGB Parade"), help: () => t("About RGB Parade"),
+    key: "parade", tab: () => t("Parade"), help: () => t("About RGB Parade"),
     draw: drawParade, read: paradeSummary,
   },
   {
-    key: "vectorscope", tab: () => t("Vector"), name: () => t("Vectorscope"), help: () => t("About Vectorscope"),
+    key: "vectorscope", tab: () => t("Vector"), help: () => t("About Vectorscope"),
     draw: drawVectorscope, read: vectorscopeSummary,
   },
   {
-    key: "cie", tab: () => t("CIE"), name: () => t("CIE Chromaticity"), help: () => t("About CIE Chromaticity"),
+    key: "cie", tab: () => t("CIE"), help: () => t("About CIE Chromaticity"),
     draw: drawChromaticity, read: chromaticitySummary,
   },
 ];
 
-const TABS: { view: ScopeView; label: () => string }[] = [
-  ...SCOPES.map((s) => ({ view: s.key as ScopeView, label: s.tab })),
+const TABS: { view: ScopeKey; label: () => string }[] = [
   { view: "tonecurve", label: () => t("Tone Curve") },
-  { view: "all", label: () => t("All") },
+  ...SCOPES.map((s) => ({ view: s.key, label: s.tab })),
 ];
 
 /**
- * Waveform, RGB Parade, Vectorscope, CIE and the Tone Curve, one at a time or
- * all together. Nothing is drawn until its tab is open, since a hidden canvas
+ * The Tone Curve, Waveform, RGB Parade, Vectorscope and CIE, one at a time.
+ * Nothing is drawn until its tab is open, since a hidden canvas
  * has no size to draw at.
  */
 export function AdvancedTools() {
@@ -88,12 +86,12 @@ export function AdvancedTools() {
         id="scope-panel"
         role="tabpanel"
         aria-labelledby={`scope-tab-${view}`}
-        className={`scope-grid${view === "all" ? " scope-grid-all" : ""}`}
+        className="scope-grid"
       >
+        <ToneCurveCell shown={open && view === "tonecurve"} />
         {SCOPES.map((scope) => (
-          <ScopeCell key={scope.key} scope={scope} scopes={scopes} shown={open && (view === "all" || view === scope.key)} />
+          <ScopeCell key={scope.key} scope={scope} scopes={scopes} shown={open && view === scope.key} />
         ))}
-        <ToneCurveCell shown={open && (view === "all" || view === "tonecurve")} />
       </div>
     </>
   );
@@ -119,7 +117,6 @@ function ScopeCell({ scope, scopes, shown }: { scope: ScopeInfo; scopes: Scopes;
 
   return (
     <figure className={`scope-cell${shown ? "" : " hidden"}`} data-scope={scope.key}>
-      <figcaption className="scope-name">{scope.name()}</figcaption>
       <canvas ref={ref} className="scope-canvas" />
       <p className="hint scope-caption">{shown && <ReadingText reading={scope.read(scopes.stats)} />}</p>
       <ScopeHelp help={scope.help()} tool={scope.key} />
@@ -156,7 +153,6 @@ function ToneCurveCell({ shown }: { shown: boolean }) {
 
   return (
     <figure className={`scope-cell${shown ? "" : " hidden"}`} data-scope="tonecurve">
-      <figcaption className="scope-name">{t("Tone Curve")}</figcaption>
       <div className="overlay-controls curve-modes">
         <button type="button" className={`chip-btn${adjusting ? "" : " active"}`} aria-pressed={!adjusting} onClick={() => toneCurve.setMode("measured")}>
           {t("Measured")}
