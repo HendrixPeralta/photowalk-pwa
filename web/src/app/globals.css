@@ -917,7 +917,6 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
 .curve-modes { margin: 0 0 8px; }
 .curve-modes .chip-btn-icon { font-size: 15px; font-weight: 700; }
 .chip-btn:disabled { opacity: 0.45; cursor: default; }
-.curve-hint { margin: 0 0 8px; font-size: 0.72rem; }
 .btn-sm { padding: 6px 11px; font-size: 0.8rem; }
 .btn-sm:disabled { opacity: 0.45; pointer-events: none; }
 .scope-caption { margin-bottom: 0; }
