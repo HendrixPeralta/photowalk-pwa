@@ -1948,17 +1948,26 @@ input[type="file"].text-input { padding: 8px; }
   cursor: pointer;
 }
 .tutorial-card:hover { border-color: var(--accent); }
-.tutorial-card strong { font-family: var(--font-display); font-size: 1rem; }
+.tutorial-card strong { font-family: var(--font-display); font-size: 1.1rem; }
 /* Just a taste of the article: two lines, then an ellipsis. */
 .tutorial-card span {
   color: var(--text-dim);
-  font-size: 0.82rem;
+  font-size: 0.95rem;
+  line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.tutorial-title { margin: 0 0 6px; font-family: var(--font-display); font-size: 1.4rem; }
+.tutorial-title { margin: 0 0 6px; font-family: var(--font-display); font-size: 1.6rem; line-height: 1.25; }
+/* The article is read on a phone, not glanced at in a pop-up: the same body as
+   ToolHelpModal, at a size meant for reading. */
+[data-view="learn"] .section-title { font-size: 12px; line-height: 14px; }
+.tutorial-article .card-text { font-size: 1.1rem; line-height: 1.55; }
+.tutorial-article .subsection-title { font-size: 14px; letter-spacing: 0.06em; margin: 24px 0 8px; }
+.tutorial-article .tool-help-list { font-size: 1.05rem; line-height: 1.5; }
+.tutorial-article .tool-help-list li { margin-bottom: 8px; }
+.tutorial-article .tool-help-refs { font-size: 1rem; line-height: 1.5; }
 
 /* --- Floating walk launcher ---------------------------------------------- */
 /* Sits over the bottom-right corner of the app column, above the nav bar. */
