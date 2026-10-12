@@ -44,7 +44,7 @@ export function AnalysisScreen() {
 
       {hasPhoto ? (
         <div className={comparing ? "comparing" : undefined}>
-          <PhotoPanes imageRef={imageRef} overlayRef={overlayRef} />
+          <PhotoPanes imageRef={imageRef} overlayRef={overlayRef} onUpload={() => inputRef.current?.click()} />
           <ReadoutTabs histogramRef={histogramRef} />
           <SaveSection imageRef={imageRef} overlayRef={overlayRef} histogramRef={histogramRef} />
         </div>

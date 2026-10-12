@@ -38,9 +38,9 @@ export function ConfirmHoursModal({ measured, onConfirm }: { measured: number; o
     <>
       <h3>{t("How long were you shooting?")}</h3>
       <p className="muted">
-        {t("This walk has been open for about {hours}. Log the time you actually spent shooting. Hours earn your rewards, so it's worth keeping them honest.", { hours: formatHours(measured) })}
+        {t("This walk has been open for about {hours}. Log the time you actually spent shooting.", { hours: formatHours(measured) })}
       </p>
-      <div className="field-row">
+      <div className="field-row hours-row">
         <label htmlFor={inputId}>{t("Hours to log")}</label>
         <input
           id={inputId}

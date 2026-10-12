@@ -332,7 +332,7 @@ function finalizeWalk(startedAt: number, auto: boolean): void {
           completeWalk(startedAt, Math.min(hours, CASUAL_MAX_HOURS), auto);
         }}
       />,
-      { onClose: () => { if (!settled) showToast(t("Still on your walk. Finish whenever you're ready.")); } },
+      { floating: true, onClose: () => { if (!settled) showToast(t("Still on your walk. Finish whenever you're ready.")); } },
     );
     return;
   }

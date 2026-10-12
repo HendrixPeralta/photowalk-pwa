@@ -3,7 +3,6 @@
 import { Fragment, useCallback, useId, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { Icon } from "@/components/icons/Icon";
 import type { IconName } from "@/components/icons/sprite";
-import { useImageUrl } from "@/components/useImageUrl";
 import { useRedrawOnResize } from "@/components/useRedrawOnResize";
 import { ToolHelpButton } from "@/features/toolhelp/ToolHelp";
 import { DISPLAY_MAX_DIM, FLIPPABLE_OVERLAYS, OVERLAY_TYPES, ROTATABLE_OVERLAYS } from "@/lib/analysis/constants";
@@ -11,11 +10,10 @@ import { drawGuides } from "@/lib/analysis/drawGuides";
 import type { Exif } from "@/lib/exif";
 import { t } from "@/lib/i18n/core";
 import { navigate } from "@/lib/nav";
-import { getData } from "@/state/appStore";
-import type { AlbumItem, Overlay, OverlayType } from "@/state/types";
+import type { Overlay, OverlayType } from "@/state/types";
 import { closeModal, openModal, showToast } from "@/state/ui";
 import {
-  enterCompare, exitCompare, flipOverlay, rotateOverlay, saveToAlbum, setOverlayType, toneCurve, useAnalysis,
+  flipOverlay, rotateOverlay, saveToAlbum, setOverlayType, toneCurve, useAnalysis,
 } from "./session";
 import { TONE_CURVE_FILTER_ID } from "./AdvancedTools";
 import { usePanZoom } from "./usePanZoom";
@@ -53,13 +51,15 @@ const overlayLabel = (type: OverlayType): string => {
 interface PaneRefs {
   imageRef: RefObject<HTMLCanvasElement | null>;
   overlayRef: RefObject<HTMLCanvasElement | null>;
+  /** Opens the file picker for a different photo. */
+  onUpload: () => void;
 }
 
 /**
  * The guide controls, then your photo with the guide over it and the
  * reference beside it in compare mode.
  */
-export function PhotoPanes({ imageRef, overlayRef }: PaneRefs) {
+export function PhotoPanes({ imageRef, overlayRef, onUpload }: PaneRefs) {
   const frame = useAnalysis((s) => s.frame)!;
   const overlay = useAnalysis((s) => s.overlay);
   const exif = useAnalysis((s) => s.exif);
@@ -89,7 +89,7 @@ export function PhotoPanes({ imageRef, overlayRef }: PaneRefs) {
 
   return (
     <>
-      <GuideControls overlay={overlay} comparing={Boolean(compare)} onFit={fit} />
+      <GuideControls overlay={overlay} onUpload={onUpload} />
 
       <div className="compare-strip">
         <div className="compare-pane">
@@ -161,7 +161,7 @@ function ShotStrip({ exif }: { exif: Exif | null }) {
   );
 }
 
-function GuideControls({ overlay, comparing, onFit }: { overlay: Overlay; comparing: boolean; onFit: () => void }) {
+function GuideControls({ overlay, onUpload }: { overlay: Overlay; onUpload: () => void }) {
   const updating = useAnalysis((s) => Boolean(s.albumItemId));
 
   return (
@@ -185,14 +185,8 @@ function GuideControls({ overlay, comparing, onFit }: { overlay: Overlay; compar
         onClick={() => openModal(<SaveTagsModal updating={updating} />)}
       />
       <IconChip name="share" label={t("Share to Room")} onClick={shareToRoom} />
-      <IconChip
-        name="split"
-        label={comparing ? t("Exit Compare") : t("Compare…")}
-        className={comparing ? "active" : undefined}
-        onClick={comparing ? exitCompare : openComparePicker}
-      />
+      <IconChip name="upload" label={t("Upload New Photo")} onClick={onUpload} />
       {FLIPPABLE_OVERLAYS.includes(overlay.type) && <IconChip name="swap" label={t("Flip")} onClick={flipOverlay} />}
-      <IconChip name="fullscreen" label={t("Fit")} onClick={onFit} />
     </div>
   );
 }
@@ -250,44 +244,5 @@ function SaveTagsModal({ updating }: { updating: boolean }) {
         <button type="submit" className="btn btn-primary" disabled={saving}>{t("Save")}</button>
       </div>
     </form>
-  );
-}
-
-function openComparePicker(): void {
-  const albumItemId = useAnalysis.getState().albumItemId;
-  const candidates = getData().album.filter((item) => item.id !== albumItemId && item.imageId);
-  if (!candidates.length) {
-    showToast(t("Save a reference to your album first, then compare against it."));
-    return;
-  }
-  openModal(<ComparePickerModal items={candidates} />);
-}
-
-function ComparePickerModal({ items }: { items: AlbumItem[] }) {
-  return (
-    <>
-      <h3>{t("Compare with a reference")}</h3>
-      <p className="muted">{t("Same guides on both, both histograms. Study what their photo does that yours doesn't.")}</p>
-      <div className="album-grid compare-pick-grid">
-        {items.map((item) => <CompareThumb key={item.id} item={item} />)}
-      </div>
-    </>
-  );
-}
-
-function CompareThumb({ item }: { item: AlbumItem }) {
-  const url = useImageUrl(item.imageId);
-  return (
-    <button
-      type="button"
-      className="album-thumb"
-      style={url ? { backgroundImage: `url("${url}")` } : undefined}
-      onClick={() => {
-        closeModal();
-        void enterCompare(item);
-      }}
-    >
-      <span className="album-thumb-tag">{t(item.aspectLabel)}</span>
-    </button>
   );
 }

@@ -74,6 +74,16 @@ test("guides change, flip and rotate, and stay put across screens", async ({ pag
   expect(await paintedPixels(guides)).toBeGreaterThan(0);
 });
 
+test("the upload chip opens the picker and analyzes the new photo", async ({ page }) => {
+  await openSample(page);
+  const before = (await saved(page)).profile.photosAnalyzed;
+  const chooser = page.waitForEvent("filechooser");
+  await page.getByRole("button", { name: "Upload New Photo" }).click();
+  await (await chooser).setFiles(join(PHOTOS, "a_1.jpg"));
+  await expect.poll(async () => (await saved(page)).profile.photosAnalyzed).toBe(before + 1);
+  await expect(page.getByRole("button", { name: /Compare/ })).toHaveCount(0);
+});
+
 test("a tool's help links to its tutorial by title", async ({ page }) => {
   await openSample(page);
   await page.getByRole("tab", { name: "Light" }).click();
@@ -112,8 +122,8 @@ test("bending the tone curve previews it on the photo", async ({ page }) => {
   await expect(photo).not.toHaveAttribute("style", /filter/);
 });
 
-test("a picked photo is analyzed, saved to the album and compared", async ({ page }) => {
-  // Six sample photos in the album to compare against.
+test("a picked photo is analyzed and saved to the album", async ({ page }) => {
+  // Six sample photos already in the album.
   await page.goto("/album/?photos=seed");
   await expect(page.locator(".view .album-thumb")).toHaveCount(6);
   await openSample(page);
@@ -133,15 +143,6 @@ test("a picked photo is analyzed, saved to the album and compared", async ({ pag
   const item = state.album[0];
   expect(item.tags).toEqual(["sea", "people"]);
   expect(item.overlay).toEqual({ type: "thirds", flip: false, rotation: 0 });
-
-  // Only a reference opened from the album is left out, so all seven are offered.
-  await page.getByRole("button", { name: "Compare…" }).click();
-  await expect(dialog(page).locator(".album-thumb")).toHaveCount(7);
-  await dialog(page).locator(".album-thumb").nth(1).click();
-  await expect(page.locator(".compare-pane")).toHaveCount(2);
-  await expect(page.locator(".histogram-canvas")).toHaveCount(2);
-  await page.getByRole("button", { name: "Exit Compare" }).click();
-  await expect(page.locator(".compare-pane")).toHaveCount(1);
 });
 
 test("the summary downloads, and Share to Room goes to Partners", async ({ page }) => {
