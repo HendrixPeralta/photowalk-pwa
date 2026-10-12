@@ -2,7 +2,7 @@
 // without an icon font. Generated once from the old index.html sprite.
 // <IconSprite> renders these once; <Icon name> references one with <use>.
 
-export const ICON_NAMES = ["camera", "explore", "grid", "library", "timer", "hourglass", "target", "footprint", "bolt", "flame", "star", "reset", "rotate", "film", "sun", "twilight", "lens", "shutter", "bulb", "contrast", "palette", "compare", "tune", "chat", "send", "share", "pin", "navigate", "pause", "play", "plus", "flag", "download", "upload", "bookmark", "repeat", "settings", "user", "split", "swap", "fullscreen", "filter", "chevron-down", "check", "close", "qr"] as const;
+export const ICON_NAMES = ["camera", "explore", "grid", "library", "timer", "hourglass", "target", "footprint", "bolt", "flame", "star", "reset", "rotate", "film", "sun", "twilight", "lens", "shutter", "bulb", "contrast", "palette", "compare", "tune", "chat", "send", "share", "pin", "navigate", "pause", "play", "plus", "flag", "download", "upload", "bookmark", "repeat", "settings", "user", "split", "swap", "fullscreen", "filter", "chevron-down", "check", "close", "qr", "trash"] as const;
 
 export type IconName = (typeof ICON_NAMES)[number];
 
@@ -153,6 +153,9 @@ export const SPRITE_DEFS = `
       <rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1"/>
       <rect x="3.5" y="14" width="6.5" height="6.5" rx="1"/>
       <path d="M14 14h2.5v2.5H14zM18 18h2.5v2.5H18zM14 18.5v2M18.5 14h2" stroke-linecap="round"/>
+    </g>
+    <g id="i-trash" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 7h16M9.5 7V4.5h5V7M6 7l1 12.5a1 1 0 0 0 1 .9h8a1 1 0 0 0 1-.9L18 7M10 11v5.5M14 11v5.5"/>
     </g>
 
     
