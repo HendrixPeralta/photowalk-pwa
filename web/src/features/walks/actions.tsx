@@ -163,7 +163,7 @@ export function dropWalkIfNeverStarted(): void {
 
 export function openWalkBrief(): void {
   if (!walkTheme()) return;
-  openModal(<WalkBriefModal />, { floating: true });
+  openModal(<WalkBriefModal />);
 }
 
 export function openThemePicker(): void {
@@ -332,7 +332,7 @@ function finalizeWalk(startedAt: number, auto: boolean): void {
           completeWalk(startedAt, Math.min(hours, CASUAL_MAX_HOURS), auto);
         }}
       />,
-      { floating: true, onClose: () => { if (!settled) showToast(t("Still on your walk. Finish whenever you're ready.")); } },
+      { onClose: () => { if (!settled) showToast(t("Still on your walk. Finish whenever you're ready.")); } },
     );
     return;
   }
