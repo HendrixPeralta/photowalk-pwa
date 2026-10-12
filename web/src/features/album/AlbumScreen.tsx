@@ -3,6 +3,7 @@
 import { Icon } from "@/components/icons/Icon";
 import { useImageUrl } from "@/components/useImageUrl";
 import { openAnalysis } from "@/features/analysis/request";
+import { byLightness } from "@/lib/color";
 import { themeById } from "@/lib/content/themes";
 import { t } from "@/lib/i18n/core";
 import { formatDate } from "@/lib/util";
@@ -72,7 +73,7 @@ function ReferenceDetail({ id }: { id: string }) {
       {url === null && <p className="muted">{t("This photo is missing from storage.")}</p>}
       <div className="detail-strip">
         <div className="swatch-row">
-          {item.colors.map((hex, i) => <span key={i} className="swatch-sm" style={{ background: hex }} title={hex} />)}
+          {byLightness(item.colors).map((hex, i) => <span key={i} className="swatch-sm" style={{ background: hex }} title={hex} />)}
         </div>
         <p className="detail-settings">
           {settings.map((value, i) => <span key={i} className={value ? undefined : "muted"}>{value || "--"}</span>)}
