@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon } from "@/components/icons/Icon";
+import { WalkPartnersCard } from "@/features/partners/WalkPartnersCard";
 import { RewardBar } from "@/features/rewards/RewardBar";
 import { t } from "@/lib/i18n/core";
 import { useAppStore } from "@/state/appStore";
@@ -10,7 +11,7 @@ import { GoldenBadge } from "./GoldenBadge";
 import { QuickStart } from "./QuickStart";
 import { WalkControls } from "./WalkControls";
 
-/** Home: this week and the year at a glance, the walk launcher (or the open walk), and rewards. */
+/** Home: this week and the year at a glance, the walk launcher (or the open walk), rewards, and the rooms you're in. */
 export function WalksScreen() {
   // Only once Start shooting is tapped; a walk still on its brief isn't under way.
   const walk = useAppStore((s) => (s.activeWalk?.startedAt ? s.activeWalk : null));
@@ -34,6 +35,8 @@ export function WalksScreen() {
       <div className="theme-card reward-progress-card">
         <RewardBar />
       </div>
+
+      <WalkPartnersCard />
 
       {/* At the foot of the screen, as on Live Walk. */}
       {walk && <WalkControls walk={walk} className="home-walk-controls" />}
