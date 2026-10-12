@@ -1,41 +1,27 @@
 "use client";
 
-import { useState, type RefObject } from "react";
+import { useState } from "react";
 import { Icon } from "@/components/icons/Icon";
-import { exifRows } from "@/lib/analysis/album";
-import { gamutClusters, takeawayText, tonalKeyNote } from "@/lib/deconstruct";
+import { rgbToHex } from "@/lib/color";
 import { t } from "@/lib/i18n/core";
-import { histogramSummary, paletteRelationship } from "@/lib/interpret";
 import { exportBreakdownSheet } from "@/lib/sheet";
 import { showToast } from "@/state/ui";
 import { resetSession, useAnalysis } from "./session";
 
-interface Canvases {
-  imageRef: RefObject<HTMLCanvasElement | null>;
-  overlayRef: RefObject<HTMLCanvasElement | null>;
-  histogramRef: RefObject<HTMLCanvasElement | null>;
-}
-
-/** Renders what is on screen into a downloadable study sheet. */
-async function downloadSummary({ imageRef, overlayRef, histogramRef }: Canvases): Promise<void> {
+/** Renders the photo and its readouts into a downloadable summary sheet. */
+async function downloadSummary(): Promise<void> {
   const { frame, exif } = useAnalysis.getState();
-  if (!frame || !imageRef.current) { showToast(t("Load a photo first.")); return; }
-  const summary = histogramSummary(frame.hist.bins);
+  if (!frame) { showToast(t("Load a photo first.")); return; }
   await exportBreakdownSheet({
-    imageCanvas: imageRef.current,
-    overlayCanvas: overlayRef.current,
-    histogramCanvas: histogramRef.current,
-    clusters: gamutClusters(frame.palette),
-    harmony: frame.palette.length ? paletteRelationship(frame.palette).label : "",
-    tonalTitle: tonalKeyNote(frame.hist.bins, summary).title,
-    tonalText: summary.caption,
-    takeaway: takeawayText(frame.palette, summary, exif),
-    exifRows: exifRows(exif),
+    image: frame.image,
+    colors: frame.palette.map((c) => rgbToHex(c.r, c.g, c.b)),
+    bins: frame.hist.bins,
+    exif,
   });
 }
 
 /** Download, or start over. Saving (and tagging) lives with the guide controls. */
-export function SaveSection(canvases: Canvases) {
+export function SaveSection() {
   const [exporting, setExporting] = useState(false);
 
   return (
@@ -48,7 +34,7 @@ export function SaveSection(canvases: Canvases) {
           disabled={exporting}
           onClick={async () => {
             setExporting(true);
-            try { await downloadSummary(canvases); } finally { setExporting(false); }
+            try { await downloadSummary(); } finally { setExporting(false); }
           }}
         >
           <Icon name="download" />

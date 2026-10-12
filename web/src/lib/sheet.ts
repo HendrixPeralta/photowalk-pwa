@@ -1,27 +1,39 @@
 /**
  * Study-sheet export.
  *
- * Renders a contact-sheet-style summary to a canvas and downloads it as a
- * JPEG. A real PDF would mean shipping a PDF library for one button; a 1400px
- * JPEG drops straight into a notes app, a print, or a message to whoever you
- * walked with, which is what the sheet is for. Browser-only.
+ * Renders a one-page summary to a canvas and downloads it as a JPEG: the
+ * photo, then one line under it with the main colors, a
+ * small brightness chart and the camera settings. A real PDF would mean
+ * shipping a PDF library for one button; a 1400px JPEG drops straight into a
+ * notes app, a print, or a message to whoever you walked with, which is what
+ * the sheet is for. Browser-only.
  */
 
-import type { GamutCluster, GamutRole } from "./deconstruct";
-import type { ExifRow } from "./analysis/album";
-import { getDateLocale, t } from "./i18n/core";
+import type { HistogramBin } from "./analysis/histogram";
+import { byLightness } from "./color";
+import type { Exif } from "./exif";
 import { canvasToBlob } from "./image";
 
 type Ctx = CanvasRenderingContext2D;
 
 const W = 1400;
-const PAD = 56;
-const INK = "#e2e2e9";
-const DIM = "#9ca3af";
-const AMBER = "#f59e0b";
-const BG = "#111318";
-const PANEL = "#1a1b21";
-const HAIRLINE = "#2a2e39";
+/** Drawn at twice the page size so the swatches' edges and the text stay crisp in the JPEG. */
+const SCALE = 2;
+const PAD = 64;
+const BG = "#ffffff";
+const INK = "#1f2329";
+const DIM = "#8a9099";
+/** The app's amber, deepened enough to read on white. */
+const AMBER = "#d97706";
+const WELL = "#f3f4f6";
+const EDGE = "#e3e5e9";
+/**
+ * The colors and the brightness chart share the album pop-up's swatch shape
+ * (26px squares, 6px apart, 6px corners), kept small so the photo leads.
+ */
+const BLOCK = 34;
+const BLOCK_GAP = 8;
+const BLOCK_RADIUS = 8;
 
 /**
  * The page's font stack for a role. next/font self-hosts the fonts under
@@ -29,62 +41,146 @@ const HAIRLINE = "#2a2e39";
  * "Space Grotesk"; canvas text in a family the page never loaded would fall
  * back silently.
  */
-function family(cssVar: "--font-display" | "--font-body" | "--font-data", fallback: string): string {
+function family(cssVar: "--font-display" | "--font-body", fallback: string): string {
   if (typeof document === "undefined") return fallback;
   const value = getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
   return value || fallback;
 }
 
-const mono = (size: number, weight = 500) => `${weight} ${size}px ${family("--font-data", "ui-monospace, monospace")}`;
-const display = (size: number, weight = 600) => `${weight} ${size}px ${family("--font-display", "system-ui, sans-serif")}`;
+const display = (size: number, weight = 500) => `${weight} ${size}px ${family("--font-display", "system-ui, sans-serif")}`;
 const body = (size: number, weight = 400) => `${weight} ${size}px ${family("--font-body", "system-ui, sans-serif")}`;
 
-// Japanese has no spaces between words, so every CJK character is its own
-// break point. Closing punctuation is kept off the start of a line.
-const CJK = "　-ヿ㐀-鿿＀-￯";
-const TOKEN = new RegExp(`\\s+|[${CJK}]|[^\\s${CJK}]+`, "g");
-const NO_LINE_START = /^[、。，．）」』！？：・ー]$/;
-
-/** Splits text into the tokens line wrapping may break between. Exported for tests. */
-export function wrapTokens(text: string): string[] {
-  return String(text || "").match(TOKEN) || [];
-}
-
-/** Draws wrapped text and returns the y coordinate just below it. */
-function wrapText(ctx: Ctx, text: string, x: number, y: number, maxWidth: number, lineHeight: number): number {
-  let line = "";
-  let pendingSpace = false;
-  let cursor = y;
-  for (const token of wrapTokens(text)) {
-    if (/^\s+$/.test(token)) { pendingSpace = !!line; continue; }
-    const test = line + (pendingSpace ? " " : "") + token;
-    pendingSpace = false;
-    if (ctx.measureText(test).width > maxWidth && line && !NO_LINE_START.test(token)) {
-      ctx.fillText(line, x, cursor);
-      cursor += lineHeight;
-      line = token;
-    } else {
-      line = test;
-    }
-  }
-  if (line) { ctx.fillText(line, x, cursor); cursor += lineHeight; }
-  return cursor;
-}
-
-function capsLabel(ctx: Ctx, text: string, x: number, y: number): number {
-  ctx.font = display(18, 700);
-  ctx.fillStyle = DIM;
-  ctx.fillText(String(text).toUpperCase(), x, y);
-  return y + 26;
-}
-
-function hairline(ctx: Ctx, y: number, width: number): void {
-  ctx.strokeStyle = HAIRLINE;
-  ctx.lineWidth = 2;
+/** One swatch-shaped square, outlined so a white color still shows on the white page. */
+function block(ctx: Ctx, x: number, y: number, fill: string, width = BLOCK): void {
   ctx.beginPath();
-  ctx.moveTo(PAD, y + 0.5);
-  ctx.lineTo(PAD + width, y + 0.5);
+  ctx.roundRect(x + 0.5, y + 0.5, width - 1, BLOCK - 1, BLOCK_RADIUS);
+  ctx.fillStyle = fill;
+  ctx.fill();
+  ctx.strokeStyle = EDGE;
+  ctx.lineWidth = 1;
   ctx.stroke();
+}
+
+/** The main colors as a row of squares, darkest first. Returns the x just past them. */
+function swatches(ctx: Ctx, colors: string[], x: number, y: number): number {
+  for (const hex of byLightness(colors)) {
+    block(ctx, x, y, hex);
+    x += BLOCK + BLOCK_GAP;
+  }
+  return x;
+}
+
+/** Brightness only, as one filled shape four blocks wide: no channels, no labels. */
+function miniHistogram(ctx: Ctx, bins: HistogramBin[], x: number, y: number): void {
+  const width = BLOCK * 4 + BLOCK_GAP * 3;
+  block(ctx, x, y, WELL, width);
+  // Square-root scale, so one tall spike doesn't flatten the rest of the shape.
+  const max = Math.sqrt(Math.max(...bins.map((b) => b.lum)));
+  if (!bins.length || !max) return;
+  const inset = 6;
+  const w = width - inset * 2;
+  const h = BLOCK - inset * 2;
+  const base = y + inset + h;
+  ctx.beginPath();
+  ctx.moveTo(x + inset, base);
+  bins.forEach((bin, i) => ctx.lineTo(x + inset + (i / (bins.length - 1)) * w, base - (Math.sqrt(bin.lum) / max) * h));
+  ctx.lineTo(x + inset + w, base);
+  ctx.closePath();
+  ctx.fillStyle = INK;
+  ctx.fill();
+}
+
+/**
+ * Aperture, shutter and ISO over lens and camera, right-aligned to `right`,
+ * with an amber "--" for whatever the file didn't record, as in the app.
+ */
+function settings(ctx: Ctx, exif: Exif | null, right: number, y: number): void {
+  const camera = [exif?.make, exif?.model].filter(Boolean).join(" ") || undefined;
+  const line = (values: (string | undefined)[], font: string, color: string, baseline: number) => {
+    ctx.font = font;
+    ctx.letterSpacing = "0.5px";
+    const gap = 18;
+    const texts = values.map((v) => v || "--");
+    const width = texts.reduce((sum, text) => sum + ctx.measureText(text).width, 0) + gap * (texts.length - 1);
+    let cx = right - width;
+    texts.forEach((text, i) => {
+      if (i > 0) {
+        ctx.fillStyle = EDGE;
+        ctx.beginPath();
+        ctx.arc(cx + gap / 2, baseline - 5, 1.6, 0, Math.PI * 2);
+        ctx.fill();
+        cx += gap;
+      }
+      ctx.fillStyle = values[i] ? color : AMBER;
+      ctx.fillText(text, cx, baseline);
+      cx += ctx.measureText(text).width;
+    });
+    ctx.letterSpacing = "0px";
+  };
+  line([exif?.aperture, exif?.shutter, exif?.iso], body(17, 500), INK, y + 14);
+  line([exif?.focalLength, camera], body(13), DIM, y + BLOCK - 1);
+}
+
+export interface BreakdownSpec {
+  /** The photo at full size. */
+  image: HTMLImageElement;
+  /** The main colors, as hex. */
+  colors: string[];
+  bins: HistogramBin[];
+  exif: Exif | null;
+}
+
+/**
+ * The summary sheet: the name, the photo, then the colors and brightness on
+ * the left and the camera settings on the right, small so the photo leads.
+ * Resolves true once the download has started.
+ */
+export async function exportBreakdownSheet(spec: BreakdownSpec): Promise<boolean> {
+  const inner = W - PAD * 2;
+
+  // Cap the frame's height so a tall portrait still leaves the details in view.
+  const MAX_PHOTO_H = 1300;
+  const natural = spec.image.naturalHeight / spec.image.naturalWidth;
+  const photoH = Math.min(MAX_PHOTO_H, Math.round(inner * natural));
+  const photoW = Math.round(photoH / natural);
+  const photoX = PAD + Math.round((inner - photoW) / 2);
+  // The gap between the photo and the line of details under it.
+  const DETAILS_GAP = 20;
+  const height = PAD + 40 + photoH + DETAILS_GAP + BLOCK + PAD;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = W * SCALE;
+  canvas.height = height * SCALE;
+  const ctx = canvas.getContext("2d")!;
+  ctx.scale(SCALE, SCALE);
+  ctx.fillStyle = BG;
+  ctx.fillRect(0, 0, W, height);
+  ctx.textBaseline = "alphabetic";
+
+  let y = PAD + 12;
+  ctx.font = display(13, 500);
+  ctx.letterSpacing = "5px";
+  ctx.fillStyle = DIM;
+  ctx.fillText("PHOTOEYE", PAD, y);
+  ctx.letterSpacing = "0px";
+  y += 28;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(photoX, y, photoW, photoH, 6);
+  ctx.clip();
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(spec.image, photoX, y, photoW, photoH);
+  ctx.restore();
+  y += photoH + DETAILS_GAP;
+
+  // One line under the photo, edged to the photo rather than the page.
+  const x = swatches(ctx, spec.colors, photoX, y);
+  // Set apart from the swatches by three gaps, so it reads as its own thing.
+  miniHistogram(ctx, spec.bins, x + BLOCK_GAP * 2, y);
+  settings(ctx, spec.exif, photoX + photoW, y);
+
+  return finish(canvas, "photoeye_breakdown");
 }
 
 function download(blob: Blob, filename: string): void {
@@ -99,182 +195,20 @@ function download(blob: Blob, filename: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
-function roleWord(role: GamutRole): string {
-  switch (role) {
-    case "DOM": return t("DOM");
-    case "SPEC": return t("SPEC");
-    case "BLACK": return t("BLACK");
-    case "BASE": return t("BASE");
-    case "RIM": return t("RIM");
-    case "WARM": return t("WARM");
-    case "COOL": return t("COOL");
-  }
-}
-
-export interface BreakdownSpec {
-  /** The analysed photo. */
-  imageCanvas: HTMLCanvasElement;
-  /** Guides drawn on top, burnt into the sheet. */
-  overlayCanvas?: HTMLCanvasElement | null;
-  histogramCanvas?: HTMLCanvasElement | null;
-  clusters: GamutCluster[];
-  tonalTitle: string;
-  tonalText: string;
-  harmony: string;
-  takeaway: string;
-  exifRows: ExifRow[];
-}
-
 /**
- * Analysis breakdown: the frame with its guides burnt in, plus the tonal,
- * color and EXIF readouts. Resolves true once the download has started.
+ * Local date and time to the second, e.g. "20261012_161901", so two
+ * sheets saved the same day don't land on the same file name. Exported for tests.
  */
-export async function exportBreakdownSheet(spec: BreakdownSpec): Promise<boolean> {
-  const canvas = document.createElement("canvas");
-  const inner = W - PAD * 2;
-
-  // Cap the frame's height so a tall portrait doesn't push the readouts off
-  // the bottom of a sheet someone is going to read side by side with it.
-  const MAX_PHOTO_H = 760;
-  const natural = spec.imageCanvas.height / spec.imageCanvas.width;
-  const photoH = Math.min(MAX_PHOTO_H, Math.round(inner * natural));
-  const photoW = Math.round(photoH / natural);
-  const photoX = PAD + Math.round((inner - photoW) / 2);
-  const height = PAD + 120 + photoH + 640;
-
-  canvas.width = W;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d")!;
-
-  ctx.fillStyle = BG;
-  ctx.fillRect(0, 0, W, height);
-
-  let y = PAD + 34;
-  ctx.textBaseline = "alphabetic";
-  ctx.font = display(20, 700);
-  ctx.fillStyle = AMBER;
-  ctx.fillText("P H O T O E Y E", PAD, y);
-  ctx.font = display(40, 600);
-  ctx.fillStyle = INK;
-  y += 48;
-  ctx.fillText(t("Photo breakdown"), PAD, y);
-  ctx.font = mono(18, 400);
-  ctx.fillStyle = DIM;
-  ctx.textAlign = "right";
-  ctx.fillText(new Date().toLocaleString(getDateLocale()), W - PAD, y);
-  ctx.textAlign = "left";
-  y += 24;
-  hairline(ctx, y, inner);
-  y += 30;
-
-  ctx.drawImage(spec.imageCanvas, photoX, y, photoW, photoH);
-  if (spec.overlayCanvas) ctx.drawImage(spec.overlayCanvas, photoX, y, photoW, photoH);
-  ctx.strokeStyle = HAIRLINE;
-  ctx.lineWidth = 2;
-  ctx.strokeRect(photoX, y, photoW, photoH);
-  y += photoH + 44;
-
-  // Left column: tonal readout with the histogram. Right column: EXIF.
-  const colW = (inner - 40) / 2;
-  const colTop = y;
-
-  y = capsLabel(ctx, t("Brightness chart"), PAD, y);
-  if (spec.histogramCanvas) {
-    const hh = 150;
-    ctx.fillStyle = PANEL;
-    ctx.fillRect(PAD, y, colW, hh);
-    ctx.drawImage(spec.histogramCanvas, PAD, y, colW, hh);
-    ctx.strokeStyle = HAIRLINE;
-    ctx.strokeRect(PAD, y, colW, hh);
-    y += hh + 26;
-  }
-  ctx.font = display(24, 600);
-  ctx.fillStyle = INK;
-  ctx.fillText(spec.tonalTitle || "", PAD, y);
-  y += 28;
-  ctx.font = body(19);
-  ctx.fillStyle = DIM;
-  y = wrapText(ctx, spec.tonalText, PAD, y, colW, 27);
-
-  const leftBottom = y;
-
-  // Right column.
-  const rx = PAD + colW + 40;
-  let ry = capsLabel(ctx, t("Camera settings"), rx, colTop);
-  ctx.font = mono(19, 500);
-  for (const row of spec.exifRows) {
-    ctx.fillStyle = DIM;
-    ctx.fillText(row.label, rx, ry);
-    ctx.fillStyle = INK;
-    ctx.fillText(row.value, rx + 200, ry);
-    ry += 30;
-  }
-  if (!spec.exifRows.length) {
-    ctx.fillStyle = DIM;
-    ctx.font = body(19);
-    ry = wrapText(ctx, t("No camera settings saved in this file."), rx, ry, colW, 27);
-  }
-
-  ry += 20;
-  ry = capsLabel(ctx, t("Main colors"), rx, ry);
-  if (spec.harmony) {
-    ctx.font = display(22, 600);
-    ctx.fillStyle = AMBER;
-    ctx.fillText(spec.harmony, rx, ry);
-    ry += 30;
-  }
-  const clusters = spec.clusters;
-  if (clusters.length) {
-    const barH = 34;
-    let cx = rx;
-    for (const c of clusters) {
-      const cw = Math.max(2, colW * c.share);
-      ctx.fillStyle = c.hex;
-      ctx.fillRect(cx, ry, cw, barH);
-      cx += cw;
-    }
-    ctx.strokeStyle = HAIRLINE;
-    ctx.strokeRect(rx, ry, colW, barH);
-    ry += barH + 26;
-    ctx.font = mono(17, 500);
-    for (const c of clusters) {
-      ctx.fillStyle = c.hex;
-      ctx.fillRect(rx, ry - 13, 15, 15);
-      ctx.fillStyle = INK;
-      ctx.fillText(c.hex.toUpperCase(), rx + 26, ry);
-      ctx.fillStyle = DIM;
-      ctx.fillText(`${Math.round(c.share * 100)}% ${roleWord(c.role)}`, rx + 160, ry);
-      ry += 26;
-    }
-  }
-
-  y = Math.max(leftBottom, ry) + 24;
-  if (spec.takeaway) {
-    hairline(ctx, y, inner);
-    y += 34;
-    y = capsLabel(ctx, t("Takeaway"), PAD, y);
-    ctx.font = body(21);
-    ctx.fillStyle = INK;
-    y = wrapText(ctx, spec.takeaway, PAD, y, inner, 30);
-  }
-
-  return finish(canvas, y, "photoeye-breakdown");
+export function fileStamp(date: Date): string {
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}${p(date.getMonth() + 1)}${p(date.getDate())}_${p(date.getHours())}${p(date.getMinutes())}${p(date.getSeconds())}`;
 }
 
-/** Trims the canvas to the content height, encodes it, and starts the download. */
-async function finish(canvas: HTMLCanvasElement, contentBottom: number, name: string): Promise<boolean> {
-  const height = Math.round(contentBottom + PAD);
-  const out = document.createElement("canvas");
-  out.width = canvas.width;
-  out.height = height;
-  const ctx = out.getContext("2d")!;
-  ctx.fillStyle = BG;
-  ctx.fillRect(0, 0, out.width, height);
-  ctx.drawImage(canvas, 0, 0);
-
+/** Encodes the sheet and starts the download. */
+async function finish(canvas: HTMLCanvasElement, name: string): Promise<boolean> {
   try {
-    const blob = await canvasToBlob(out, "image/jpeg", 0.92);
-    download(blob, `${name}-${new Date().toISOString().slice(0, 10)}.jpg`);
+    const blob = await canvasToBlob(canvas, "image/jpeg", 0.95);
+    download(blob, `${name}_${fileStamp(new Date())}.jpg`);
     return true;
   } catch (err) {
     console.warn("PhotoEYE: could not build the sheet.", err);

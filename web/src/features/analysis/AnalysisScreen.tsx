@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode, type RefObject } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { t } from "@/lib/i18n/core";
 import { AdvancedTools, ToneCurveFilter } from "./AdvancedTools";
 import { PhotoPanes } from "./PhotoPanes";
@@ -18,7 +18,6 @@ export function AnalysisScreen() {
   const inputRef = useRef<HTMLInputElement>(null);
   const imageRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLCanvasElement>(null);
-  const histogramRef = useRef<HTMLCanvasElement>(null);
 
   // A first visit opens the bundled sample, so every tool has something to read.
   useEffect(() => {
@@ -45,8 +44,8 @@ export function AnalysisScreen() {
       {hasPhoto ? (
         <div className={comparing ? "comparing" : undefined}>
           <PhotoPanes imageRef={imageRef} overlayRef={overlayRef} onUpload={() => inputRef.current?.click()} />
-          <ReadoutTabs histogramRef={histogramRef} />
-          <SaveSection imageRef={imageRef} overlayRef={overlayRef} histogramRef={histogramRef} />
+          <ReadoutTabs />
+          <SaveSection />
         </div>
       ) : (
         // The same big start square as Live Walk before a walk.
@@ -65,15 +64,12 @@ const TABS: { tab: ReadoutTab; label: () => string }[] = [
   { tab: "advanced", label: () => t("Advanced") },
 ];
 
-/**
- * Main colors, brightness and the advanced tools, one tab at a time. Every
- * panel stays mounted so the summary download can still read the histogram.
- */
-function ReadoutTabs({ histogramRef }: { histogramRef: RefObject<HTMLCanvasElement | null> }) {
+/** Main colors, brightness and the advanced tools, one tab at a time. */
+function ReadoutTabs() {
   const active = useAnalysis((s) => s.readoutTab);
   const panels: Record<ReadoutTab, ReactNode> = {
     color: <MainColors />,
-    light: <Brightness histogramRef={histogramRef} />,
+    light: <Brightness />,
     advanced: <AdvancedTools />,
   };
 

@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { wrapTokens } from "./sheet";
+import { fileStamp } from "./sheet";
 
-describe("sheet line wrapping", () => {
-  it("breaks English between words and Japanese between characters", () => {
-    expect(wrapTokens("Golden hour, again")).toEqual(["Golden", " ", "hour,", " ", "again"]);
-    expect(wrapTokens("撮影の記録")).toEqual(["撮", "影", "の", "記", "録"]);
-    expect(wrapTokens("ISO 400の写真")).toEqual(["ISO", " ", "400", "の", "写", "真"]);
+describe("sheet file name", () => {
+  it("stamps the local date and time to the second", () => {
+    expect(fileStamp(new Date(2026, 9, 2, 7, 5, 9))).toBe("20261002_070509");
   });
 });

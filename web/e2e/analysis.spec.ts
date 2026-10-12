@@ -149,7 +149,7 @@ test("the summary downloads, and Share to Room goes to Partners", async ({ page 
   await openSample(page);
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Download Summary" }).click();
-  expect((await download).suggestedFilename()).toMatch(/^photoeye-breakdown-.*\.jpg$/);
+  expect((await download).suggestedFilename()).toMatch(/^photoeye_breakdown_\d{8}_\d{6}\.jpg$/);
 
   await page.getByRole("button", { name: "Share to Room" }).click();
   await expect(page).toHaveURL(/\/partners\/$/);

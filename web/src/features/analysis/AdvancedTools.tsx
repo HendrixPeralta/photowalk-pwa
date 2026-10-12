@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useLayoutEffect, useRef, useState, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
+import { useCallback, useLayoutEffect, useRef, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { Trans } from "@/components/Trans";
 import { Icon } from "@/components/icons/Icon";
 import { useRedrawOnResize } from "@/components/useRedrawOnResize";
@@ -133,7 +133,6 @@ function ToneCurveCell({ shown }: { shown: boolean }) {
   const version = useAnalysis((s) => s.curveVersion);
   const ref = useRef<HTMLCanvasElement>(null);
   const adjusting = toneCurve.mode === "adjust";
-  const [hintOpen, setHintOpen] = useState(false);
 
   const draw = useCallback(() => {
     const canvas = ref.current;
@@ -172,24 +171,10 @@ function ToneCurveCell({ shown }: { shown: boolean }) {
             <Icon name="reset" />
           </button>
         )}
-        <button
-          type="button"
-          className={`chip-btn chip-btn-icon${adjusting ? "" : " chip-btn-push"}${hintOpen ? " active" : ""}`}
-          aria-label={t("How to use the curve")}
-          aria-expanded={hintOpen}
-          aria-controls="curve-hint"
-          onClick={() => setHintOpen((o) => !o)}
-        >
-          ?
-        </button>
+        <span className={adjusting ? undefined : "chip-btn-push"}>
+          <ToolHelpButton tool="tonecurve" label={t("About Tone Curve")} />
+        </span>
       </div>
-      {hintOpen && (
-        <p id="curve-hint" className="hint curve-hint">
-          {adjusting
-            ? t("Tap to add a point · double-tap one to remove it")
-            : t("This is measured from your photo. Switch to Adjust to try changes.")}
-        </p>
-      )}
       <canvas
         ref={ref}
         className="scope-canvas curve-canvas"
@@ -204,7 +189,6 @@ function ToneCurveCell({ shown }: { shown: boolean }) {
         onDoubleClick={(e) => toneCurve.removeAt(...at(e))}
       />
       <p className="hint scope-caption">{shown && <ReadingText reading={toneCurve.summary()} />}</p>
-      <ScopeHelp help={t("About Tone Curve")} tool="tonecurve" />
     </figure>
   );
 }

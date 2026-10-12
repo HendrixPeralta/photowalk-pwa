@@ -85,10 +85,11 @@ function HistogramCanvas({ bins, canvasRef }: { bins: HistogramBin[]; canvasRef:
  * The brightness chart (with the reference's beside it when comparing), and
  * the tonal key it adds up to.
  */
-export function Brightness({ histogramRef }: { histogramRef: RefObject<HTMLCanvasElement | null> }) {
+export function Brightness() {
   const frameId = useAnalysis((s) => s.frame!.id);
   const bins = useAnalysis((s) => s.frame!.hist.bins);
   const compareBins = useAnalysis((s) => s.compare?.hist.bins);
+  const histogramRef = useRef<HTMLCanvasElement>(null);
   const compareRef = useRef<HTMLCanvasElement>(null);
   const summary = histogramSummary(bins);
   const note = tonalKeyNote(bins, summary);
