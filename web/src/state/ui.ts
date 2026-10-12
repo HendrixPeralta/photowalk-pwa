@@ -35,8 +35,6 @@ export interface ModalEntry {
   onClose?: () => void;
   /** A short question with its answers: centered, no close button. */
   alert?: boolean;
-  /** A window floating in the middle of the screen, not a sheet from the bottom. */
-  floating?: boolean;
 }
 
 /**
@@ -48,7 +46,7 @@ export interface ModalEntry {
 export const useModal = create<{ current: ModalEntry | null }>(() => ({ current: null }));
 let nextModalId = 1;
 
-export function openModal(element: ReactElement, opts: { onClose?: () => void; alert?: boolean; floating?: boolean } = {}): void {
+export function openModal(element: ReactElement, opts: { onClose?: () => void; alert?: boolean } = {}): void {
   useModal.setState({ current: { id: nextModalId++, element, ...opts } });
 }
 

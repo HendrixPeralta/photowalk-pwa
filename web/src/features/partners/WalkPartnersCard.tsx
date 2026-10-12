@@ -59,16 +59,22 @@ function AddRoomModal() {
       <h3>{t("Add a room")}</h3>
       <div className="theme-actions theme-actions-row">
         <button type="button" className="btn btn-accent" disabled={busy} onClick={() => void create()}>{t("Create Room")}</button>
-        <button type="button" className="btn btn-primary" onClick={() => openModal(<JoinRoomModal />, { floating: true })}>{t("Join Room")}</button>
+        <button type="button" className="btn btn-primary" onClick={() => openModal(<JoinRoomModal />)}>{t("Join Room")}</button>
       </div>
     </>
   );
 }
 
+/**
+ * The last list the server sent, so coming back to the card shows it at once
+ * while a fresh one is asked for. Sign-out reloads the page, which clears it.
+ */
+let lastRooms: RoomSummary[] = [];
+
 /** Every room you're in, from any device: tap a code to copy it, or go in. The + makes or joins another. */
 export function WalkPartnersCard() {
   const current = useAppStore((s) => s.currentRoom);
-  const [rooms, setRooms] = useState<RoomSummary[]>([]);
+  const [rooms, setRooms] = useState<RoomSummary[]>(lastRooms);
   const [busy, setBusy] = useState(false);
   const enabled = roomsEnabled();
 
@@ -76,7 +82,11 @@ export function WalkPartnersCard() {
   useEffect(() => {
     if (!enabled || !navigator.onLine) return;
     let live = true;
-    void roomsApi.list().then((res) => { if (live && res.ok) setRooms(res.data.rooms); });
+    void roomsApi.list().then((res) => {
+      if (!res.ok) return;
+      lastRooms = res.data.rooms;
+      if (live) setRooms(lastRooms);
+    });
     return () => { live = false; };
   }, [enabled, current]);
 
@@ -115,7 +125,7 @@ export function WalkPartnersCard() {
           type="button"
           className="rooms-add"
           aria-label={t("Add a room")}
-          onClick={() => openModal(<AddRoomModal />, { floating: true })}
+          onClick={() => openModal(<AddRoomModal />)}
         >
           <Icon name="plus" />
         </button>

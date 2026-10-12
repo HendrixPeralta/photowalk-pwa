@@ -163,7 +163,7 @@ export function dropWalkIfNeverStarted(): void {
 
 export function openWalkBrief(): void {
   if (!walkTheme()) return;
-  openModal(<WalkBriefModal />, { floating: true });
+  openModal(<WalkBriefModal />);
 }
 
 export function openThemePicker(): void {

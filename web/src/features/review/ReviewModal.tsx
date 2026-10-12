@@ -9,7 +9,7 @@ import { FEATURE_KEYS, LEVEL_KEYS, REVIEW_STRINGS, type FeatureKey, type LevelKe
 const MAX_TEXT = 2000;
 
 export function openReview(): void {
-  openModal(<ReviewModal />, { floating: true });
+  openModal(<ReviewModal />);
 }
 
 /**

@@ -603,7 +603,18 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
   font-size: 0.85rem;
 }
 
-.hours-input { width: auto; margin: 0; }
+/* Label on one line, a short box sized for a number like 8.25, both on the
+   right. Two classes each so they win over .field-row's space-between and
+   .text-input's full width further down. */
+.field-row.hours-row { justify-content: flex-end; gap: 12px; margin: 16px 0 18px; }
+.hours-row label { white-space: nowrap; font-size: 0.95rem; color: var(--text); }
+.text-input.hours-input {
+  width: 6.5rem;
+  margin: 0;
+  text-align: center;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
 
 .quick-actions {
   display: grid;
@@ -883,16 +894,7 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
 /* Scopes. Deliberately dark in both themes: a waveform trace is a thin bright
    line, and it disappears on a light background. */
 .scope-grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
-.scope-grid-all { grid-template-columns: 1fr 1fr; gap: 12px; }
 .scope-cell { margin: 0; min-width: 0; }
-/* One scope at a time, its tab already names it; under All, each needs its own. */
-.scope-name {
-  display: none;
-  font-size: 0.8rem;
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-.scope-grid-all .scope-name { display: block; }
 .scope-help { display: flex; margin-top: 8px; }
 .scope-canvas {
   width: 100%;
@@ -902,7 +904,6 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
   border-radius: var(--radius-sm);
   display: block;
 }
-.scope-grid-all .scope-canvas { height: 150px; }
 
 /* The one scope you touch. touch-action:none stops the browser claiming a
    drag as a page scroll, which would make a point impossible to pull down. */
@@ -911,7 +912,6 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
   cursor: crosshair;
   height: 260px;
 }
-.scope-grid-all .curve-canvas { height: 180px; }
 .curve-modes { margin: 0 0 8px; }
 .curve-modes .chip-btn-icon { font-size: 15px; font-weight: 700; }
 .chip-btn:disabled { opacity: 0.45; cursor: default; }
@@ -919,11 +919,6 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
 .btn-sm { padding: 6px 11px; font-size: 0.8rem; }
 .btn-sm:disabled { opacity: 0.45; pointer-events: none; }
 .scope-caption { margin-bottom: 0; }
-
-@media (max-width: 520px) {
-  .scope-grid-all { grid-template-columns: 1fr; }
-  .scope-grid-all .scope-canvas { height: 180px; }
-}
 
 .palette-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .swatch {
@@ -1349,43 +1344,36 @@ input[type="file"].text-input { padding: 8px; }
 @keyframes nav-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 @media (prefers-reduced-motion: reduce) { .nav-btn .nav-live { animation: none; } }
 
-/* Modal */
+/* Modal: a window hovering in the middle of the screen, clear of every edge,
+   lifted by a shadow, and growing in from slightly smaller. */
 .modal-root {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.55);
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
+  padding: 20px 16px;
   z-index: 50;
 }
 .modal-root.hidden { display: none; }
-/* A short question: in the middle of the screen, not a sheet from the bottom. */
-.modal-root-alert { align-items: center; padding: 16px; }
+/* A short question: narrower. */
 .modal-root-alert .modal-card { width: min(340px, 100%); }
 .modal-root-alert h3 { margin-top: 0; }
-/* A window hovering over the page: centered, clear of every edge, lifted by a
-   shadow, and growing in from slightly smaller. */
-.modal-root-floating { align-items: center; padding: 20px 16px; }
-.modal-root-floating .modal-card {
-  max-height: calc(100dvh - 40px);
-  padding: 20px;
-  border-color: var(--border-strong);
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.4);
-  animation: modal-float-in 180ms ease-out;
-}
 @keyframes modal-float-in { from { opacity: 0; transform: translateY(8px) scale(0.96); } }
-@media (prefers-reduced-motion: reduce) { .modal-root-floating .modal-card { animation: none; } }
 .modal-card {
   width: min(440px, 100%);
-  max-height: 86dvh;
+  max-height: calc(100dvh - 40px);
   overflow-y: auto;
   background: var(--surface-1);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
-  padding: 16px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.4);
+  padding: 20px;
   position: relative;
+  animation: modal-float-in 180ms ease-out;
 }
+@media (prefers-reduced-motion: reduce) { .modal-card { animation: none; } }
 .modal-close {
   position: absolute;
   top: 10px; right: 14px;

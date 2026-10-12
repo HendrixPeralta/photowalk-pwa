@@ -153,7 +153,7 @@ function SplitPane({ room, photo }: { room: RoomSnapshot; photo: RoomPhoto }) {
   return (
     <div className="split-pane">
       {/* Tap a shot for its comments, Analyze, and taking it down. */}
-      <button type="button" className="split-pane-photo" onClick={() => openModal(<RoomPhotoModal photoId={photo.id} />, { floating: true })}>
+      <button type="button" className="split-pane-photo" onClick={() => openModal(<RoomPhotoModal photoId={photo.id} />)}>
         {/* eslint-disable-next-line @next/next/no-img-element -- a local object URL, nothing to optimize */}
         <img src={url ?? undefined} alt={t("Shared by {name}", { name })} />
         <span className="split-pane-who" title={name}><Avatar user={room.people[photo.userId]} /></span>

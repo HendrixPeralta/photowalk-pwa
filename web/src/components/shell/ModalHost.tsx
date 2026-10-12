@@ -68,7 +68,7 @@ export function ModalHost() {
 
   return (
     <div
-      className={`modal-root${current.alert ? " modal-root-alert" : ""}${current.floating ? " modal-root-floating" : ""}`}
+      className={`modal-root${current.alert ? " modal-root-alert" : ""}`}
       onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
     >
       <div ref={cardRef} className="modal-card" role="dialog" aria-modal="true" tabIndex={-1} key={current.id}>
