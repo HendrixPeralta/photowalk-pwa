@@ -92,7 +92,7 @@ function Telemetry({ walk }: { walk: ActiveWalk }) {
 function MissionCard({ walk }: { walk: ActiveWalk }) {
   const theme = useWalkTheme();
   const frames = walk.frames ?? [];
-  const challenges = challengesFor(theme, walk.mode);
+  const challenges = challengesFor(theme, walk);
   const done = walk.challengesChecked.filter(Boolean).length;
   const total = walk.challengesChecked.length;
   const tips = (theme?.concepts ?? []).map(concept).filter((c) => c !== undefined);

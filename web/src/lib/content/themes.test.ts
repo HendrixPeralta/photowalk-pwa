@@ -7,12 +7,19 @@ import { allChallenges, concept, suggestTheme, themes } from "./themes";
 afterEach(() => vi.restoreAllMocks());
 
 describe("theme catalog", () => {
-  it("has 24 themes with a brief, and challenges pooled without repeats", () => {
-    expect(themes()).toHaveLength(24);
+  it("has 18 themes with a brief, and challenges pooled without repeats", () => {
+    expect(themes()).toHaveLength(18);
     for (const th of themes()) expect(th.title && th.brief).toBeTruthy();
     const pool = allChallenges();
     expect(new Set(pool).size).toBe(pool.length);
     expect(pool).toEqual(expect.arrayContaining(themes()[0].challenges));
+  });
+
+  it("gives every theme enough challenges to draw a different three each walk", () => {
+    for (const th of RAW_THEMES) {
+      expect(th.challenges.length, th.id).toBeGreaterThanOrEqual(6);
+      expect(new Set(th.challenges).size, th.id).toBe(th.challenges.length);
+    }
   });
 
   it("keeps every concept the themes refer to", () => {

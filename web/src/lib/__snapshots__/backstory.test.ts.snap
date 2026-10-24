@@ -12,7 +12,7 @@ exports[`backstory > generates the same demo year 1`] = `
 }
 `;
 
-exports[`backstory > generates the same demo year 2`] = `"sha256:fe26d319abc9042b"`;
+exports[`backstory > generates the same demo year 2`] = `"sha256:6abd5d737f7dc396"`;
 
 exports[`backstory > generates the same starter 1`] = `
 {
@@ -26,4 +26,4 @@ exports[`backstory > generates the same starter 1`] = `
 }
 `;
 
-exports[`backstory > generates the same starter 2`] = `"sha256:271455412ba9fa3d"`;
+exports[`backstory > generates the same starter 2`] = `"sha256:da69e44a29fe4ed1"`;

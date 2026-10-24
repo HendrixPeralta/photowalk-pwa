@@ -12,7 +12,7 @@ import {
 import { ConfirmCompleteModal, ConfirmHoursModal } from "./modals/FinishModals";
 import { WalkBriefModal } from "./modals/WalkBrief";
 import { WalkSummaryModal } from "./modals/WalkSummary";
-import { useWalkUi, walkTheme } from "./walkUi";
+import { challengesFor, CHALLENGES_PER_WALK, useWalkUi, walkTheme } from "./walkUi";
 
 const START = new Date(2026, 5, 10, 10, 0);
 const MIN = 60_000;
@@ -71,9 +71,32 @@ describe("opening a walk", () => {
     const theme = walkTheme()!;
     expect(theme).toBeTruthy();
     expect(walk().durationMin).toBe(30);
-    expect(walk().challengesChecked).toEqual(theme.challenges.map(() => false));
+    expect(walk().challengesChecked).toEqual([false, false, false]);
+    expect(challengesFor(theme, walk())).toHaveLength(CHALLENGES_PER_WALK);
     beginShooting();
     expect(walk().nudges.map((n) => n.at - START.getTime())).toEqual([15 * MIN, 25.5 * MIN, 30 * MIN]);
+  });
+
+  it("draws a built-in theme's challenges at random, but gives a custom theme all of its own", () => {
+    setMode("guided");
+    const theme = themes()[0];
+    putThemeOnHand(theme);
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    launchWalk();
+    expect(walk().challengePicks).toEqual([1, 2, 3]);
+    expect(challengesFor(theme, walk())).toEqual([1, 2, 3].map((i) => theme.challenges[i]));
+
+    const mine = { id: "mine", title: "Mine", brief: "", concepts: [], challenges: ["a", "b", "c", "d"] };
+    update((d) => { d.customThemes.push(mine); });
+    putThemeOnHand(mine);
+    expect(challengesFor(mine, walk())).toEqual(["a", "b", "c", "d"]);
+    expect(walk().challengesChecked).toEqual([false, false, false, false]);
+  });
+
+  it("falls back to a theme's first challenges for a walk saved without picks", () => {
+    const theme = themes()[0];
+    const saved = { mode: "guided" as const, challengesChecked: [true, false, false] };
+    expect(challengesFor(theme, saved)).toEqual(theme.challenges.slice(0, 3));
   });
 
   it("keeps the mode fixed while a walk is open", () => {
