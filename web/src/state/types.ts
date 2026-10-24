@@ -150,6 +150,8 @@ export interface CustomTheme {
   brief: string;
   concepts: string[];
   challenges: string[];
+  /** Set on a copy added from the Theme Market: which entry, and who made it. */
+  market?: { id: string; author: string };
 }
 
 export interface Reminder {

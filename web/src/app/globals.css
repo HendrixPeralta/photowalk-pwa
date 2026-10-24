@@ -469,6 +469,30 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
 .reward-foot { margin-top: 8px; font-size: 0.78rem; }
 .reward-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 
+/* My Themes: Mine | Market, and a theme's name above its buttons so four
+   of them still leave the name room on a phone. */
+.themes-tabs { margin-top: 12px; }
+.my-theme-row { flex-direction: column; align-items: stretch; gap: 8px; }
+.my-theme-row .reward-actions { justify-content: flex-end; flex-wrap: wrap; }
+.my-theme-name { display: flex; flex-direction: column; gap: 2px; }
+.my-theme-note { font-size: 0.78rem; }
+.my-theme-shared { color: var(--accent-strong); }
+
+/* Theme Market */
+.market-card { display: flex; flex-direction: column; gap: 8px; }
+.market-card-head {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
+  background: none; border: 0; padding: 0; color: inherit; font: inherit; text-align: left; cursor: pointer;
+}
+.market-brief { font-size: 0.85rem; }
+.market-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; color: var(--text-dim); font-size: 0.75rem; }
+.market-meta .profile-avatar { width: 20px; height: 20px; font-size: 10px; }
+.market-challenges { margin: 0; padding-left: 18px; font-size: 0.85rem; display: flex; flex-direction: column; gap: 4px; }
+p.market-challenges { padding-left: 0; }
+.market-hidden { margin: 0; font-size: 0.78rem; color: var(--accent-strong); }
+.market-actions { justify-content: flex-end; }
+.market-more { margin-top: 12px; }
+
 /* Title on its own row, then hours + button: three fields side by side leave the
    name unreadably narrow on a phone. */
 .reward-form { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
