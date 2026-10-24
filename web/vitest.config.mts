@@ -14,6 +14,9 @@ export default defineConfig({
     // Some tests decode full-size bundled JPEGs in pure JS, which can pass 5s
     // when every test file runs in parallel.
     testTimeout: 30_000,
+    // Server tests start an in-memory Postgres and run every migration in
+    // beforeAll, which can pass 10s when several start at once.
+    hookTimeout: 30_000,
     // Snapshots of dates and day boundaries hold on any machine.
     env: { TZ: "Asia/Tokyo" },
   },
