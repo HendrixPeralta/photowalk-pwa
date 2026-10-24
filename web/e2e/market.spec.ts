@@ -28,7 +28,7 @@ test("a published theme is added by someone else as their own copy", async ({ pa
   await ken.goto("/themes/");
   await expect(ken.locator(".market-card")).toHaveCount(0);
   await ken.getByRole("button", { name: "Add a theme" }).click();
-  await ken.getByRole("dialog").getByRole("button", { name: /Browse community themes/ }).click();
+  await ken.getByRole("button", { name: "Browse community themes" }).click();
   await expect(ken).toHaveURL(/\/themes\/\?view=community$/);
   await expect(ken.getByRole("heading", { name: "Community Themes" })).toBeVisible();
   const rainy = card(ken, "Rainy Day");

@@ -477,9 +477,7 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
 .my-theme-note { font-size: 0.78rem; }
 .my-theme-shared { color: var(--accent-strong); }
 
-/* Community themes, and the + button's choice that leads there */
-.new-theme-option { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.new-theme-hint { font-size: 0.75rem; font-weight: 400; opacity: 0.8; }
+/* Community themes */
 .market-card { display: flex; flex-direction: column; gap: 8px; }
 .market-card-head {
   display: flex; flex-direction: column; align-items: flex-start; gap: 4px;

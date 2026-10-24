@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Icon } from "@/components/icons/Icon";
+import { FabMenu } from "@/components/FabMenu";
 import { chooseSavedTheme, openThemeEditor, removeSavedTheme } from "@/features/walks/actions";
 import { t } from "@/lib/i18n/core";
 import { navigateTo } from "@/lib/nav";
@@ -39,25 +39,6 @@ export function MyThemesScreen() {
     <section className="view" data-view="themes">
       <ThemeList />
     </section>
-  );
-}
-
-/** The + button's choice: build a theme, or add one someone else shared. */
-function NewThemeModal() {
-  return (
-    <>
-      <h3>{t("Add a theme")}</h3>
-      <div className="theme-actions">
-        <button type="button" className="btn btn-accent btn-block new-theme-option" onClick={() => { closeModal(); openThemeEditor(null); }}>
-          <span>{t("Build your own")}</span>
-          <span className="new-theme-hint">{t("Pick challenges or write your own.")}</span>
-        </button>
-        <button type="button" className="btn btn-ghost btn-block new-theme-option" onClick={() => { closeModal(); navigateTo("/themes?view=community"); }}>
-          <span>{t("Browse community themes")}</span>
-          <span className="new-theme-hint">{t("Add a theme another photographer shared.")}</span>
-        </button>
-      </div>
-    </>
   );
 }
 
@@ -104,13 +85,17 @@ function ThemeList() {
           </li>
         ))}
       </ul>
-      {/* Same corner button as the walk launcher. Building comes back to this
-          list after saving, so the new theme shows up in it. */}
-      <div className="walk-fab-wrap">
-        <button type="button" className="walk-fab" aria-label={t("Add a theme")} onClick={() => (marketEnabled() ? openModal(<NewThemeModal />) : openThemeEditor(null))}>
-          <Icon name="plus" />
-        </button>
-      </div>
+      {/* The same corner menu as on Walks. Building comes back to this list
+          after saving, so the new theme shows up in it. */}
+      <FabMenu
+        label={t("Add a theme")}
+        options={[
+          { key: "build", icon: "tune", label: t("Build your own"), onSelect: (close) => { close(); openThemeEditor(null); } },
+          ...(marketEnabled()
+            ? [{ key: "community", icon: "explore" as const, label: t("Browse community themes"), onSelect: (close: () => void) => { close(); navigateTo("/themes?view=community"); } }]
+            : []),
+        ]}
+      />
     </>
   );
 }
