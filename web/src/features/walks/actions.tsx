@@ -180,17 +180,23 @@ export function openWalkThemePicker(): void {
 /**
  * The custom theme builder, which doubles as the editor for an existing one.
  * It's a page under My Themes. From the walk's theme picker it returns to the
- * brief once done. Once shooting has started the theme is locked in.
+ * brief once done. Once shooting has started the walk's own theme is locked
+ * in; building a new theme or editing another one is still fine.
  */
 export function openThemeEditor(existing: Theme | null = null, opts: { fromWalk?: boolean } = {}): void {
-  const w = getData().activeWalk;
-  if (w?.startedAt) {
+  if (existing && isRunningWalkTheme(existing.id)) {
     showToast(t("Finish your current walk before editing a theme."));
     return;
   }
   const params = new URLSearchParams({ edit: existing?.id ?? "new" });
   if (opts.fromWalk) params.set("from", "walk");
   navigateTo(`/themes?${params}`);
+}
+
+/** Whether a walk has started shooting on this theme, which locks it until the walk ends. */
+export function isRunningWalkTheme(id: string): boolean {
+  const w = getData().activeWalk;
+  return Boolean(w?.startedAt && w.themeId === id);
 }
 
 /* ---------- While the walk runs ---------- */

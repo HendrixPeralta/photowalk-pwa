@@ -146,6 +146,16 @@ test("a custom theme built from the brief is used and kept in My Themes", async 
   const state = await saved(page);
   expect(state.customThemes[0].challenges).toEqual(["Find a puddle"]);
   expect(state.activeWalk.themeId).toBe(state.customThemes[0].id);
+
+  // Nor edited, but a new theme can still be built while the walk runs.
+  await page.getByRole("button", { name: "Edit" }).click();
+  await expect(toast(page, "Finish your current walk before editing a theme.")).toBeVisible();
+  await expect(page).toHaveURL(/\/themes\/$/);
+  await page.getByRole("button", { name: "Build a Custom Theme" }).click();
+  await page.getByPlaceholder("Title (e.g. Rainy Day Reflections)").fill("Night Neon");
+  await page.getByRole("button", { name: "Save Theme" }).click();
+  await expect(page.locator(".log-last")).toHaveText("2 saved");
+  expect((await saved(page)).activeWalk.themeId).toBe(state.customThemes[0].id);
 });
 
 test("My Themes builds a new theme and stays put to list it", async ({ page }) => {

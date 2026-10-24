@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { putThemeOnHand } from "@/features/walks/actions";
+import { isRunningWalkTheme, putThemeOnHand } from "@/features/walks/actions";
 import { useWalkUi } from "@/features/walks/walkUi";
 import { allChallenges, themeById, themes, type Theme } from "@/lib/content/themes";
 import { t } from "@/lib/i18n/core";
@@ -72,7 +72,7 @@ export function ThemeEditorScreen({ themeId, fromWalk }: { themeId: string | nul
   };
 
   const save = () => {
-    if (getData().activeWalk?.startedAt) { showToast(t("Finish your current walk before editing a theme.")); return; }
+    if (editingId && isRunningWalkTheme(editingId)) { showToast(t("Finish your current walk before editing a theme.")); return; }
     const name = title.trim();
     if (!name) { showToast(t("Give your theme a title.")); return; }
 
