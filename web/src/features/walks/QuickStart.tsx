@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Icon } from "@/components/icons/Icon";
+import { useState } from "react";
+import { FabMenu, type FabOption } from "@/components/FabMenu";
 import type { IconName } from "@/components/icons/sprite";
 import { createRoom } from "@/features/partners/rooms";
 import { JoinRoomModal } from "@/features/partners/WalkPartnersCard";
@@ -25,73 +25,33 @@ const MODES: { mode: WalkMode; icon: IconName }[] = [
  * one opens that walk's brief.
  */
 export function QuickStart() {
-  const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
-
-  function start(mode: WalkMode) {
-    setOpen(false);
+  function start(mode: WalkMode, close: () => void) {
+    close();
     setMode(mode);
     launchWalk();
   }
 
-  async function room() {
+  async function room(close: () => void) {
     if (busy) return;
     setBusy(true);
     const problem = await createRoom();
     setBusy(false);
     if (problem) { showToast(problem); return; }
-    setOpen(false);
+    close();
     navigate("share");
   }
 
-  return (
-    <>
-      {open && <div className="walk-fab-backdrop" onClick={() => setOpen(false)} />}
+  const options: FabOption[] = [
+    ...(roomsEnabled()
+      ? [
+          { key: "create-room", icon: "share" as const, label: t("Create Room"), disabled: busy, onSelect: (close: () => void) => void room(close) },
+          { key: "join-room", icon: "user" as const, label: t("Join Room"), onSelect: (close: () => void) => { close(); openModal(<JoinRoomModal />); } },
+        ]
+      : []),
+    ...MODES.map(({ mode, icon }) => ({ key: mode, icon, label: modeTitle(mode), onSelect: (close: () => void) => start(mode, close) })),
+  ];
 
-      <div className="walk-fab-wrap">
-        {open && (
-          <div className="walk-fab-menu" id="walk-fab-menu">
-            {roomsEnabled() && (
-              <>
-                <button type="button" className="walk-fab-option" disabled={busy} onClick={() => void room()}>
-                  <span className="walk-fab-option-icon"><Icon name="share" /></span>
-                  <strong>{t("Create Room")}</strong>
-                </button>
-                <button type="button" className="walk-fab-option" onClick={() => { setOpen(false); openModal(<JoinRoomModal />); }}>
-                  <span className="walk-fab-option-icon"><Icon name="user" /></span>
-                  <strong>{t("Join Room")}</strong>
-                </button>
-              </>
-            )}
-            {MODES.map(({ mode, icon }) => (
-              <button key={mode} type="button" className="walk-fab-option" onClick={() => start(mode)}>
-                <span className="walk-fab-option-icon"><Icon name={icon} /></span>
-                <strong>{modeTitle(mode)}</strong>
-              </button>
-            ))}
-          </div>
-        )}
-
-        <button
-          type="button"
-          className={`walk-fab${open ? " open" : ""}`}
-          aria-label={t("Start Photo Walk")}
-          aria-expanded={open}
-          aria-controls="walk-fab-menu"
-          onClick={() => setOpen((o) => !o)}
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
-          </svg>
-        </button>
-      </div>
-    </>
-  );
+  return <FabMenu label={t("Start Photo Walk")} options={options} />;
 }
