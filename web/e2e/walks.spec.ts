@@ -177,8 +177,11 @@ test("My Themes builds a new theme and stays put to list it", async ({ page }) =
 test("the theme builder narrows the challenge list by theme, search and picks", async ({ page }) => {
   await page.goto("/themes/?edit=new");
   const items = page.locator(".challenge-item");
-  await expect(items.first()).toBeVisible();
-  const all = await items.count();
+
+  // Opens on the picked ones, which is nothing yet.
+  await expect(page.getByRole("button", { name: "Picked", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator(".empty-state-sm")).toContainText("Nothing picked yet.");
+  await expect(items).toHaveCount(0);
 
   await page.getByRole("button", { name: "Reflections", exact: true }).click();
   await expect(items).toHaveCount(6);
@@ -186,7 +189,9 @@ test("the theme builder narrows the challenge list by theme, search and picks", 
   await expect(page.locator(".log-last")).toHaveText("1 picked");
 
   await page.getByRole("button", { name: "All", exact: true }).click();
-  await expect(items).toHaveCount(all);
+  await expect(items.first()).toBeVisible();
+  const all = await items.count();
+  expect(all).toBeGreaterThan(6);
   await page.getByPlaceholder("Search challenges").fill("puddle");
   await expect(items).not.toHaveCount(all);
   await expect(items.first()).toContainText(/puddle/i);

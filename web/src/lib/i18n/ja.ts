@@ -196,7 +196,7 @@ const ja: Record<string, string> = {
   "Search challenges": "課題を検索",
   "Show challenges from": "表示する課題",
   "Picked": "選択済み",
-  "Nothing picked yet.": "まだ何も選んでいません。",
+  "Nothing picked yet. Pick a theme above or search to find challenges.": "まだ何も選んでいません。上のテーマを選ぶか、検索して課題を探してください。",
   "No challenges match.": "一致する課題はありません。",
   "Add": "追加",
   "Save Changes": "変更を保存",

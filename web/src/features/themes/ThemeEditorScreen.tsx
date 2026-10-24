@@ -10,7 +10,7 @@ import { uid } from "@/lib/util";
 import { getData, update } from "@/state/appStore";
 import { showToast } from "@/state/ui";
 
-/** "all", "picked", or a built-in theme's id: which challenges the list shows. */
+/** "picked", "all", or a built-in theme's id: which challenges the list shows. */
 type Filter = string;
 
 /**
@@ -37,7 +37,7 @@ export function ThemeEditorScreen({ themeId, fromWalk }: { themeId: string | nul
   const [extras, setExtras] = useState(() => existing?.challenges.filter((c) => !pool.includes(c)) ?? []);
   const [draft, setDraft] = useState("");
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<Filter>("all");
+  const [filter, setFilter] = useState<Filter>("picked");
 
   const shown = useMemo(() => {
     const base = filter === "all" ? pool
@@ -177,8 +177,8 @@ export function ThemeEditorScreen({ themeId, fromWalk }: { themeId: string | nul
         onChange={(e) => setQuery(e.target.value)}
       />
       <div className="theme-filter-chips" role="group" aria-label={t("Show challenges from")}>
-        {chip("all", t("All"))}
         {chip("picked", t("Picked"))}
+        {chip("all", t("All"))}
         {builtIn.map((th) => chip(th.id, th.title))}
       </div>
       {shown.length ? (
@@ -198,7 +198,7 @@ export function ThemeEditorScreen({ themeId, fromWalk }: { themeId: string | nul
           ))}
         </ul>
       ) : (
-        <p className="empty-state-sm">{filter === "picked" && !query.trim() ? t("Nothing picked yet.") : t("No challenges match.")}</p>
+        <p className="empty-state-sm">{filter === "picked" && !query.trim() ? t("Nothing picked yet. Pick a theme above or search to find challenges.") : t("No challenges match.")}</p>
       )}
 
       <div className="theme-actions">
