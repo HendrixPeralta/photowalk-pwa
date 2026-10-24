@@ -5,7 +5,7 @@
 import { suggestTheme, themeById, type Theme } from "@/lib/content/themes";
 import { t } from "@/lib/i18n/core";
 import { claimNewMilestones, type Milestone } from "@/lib/milestones";
-import { navigate } from "@/lib/nav";
+import { navigate, navigateTo } from "@/lib/nav";
 import { notificationsGranted, showNow } from "@/lib/notify";
 import { claimRewardUnlocks } from "@/lib/rewards";
 import { addActivityHours, recordWalk, themeWalkCounts, totalActivityHours } from "@/lib/stats";
@@ -18,7 +18,6 @@ import { getData, update } from "@/state/appStore";
 import type { Reward, WalkMode, WalkRecord } from "@/state/types";
 import { closeModal, openModal, showToast, useModal } from "@/state/ui";
 import { ConfirmCompleteModal, ConfirmHoursModal } from "./modals/FinishModals";
-import { ThemeEditorModal } from "./modals/ThemeEditor";
 import { ThemePickerModal } from "./modals/ThemePicker";
 import { WalkBriefModal } from "./modals/WalkBrief";
 import { WalkSummaryModal } from "./modals/WalkSummary";
@@ -180,15 +179,24 @@ export function openWalkThemePicker(): void {
 
 /**
  * The custom theme builder, which doubles as the editor for an existing one.
- * Once shooting has started the theme is locked in.
+ * It's a page under My Themes. From the walk's theme picker it returns to the
+ * brief once done. Once shooting has started the walk's own theme is locked
+ * in; building a new theme or editing another one is still fine.
  */
-export function openThemeEditor(existing: Theme | null = null, onSaved?: () => void): void {
-  const w = getData().activeWalk;
-  if (w?.startedAt) {
+export function openThemeEditor(existing: Theme | null = null, opts: { fromWalk?: boolean } = {}): void {
+  if (existing && isRunningWalkTheme(existing.id)) {
     showToast(t("Finish your current walk before editing a theme."));
     return;
   }
-  openModal(<ThemeEditorModal existing={existing} onSaved={onSaved} />);
+  const params = new URLSearchParams({ edit: existing?.id ?? "new" });
+  if (opts.fromWalk) params.set("from", "walk");
+  navigateTo(`/themes?${params}`);
+}
+
+/** Whether a walk has started shooting on this theme, which locks it until the walk ends. */
+export function isRunningWalkTheme(id: string): boolean {
+  const w = getData().activeWalk;
+  return Boolean(w?.startedAt && w.themeId === id);
 }
 
 /* ---------- While the walk runs ---------- */
