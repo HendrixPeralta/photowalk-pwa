@@ -62,7 +62,7 @@ export function ThemePickerModal({ midWalk = false }: { midWalk?: boolean }) {
           type="button"
           className="btn btn-ghost btn-block"
           style={{ marginTop: 8 }}
-          onClick={() => openThemeEditor(null, openWalkBrief)}
+          onClick={() => openThemeEditor(null, { fromWalk: true })}
         >
           {t("Build a Custom Theme")}
         </button>
