@@ -10,11 +10,13 @@
 //
 // Walk Partners rooms are answered by FakeRooms (e2e/rooms.ts): the real
 // rooms handlers on an in-memory database, one per worker, emptied before
-// each test. openAs(person) opens a second browser as someone else, in the
-// same rooms.
+// each test. The Theme Market (e2e/themes.ts) runs on that same database.
+// openAs(person) opens a second browser as someone else, in the same rooms
+// and the same Market.
 
 import { test as base, type Browser, type Page, type Route } from "@playwright/test";
 import { FakeRooms } from "./rooms";
+import { attachThemes, resetThemes } from "./themes";
 
 export { expect } from "@playwright/test";
 export type { Locator, Page } from "@playwright/test";
@@ -68,6 +70,7 @@ async function openPerson(browser: Browser, rooms: FakeRooms, person: FakeUser, 
   const auth = new FakeAuth(person);
   await context.route("**/api/auth/**", (route) => auth.handle(route));
   await rooms.attach(context, () => auth.signedInAs);
+  await attachThemes(context, rooms.database, () => auth.signedInAs);
   return { context, page: await context.newPage(), auth };
 }
 
@@ -90,7 +93,9 @@ export const test = base.extend<
       const auth = new FakeAuth(signedInAs);
       await context.route("**/api/auth/**", (route) => auth.handle(route));
       await rooms.reset();
+      await resetThemes(await rooms.database());
       await rooms.attach(context, () => auth.signedInAs);
+      await attachThemes(context, rooms.database, () => auth.signedInAs);
       await use(auth);
     },
     { auto: true },
