@@ -109,6 +109,12 @@ export interface ActiveWalk {
   /** Guided walks only. */
   durationMin: number | null;
   challengesChecked: boolean[];
+  /**
+   * Which of the theme's mini-challenges this walk got, as indexes into its
+   * list, in step with challengesChecked. Missing on walks saved before
+   * themes had more than three: those use the first ones.
+   */
+  challengePicks?: number[];
   nudges: Nudge[];
   pausedAt: number | null;
   frames?: Frame[];

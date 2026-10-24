@@ -22,7 +22,7 @@ import { ThemeEditorModal } from "./modals/ThemeEditor";
 import { ThemePickerModal } from "./modals/ThemePicker";
 import { WalkBriefModal } from "./modals/WalkBrief";
 import { WalkSummaryModal } from "./modals/WalkSummary";
-import { challengesFor, useWalkUi, walkTheme } from "./walkUi";
+import { challengesFor, pickChallenges, useWalkUi, walkTheme } from "./walkUi";
 
 /* ---------- Mode and theme ---------- */
 
@@ -52,7 +52,8 @@ export function changeWalkTheme(theme: Theme, reason = ""): void {
     const w = d.activeWalk;
     if (!w) return;
     w.themeId = theme.id;
-    w.challengesChecked = new Array(challengesFor(theme, w.mode).length).fill(false);
+    w.challengePicks = pickChallenges(theme, w.mode);
+    w.challengesChecked = w.challengePicks.map(() => false);
   });
 }
 
@@ -95,13 +96,15 @@ export function launchWalk(): void {
   const { theme, mode } = useWalkUi.getState();
   if (!theme) return;
 
+  const challengePicks = pickChallenges(theme, mode);
   update((d) => {
     d.activeWalk = {
       mode,
       themeId: theme.id,
       startedAt: null,
       durationMin: mode === "guided" ? validGuidedDuration(d.profile.guidedDurationMin) : null,
-      challengesChecked: new Array(challengesFor(theme, mode).length).fill(false),
+      challengesChecked: challengePicks.map(() => false),
+      challengePicks,
       nudges: [],
       pausedAt: null,
       frames: [],
@@ -266,7 +269,7 @@ function fireDueNudges(now: number): void {
   // Coming back after a long gap makes several due at once. Only the latest
   // still means anything ("halfway there" is stale once time is up).
   const latest = due[due.length - 1];
-  const message = nudgeMessage(latest.id, challengesFor(walkTheme(), w.mode), w.challengesChecked);
+  const message = nudgeMessage(latest.id, challengesFor(walkTheme(), w), w.challengesChecked);
   if (visible) showToast(message);
   void showNow(message, `walk-${latest.id}`);
 }

@@ -23,7 +23,7 @@ export function WalkBriefModal() {
 
   const preShooting = !walk.startedAt;
   const guided = walk.mode === "guided";
-  const challenges = challengesFor(theme, walk.mode);
+  const challenges = challengesFor(theme, walk);
 
   return (
     <>
