@@ -17,7 +17,7 @@
 
 import type { Exif } from "@/lib/exif";
 import { LIMITS, type PhotoMeta } from "@/lib/rooms/protocol";
-import { HttpError } from "../http";
+import { HttpError, jsonBody, stringField } from "../http";
 import * as service from "./service";
 import type { RoomDeps } from "./service";
 
@@ -87,22 +87,6 @@ export async function handleRoomsRequest(req: Request, deps: () => Promise<RoomD
 }
 
 /* ---------- Reading requests ---------- */
-
-async function jsonBody(req: Request): Promise<Record<string, unknown>> {
-  try {
-    const body: unknown = await req.json();
-    if (body && typeof body === "object" && !Array.isArray(body)) return body as Record<string, unknown>;
-  } catch {
-    // falls through
-  }
-  throw new HttpError(400, "invalid");
-}
-
-function stringField(body: Record<string, unknown>, name: string, fallback?: string): string {
-  const value = body[name] ?? fallback;
-  if (typeof value !== "string") throw new HttpError(400, "invalid");
-  return value;
-}
 
 /** Some headroom over the photo itself for the form's other parts. */
 const MAX_UPLOAD_REQUEST = 2_000_000;

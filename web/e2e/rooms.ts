@@ -29,6 +29,9 @@ export class FakeRooms {
     return this.started;
   }
 
+  /** The database, for the other fake APIs that share it. */
+  database = async (): Promise<Db> => (await this.start()).db;
+
   /** Empties every room, so each test starts fresh on the same database. */
   async reset(): Promise<void> {
     if (!this.started) return;
