@@ -469,16 +469,15 @@ details[open] > .collapse-summary .collapse-chevron { transform: rotate(180deg);
 .reward-foot { margin-top: 8px; font-size: 0.78rem; }
 .reward-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 
-/* My Themes: Mine | Market, and a theme's name above its buttons so four
-   of them still leave the name room on a phone. */
-.themes-tabs { margin-top: 12px; }
+/* My Themes: a theme's name above its buttons, so four of them still leave
+   the name room on a phone. */
 .my-theme-row { flex-direction: column; align-items: stretch; gap: 8px; }
 .my-theme-row .reward-actions { justify-content: flex-end; flex-wrap: wrap; }
 .my-theme-name { display: flex; flex-direction: column; gap: 2px; }
 .my-theme-note { font-size: 0.78rem; }
 .my-theme-shared { color: var(--accent-strong); }
 
-/* Theme Market */
+/* Community themes */
 .market-card { display: flex; flex-direction: column; gap: 8px; }
 .market-card-head {
   display: flex; flex-direction: column; align-items: flex-start; gap: 4px;

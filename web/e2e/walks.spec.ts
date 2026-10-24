@@ -151,7 +151,8 @@ test("a custom theme built from the brief is used and kept in My Themes", async 
   await page.getByRole("button", { name: "Edit" }).click();
   await expect(toast(page, "Finish your current walk before editing a theme.")).toBeVisible();
   await expect(page).toHaveURL(/\/themes\/$/);
-  await page.getByRole("button", { name: "Build a Custom Theme" }).click();
+  await page.getByRole("button", { name: "Add a theme" }).click();
+  await page.getByRole("button", { name: "Build your own" }).click();
   await page.getByPlaceholder("Title (e.g. Rainy Day Reflections)").fill("Night Neon");
   await page.getByRole("button", { name: "Save Theme" }).click();
   await expect(page.locator(".log-last")).toHaveText("2 saved");
@@ -163,7 +164,8 @@ test("My Themes builds a new theme and stays put to list it", async ({ page }) =
   await page.goto("/themes/");
   await expect(page.locator(".empty-state-sm")).toHaveText("No custom themes yet.");
 
-  await page.getByRole("button", { name: "Build a Custom Theme" }).click();
+  await page.getByRole("button", { name: "Add a theme" }).click();
+  await page.getByRole("button", { name: "Build your own" }).click();
   await expect(page).toHaveURL(/\/themes\/\?edit=new$/);
   await page.getByPlaceholder("Title (e.g. Rainy Day Reflections)").fill("Night Neon");
   await page.getByRole("button", { name: "Save Theme" }).click();
