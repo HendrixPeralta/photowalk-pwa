@@ -194,7 +194,6 @@ const ja: Record<string, string> = {
   "Community Themes": "みんなのテーマ",
   "Add a theme": "テーマを追加",
   "Build your own": "自分で作る",
-  "Browse community themes": "みんなのテーマを見る",
   "Themes you've built or added, saved so you can use them again.": "作ったテーマや追加したテーマを保存して、また使えます。",
   "Stop sharing this theme?": "このテーマの共有をやめますか？",
   "No community themes yet. Share one of yours from My Themes.": "みんなのテーマはまだありません。マイテーマから自分のテーマを共有できます。",

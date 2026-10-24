@@ -92,7 +92,7 @@ function ThemeList() {
         options={[
           { key: "build", icon: "tune", label: t("Build your own"), onSelect: (close) => { close(); openThemeEditor(null); } },
           ...(marketEnabled()
-            ? [{ key: "community", icon: "explore" as const, label: t("Browse community themes"), onSelect: (close: () => void) => { close(); navigateTo("/themes?view=community"); } }]
+            ? [{ key: "community", icon: "explore" as const, label: t("Community Themes"), onSelect: (close: () => void) => { close(); navigateTo("/themes?view=community"); } }]
             : []),
         ]}
       />
