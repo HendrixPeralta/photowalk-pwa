@@ -38,12 +38,12 @@ export function challengeCountLabel(n: number): string {
 
 export function themeErrorMessage(error: ThemesFailure): string {
   switch (error) {
-    case "too_many_themes": return t("You've published 20 themes. Unpublish one first.");
-    case "not_found": return t("That theme isn't on the Market anymore.");
+    case "too_many_themes": return t("You're sharing 20 themes. Stop sharing one first.");
+    case "not_found": return t("That theme isn't shared anymore.");
     case "own_theme": return t("That's your own theme.");
     case "signed_out": return t("Your session ended. Sign in again.");
-    case "not_configured": return t("The Theme Market isn't set up on this server yet.");
-    case "offline": return t("You're offline. Connect to use the Theme Market.");
+    case "not_configured": return t("Community themes aren't set up on this server yet.");
+    case "offline": return t("You're offline. Connect to see community themes.");
     case "invalid":
     case "forbidden":
     case "server":
@@ -72,7 +72,7 @@ export async function publishOwnTheme(theme: CustomTheme): Promise<boolean> {
   });
   if (!res.ok) { showToast(themeErrorMessage(res.error)); return false; }
   remember(res.data.theme);
-  showToast(wasPublished ? t("Market copy updated.") : t("Published to the Theme Market."));
+  showToast(wasPublished ? t("Shared version updated.") : t("Shared with the community."));
   return true;
 }
 
@@ -80,7 +80,7 @@ export async function unpublishShared(id: string): Promise<boolean> {
   const res = await themesApi.unpublish(id);
   if (!res.ok && res.error !== "not_found") { showToast(themeErrorMessage(res.error)); return false; }
   forget(id);
-  showToast(t("Taken off the Theme Market."));
+  showToast(t("No longer shared."));
   return true;
 }
 

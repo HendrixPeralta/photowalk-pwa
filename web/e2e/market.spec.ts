@@ -19,14 +19,18 @@ test("a published theme is added by someone else as their own copy", async ({ pa
   await buildTheme(aki, "Rainy Day", "Find a puddle");
   await row(aki, "Rainy Day").getByRole("button", { name: "Share" }).click();
   await expect(dialog(aki)).toContainText("your name and photo");
-  await dialog(aki).getByRole("button", { name: "Publish" }).click();
-  await expect(toast(aki, "Published to the Theme Market.")).toBeVisible();
-  await expect(row(aki, "Rainy Day")).toContainText("On the Market · Not added yet");
+  await dialog(aki).getByRole("button", { name: "Share", exact: true }).click();
+  await expect(toast(aki, "Shared with the community.")).toBeVisible();
+  await expect(row(aki, "Rainy Day")).toContainText("Shared · Not added yet");
 
   const ken = await openAs(PARTNER);
+  // My Themes only lists your own; community themes are behind the + button.
   await ken.goto("/themes/");
-  await ken.getByRole("button", { name: "Market" }).click();
-  await expect(ken).toHaveURL(/\/themes\/\?tab=market$/);
+  await expect(ken.locator(".market-card")).toHaveCount(0);
+  await ken.getByRole("button", { name: "Add a theme" }).click();
+  await ken.getByRole("dialog").getByRole("button", { name: /Browse community themes/ }).click();
+  await expect(ken).toHaveURL(/\/themes\/\?view=community$/);
+  await expect(ken.getByRole("heading", { name: "Community Themes" })).toBeVisible();
   const rainy = card(ken, "Rainy Day");
   await expect(rainy).toContainText("Aki Tanaka");
   await expect(rainy).toContainText("1 challenge");
@@ -38,8 +42,8 @@ test("a published theme is added by someone else as their own copy", async ({ pa
   await expect(rainy).toContainText("Added once");
 
   // Ken's copy is his own: editing it leaves Aki's alone.
-  await ken.getByRole("button", { name: "Mine" }).click();
-  await expect(row(ken, "Rainy Day")).toContainText("From the Market, by Aki Tanaka");
+  await ken.getByRole("button", { name: "Back", exact: true }).click();
+  await expect(row(ken, "Rainy Day")).toContainText("Shared by Aki Tanaka");
   await expect(row(ken, "Rainy Day").getByRole("button", { name: "Share" })).toHaveCount(0);
   await row(ken, "Rainy Day").getByRole("button", { name: "Edit" }).click();
   await ken.getByPlaceholder("Title (e.g. Rainy Day Reflections)").fill("Ken's Rain");
@@ -55,38 +59,38 @@ test("a published theme is added by someone else as their own copy", async ({ pa
 test("reporting hides a theme from the reporter, and unpublishing takes it off", async ({ page: aki, openAs }) => {
   await buildTheme(aki, "Neon Nights", "Shoot a sign");
   await aki.getByRole("button", { name: "Share" }).click();
-  await dialog(aki).getByRole("button", { name: "Publish" }).click();
-  await expect(toast(aki, "Published to the Theme Market.")).toBeVisible();
+  await dialog(aki).getByRole("button", { name: "Share", exact: true }).click();
+  await expect(toast(aki, "Shared with the community.")).toBeVisible();
 
   const ken = await openAs(PARTNER);
-  await ken.goto("/themes/?tab=market");
+  await ken.goto("/themes/?view=community");
   await card(ken, "Neon Nights").getByRole("button", { name: "Report" }).click();
   await dialog(ken).getByRole("button", { name: "Report" }).click();
   await expect(toast(ken, "Thanks for the report.")).toBeVisible();
   await expect(card(ken, "Neon Nights")).toHaveCount(0);
   await ken.reload();
-  await expect(ken.locator(".empty-state-sm")).toContainText("No themes on the Market yet");
+  await expect(ken.locator(".empty-state-sm")).toContainText("No community themes yet");
 
   // Aki still sees it, as hers, and takes it down.
-  await aki.goto("/themes/?tab=market");
+  await aki.goto("/themes/?view=community");
   await expect(card(aki, "Neon Nights")).toContainText("You");
-  await card(aki, "Neon Nights").getByRole("button", { name: "Unpublish" }).click();
-  await dialog(aki).getByRole("button", { name: "Unpublish" }).click();
-  await expect(toast(aki, "Taken off the Theme Market.")).toBeVisible();
+  await card(aki, "Neon Nights").getByRole("button", { name: "Stop sharing" }).click();
+  await dialog(aki).getByRole("button", { name: "Stop sharing" }).click();
+  await expect(toast(aki, "No longer shared.")).toBeVisible();
   await expect(card(aki, "Neon Nights")).toHaveCount(0);
-  await aki.getByRole("button", { name: "Mine" }).click();
-  await expect(row(aki, "Neon Nights")).not.toContainText("On the Market");
+  await aki.getByRole("button", { name: "Back", exact: true }).click();
+  await expect(row(aki, "Neon Nights")).not.toContainText("Shared");
 });
 
 test("the Market searches and sorts", async ({ page: aki, openAs }) => {
   for (const [title, challenge] of [["Rainy Day", "Find a puddle"], ["Neon Nights", "Shoot a sign"]]) {
     await buildTheme(aki, title, challenge);
     await row(aki, title).getByRole("button", { name: "Share" }).click();
-    await dialog(aki).getByRole("button", { name: "Publish" }).click();
-    await expect(toast(aki, "Published to the Theme Market.")).toBeVisible();
+    await dialog(aki).getByRole("button", { name: "Share", exact: true }).click();
+    await expect(toast(aki, "Shared with the community.")).toBeVisible();
   }
   const ken = await openAs(PARTNER);
-  await ken.goto("/themes/?tab=market");
+  await ken.goto("/themes/?view=community");
   await card(ken, "Rainy Day").getByRole("button", { name: "Add", exact: true }).click();
   await expect(toast(ken, "Added to My Themes.")).toBeVisible();
 
@@ -96,8 +100,8 @@ test("the Market searches and sorts", async ({ page: aki, openAs }) => {
   await expect(titles).toHaveText(["Rainy Day", "Neon Nights"]);
   await ken.getByRole("button", { name: "Newest" }).click();
   await expect(titles).toHaveText(["Neon Nights", "Rainy Day"]);
-  await ken.getByPlaceholder("Search the Market").fill("rain");
+  await ken.getByPlaceholder("Search community themes").fill("rain");
   await expect(titles).toHaveText(["Rainy Day"]);
-  await ken.getByPlaceholder("Search the Market").fill("zzz");
+  await ken.getByPlaceholder("Search community themes").fill("zzz");
   await expect(ken.locator(".empty-state-sm")).toHaveText("No themes match.");
 });

@@ -12,8 +12,8 @@ import { addedLabel, addFromMarket, challengeCountLabel, reportShared, themeErro
 /** Waits this long after the last keystroke before searching. */
 const SEARCH_DELAY_MS = 300;
 
-/** Everyone's published themes: search, sort, and add a copy to My Themes. */
-export function MarketScreen() {
+/** Everyone's shared themes: search, sort, and add a copy to My Themes. */
+export function CommunityScreen() {
   const [sort, setSort] = useState<MarketSort>("popular");
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState("");
@@ -75,8 +75,8 @@ export function MarketScreen() {
       <input
         type="search"
         className="text-input"
-        placeholder={t("Search the Market")}
-        aria-label={t("Search the Market")}
+        placeholder={t("Search community themes")}
+        aria-label={t("Search community themes")}
         maxLength={60}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
@@ -88,7 +88,7 @@ export function MarketScreen() {
 
       {error && <p className="empty-state-sm" role="alert">{themeErrorMessage(error)}</p>}
       {!error && !loading && !themes.length && (
-        <p className="empty-state-sm">{search.trim() ? t("No themes match.") : t("No themes on the Market yet. Publish one of yours from Mine.")}</p>
+        <p className="empty-state-sm">{search.trim() ? t("No themes match.") : t("No community themes yet. Share one of yours from My Themes.")}</p>
       )}
       <ul className="rewards-list market-list">
         {themes.map((theme) => (
@@ -131,7 +131,7 @@ function MarketCard({ theme, onGone }: { theme: SharedTheme; onGone: () => void 
           <span>{addedLabel(addCount)}</span>
         </span>
       </button>
-      {theme.hidden && <p className="market-hidden">{t("Hidden from the Market after reports. Only you can see it.")}</p>}
+      {theme.hidden && <p className="market-hidden">{t("Hidden after reports. Only you can see it.")}</p>}
       {open && (
         theme.challenges.length ? (
           <ul className="market-challenges">
@@ -144,7 +144,7 @@ function MarketCard({ theme, onGone }: { theme: SharedTheme; onGone: () => void 
       <div className="reward-actions market-actions">
         {theme.mine ? (
           <button type="button" className="btn btn-ghost btn-sm" onClick={() => openModal(<UnpublishModal id={theme.id} onDone={onGone} />)}>
-            {t("Unpublish")}
+            {t("Stop sharing")}
           </button>
         ) : (
           <>
@@ -164,7 +164,7 @@ function MarketCard({ theme, onGone }: { theme: SharedTheme; onGone: () => void 
 export function UnpublishModal({ id, onDone }: { id: string; onDone?: () => void }) {
   return (
     <>
-      <h3>{t("Take this theme off the Market?")}</h3>
+      <h3>{t("Stop sharing this theme?")}</h3>
       <p className="muted">{t("People who already added it keep their copy. Your own theme stays in My Themes.")}</p>
       <div className="theme-actions">
         <button
@@ -172,7 +172,7 @@ export function UnpublishModal({ id, onDone }: { id: string; onDone?: () => void
           className="btn btn-danger-solid"
           onClick={async () => { closeModal(); if (await unpublishShared(id)) onDone?.(); }}
         >
-          {t("Unpublish")}
+          {t("Stop sharing")}
         </button>
         <button type="button" className="btn btn-ghost btn-block" onClick={closeModal}>{t("Cancel")}</button>
       </div>
