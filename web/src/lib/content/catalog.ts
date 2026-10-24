@@ -21,24 +21,16 @@ export interface RawTheme {
 const SUN_BEHIND = N("Stand so the sun is behind the person or thing you're photographing");
 const DARK_CUTOUT = N("Make someone a dark cutout: put them in front of a bright sky, then tap the sky on your screen");
 const LINE_AT_BOTTOM = N("Crouch down so a line starts right at the bottom edge of your photo");
-const DOWN_THE_MIDDLE = N("Stand in the middle of a hallway, tunnel or path and shoot straight down it");
 const PUDDLE_LOW = N("Crouch close to a puddle so the reflection fills most of the photo");
-const MATCHING_HALVES = N("Line up a reflection so the top and bottom halves match");
 const PATTERN_FILL = N("Fill the whole photo with one repeating pattern: bricks, tiles, windows");
 const SURFACE_CLOSE = N("Get so close to a rough surface that you can't tell what it is");
-const RUST_LANDSCAPE = N("Get so close to rust or peeling paint that it looks like a landscape");
 const LEAF_FRAME = N("Use leaves or branches around the edges like a picture frame");
 const NEAR_MIDDLE_FAR = N("Put something close, your subject in the middle, and something else far behind");
-const BRIGHT_PAINT = N("Find a brightly painted door, bike or sign");
 const SMALL_IN_SPACE = N("Make your subject small, with lots of empty space around it");
-const WATER_DROPS = N("Find water drops on a leaf, car or window");
 const ALONE_IN_SKY = N("Find one bird, person or tree alone against the sky");
 const STILL_AND_RUSHING = N("Catch someone standing still while something rushes past");
 const MOVING_LIGHTS = N("Photograph moving lights at night, like cars or bikes");
-const SHOOT_UP_TALL = N("Stand at the bottom of something tall and shoot up so it looks even taller");
 const TINY_WORLD = N("Find a tiny world on the ground: a bug, or a flower in a crack");
-const WORN_SIGN = N("Photograph an old sign so worn it looks like a texture");
-const PLANT_IN_CRACK = N("Photograph a plant growing somewhere it shouldn't, like a crack or a wall");
 
 export const RAW_THEMES: readonly RawTheme[] = [
   {
@@ -66,7 +58,7 @@ export const RAW_THEMES: readonly RawTheme[] = [
       N("Put your subject where the lines meet"),
       N("Use stairs or a handrail to point at something"),
       N("Follow lines painted on the ground, like a crosswalk or parking lines"),
-      DOWN_THE_MIDDLE,
+      N("Stand in the middle of a hallway, tunnel or path and shoot straight down it"),
     ],
   },
   {
@@ -80,7 +72,7 @@ export const RAW_THEMES: readonly RawTheme[] = [
       N("Take a photo of only the reflection, not the real thing"),
       N("Use a shop window to show what's inside and what's reflected at the same time"),
       N("Find a reflection in something shiny: a car, a spoon, sunglasses"),
-      MATCHING_HALVES,
+      N("Line up a reflection so the top and bottom halves match"),
     ],
   },
   {
@@ -94,7 +86,7 @@ export const RAW_THEMES: readonly RawTheme[] = [
       N("Find a pattern with one piece that's different: a missing tile, an odd window"),
       N("Put two textures side by side, like smooth glass next to rough stone"),
       N("Find a wall where light from the side makes the bumps stand out"),
-      RUST_LANDSCAPE,
+      N("Get so close to rust or peeling paint that it looks like a landscape"),
     ],
   },
   {
@@ -136,7 +128,7 @@ export const RAW_THEMES: readonly RawTheme[] = [
       N("Photograph a person wearing a bright color"),
       N("Find two colors that look great together"),
       N("Fill the whole photo with a single color"),
-      BRIGHT_PAINT,
+      N("Find a brightly painted door, bike or sign"),
     ],
   },
   {
@@ -162,7 +154,7 @@ export const RAW_THEMES: readonly RawTheme[] = [
       N("Get as close as your phone can still focus"),
       N("Photograph one small thing with a blurry background (try Portrait mode)"),
       N("Photograph something people walk past without noticing"),
-      WATER_DROPS,
+      N("Find water drops on a leaf, car or window"),
       N("Photograph a flower from the side instead of from above"),
       SURFACE_CLOSE,
     ],
@@ -203,7 +195,7 @@ export const RAW_THEMES: readonly RawTheme[] = [
     challenges: [
       N("Point your phone straight up and photograph what's above you"),
       N("Photograph a roof, wire or branch against a plain sky"),
-      SHOOT_UP_TALL,
+      N("Stand at the bottom of something tall and shoot up so it looks even taller"),
       N("Find something interesting on a ceiling or under a bridge"),
       ALONE_IN_SKY,
       N("Photograph clouds with the edge of a building in the photo"),
@@ -224,20 +216,6 @@ export const RAW_THEMES: readonly RawTheme[] = [
     ],
   },
   {
-    id: "sense-of-scale",
-    title: N("Sense of Scale"),
-    brief: N("Pair something tiny with something huge and let the contrast speak."),
-    concepts: ["scale-contrast","negative-space"],
-    challenges: [
-      N("Photograph a person who looks tiny next to a big building or view"),
-      N("Include something everyone knows the size of, like a person, car or bike, to show how big a place is"),
-      N("Get very close to something small so it looks huge"),
-      SMALL_IN_SPACE,
-      SHOOT_UP_TALL,
-      N("Put something very close and something very far in the same photo"),
-    ],
-  },
-  {
     id: "night-lights",
     title: N("Night Lights"),
     brief: N("After dark the light sources become the subjects."),
@@ -252,73 +230,17 @@ export const RAW_THEMES: readonly RawTheme[] = [
     ],
   },
   {
-    id: "weather-mood",
-    title: N("Weather & Mood"),
-    brief: N("Rain, fog, wind, and heavy clouds do the atmosphere for you."),
-    concepts: ["negative-space","layers-depth"],
-    challenges: [
-      N("Show the weather in your photo: raindrops, fog, wind blowing things"),
-      N("Photograph how the light looks on a cloudy or foggy day"),
-      N("Find someone with an umbrella or someone reacting to the weather"),
-      N("Take a photo through a wet window"),
-      N("Photograph a dramatic sky with only a little ground or buildings"),
-      WATER_DROPS,
-    ],
-  },
-  {
-    id: "signs-letters",
-    title: N("Signs & Letters"),
-    brief: N("Hunt for lettering: hand-painted, neon, worn, or accidental."),
-    concepts: ["color-pop","texture-pattern"],
-    challenges: [
-      WORN_SIGN,
-      N("Make a single letter or number the whole subject"),
-      N("Find words that are funny or mean something different on their own"),
-      N("Find a hand-painted sign"),
-      N("Find a letter shape in something that isn't a letter, like a Y in a branch"),
-      BRIGHT_PAINT,
-    ],
-  },
-  {
     id: "nature-in-city",
     title: N("Nature in the City"),
     brief: N("Find nature pushing back: weeds, roots, moss, and birds."),
     concepts: ["framing","shallow-dof"],
     challenges: [
-      PLANT_IN_CRACK,
+      N("Photograph a plant growing somewhere it shouldn't, like a crack or a wall"),
       LEAF_FRAME,
       N("Get close to a small living thing and let the city blur behind it"),
       N("Photograph a bird or animal in the city"),
       N("Put a tree and a building side by side"),
       TINY_WORLD,
-    ],
-  },
-  {
-    id: "curves-spirals",
-    title: N("Curves & Spirals"),
-    brief: N("Skip the straight lines. Hunt for arcs, bends, and coils instead."),
-    concepts: ["golden","leading-lines"],
-    challenges: [
-      N("Find stairs, a ramp or a road that curves through the photo"),
-      N("Let one curve lead the eye from a corner of the photo to your subject"),
-      N("Find a spiral: a shell, a coiled hose, a spiral staircase from above or below"),
-      N("Find circles: wheels, manhole covers, round windows"),
-      N("Photograph a curved building or bridge"),
-      N("Find a curve in nature: a curling leaf, a bending river"),
-    ],
-  },
-  {
-    id: "symmetry-hunt",
-    title: N("Symmetry Hunt"),
-    brief: N("Find scenes that mirror themselves, then decide whether to break them."),
-    concepts: ["reflection","framing"],
-    challenges: [
-      N("Stand right in the middle and photograph something that's the same on both sides"),
-      MATCHING_HALVES,
-      N("Take a balanced photo, then add one thing off to the side to break it"),
-      N("Find a balanced building front, gate or bridge"),
-      N("Find something balanced in nature: a leaf, a flower"),
-      DOWN_THE_MIDDLE,
     ],
   },
   {
@@ -333,20 +255,6 @@ export const RAW_THEMES: readonly RawTheme[] = [
       N("Find one simple shape, like a circle or triangle, and make it the star"),
       N("Fill the photo with blocks of color: walls, doors, shadows"),
       PATTERN_FILL,
-    ],
-  },
-  {
-    id: "wear-and-decay",
-    title: N("Wear & Decay"),
-    brief: N("Rust, cracks, and fading paint. Photograph what time leaves behind."),
-    concepts: ["texture-pattern","layers-depth"],
-    challenges: [
-      N("Find something old next to something new in one photo"),
-      RUST_LANDSCAPE,
-      N("Make a repair the subject: tape, a patch, a weld"),
-      WORN_SIGN,
-      PLANT_IN_CRACK,
-      N("Photograph something left behind: a lost glove, an old bike"),
     ],
   },
   {
@@ -381,7 +289,6 @@ export const RAW_THEMES: readonly RawTheme[] = [
 
 export const RAW_CONCEPTS: Readonly<Record<string, { title: string; tip: string }>> = {
   "thirds": { title: N("Rule of Thirds"), tip: N("Place key subjects along the grid lines or their intersections instead of dead center.") },
-  "golden": { title: N("Golden Ratio"), tip: N("A softer take on the rule of thirds. The spiral leads the eye naturally toward the subject.") },
   "leading-lines": { title: N("Leading Lines"), tip: N("Use roads, rails, or fences that draw the eye toward your subject.") },
   "reflection": { title: N("Reflections & Symmetry"), tip: N("Still water, glass, and mirrors let you double a subject for a neat, balanced look.") },
   "framing": { title: N("Natural Framing"), tip: N("Shoot through doorways, arches, or branches to add depth and draw focus inward.") },
@@ -394,6 +301,5 @@ export const RAW_CONCEPTS: Readonly<Record<string, { title: string; tip: string 
   "shallow-dof": { title: N("Shallow Depth of Field"), tip: N("A wide aperture (a small f-number like f/1.8) or your phone's Portrait mode blurs the background so one sharp subject stands out.") },
   "motion-blur": { title: N("Motion & Blur"), tip: N("Let moving things blur while something still stays sharp, or move the camera along with the motion.") },
   "low-angle": { title: N("Change Your Angle"), tip: N("Shoot from your knees or point straight up. Unusual angles make familiar places look new.") },
-  "scale-contrast": { title: N("Sense of Scale"), tip: N("A tiny figure beside something huge tells the viewer exactly how big the scene is.") },
   "night-glow": { title: N("Night Glow"), tip: N("After dark, lights become the subject. Hold your phone steady and tap on the lights so they don't blow out.") },
 };

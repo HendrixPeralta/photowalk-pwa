@@ -7,8 +7,8 @@ import { allChallenges, concept, suggestTheme, themes } from "./themes";
 afterEach(() => vi.restoreAllMocks());
 
 describe("theme catalog", () => {
-  it("has 24 themes with a brief, and challenges pooled without repeats", () => {
-    expect(themes()).toHaveLength(24);
+  it("has 18 themes with a brief, and challenges pooled without repeats", () => {
+    expect(themes()).toHaveLength(18);
     for (const th of themes()) expect(th.title && th.brief).toBeTruthy();
     const pool = allChallenges();
     expect(new Set(pool).size).toBe(pool.length);
