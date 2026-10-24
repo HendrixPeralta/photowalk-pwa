@@ -18,7 +18,7 @@ describe("migrations", () => {
     );
     expect(rows.map((r) => r.table_name)).toEqual([
       "account", "blob_trash", "blob_usage", "room_comments", "room_members", "room_notes",
-      "room_photos", "rooms", "session", "user", "verification",
+      "room_photos", "rooms", "session", "shared_themes", "theme_adds", "theme_reports", "user", "verification",
     ]);
   });
 
@@ -50,5 +50,24 @@ describe("migrations", () => {
         + (select count(*) from room_comments)::int + (select count(*) from room_notes)::int as n
     `);
     expect(rows[0].n).toBe(0);
+  });
+
+  it("removes a theme's adds and reports with it, and a person's themes with them", async () => {
+    await client.exec(`
+      insert into "user" (id, name, email) values ('author', 'Ana', 'author@example.com'), ('fan', 'Ken', 'fan@example.com');
+      insert into shared_themes (id, author_id, source_id, title) values ('t1', 'author', 'local1', 'Puddles'), ('t2', 'author', 'local2', 'Neon');
+      insert into theme_adds (theme_id, user_id) values ('t1', 'fan'), ('t2', 'fan');
+      insert into theme_reports (theme_id, reporter_id) values ('t1', 'fan');
+      delete from shared_themes where id = 't1';
+    `);
+    const left = await client.query<{ n: number }>(
+      "select (select count(*) from theme_adds)::int + (select count(*) from theme_reports)::int as n",
+    );
+    expect(left.rows[0].n).toBe(1);
+    await client.exec(`delete from "user" where id = 'author'`);
+    const gone = await client.query<{ n: number }>(
+      "select (select count(*) from shared_themes)::int + (select count(*) from theme_adds)::int as n",
+    );
+    expect(gone.rows[0].n).toBe(0);
   });
 });

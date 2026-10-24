@@ -3,3 +3,4 @@
 
 export * from "./auth-schema";
 export * from "./rooms-schema";
+export * from "./themes-schema";
