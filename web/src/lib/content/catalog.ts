@@ -16,6 +16,30 @@ export interface RawTheme {
   challenges: string[];
 }
 
+// Challenges that fit more than one theme, written once so the wording (and
+// its translation key) can't drift between them.
+const SUN_BEHIND = N("Stand so the sun is behind the person or thing you're photographing");
+const DARK_CUTOUT = N("Make someone a dark cutout: put them in front of a bright sky, then tap the sky on your screen");
+const LINE_AT_BOTTOM = N("Crouch down so a line starts right at the bottom edge of your photo");
+const DOWN_THE_MIDDLE = N("Stand in the middle of a hallway, tunnel or path and shoot straight down it");
+const PUDDLE_LOW = N("Crouch close to a puddle so the reflection fills most of the photo");
+const MATCHING_HALVES = N("Line up a reflection so the top and bottom halves match");
+const PATTERN_FILL = N("Fill the whole photo with one repeating pattern: bricks, tiles, windows");
+const SURFACE_CLOSE = N("Get so close to a rough surface that you can't tell what it is");
+const RUST_LANDSCAPE = N("Get so close to rust or peeling paint that it looks like a landscape");
+const LEAF_FRAME = N("Use leaves or branches around the edges like a picture frame");
+const NEAR_MIDDLE_FAR = N("Put something close, your subject in the middle, and something else far behind");
+const BRIGHT_PAINT = N("Find a brightly painted door, bike or sign");
+const SMALL_IN_SPACE = N("Make your subject small, with lots of empty space around it");
+const WATER_DROPS = N("Find water drops on a leaf, car or window");
+const ALONE_IN_SKY = N("Find one bird, person or tree alone against the sky");
+const STILL_AND_RUSHING = N("Catch someone standing still while something rushes past");
+const MOVING_LIGHTS = N("Photograph moving lights at night, like cars or bikes");
+const SHOOT_UP_TALL = N("Stand at the bottom of something tall and shoot up so it looks even taller");
+const TINY_WORLD = N("Find a tiny world on the ground: a bug, or a flower in a crack");
+const WORN_SIGN = N("Photograph an old sign so worn it looks like a texture");
+const PLANT_IN_CRACK = N("Photograph a plant growing somewhere it shouldn't, like a crack or a wall");
+
 export const RAW_THEMES: readonly RawTheme[] = [
   {
     id: "shadows-silhouettes",
@@ -23,9 +47,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("Hunt for hard light, long shadows, and shapes stripped of detail."),
     concepts: ["silhouette","warm-light"],
     challenges: [
-      N("Shoot when the sun is low and behind your subject"),
-      N("Find a hard-edged shadow on a wall or sidewalk"),
-      N("Turn a person or object into a pure silhouette"),
+      SUN_BEHIND,
+      DARK_CUTOUT,
+      N("Find a shadow with sharp edges on a wall or the ground"),
+      N("Photograph just a shadow, without the thing that's making it"),
+      N("Make your own shadow part of the photo"),
+      N("Find light coming through a fence, blinds or leaves that makes stripes or spots"),
     ],
   },
   {
@@ -34,9 +61,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("Find lines in the environment that pull the eye through the frame."),
     concepts: ["leading-lines","thirds"],
     challenges: [
-      N("Find a road, rail, or fence that leads into the frame"),
-      N("Get low to exaggerate the line's pull"),
-      N("Place your subject where the lines converge"),
+      N("Find a road, railway or fence that runs from the front of the photo into the distance"),
+      LINE_AT_BOTTOM,
+      N("Put your subject where the lines meet"),
+      N("Use stairs or a handrail to point at something"),
+      N("Follow lines painted on the ground, like a crosswalk or parking lines"),
+      DOWN_THE_MIDDLE,
     ],
   },
   {
@@ -45,9 +75,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("Puddles, glass, and still water double the world in interesting ways."),
     concepts: ["reflection","thirds"],
     challenges: [
-      N("Find a puddle, window, or still water"),
-      N("Try a low angle to fill the frame with the reflection"),
-      N("Shoot one where the real subject is barely visible"),
+      N("Find a puddle, window or calm water with a reflection in it"),
+      PUDDLE_LOW,
+      N("Take a photo of only the reflection, not the real thing"),
+      N("Use a shop window to show what's inside and what's reflected at the same time"),
+      N("Find a reflection in something shiny: a car, a spoon, sunglasses"),
+      MATCHING_HALVES,
     ],
   },
   {
@@ -56,9 +89,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("Peeling paint, brick, tile. Get close and let pattern be the subject."),
     concepts: ["texture-pattern","negative-space"],
     challenges: [
-      N("Fill the frame with one repeating pattern"),
-      N("Photograph a texture up close, with no context"),
-      N("Look for a break or imperfection in a repetition"),
+      PATTERN_FILL,
+      SURFACE_CLOSE,
+      N("Find a pattern with one piece that's different: a missing tile, an odd window"),
+      N("Put two textures side by side, like smooth glass next to rough stone"),
+      N("Find a wall where light from the side makes the bumps stand out"),
+      RUST_LANDSCAPE,
     ],
   },
   {
@@ -67,9 +103,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("Time your walk around sunrise or sunset for warm, directional light."),
     concepts: ["warm-light","silhouette"],
     challenges: [
-      N("Shoot 30 minutes before sunset"),
-      N("Put the sun behind your subject and tap the sky to set exposure"),
-      N("Capture a long shadow stretching across the frame"),
+      N("Photograph something lit by warm light in the hour before sunset"),
+      SUN_BEHIND,
+      DARK_CUTOUT,
+      N("Find a long shadow stretching across the ground"),
+      N("Photograph a face or building lit by orange light from the side"),
+      N("Catch sunlight glowing through leaves, hair or grass"),
     ],
   },
   {
@@ -78,9 +117,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("Use the environment itself to build a frame around your subject."),
     concepts: ["framing","layers-depth"],
     challenges: [
-      N("Shoot through a doorway, window, or archway"),
-      N("Use foliage or an object to frame the edges"),
-      N("Add a second layer of depth behind the frame"),
+      N("Take a photo through a doorway, window or arch"),
+      LEAF_FRAME,
+      NEAR_MIDDLE_FAR,
+      N("Use the gap between two buildings as a frame"),
+      N("Find a frame inside a frame, like a window seen through a doorway"),
+      N("Use a mirror or a car's side mirror as a frame"),
     ],
   },
   {
@@ -89,9 +131,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("One bold color against a muted scene is an instant subject."),
     concepts: ["color-pop"],
     challenges: [
-      N("Find one bright color against a muted background"),
-      N("Shoot mostly grayscale, then find the one exception"),
-      N("Try it with a person wearing a bold color"),
+      N("Find one bright color on a dull, gray background"),
+      N("Find a scene that's almost all gray with one colorful thing in it"),
+      N("Photograph a person wearing a bright color"),
+      N("Find two colors that look great together"),
+      N("Fill the whole photo with a single color"),
+      BRIGHT_PAINT,
     ],
   },
   {
@@ -100,9 +145,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("Practice patience: wait for a moment to happen instead of chasing it."),
     concepts: ["layers-depth","negative-space"],
     challenges: [
-      N("Capture a stranger in motion, respectfully, in public"),
-      N("Wait in one spot for a moment to come to you"),
-      N("Look for overlapping layers: foreground, subject, background"),
+      N("Photograph a stranger walking by, from a respectful distance in a public place"),
+      N("Pick a nice spot and wait for someone to walk into it"),
+      NEAR_MIDDLE_FAR,
+      N("Catch a funny or surprising moment"),
+      N("Photograph people from behind so the scene tells the story"),
+      SMALL_IN_SPACE,
     ],
   },
   {
@@ -111,9 +159,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("Get close to something people usually walk past."),
     concepts: ["shallow-dof","texture-pattern"],
     challenges: [
-      N("Get as close as your lens allows"),
-      N("Isolate one small detail with a blurred background"),
-      N("Photograph something people usually overlook"),
+      N("Get as close as your phone can still focus"),
+      N("Photograph one small thing with a blurry background (try Portrait mode)"),
+      N("Photograph something people walk past without noticing"),
+      WATER_DROPS,
+      N("Photograph a flower from the side instead of from above"),
+      SURFACE_CLOSE,
     ],
   },
   {
@@ -122,9 +173,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("Give your subject room to breathe in a mostly-empty frame."),
     concepts: ["negative-space","color-pop"],
     challenges: [
-      N("Place your subject small in a large empty area"),
-      N("Use a plain sky, wall, or floor as the space"),
-      N("Leave more empty room than feels comfortable"),
+      SMALL_IN_SPACE,
+      N("Use a plain sky, wall or floor as the empty part"),
+      N("Leave more empty space than feels normal"),
+      N("Put your subject near the edge of the photo, not in the middle"),
+      ALONE_IN_SKY,
+      N("Photograph a single object on a plain surface"),
     ],
   },
   {
@@ -133,9 +187,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("Bikes, buses, birds: let the city move through your frame."),
     concepts: ["motion-blur","leading-lines"],
     challenges: [
-      N("Capture something moving while the background stays sharp"),
-      N("Pan with a moving subject so the background streaks instead"),
-      N("Freeze a moment mid-motion: a step, a jump, a splash"),
+      N("Photograph something moving and let it blur while the background stays sharp"),
+      N("Follow a moving bike or car with your phone while you take the photo"),
+      N("Freeze a moment: a jump, a step, a splash"),
+      STILL_AND_RUSHING,
+      N("Photograph moving water: a fountain, a river, rain off a roof"),
+      MOVING_LIGHTS,
     ],
   },
   {
@@ -144,9 +201,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("Everything above eye level: rooftops, wires, trees, sky."),
     concepts: ["low-angle","negative-space"],
     challenges: [
-      N("Point the camera straight up and shoot what converges"),
-      N("Frame a rooftop, wire, or branch against plain sky"),
-      N("Shoot a tall subject from its base to exaggerate its height"),
+      N("Point your phone straight up and photograph what's above you"),
+      N("Photograph a roof, wire or branch against a plain sky"),
+      SHOOT_UP_TALL,
+      N("Find something interesting on a ceiling or under a bridge"),
+      ALONE_IN_SKY,
+      N("Photograph clouds with the edge of a building in the photo"),
     ],
   },
   {
@@ -155,9 +215,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("Drop the camera to your ankles and shoot the world from below."),
     concepts: ["low-angle","leading-lines"],
     challenges: [
-      N("Shoot with the camera resting on the ground"),
-      N("Use the pavement itself as a giant foreground"),
-      N("Catch feet, wheels, or paws passing at their own eye level"),
+      N("Put your phone on the ground and take the photo from there"),
+      N("Crouch so the ground fills the bottom half of your photo"),
+      N("Photograph feet, wheels or paws at their own height"),
+      LINE_AT_BOTTOM,
+      PUDDLE_LOW,
+      TINY_WORLD,
     ],
   },
   {
@@ -166,9 +229,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("Pair something tiny with something huge and let the contrast speak."),
     concepts: ["scale-contrast","negative-space"],
     challenges: [
-      N("Photograph a person dwarfed by a building or landscape"),
-      N("Include something familiar to make a big scene measurable"),
-      N("Reverse it: shoot something tiny so it looks monumental"),
+      N("Photograph a person who looks tiny next to a big building or view"),
+      N("Include something everyone knows the size of, like a person, car or bike, to show how big a place is"),
+      N("Get very close to something small so it looks huge"),
+      SMALL_IN_SPACE,
+      SHOOT_UP_TALL,
+      N("Put something very close and something very far in the same photo"),
     ],
   },
   {
@@ -177,9 +243,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("After dark the light sources become the subjects."),
     concepts: ["night-glow","color-pop"],
     challenges: [
-      N("Shoot a lit window, sign, or streetlamp against the dark"),
-      N("Brace your phone on something solid and hold still"),
-      N("Find two different colors of light in one frame"),
+      N("Photograph a lit window, sign or street lamp in the dark"),
+      N("Rest your phone on something steady and hold still while you take the photo"),
+      N("Find two different colors of light in one photo"),
+      N("Tap the brightest light on your screen so it doesn't turn white"),
+      N("Find lights reflected in a wet street or a puddle"),
+      MOVING_LIGHTS,
     ],
   },
   {
@@ -188,9 +257,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("Rain, fog, wind, and heavy clouds do the atmosphere for you."),
     concepts: ["negative-space","layers-depth"],
     challenges: [
-      N("Make the weather itself visible in the frame"),
-      N("Shoot how the light changes under clouds or through fog"),
-      N("Find someone or something reacting to the weather"),
+      N("Show the weather in your photo: raindrops, fog, wind blowing things"),
+      N("Photograph how the light looks on a cloudy or foggy day"),
+      N("Find someone with an umbrella or someone reacting to the weather"),
+      N("Take a photo through a wet window"),
+      N("Photograph a dramatic sky with only a little ground or buildings"),
+      WATER_DROPS,
     ],
   },
   {
@@ -199,9 +271,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("Hunt for lettering: hand-painted, neon, worn, or accidental."),
     concepts: ["color-pop","texture-pattern"],
     challenges: [
-      N("Photograph a sign so old it has become texture"),
-      N("Isolate a single letter or number as the subject"),
-      N("Find words that mean something new out of context"),
+      WORN_SIGN,
+      N("Make a single letter or number the whole subject"),
+      N("Find words that are funny or mean something different on their own"),
+      N("Find a hand-painted sign"),
+      N("Find a letter shape in something that isn't a letter, like a Y in a branch"),
+      BRIGHT_PAINT,
     ],
   },
   {
@@ -210,9 +285,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("Find nature pushing back: weeds, roots, moss, and birds."),
     concepts: ["framing","shallow-dof"],
     challenges: [
-      N("Photograph a plant growing where it should not"),
-      N("Frame something man-made through leaves or branches"),
-      N("Get close to one small living detail and blur the city behind it"),
+      PLANT_IN_CRACK,
+      LEAF_FRAME,
+      N("Get close to a small living thing and let the city blur behind it"),
+      N("Photograph a bird or animal in the city"),
+      N("Put a tree and a building side by side"),
+      TINY_WORLD,
     ],
   },
   {
@@ -221,9 +299,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("Skip the straight lines. Hunt for arcs, bends, and coils instead."),
     concepts: ["golden","leading-lines"],
     challenges: [
-      N("Find a staircase, ramp, or road that curves through the frame"),
-      N("Let one arc carry the eye from a corner to your subject"),
-      N("Shoot a spiral: a shell, a hose, or a stairwell from above or below"),
+      N("Find stairs, a ramp or a road that curves through the photo"),
+      N("Let one curve lead the eye from a corner of the photo to your subject"),
+      N("Find a spiral: a shell, a coiled hose, a spiral staircase from above or below"),
+      N("Find circles: wheels, manhole covers, round windows"),
+      N("Photograph a curved building or bridge"),
+      N("Find a curve in nature: a curling leaf, a bending river"),
     ],
   },
   {
@@ -232,9 +313,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("Find scenes that mirror themselves, then decide whether to break them."),
     concepts: ["reflection","framing"],
     challenges: [
-      N("Center a perfectly symmetrical scene, dead-on"),
-      N("Use a reflection to complete the symmetry"),
-      N("Break it: add one off-center element to a symmetrical frame"),
+      N("Stand right in the middle and photograph something that's the same on both sides"),
+      MATCHING_HALVES,
+      N("Take a balanced photo, then add one thing off to the side to break it"),
+      N("Find a balanced building front, gate or bridge"),
+      N("Find something balanced in nature: a leaf, a flower"),
+      DOWN_THE_MIDDLE,
     ],
   },
   {
@@ -243,9 +327,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("Reduce the world to shapes: blocks of color, edges, and empty space."),
     concepts: ["negative-space","thirds"],
     challenges: [
-      N("Shoot a frame with three or fewer shapes in it"),
-      N("Line up an edge in the scene with a rule-of-thirds line"),
-      N("Make a photo that reads as abstract until you look twice"),
+      N("Take a photo with only 2 or 3 simple shapes in it"),
+      N("Turn on your camera's grid and line up a roofline or the horizon with one of its lines"),
+      N("Make a photo that looks abstract until you look twice"),
+      N("Find one simple shape, like a circle or triangle, and make it the star"),
+      N("Fill the photo with blocks of color: walls, doors, shadows"),
+      PATTERN_FILL,
     ],
   },
   {
@@ -254,9 +341,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("Rust, cracks, and fading paint. Photograph what time leaves behind."),
     concepts: ["texture-pattern","layers-depth"],
     challenges: [
-      N("Find something old beside something new in one frame"),
-      N("Get close enough that rust or peeling paint becomes a landscape"),
-      N("Make a repair the subject: tape, a patch, or a weld"),
+      N("Find something old next to something new in one photo"),
+      RUST_LANDSCAPE,
+      N("Make a repair the subject: tape, a patch, a weld"),
+      WORN_SIGN,
+      PLANT_IN_CRACK,
+      N("Photograph something left behind: a lost glove, an old bike"),
     ],
   },
   {
@@ -265,9 +355,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("Stations, stops, and platforms: the in-between places people pass through."),
     concepts: ["leading-lines","motion-blur"],
     challenges: [
-      N("Use tracks, platform edges, or queue lines to lead the eye"),
-      N("Contrast someone waiting still with something rushing past"),
-      N("Shoot the moment of arrival or departure, not the ride"),
+      N("Use train tracks, platform edges or a line of people to lead the eye"),
+      STILL_AND_RUSHING,
+      N("Photograph the moment someone arrives or leaves, not the ride"),
+      N("Photograph people waiting, from a respectful distance"),
+      N("Take a photo through a train or bus window"),
+      N("Photograph a timetable, ticket gate or platform sign up close"),
     ],
   },
   {
@@ -276,9 +369,12 @@ export const RAW_THEMES: readonly RawTheme[] = [
     brief: N("Vendors, makers, gardeners. Tell a story through hands, not faces."),
     concepts: ["shallow-dof","motion-blur"],
     challenges: [
-      N("Photograph hands mid-task, respectfully, in public"),
-      N("Isolate the hands with a blurred background"),
-      N("Include the tool or material, and let it explain the job"),
+      N("Photograph hands doing something, respectfully (ask first if you're close)"),
+      N("Make the hands sharp and the background blurry (try Portrait mode)"),
+      N("Include the tool or material so it shows what the job is"),
+      N("Photograph food being made at a stall or shop window"),
+      N("Photograph your own hands doing something"),
+      N("Photograph worn tools or gloves, without the hands"),
     ],
   },
 ];

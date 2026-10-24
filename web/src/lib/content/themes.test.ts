@@ -15,6 +15,13 @@ describe("theme catalog", () => {
     expect(pool).toEqual(expect.arrayContaining(themes()[0].challenges));
   });
 
+  it("gives every theme enough challenges to draw a different three each walk", () => {
+    for (const th of RAW_THEMES) {
+      expect(th.challenges.length, th.id).toBeGreaterThanOrEqual(6);
+      expect(new Set(th.challenges).size, th.id).toBe(th.challenges.length);
+    }
+  });
+
   it("keeps every concept the themes refer to", () => {
     for (const key of Object.keys(RAW_CONCEPTS)) expect(concept(key)?.title).toBeTruthy();
     const referenced = new Set(RAW_THEMES.flatMap((th) => th.concepts));
