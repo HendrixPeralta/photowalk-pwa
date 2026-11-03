@@ -8,7 +8,6 @@ import { ChallengeList } from "@/features/walks/ChallengeList";
 import { launchIfRequested, launchWalk, openWalkThemePicker } from "@/features/walks/actions";
 import { WalkControls } from "@/features/walks/WalkControls";
 import { challengesFor, useWalkTheme } from "@/features/walks/walkUi";
-import { concept } from "@/lib/content/themes";
 import { t } from "@/lib/i18n/core";
 import { useNow } from "@/lib/useNow";
 import { clockText } from "@/lib/walk";
@@ -86,7 +85,7 @@ function Telemetry({ walk }: { walk: ActiveWalk }) {
 }
 
 /**
- * The theme, its concepts, the guided checklist and the latest photos. Tap the
+ * The theme, the guided checklist and the latest photos. Tap the
  * title to fold it away; Change Theme swaps it without ending the walk.
  */
 function MissionCard({ walk }: { walk: ActiveWalk }) {
@@ -95,7 +94,6 @@ function MissionCard({ walk }: { walk: ActiveWalk }) {
   const challenges = challengesFor(theme, walk);
   const done = walk.challengesChecked.filter(Boolean).length;
   const total = walk.challengesChecked.length;
-  const tips = (theme?.concepts ?? []).map(concept).filter((c) => c !== undefined);
 
   return (
     <details open className="mission-card">
@@ -123,13 +121,6 @@ function MissionCard({ walk }: { walk: ActiveWalk }) {
         <Icon name="bulb" />
         <p>{theme ? theme.brief : t("Pick a subject and keep shooting it from new angles.")}</p>
       </div>
-      {tips.length > 0 && (
-        <div className="hud-theme-tips">
-          {tips.map((tip) => (
-            <p key={tip.title} className="hud-theme-tip"><strong>{tip.title}:</strong> {tip.tip}</p>
-          ))}
-        </div>
-      )}
       {/* A casual walk has no checklist, so no progress to show. */}
       {total > 0 && (
         <div className="mission-progress">
