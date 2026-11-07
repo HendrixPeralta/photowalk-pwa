@@ -42,7 +42,7 @@ export function TopBar() {
           title={t("Add photo to Reference Album")}
           onClick={() => inputRef.current?.click()}
         >
-          <Icon name="plus" className="brand-icon" />
+          <Icon name="image-plus" className="brand-icon" />
         </button>
         {/* Only the mark shows; the screen name stays for screen readers. */}
         <h1 id="screenTitle" className="visually-hidden">{screenTitle(viewForPath(pathname))}</h1>
