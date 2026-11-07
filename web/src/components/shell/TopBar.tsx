@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useRef } from "react";
 import { Icon } from "@/components/icons/Icon";
-import { addPhotoToAlbum } from "@/features/album/addPhoto";
+import { addPhotosToAlbum } from "@/features/album/addPhotos";
 import { install, useInstallPrompt } from "@/features/pwa/install";
 import { openReview } from "@/features/review/ReviewModal";
 import { t } from "@/lib/i18n/core";
@@ -25,13 +25,14 @@ export function TopBar() {
           ref={inputRef}
           type="file"
           accept="image/*"
+          multiple
           className="visually-hidden"
           aria-hidden="true"
           tabIndex={-1}
           onChange={(e) => {
-            const file = e.target.files?.[0];
+            const files = Array.from(e.target.files ?? []);
             e.target.value = "";
-            if (file) void addPhotoToAlbum(file);
+            if (files.length) void addPhotosToAlbum(files);
           }}
         />
         <button

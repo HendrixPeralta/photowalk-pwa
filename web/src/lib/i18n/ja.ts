@@ -693,6 +693,8 @@ const ja: Record<string, string> = {
   "Update Reference": "リファレンスを更新",
   "Reference updated.": "リファレンスを更新しました。",
   "Saved to your Reference Album.": "リファレンスアルバムに保存しました。",
+  "Added {n} photos to your Reference Album.": "{n}枚の写真をリファレンスアルバムに追加しました。",
+  "Added {n} photos to your Reference Album. {skipped} couldn't be opened.": "{n}枚の写真をリファレンスアルバムに追加しました。{skipped}枚は開けませんでした。",
   "Couldn't save this reference. Your device may be out of storage.": "このリファレンスを保存できませんでした。端末の空き容量が不足している可能性があります。",
   "Load a photo first.": "先に写真を読み込んでください。",
   "Tonal key: {title}": "トーンキー：{title}",
