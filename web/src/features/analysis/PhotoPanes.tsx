@@ -214,7 +214,7 @@ function IconChip({ name, label, className, disabled, onClick }: {
 }
 
 /** Asks for tags before the photo goes into the Reference Album. */
-function SaveTagsModal({ updating }: { updating: boolean }) {
+export function SaveTagsModal({ updating }: { updating: boolean }) {
   const [tags, setTags] = useState(() => useAnalysis.getState().tags);
   const [saving, setSaving] = useState(false);
   const inputId = useId();

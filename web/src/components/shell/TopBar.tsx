@@ -1,7 +1,9 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useRef } from "react";
 import { Icon } from "@/components/icons/Icon";
+import { addPhotoToAlbum } from "@/features/album/addPhoto";
 import { install, useInstallPrompt } from "@/features/pwa/install";
 import { openReview } from "@/features/review/ReviewModal";
 import { t } from "@/lib/i18n/core";
@@ -13,14 +15,34 @@ import { openDrawer } from "@/state/ui";
 export function TopBar() {
   const pathname = usePathname();
   const streak = useAppStore((s) => currentStreak(s.profile));
+  const inputRef = useRef<HTMLInputElement>(null);
   const installable = useInstallPrompt((s) => Boolean(s.event));
 
   return (
     <header className="topbar" data-app-chrome>
       <div className="brand">
-        <span className="brand-mark">
-          <Icon name="shutter" className="brand-icon" />
-        </span>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          className="visually-hidden"
+          aria-hidden="true"
+          tabIndex={-1}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            e.target.value = "";
+            if (file) void addPhotoToAlbum(file);
+          }}
+        />
+        <button
+          type="button"
+          className="brand-mark brand-add"
+          aria-label={t("Add photo to Reference Album")}
+          title={t("Add photo to Reference Album")}
+          onClick={() => inputRef.current?.click()}
+        >
+          <Icon name="plus" className="brand-icon" />
+        </button>
         {/* Only the mark shows; the screen name stays for screen readers. */}
         <h1 id="screenTitle" className="visually-hidden">{screenTitle(viewForPath(pathname))}</h1>
       </div>

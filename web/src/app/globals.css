@@ -2645,3 +2645,6 @@ details[open] > .harmony-row .collapse-chevron { transform: rotate(180deg); }
    must not pick up the browser's link underline. */
 a.nav-btn,
 a.drawer-item { text-decoration: none; }
+
+/* The add-photo button wears the brand well but is a real control. */
+.brand-add { cursor: pointer; }
