@@ -107,6 +107,7 @@ const ja: Record<string, string> = {
   "How to use the curve": "カーブの使い方",
   "Tags, comma separated (e.g. bridge, sunset)": "タグ（カンマ区切り、例：橋, 夕日）",
   "Save to Reference Album": "リファレンスアルバムに保存",
+  "Add photo to Reference Album": "リファレンスアルバムに写真を追加",
   "Share to Room": "ルームに共有",
   "Download Summary": "まとめを保存",
   "Summary": "まとめ",
